@@ -161,15 +161,16 @@ function handleShot(ws){
   broadcastRoom(shooter.room,{type:"player_shot",id:shooter.id,x:shooter.x,y:shooter.y,angle:shooter.angle});
 
   if(targetPlayer){
-    targetPlayer.p.hp=clamp(targetPlayer.p.hp-damage,0,100);
+    targetPlayer.p.hp=clamp(targetPlayer.p.hp-Math.max(1,damage-(targetPlayer.p.defense||0)),0,100);
     send(targetPlayer.ws,{type:"pvp_damage",from:shooter.id,amount:damage,hp:targetPlayer.p.hp});
     broadcastRoom(shooter.room,{type:"pvp_hit",shooter:shooter.id,target:targetPlayer.p.id,amount:damage,hp:targetPlayer.p.hp});
     if(targetPlayer.p.hp<=0){
       targetPlayer.p.alive=false;
       const lostScore=targetPlayer.p.score||0;
-      targetPlayer.p.level=1;targetPlayer.p.hp=0;targetPlayer.p.damage=25;targetPlayer.p.fireRate=280;
+      targetPlayer.p.level=1;targetPlayer.p.hp=0;targetPlayer.p.damage=25;targetPlayer.p.defense=0;targetPlayer.p.fireRate=280;
       targetPlayer.p.xp=0;targetPlayer.p.score=0;targetPlayer.p.kills=0;
       shooter.kills=(shooter.kills||0)+1;shooter.score=(shooter.score||0)+25;shooter.xp=(shooter.xp||0)+40;
+      if(shooter.kills%5===0){shooter.level++;shooter.damage+=5;shooter.defense+=2;shooter.fireRate=Math.max(140,shooter.fireRate-8);}
       send(targetPlayer.ws,{type:"pvp_dead",killer:shooter.name,lostScore});
       broadcastRoom(shooter.room,{type:"pvp_kill",killer:shooter.id,target:targetPlayer.p.id});
       send(shooter.ws,{type:"server_stats",kills:shooter.kills,score:shooter.score,xp:shooter.xp});
@@ -186,7 +187,8 @@ function handleShot(ws){
       const index=enemies.findIndex(e=>e.id===targetEnemy.id);
       if(index>=0)enemies.splice(index,1);
       shooter.kills=(shooter.kills||0)+1;shooter.score=(shooter.score||0)+reward;shooter.xp=(shooter.xp||0)+xp;
-      send(shooter.ws,{type:"server_stats",kills:shooter.kills,score:shooter.score,xp:shooter.xp});
+      if(shooter.kills%5===0){shooter.level++;shooter.damage+=5;shooter.defense+=2;shooter.fireRate=Math.max(140,shooter.fireRate-8);}
+      send(shooter.ws,{type:"server_stats",kills:shooter.kills,score:shooter.score,xp:shooter.xp,level:shooter.level,damage:shooter.damage,defense:shooter.defense,fireRate:shooter.fireRate});
       broadcastRoom(shooter.room,{type:"enemy_dead",id:targetEnemy.id,killer:shooter.id});
     }
   }
@@ -212,7 +214,7 @@ wss.on("connection",(ws)=>{
   const id=Math.random().toString(36).slice(2,10);
   const player={
     id,name:"Jugador",saveKey:"",x:1500,y:1100,angle:0,hp:100,level:1,
-    damage:25,fireRate:280,score:0,kills:0,xp:0,
+    damage:25,defense:0,fireRate:280,score:0,kills:0,xp:0,
     color:"#39e7ff",room:"",alive:true,frozen:false,lastShot:0
   };
   clients.set(ws,player);
@@ -232,7 +234,7 @@ wss.on("connection",(ws)=>{
         if(saved){
           p.x=Number.isFinite(saved.x)?saved.x:p.x;
           p.y=Number.isFinite(saved.y)?saved.y:p.y;
-          p.level=saved.level;p.hp=saved.hp;p.damage=saved.damage;p.fireRate=saved.fireRate;
+          p.level=saved.level;p.hp=saved.hp;p.damage=saved.damage;p.defense=Number(saved.defense)||0;p.fireRate=saved.fireRate;
           p.score=saved.score;p.kills=saved.kills;p.xp=saved.xp;
         }
         p.color=String(msg.color||"#39e7ff");
@@ -264,7 +266,7 @@ wss.on("connection",(ws)=>{
         p.angle=Number.isFinite(msg.angle)?msg.angle:p.angle;
         p.hp=clamp(Number.isFinite(msg.hp)?msg.hp:p.hp,0,100);
         const data={
-          name:p.name,x:p.x,y:p.y,level:p.level,hp:p.hp,damage:p.damage,fireRate:p.fireRate,
+          name:p.name,x:p.x,y:p.y,level:p.level,hp:p.hp,damage:p.damage,defense:p.defense,fireRate:p.fireRate,
           score:p.score,kills:p.kills,xp:p.xp
         };
         if(p.saveKey)savedPlayers.set(p.saveKey,data);
@@ -281,7 +283,7 @@ wss.on("connection",(ws)=>{
       if(msg.type==="respawn" && p.room){
         const spawn=spawnPosition(p.room);
         p.x=spawn.x;p.y=spawn.y;p.angle=0;p.hp=100;p.alive=true;
-        p.level=1;p.damage=25;p.fireRate=280;p.xp=0;p.score=0;p.kills=0;p.lastShot=0;
+        p.level=1;p.damage=25;p.defense=0;p.fireRate=280;p.xp=0;p.score=0;p.kills=0;p.lastShot=0;
         send(ws,{type:"respawn_ok",x:p.x,y:p.y,hp:p.hp,enemies:ensureRoomEnemies(p.room)});
         broadcastRoom(p.room,{type:"player_update",player:p},ws);
         sendPlayerList(p.room);
@@ -314,12 +316,12 @@ setInterval(()=>{
         enemy.x=clamp(enemy.x+enemy.vx*dt,35,WORLD.w-35);
         enemy.y=clamp(enemy.y+enemy.vy*dt,35,WORLD.h-35);
         if(best<enemy.r+24){
-          target.hp=clamp(target.hp-enemy.damage*dt,0,100);
+          target.hp=clamp(target.hp-Math.max(.5,enemy.damage-(target.defense||0))*dt,0,100);
           send(findPlayer(target.id,room)?.ws||null,{type:"pve_damage",amount:enemy.damage*dt,hp:target.hp});
           if(target.hp<=0 && target.alive && !target.frozen){
             target.alive=false;
             const lostScore=target.score||0;
-            target.level=1;target.hp=0;target.damage=25;target.fireRate=280;target.xp=0;target.score=0;target.kills=0;
+            target.level=1;target.hp=0;target.damage=25;target.defense=0;target.fireRate=280;target.xp=0;target.score=0;target.kills=0;
             const found=findPlayer(target.id,room);
             if(found)send(found.ws,{type:"pve_dead,lostScore".replace(",",":")});
             if(found)send(found.ws,{type:"pve_dead",lostScore});
