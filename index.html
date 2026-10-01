@@ -129,6 +129,21 @@ function connectMultiplayer(roomMode="quick",roomCode=""){
           for(const q of (m.players||[])) if(q.id!==multiplayerId) remotePlayers.set(q.id,q);
         }else if(m.type==="player_join"||m.type==="player_update"){
           if(m.player && m.player.id!==multiplayerId) remotePlayers.set(m.player.id,m.player);
+        }else if(m.type==="pvp_damage"){
+          p.hp=Math.max(0,p.hp-(Number(m.amount)||0));
+          burst(p.x,p.y,"#ff5474",8);
+        }else if(m.type==="pvp_dead"){
+          p.hp=0;p.alive=false;
+          document.getElementById("deathScore").textContent=p.score;
+          document.getElementById("death").style.display="flex";
+        }else if(m.type==="server_stats"){
+          p.kills=Number(m.kills)||p.kills;
+          p.score=Number(m.score)||p.score;
+          p.xp=Number(m.xp)||p.xp;
+          levelCheck();saveStats();
+        }else if(m.type==="respawn_ok"){
+          p.x=m.x;p.y=m.y;p.hp=p.maxHp;p.alive=true;
+          document.getElementById("death").style.display="none";
         }else if(m.type==="player_leave"){
           remotePlayers.delete(m.id);
         }
@@ -146,7 +161,7 @@ function sendMultiplayerState(dt){
   lastNetSend+=dt;
   if(lastNetSend<.05)return;
   lastNetSend=0;
-  multiplayerSocket.send(JSON.stringify({type:"state",x:p.x,y:p.y,angle:p.angle,hp:p.hp,level:p.level}));
+  multiplayerSocket.send(JSON.stringify({type:"state",x:p.x,y:p.y,angle:p.angle,hp:p.hp,level:p.level,damage:p.damage,fireRate:p.fireRate}));
 }
 
 function rand(a,b){return a+Math.random()*(b-a)}
@@ -190,6 +205,9 @@ function fire(){
   const now=performance.now();
   if(now-p.lastShot<p.fireRate)return;
   p.lastShot=now;
+  if(multiplayerSocket && multiplayerSocket.readyState===1){
+    multiplayerSocket.send(JSON.stringify({type:"fire"}));
+  }
   bullets.push({x:p.x+Math.cos(p.angle)*30,y:p.y+Math.sin(p.angle)*30,vx:Math.cos(p.angle)*650,vy:Math.sin(p.angle)*650,life:1.5,damage:p.damage,range:0});
 }
 function damagePlayer(amount){
@@ -387,6 +405,7 @@ document.getElementById("restart").addEventListener("click",()=>{
   p.x=world.w/2;p.y=world.h/2;p.hp=p.maxHp;p.alive=true;bullets=[];drops=[];particles=[];
   for(const e of enemies){e.x=rand(100,world.w-100);e.y=rand(100,world.h-100)}
   document.getElementById("death").style.display="none";
+  if(multiplayerSocket && multiplayerSocket.readyState===1) multiplayerSocket.send(JSON.stringify({type:"respawn"}));
 });
 
 function enterGame(roomMode="quick",roomCode=""){
