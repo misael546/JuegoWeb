@@ -32,11 +32,7 @@ h2{font-size:15px;margin:22px 0 10px}
   <h1>NEON CORE</h1>
   <div class="sub">SALAS PÚBLICAS</div>
 
-  <label for="username">NOMBRE DEL TANQUE</label>
-  <input id="username" maxlength="20" autocomplete="off" placeholder="Escribe tu nombre">
-  <div id="msg" class="msg"></div>
-
-  <h2>ELIGE UNA SALA</h2>
+    <h2>ELIGE UNA SALA</h2>
   <div class="rooms">
     <a class="room" data-room="12345" href="12345/">
       <strong>SALA 12345</strong>
@@ -49,39 +45,7 @@ h2{font-size:15px;margin:22px 0 10px}
   </div>
 
   <a class="back" href="../">VOLVER AL MENÚ</a>
-  <div class="build">NEON CORE · SALAS PÚBLICAS · 20261001-41</div>
+  <div class="build">NEON CORE · SALAS PÚBLICAS · 20261001-44</div>
 </main>
-<script>
-"use strict";
-const username=document.getElementById("username");
-const msg=document.getElementById("msg");
-function loadName(){
-  try{return localStorage.getItem("neon_core_name")||""}catch{return""}
-}
-function saveName(v){
-  try{localStorage.setItem("neon_core_name",v)}catch{}
-}
-username.value=loadName();
-document.querySelectorAll(".room").forEach(a=>{
-  a.addEventListener("click",e=>{
-    const n=String(username.value||"").trim().slice(0,20);
-    if(!n){
-      e.preventDefault();
-      msg.textContent="Escribe tu nombre para entrar.";
-      username.focus();
-      return;
-    }
-    saveName(n);
-    a.href=a.dataset.room+"/";
-  });
-});
-username.addEventListener("input",()=>{msg.textContent=""});
-username.addEventListener("keydown",e=>{
-  if(e.key==="Enter"){
-    e.preventDefault();
-    document.querySelector(".room").click();
-  }
-});
-</script>
 </body>
 </html>
