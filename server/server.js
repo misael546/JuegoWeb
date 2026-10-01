@@ -17,6 +17,7 @@ const AMMO_PACK_COST = 50;
 const MAX_AMMO = 120;
 
 const SHOP_NPC = { x: 3000, y: 2380, r: 30 };
+const SHOP_INTERACTION_RADIUS = 90;
 
 const WEAPONS = {
   blaster: { name: 'BLASTER', cost: 0, damage: 25, fireRate: 350 },
@@ -741,7 +742,7 @@ function shopBuy(ws, requestedWeapon) {
     return;
   }
 
-  if (Math.hypot(p.x - SHOP_NPC.x, p.y - SHOP_NPC.y) > SHOP_NPC.r) {
+  if (Math.hypot(p.x - SHOP_NPC.x, p.y - SHOP_NPC.y) > SHOP_INTERACTION_RADIUS) {
     send(ws, { type: 'shop_result', ok: false, message: 'Acércate al vendedor de munición.' });
     return;
   }
@@ -808,7 +809,7 @@ function buyAmmo(ws) {
     return;
   }
 
-  if (Math.hypot(p.x - SHOP_NPC.x, p.y - SHOP_NPC.y) > SHOP_NPC.r) {
+  if (Math.hypot(p.x - SHOP_NPC.x, p.y - SHOP_NPC.y) > SHOP_INTERACTION_RADIUS) {
     send(ws, {
       type: 'shop_result',
       ok: false,
@@ -1349,27 +1350,22 @@ wss.on('connection', (ws) => {
         const distance = Math.hypot(nx - p.x, ny - p.y);
         const maxDistance = p.speed * elapsed + 45;
 
+        // El cliente puede avanzar localmente mientras un paquete tarda en llegar.
+        // En vez de congelarlo o expulsarlo por una ráfaga de latencia, limitamos
+        // el paso al máximo permitido y sincronizamos la posición aceptada.
+        let acceptedX = nx;
+        let acceptedY = ny;
+        let movementClamped = false;
+
         if (distance > maxDistance) {
-          p.stateViolations += 1;
-
-          send(ws, {
-            type: 'state_rejected',
-            x: p.x,
-            y: p.y,
-            reason: 'movement_limit'
-          });
-
-          if (p.stateViolations >= 8) {
-            try {
-              ws.close(4003, 'movement_violation');
-            } catch {}
-          }
-
-          return;
+          const ratio = maxDistance / Math.max(distance, 0.0001);
+          acceptedX = p.x + (nx - p.x) * ratio;
+          acceptedY = p.y + (ny - p.y) * ratio;
+          movementClamped = true;
         }
 
         const walls = ensureRoomWalls(p.room);
-        if (collidesWithWall(nx, ny, 16, walls)) {
+        if (collidesWithWall(acceptedX, acceptedY, 16, walls)) {
           send(ws, {
             type: 'state_rejected',
             x: p.x,
@@ -1381,8 +1377,17 @@ wss.on('connection', (ws) => {
 
         p.stateViolations = Math.max(0, p.stateViolations - 1);
         p.lastStateAt = now;
-        p.x = clamp(nx, 35, WORLD.w - 35);
-        p.y = clamp(ny, 35, WORLD.h - 35);
+        p.x = clamp(acceptedX, 35, WORLD.w - 35);
+        p.y = clamp(acceptedY, 35, WORLD.h - 35);
+
+        if (movementClamped) {
+          send(ws, {
+            type: 'state_sync',
+            x: p.x,
+            y: p.y,
+            reason: 'movement_clamped'
+          });
+        }
 
         if (Number.isFinite(Number(msg.angle))) {
           p.angle = Number(msg.angle);
