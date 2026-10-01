@@ -732,6 +732,7 @@ function frame(now){
   last=now;
   update(dt);
   smoothRemotePlayers(dt);
+  smoothEnemies(dt);
   draw();
   requestAnimationFrame(frame);
 }
