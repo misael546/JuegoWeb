@@ -69,6 +69,8 @@ function joinRoom(ws,requestedCode,create=false){
   leaveRoom(ws);
   room.add(ws);
   p.room=code;
+  const spawn=spawnPosition(code);
+  p.x=spawn.x;p.y=spawn.y;p.angle=0;
   p.hp=100;
   p.alive=true;
   send(ws,{type:"room_joined",code,players:roomPlayers(room)});
@@ -76,6 +78,18 @@ function joinRoom(ws,requestedCode,create=false){
   sendPlayerList(code);
 }
 function clamp(v,a,b){return Math.max(a,Math.min(b,v))}
+function spawnPosition(code){
+  const room=rooms.get(code)||new Set();
+  const index=room.size;
+  const spots=[
+    [1400,1000],[1600,1000],[1400,1200],[1600,1200],
+    [1250,1100],[1750,1100],[1500,900],[1500,1300],
+    [1200,900],[1800,900],[1200,1300],[1800,1300],
+    [1350,850],[1650,850],[1350,1350],[1650,1350]
+  ];
+  const s=spots[index%spots.length];
+  return {x:s[0],y:s[1]};
+}
 function findPlayer(id,room){
   for(const ws of room||[]) {
     const p=clients.get(ws);
@@ -214,7 +228,8 @@ wss.on("connection",(ws)=>{
       if(msg.type==="fire") handleShot(ws);
 
       if(msg.type==="respawn" && p.room){
-        p.x=1500;p.y=1100;p.angle=0;p.hp=100;p.alive=true;
+        const spawn=spawnPosition(p.room);
+        p.x=spawn.x;p.y=spawn.y;p.angle=0;p.hp=100;p.alive=true;
         p.level=1;p.damage=25;p.fireRate=280;p.xp=0;p.score=0;p.kills=0;p.lastShot=0;
         send(ws,{type:"respawn_ok",x:p.x,y:p.y,hp:p.hp});
         broadcastRoom(p.room,{type:"player_update",player:p},ws);
