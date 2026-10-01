@@ -9,7 +9,7 @@
 <script>
 (function(){
   try{
-    var v="20261001-32";
+    var v="20261001-33";
     var k="neon_core_build";
     window.NEON_CORE_BUILD=v;
     var old=localStorage.getItem(k);
@@ -41,7 +41,7 @@
 #nameCard button,#restart{width:100%;min-height:44px;border:0;border-radius:10px;margin-top:10px;background:#183d58;color:#fff;font-weight:bold}
 #minimapWrap{position:fixed;top:10px;right:10px;width:180px;height:135px;background:rgba(5,8,17,.9);border:1px solid #26344e;border-radius:12px;padding:6px;z-index:6;pointer-events:none;backdrop-filter:blur(5px)}#minimap{display:block;width:100%;height:100%;border-radius:8px}#minimapTitle{position:absolute;left:10px;top:8px;font-size:10px;font-weight:bold;color:#dffbff;text-shadow:0 1px 2px #000}#playersPanel{position:fixed;top:153px;right:10px;width:min(210px,46vw);background:rgba(5,8,17,.88);border:1px solid #26344e;border-radius:12px;padding:8px 10px;font-size:12px;backdrop-filter:blur(5px);z-index:6;display:none;pointer-events:none}#playersList{display:grid;gap:4px;margin-top:6px;max-height:150px;overflow:auto}.onlinePlayer{display:flex;justify-content:space-between;gap:8px;color:#fff}.onlinePlayer small{color:#6ff3b0;font-size:10px}#roomActions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}#roomActions button{margin-top:0}#roomCodeInput{width:100%;padding:13px;border:1px solid #33415d;background:#111a2d;color:white;border-radius:10px;font-size:16px;outline:none;margin-top:8px;text-transform:uppercase}
 #nameMsg{font-size:13px;color:#ff8b8b;min-height:18px;margin-top:8px}
-#controlConfigBtn{position:fixed;right:10px;bottom:10px;z-index:8;width:44px;height:44px;border:1px solid #33415d;background:#0b1020;color:#fff;border-radius:12px;font-size:20px;display:none}#controlEditor{position:fixed;inset:0;background:#000b;display:none;align-items:center;justify-content:center;padding:20px;z-index:25}#controlCard{width:min(360px,100%);background:#0b1020;border:1px solid #26344e;border-radius:16px;padding:18px;box-shadow:0 15px 60px #000}#controlCard h2{margin:0 0 6px;color:#39e7ff;font-size:20px}#controlCard p{margin:0 0 14px;color:#9ca9bd;font-size:12px;line-height:1.4}.controlRow{display:grid;grid-template-columns:1fr auto;align-items:center;gap:12px;margin:12px 0}.controlRow input{width:160px}.controlActions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}.controlActions button{min-height:44px;border:0;border-radius:10px;background:#183d58;color:#fff;font-weight:bold}.controlActions button:last-child{background:#26344e}#gameActions{position:fixed;left:10px;top:74px;z-index:7;display:none;gap:7px}#gameActions button{min-height:40px;border:1px solid #33415d;background:#0b1020;color:#fff;border-radius:9px;padding:0 12px;font-weight:bold}#saveGame{background:#183d58!important}
+#controlConfigBtn{position:fixed;right:10px;bottom:10px;z-index:50;width:48px;height:48px;border:1px solid #33415d;background:#0b1020;color:#fff;border-radius:12px;font-size:22px;display:block;box-shadow:0 4px 18px #000;pointer-events:auto}#controlEditor{position:fixed;inset:0;background:#000b;display:none;align-items:center;justify-content:center;padding:20px;z-index:25}#controlCard{width:min(360px,100%);background:#0b1020;border:1px solid #26344e;border-radius:16px;padding:18px;box-shadow:0 15px 60px #000}#controlCard h2{margin:0 0 6px;color:#39e7ff;font-size:20px}#controlCard p{margin:0 0 14px;color:#9ca9bd;font-size:12px;line-height:1.4}.controlRow{display:grid;grid-template-columns:1fr auto;align-items:center;gap:12px;margin:12px 0}.controlRow input{width:160px}.controlActions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}.controlActions button{min-height:44px;border:0;border-radius:10px;background:#183d58;color:#fff;font-weight:bold}.controlActions button:last-child{background:#26344e}#gameActions{position:fixed;left:10px;top:74px;z-index:7;display:none;gap:7px}#gameActions button{min-height:40px;border:1px solid #33415d;background:#0b1020;color:#fff;border-radius:9px;padding:0 12px;font-weight:bold}#saveGame{background:#183d58!important}
 #restart{display:none}
 #controls{position:fixed;inset:auto 0 0;display:flex;justify-content:space-between;align-items:flex-end;padding:16px;z-index:5;pointer-events:none}
 .joy{touch-action:none;user-select:none;-webkit-user-select:none;width:112px;height:112px;border:1px solid #41516d;background:#07101dcc;border-radius:50%;position:relative;pointer-events:auto}
@@ -641,7 +641,7 @@ function draw(){
     }
     ctx.globalAlpha=1;
   }
-  drawTank(p.x,p.y,p.angle);
+  drawTank(p.x,p.y,p.angle,"#39e7ff",p.r);
   drawNameTag(playerName,p.x,p.y,p.r,"#39e7ff");
   drawMinimap();
 
@@ -712,6 +712,7 @@ function applyControlConfig(){
 }
 function saveControlConfig(){try{localStorage.setItem("neon_core_controls",JSON.stringify(controlConfig));}catch{}applyControlConfig();}
 const controlEditor=document.getElementById("controlEditor"),controlConfigBtn=document.getElementById("controlConfigBtn");
+controlConfigBtn.style.display="block";
 const controlInputs={joySize:document.getElementById("joySize"),fireSize:document.getElementById("fireSize"),joyX:document.getElementById("joyX"),joyY:document.getElementById("joyY"),fireX:document.getElementById("fireX"),fireY:document.getElementById("fireY")};
 function syncControlInputs(){for(const k in controlInputs)controlInputs[k].value=controlConfig[k];}
 for(const [k,input] of Object.entries(controlInputs))input.addEventListener("input",()=>{controlConfig[k]=Number(input.value);saveControlConfig();});
