@@ -59,6 +59,6 @@ jobs:
             versions.push(m[1]);
           }
           if (new Set(versions).size !== 1) throw new Error('Build mismatch: ' + versions.join(', '));
-          if (!/^20261001-\\d+$/.test(versions[0])) throw new Error('Invalid build marker: ' + versions[0]);
+          if (!/^20261001-\d+$/.test(versions[0])) throw new Error('Invalid build marker: ' + versions[0]);
           console.log('Build synchronization: OK');
           NODE
