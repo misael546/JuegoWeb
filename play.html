@@ -9,7 +9,7 @@
 <script>
 (function(){
   try{
-    var v="20261001-11";
+    var v="20261001-12";
     var k="neon_core_page_version";
     var old=localStorage.getItem(k);
     if(old!==v){
@@ -239,7 +239,7 @@ function connectMultiplayer(roomMode="quick",roomCode=""){
         }else if(m.type==="enemy_hit"){
           const e=enemies.find(x=>x.id===m.id); if(e)e.hp=m.hp;
         }else if(m.type==="enemy_dead"){
-          const e=enemies.find(x=>x.id===m.id); if(e)e.dead=true;
+          const e=enemies.find(x=>x.id===m.id); if(e){burst(e.x,e.y,e.kind==="elite"?"#ff9f43":"#ff3b81",18);e.dead=true;}
         }else if(m.type==="pve_damage"){
           p.hp=Math.max(0,p.hp-(Number(m.amount)||0));
           burst(p.x,p.y,"#ff5474",4);
