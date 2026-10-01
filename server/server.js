@@ -10,14 +10,16 @@ const WORLD = { w: 6000, h: 4400 };
 const MAX_PLAYERS = 16;
 const SAFE_ZONE = { x: 3000, y: 2200, r: 300 };
 
-const SERVER_VERSION = '20261001-101';
+const SERVER_VERSION = '20261001-102';
 
 const AMMO_PACK_SIZE = 50;
 const AMMO_PACK_COST = 50;
 const MAX_AMMO = 120;
 
 const SHOP_NPC = { x: 3000, y: 2380, r: 30 };
-const SHOP_INTERACTION_RADIUS = 90;
+const SHOP_INTERACTION_RADIUS = 180;
+const BANK_NPC = { x: 3000, y: 2050, r: 30 };
+const BANK_INTERACTION_RADIUS = 180;
 
 const WEAPONS = {
   blaster: { name: 'BLASTER', cost: 0, damage: 25, fireRate: 350 },
@@ -204,7 +206,10 @@ function sendStats(p) {
     ammo: p.ammo ?? 0,
     maxAmmo: MAX_AMMO,
     weapon: p.weapon,
-    shopNpc: SHOP_NPC
+    shopNpc: SHOP_NPC,
+    bankNpc: BANK_NPC,
+    bankedGold: p.bankedGold || 0,
+    bankedDiamonds: p.bankedDiamonds || 0
   });
 }
 
@@ -227,6 +232,8 @@ function capturePlayerData(p) {
     diamonds: p.diamonds || 0,
     ammo: clamp(Number(p.ammo) || 0, 0, MAX_AMMO),
     weapon: WEAPONS[p.weapon] ? p.weapon : 'blaster',
+    bankedGold: Math.max(0, Number(p.bankedGold) || 0),
+    bankedDiamonds: Math.max(0, Number(p.bankedDiamonds) || 0),
     damageXp: Math.max(0, Number(p.damageXp) || 0),
     defenseXp: Math.max(0, Number(p.defenseXp) || 0),
     damagePenalty: Math.max(0, Number(p.damagePenalty) || 0),
@@ -811,6 +818,52 @@ function shopBuy(ws, requestedWeapon) {
   sendPlayerList(p.room);
 }
 
+function depositBank(ws) {
+  const p = clients.get(ws);
+  if (!p) return;
+  if (!p.room || !p.alive) {
+    send(ws, { type: 'bank_result', ok: false, message: 'No puedes usar el banco ahora.' });
+    return;
+  }
+  if (Math.hypot(p.x - BANK_NPC.x, p.y - BANK_NPC.y) > BANK_INTERACTION_RADIUS) {
+    send(ws, { type: 'bank_result', ok: false, message: 'Acércate al BANCO NEON.' });
+    return;
+  }
+  const gold = Math.max(0, Number(p.gold) || 0);
+  const diamonds = Math.max(0, Number(p.diamonds) || 0);
+  if (gold <= 0 && diamonds <= 0) {
+    send(ws, { type: 'bank_result', ok: false, message: 'No tienes recursos en la bolsa.' });
+    return;
+  }
+  p.gold = 0;
+  p.diamonds = 0;
+  p.bankedGold = Math.max(0, Number(p.bankedGold) || 0) + gold;
+  p.bankedDiamonds = Math.max(0, Number(p.bankedDiamonds) || 0) + diamonds;
+  await persistPlayer(p);
+  send(ws, { type: 'bank_result', ok: true, message: 'Recursos guardados en el banco.', gold: p.gold, diamonds: p.diamonds, bankedGold: p.bankedGold, bankedDiamonds: p.bankedDiamonds });
+  sendStats(p);
+}
+
+async function withdrawBank(ws) {
+  const p = clients.get(ws);
+  if (!p) return;
+  if (!p.room || !p.alive) {
+    send(ws, { type: 'bank_result', ok: false, message: 'No puedes usar el banco ahora.' });
+    return;
+  }
+  if (Math.hypot(p.x - BANK_NPC.x, p.y - BANK_NPC.y) > BANK_INTERACTION_RADIUS) {
+    send(ws, { type: 'bank_result', ok: false, message: 'Acércate al BANCO NEON.' });
+    return;
+  }
+  p.gold = Math.max(0, Number(p.gold) || 0) + Math.max(0, Number(p.bankedGold) || 0);
+  p.diamonds = Math.max(0, Number(p.diamonds) || 0) + Math.max(0, Number(p.bankedDiamonds) || 0);
+  p.bankedGold = 0;
+  p.bankedDiamonds = 0;
+  await persistPlayer(p);
+  send(ws, { type: 'bank_result', ok: true, message: 'Recursos retirados del banco.', gold: p.gold, diamonds: p.diamonds, bankedGold: 0, bankedDiamonds: 0 });
+  sendStats(p);
+}
+
 function buyAmmo(ws) {
   const p = clients.get(ws);
   if (!p) return;
@@ -1180,6 +1233,8 @@ function createPlayer(ws) {
     pvpKills: 0,
     gold: 0,
     diamonds: 0,
+    bankedGold: 0,
+    bankedDiamonds: 0,
     ammo: 60,
     weapon: 'blaster',
     color: '#39e7ff',
@@ -1311,6 +1366,9 @@ wss.on('connection', (ws) => {
           p.gold = Math.max(0, Number(saved.gold) || 0);
           p.diamonds = Math.max(0, Number(saved.diamonds) || 0);
           p.ammo = clamp(Number(saved.ammo) || 0, 0, MAX_AMMO);
+          if (p.ammo <= 0) p.ammo = 60;
+          p.bankedGold = Math.max(0, Number(saved.bankedGold) || 0);
+          p.bankedDiamonds = Math.max(0, Number(saved.bankedDiamonds) || 0);
           p.weapon = WEAPONS[saved.weapon] ? saved.weapon : 'blaster';
           p.damagePenalty = Math.max(0, Number(saved.damagePenalty) || 0);
           p.defensePenalty = Math.max(0, Number(saved.defensePenalty) || 0);
@@ -1458,6 +1516,16 @@ wss.on('connection', (ws) => {
 
       if (msg.type === 'fire') {
         if (!p.frozen) handleShot(ws);
+        return;
+      }
+
+      if (msg.type === 'deposit_bank') {
+        if (!p.frozen) await depositBank(ws);
+        return;
+      }
+
+      if (msg.type === 'withdraw_bank') {
+        if (!p.frozen) await withdrawBank(ws);
         return;
       }
 
