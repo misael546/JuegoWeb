@@ -9,7 +9,7 @@
 <script>
 (function(){
   try{
-    var v="20261001-15";
+    var v="20261001-16";
     var k="neon_core_page_version";
     var old=localStorage.getItem(k);
     if(old!==v){
@@ -108,6 +108,7 @@ addEventListener("resize",resize);resize();
 const world={w:3000,h:2200};
 const p={x:1500,y:1100,r:24,angle:0,hp:100,maxHp:100,xp:0,level:1,score:0,kills:0,damage:25,defense:0,speed:205,fireRate:280,lastShot:0,alive:true};
 let bullets=[],enemies=[],drops=[],particles=[],walls=[];
+let serverXpNeed=100,serverKillsToLevel=5;
 let gameActive=false;
 let camera={x:p.x,y:p.y},last=performance.now(),playerName="";
 const keys={w:false,a:false,s:false,d:false};
@@ -183,7 +184,7 @@ function connectMultiplayer(roomMode="quick",roomCode=""){
           setRoomPanel(m.code);
           const me=(m.players||[]).find(q=>q.id===multiplayerId);
           if(me){
-            p.x=me.x;p.y=me.y;p.hp=me.hp||p.maxHp;p.alive=me.alive!==false;
+            p.x=me.x;p.y=me.y;p.hp=Number.isFinite(me.hp)?me.hp:p.maxHp;p.alive=me.alive!==false;
             if(Number.isFinite(me.level))p.level=me.level;
             if(Number.isFinite(me.score))p.score=me.score;
             if(Number.isFinite(me.kills))p.kills=me.kills;
@@ -263,13 +264,16 @@ function connectMultiplayer(roomMode="quick",roomCode=""){
           enemies.length=0;
           setTimeout(returnToMenu,50);
         }else if(m.type==="server_stats"){
-          p.kills=Number(m.kills)||p.kills;
-          p.score=Number(m.score)||p.score;
-          p.xp=Number(m.xp)||p.xp;
+          if(Number.isFinite(m.kills))p.kills=m.kills;
+          if(Number.isFinite(m.score))p.score=m.score;
+          if(Number.isFinite(m.xp))p.xp=m.xp;
           if(Number.isFinite(m.level))p.level=m.level;
           if(Number.isFinite(m.damage))p.damage=m.damage;
           if(Number.isFinite(m.defense))p.defense=m.defense;
           if(Number.isFinite(m.fireRate))p.fireRate=m.fireRate;
+          if(Number.isFinite(m.maxHp))p.maxHp=m.maxHp;
+          if(Number.isFinite(m.xpNeed))serverXpNeed=m.xpNeed;
+          if(Number.isFinite(m.killsToLevel))serverKillsToLevel=m.killsToLevel;
         }else if(m.type==="respawn_ok"){
           p.x=m.x;p.y=m.y;p.hp=p.maxHp;p.alive=true;
           document.getElementById("death").style.display="none";
@@ -575,7 +579,7 @@ function draw(){
   document.getElementById("kills").textContent=p.kills;
   document.getElementById("damageStat").textContent=p.damage;
   document.getElementById("defenseStat").textContent=p.defense;
-  const need=100;
+  const need=Math.max(1,serverXpNeed);
   document.getElementById("xp").textContent=p.xp;document.getElementById("xpNeed").textContent=need;
   document.getElementById("hpFill").style.width=clamp(p.hp/p.maxHp*100,0,100)+"%";
   document.getElementById("xpFill").style.width=clamp(p.xp/need*100,0,100)+"%";
