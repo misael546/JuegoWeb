@@ -761,76 +761,42 @@ function draw(){
 
 function setupJoystick(id){
   const el=document.getElementById(id),stick=el.querySelector(".stick");
-  let active=false,pointerId=null,touchId=null;
+  let active=false,pointerId=null;
   function reset(){
-    active=false;pointerId=null;touchId=null;
+    active=false;pointerId=null;
     stick.style.transform="translate(0,0)";
     moveX=0;moveY=0;
   }
-  function setPosition(clientX,clientY){
+  function set(e){
     const r=el.getBoundingClientRect();
     const cx=r.left+r.width/2,cy=r.top+r.height/2;
     const max=Math.max(1,(r.width-stick.offsetWidth)/2);
-    let x=clientX-cx,y=clientY-cy;
+    let x=e.clientX-cx,y=e.clientY-cy;
     const len=Math.hypot(x,y);
     if(len>max){x=x/len*max;y=y/len*max}
     stick.style.transform="translate("+x+"px,"+y+"px)";
     moveX=clamp(x/max,-1,1);
     moveY=clamp(y/max,-1,1);
   }
-  function pointerStart(e){
+  el.addEventListener("pointerdown",e=>{
     if(e.pointerType==="mouse" && e.button!==0)return;
     e.preventDefault();
     reset();
     active=true;pointerId=e.pointerId;
     try{el.setPointerCapture(pointerId)}catch{}
-    setPosition(e.clientX,e.clientY);
-  }
-  function pointerMove(e){
-    if(active && touchId===null && e.pointerId===pointerId){
-      e.preventDefault();
-      setPosition(e.clientX,e.clientY);
-    }
-  }
-  function pointerFinish(e){
-    if(pointerId!==null && e.pointerId===pointerId)reset();
-  }
-  el.addEventListener("pointerdown",pointerStart,{passive:false});
-  el.addEventListener("pointermove",pointerMove,{passive:false});
-  el.addEventListener("pointerup",pointerFinish,{passive:false});
-  el.addEventListener("pointercancel",pointerFinish,{passive:false});
-  el.addEventListener("lostpointercapture",()=>{if(touchId===null)reset()});
-
-  el.addEventListener("touchstart",e=>{
-    if(active)return;
-    const t=e.changedTouches[0];
-    if(!t)return;
-    e.preventDefault();
-    active=true;touchId=t.identifier;
-    setPosition(t.clientX,t.clientY);
+    set(e);
   },{passive:false});
-  el.addEventListener("touchmove",e=>{
-    if(!active || touchId===null)return;
-    for(const t of e.changedTouches){
-      if(t.identifier===touchId){
-        e.preventDefault();
-        setPosition(t.clientX,t.clientY);
-        break;
-      }
+  el.addEventListener("pointermove",e=>{
+    if(active && e.pointerId===pointerId){
+      e.preventDefault();set(e);
     }
   },{passive:false});
-  const touchEnd=e=>{
-    if(touchId===null)return;
-    for(const t of e.changedTouches){
-      if(t.identifier===touchId){
-        e.preventDefault();
-        reset();
-        break;
-      }
-    }
+  const finish=e=>{
+    if(pointerId===null || e.pointerId===pointerId){e.preventDefault();reset()}
   };
-  el.addEventListener("touchend",touchEnd,{passive:false});
-  el.addEventListener("touchcancel",touchEnd,{passive:false});
+  el.addEventListener("pointerup",finish,{passive:false});
+  el.addEventListener("pointercancel",finish,{passive:false});
+  el.addEventListener("lostpointercapture",()=>reset());
   return reset;
 }
 const resetMoveJoystick=setupJoystick("moveJoy");
