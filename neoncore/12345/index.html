@@ -9,7 +9,7 @@
 <script>
 (function(){
   try{
-    var v="20261001-103";
+    var v="20261001-105";
     var k="neon_core_build";
     window.NEON_CORE_BUILD=v;
     var old=localStorage.getItem(k);
@@ -729,7 +729,7 @@ function updateHud(){
   updateResourceHud();
 }
 function updateResourceHud(){updateWeaponHud();const g=document.getElementById("gold"),d=document.getElementById("diamonds"),a=document.getElementById("ammo"),m=document.getElementById("maxAmmo"),f=document.getElementById("fire");if(g)g.textContent=p.gold||0;if(d)d.textContent=p.diamonds||0;if(a)a.textContent=p.ammo||0;if(m)m.textContent=p.maxAmmo||120;if(f)f.disabled=(p.ammo||0)<=0;}
-function updateAmmoShop(){const near=Math.hypot(p.x-shopNpc.x,p.y-shopNpc.y)<=180;const box=document.getElementById("ammoShop");if(!box)return;shopOpen=near&&p.alive;box.style.display=shopOpen?"block":"none";if(near){const b=document.getElementById("buyAmmoBtn");if(b)b.disabled=!multiplayerSocket||multiplayerSocket.readyState!==1||(p.ammo||0)>=p.maxAmmo;showShopMsg((p.ammo||0)>=p.maxAmmo?"Munición al máximo.":(p.gold||0)<50?"Necesitas 50 de oro.":"50 balas por 50 de oro.");}}
+function updateAmmoShop(){const near=Math.hypot(p.x-shopNpc.x,p.y-shopNpc.y)<=80;const box=document.getElementById("ammoShop");if(!box)return;shopOpen=near&&p.alive;box.style.display=shopOpen?"block":"none";if(near){const b=document.getElementById("buyAmmoBtn");if(b)b.disabled=!multiplayerSocket||multiplayerSocket.readyState!==1||(p.ammo||0)>=p.maxAmmo;showShopMsg((p.ammo||0)>=p.maxAmmo?"Munición al máximo.":(p.gold||0)<50?"Necesitas 50 de oro.":"50 balas por 50 de oro.");}}
 function drawShopNpc(){const x=sx(shopNpc.x),y=sy(shopNpc.y);ctx.save();ctx.fillStyle="rgba(57,231,255,.08)";ctx.beginPath();ctx.arc(x,y,shopNpc.r,0,Math.PI*2);ctx.fill();ctx.strokeStyle="#39e7ff";ctx.lineWidth=2;ctx.setLineDash([8,7]);ctx.beginPath();ctx.arc(x,y,shopNpc.r,0,Math.PI*2);ctx.stroke();ctx.setLineDash([]);ctx.fillStyle="#09111f";ctx.beginPath();ctx.arc(x,y,25,0,Math.PI*2);ctx.fill();ctx.strokeStyle="#39e7ff";ctx.lineWidth=3;ctx.stroke();ctx.fillStyle="#39e7ff";ctx.font="bold 20px Arial";ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText("M",x,y);ctx.fillStyle="#fff";ctx.font="bold 11px Arial";ctx.fillText("MUNICIÓN",x,y-38);ctx.restore();}
 function drawMinimap(){
   const mm=document.getElementById("minimap");
