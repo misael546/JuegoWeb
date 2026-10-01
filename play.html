@@ -9,7 +9,7 @@
 <script>
 (function(){
   try{
-    var v="20261001-20";
+    var v="20261001-21";
     var k="neon_core_page_version";
     var old=localStorage.getItem(k);
     if(old!==v){
@@ -189,9 +189,11 @@ function connectMultiplayer(roomMode="quick",roomCode=""){
           enemies.length=0;
           for(const e of (m.enemies||[])){e.targetX=e.x;e.targetY=e.y;e.shape=e.shape||"triangle";enemies.push(e);}
           gameActive=true;
+          nameBox.style.display="none";
           updatePlayersFromList(m.players||[]);
         }else if(m.type==="room_error"){
           const msg=document.getElementById("nameMsg"); if(msg)msg.textContent=m.message||"No se pudo entrar a la sala.";
+          nameBox.style.display="flex";
         }else if(m.type==="connected"){
           multiplayerId=m.id;
         }else if(m.type==="player_list"){
@@ -287,10 +289,18 @@ function connectMultiplayer(roomMode="quick",roomCode=""){
     });
     multiplayerSocket.addEventListener("error",()=>{
       setConnectionStatus("ESPERANDO AL SERVIDOR","El servidor gratuito puede estar despertando. Reintentando…");
+      nameBox.style.display="flex";
+      username.value=playerName||username.value;
     });
     multiplayerSocket.addEventListener("close",()=>{
       multiplayerSocket=null;
-      if(currentRoom){setConnectionStatus("SERVIDOR EN ESPERA","El servidor se desconectó. Recarga para volver a conectar.");}
+      if(!gameActive && currentRoom){
+        setConnectionStatus("SERVIDOR EN ESPERA","No se pudo completar la conexión. Pulsa ENTRAR RÁPIDO otra vez.");
+        nameBox.style.display="flex";
+        username.value=playerName||username.value;
+      }else if(currentRoom){
+        setConnectionStatus("SERVIDOR EN ESPERA","El servidor se desconectó. Recarga para volver a conectar.");
+      }
     });
   }catch{}
 }
@@ -678,7 +688,7 @@ function startGame(mode="quick",code=""){
   savedFrozen=false;
   enemies.length=0;
   nameMsg.textContent="";
-  nameBox.style.display="none";
+  nameBox.style.display="flex";
   connectMultiplayer(mode,code);
 }
 
