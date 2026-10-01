@@ -10,7 +10,7 @@ const WORLD = { w: 6000, h: 4400 };
 const MAX_PLAYERS = 16;
 const SAFE_ZONE = { x: 3000, y: 2200, r: 300 };
 
-const SERVER_VERSION = '20261001-67';
+const SERVER_VERSION = '20261001-100';
 
 const AMMO_PACK_SIZE = 50;
 const AMMO_PACK_COST = 50;
@@ -35,7 +35,8 @@ const DEATH_DEFENSE_LOSS = 0.05;
 const DEATH_GOLD_LOSS = 0.10;
 const DEATH_XP_LOSS = 0.10;
 const TICK_MS = 100;
-const ENEMY_SYNC_MS = 100;
+const ENEMY_SYNC_MS = 120;
+const ENEMY_ATTACK_COOLDOWN_MS = 700;
 
 const SERVER_STARTED_AT = Date.now();
 
@@ -476,6 +477,20 @@ function collidesWithWall(x, y, radius, walls) {
   return null;
 }
 
+function hasLineOfSight(x1, y1, x2, y2, walls) {
+  const dx = x2 - x1;
+  const dy = y2 - y1;
+  const distance = Math.hypot(dx, dy);
+  if (distance <= 1) return true;
+  const dirX = dx / distance;
+  const dirY = dy / distance;
+  for (const wall of walls || []) {
+    const hit = rayAabbDistance(x1, y1, dirX, dirY, wall);
+    if (hit >= 0 && hit < distance - 12) return false;
+  }
+  return true;
+}
+
 function rayAabbDistance(originX, originY, dirX, dirY, wall) {
   const minX = wall.x - wall.w / 2;
   const maxX = wall.x + wall.w / 2;
@@ -537,6 +552,7 @@ function makeEnemy() {
     maxHp: elite ? 85 : 50,
     speed: elite ? 55 : 75,
     damage: elite ? 14 : 9,
+    lastAttackAt: 0,
     kind: elite ? 'elite' : 'drone',
     shape: shapes[Math.floor(Math.random() * shapes.length)]
   };
@@ -1022,9 +1038,18 @@ function handleShot(ws) {
       type: 'pvp_hit',
       shooter: shooter.id,
       target: target.id,
-      amount: damage,
+      amount: actualDamage,
       hp: target.hp,
       maxHp: targetMaxHp
+    });
+
+    send(shooter.ws, {
+      type: 'hit_confirm',
+      kind: 'player',
+      target: target.id,
+      amount: actualDamage,
+      x: target.x,
+      y: target.y
     });
 
     if (target.hp <= 0) {
@@ -1087,7 +1112,18 @@ function handleShot(ws) {
     broadcastRoom(shooter.room, {
       type: 'enemy_hit',
       id: targetEnemy.id,
-      hp: targetEnemy.hp
+      hp: targetEnemy.hp,
+      x: targetEnemy.x,
+      y: targetEnemy.y
+    });
+
+    send(shooter.ws, {
+      type: 'hit_confirm',
+      kind: 'enemy',
+      target: targetEnemy.id,
+      amount: damage,
+      x: targetEnemy.x,
+      y: targetEnemy.y
     });
 
     if (targetEnemy.hp <= 0) {
@@ -1390,7 +1426,10 @@ wss.on('connection', (ws) => {
         }
 
         if (Number.isFinite(Number(msg.angle))) {
-          p.angle = Number(msg.angle);
+          const angle = Number(msg.angle);
+          if (Math.abs(angle) <= Math.PI * 4) {
+            p.angle = Math.atan2(Math.sin(angle), Math.cos(angle));
+          }
         }
 
         broadcastRoom(
@@ -1595,7 +1634,12 @@ setInterval(() => {
             SAFE_ZONE.y + (dySafe / dSafe) * (SAFE_ZONE.r + enemy.r + 4);
         }
 
-        if (best < enemy.r + 24) {
+        if (
+          best < enemy.r + 24 &&
+          now - (enemy.lastAttackAt || 0) >= ENEMY_ATTACK_COOLDOWN_MS &&
+          hasLineOfSight(enemy.x, enemy.y, target.x, target.y, walls)
+        ) {
+          enemy.lastAttackAt = now;
           const actualDamage =
             Math.max(0.5, enemy.damage - (target.defense || 0)) *
             (TICK_MS / 1000);
