@@ -5,104 +5,44 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
 <title>MMORPG Web V2</title>
 <style>
-*{box-sizing:border-box}
-body{margin:0;background:#111;color:white;font-family:Arial;overflow:hidden}
-#game{width:100vw;height:100vh;display:block;background:#c99b55}
-#ui{position:fixed;top:10px;left:10px;right:10px;pointer-events:none}
-.panel{display:inline-block;background:#111c;padding:10px;border-radius:10px}
-#auth{position:fixed;inset:0;background:#0009;display:flex;align-items:center;justify-content:center;padding:20px;z-index:10}
-#authBox{width:min(360px,100%);background:#181818;padding:20px;border-radius:14px}
-#authBox input{width:100%;padding:12px;margin:6px 0;border:0;border-radius:8px;font-size:16px}
-#authBox button{width:100%;height:46px;border-radius:8px;margin-top:8px;background:#333;color:white}
-#authMsg{min-height:22px;font-size:13px;margin-top:10px}
-#logout{position:fixed;top:10px;right:10px;z-index:5;border:0;border-radius:8px;padding:9px;background:#222d;color:white}
-#controls{position:fixed;bottom:20px;left:20px;right:20px;display:flex;justify-content:space-between;pointer-events:none}
-#controls button{pointer-events:auto;border:0;border-radius:50%;width:58px;height:58px;font-size:24px;background:#222d;color:white}
-#attack{background:#8b2222!important}
+*{box-sizing:border-box}body{margin:0;background:#111;color:white;font-family:Arial;overflow:hidden}#game{width:100vw;height:100vh;display:block;background:#c99b55}#ui{position:fixed;top:10px;left:10px;right:10px;pointer-events:none}.panel{display:inline-block;background:#111c;padding:10px;border-radius:10px}#auth{position:fixed;inset:0;background:#0009;display:flex;align-items:center;justify-content:center;padding:20px;z-index:10}#authBox{width:min(360px,100%);background:#181818;padding:20px;border-radius:14px}#authBox input{width:100%;padding:12px;margin:6px 0;border:0;border-radius:8px;font-size:16px}#authBox button{width:100%;height:46px;border-radius:8px;margin-top:8px;background:#333;color:white}#authMsg{min-height:22px;font-size:13px;margin-top:10px}#logout{position:fixed;top:10px;right:10px;z-index:5;border:0;border-radius:8px;padding:9px;background:#222d;color:white}#controls{position:fixed;bottom:20px;left:20px;right:20px;display:flex;justify-content:space-between;pointer-events:none}#controls button{pointer-events:auto;border:0;border-radius:50%;width:58px;height:58px;font-size:24px;background:#222d;color:white}#attack{background:#8b2222!important}
 </style>
 </head>
 <body>
 <canvas id="game"></canvas>
-
-<div id="ui"><div class="panel">
-❤️ <span id="hp">100</span>
-&nbsp; XP: <span id="xp">0</span>/100
-&nbsp; Nivel: <span id="level">1</span>
-&nbsp; 💰 <span id="gold">0</span>
-</div></div>
-
+<div id="ui"><div class="panel">❤️ <span id="hp">100</span> &nbsp; XP: <span id="xp">0</span>/100 &nbsp; Nivel: <span id="level">1</span> &nbsp; 💰 <span id="gold">0</span></div></div>
 <button id="logout" hidden>Salir</button>
-
-<div id="auth">
- <div id="authBox">
-  <h2>JuegoWeb</h2>
-  <input id="email" type="email" placeholder="Correo">
-  <input id="password" type="password" placeholder="Contraseña">
-  <input id="username" type="text" placeholder="Nombre del personaje">
-  <button id="register">Crear cuenta</button>
-  <button id="login">Iniciar sesión</button>
-  <div id="authMsg"></div>
- </div>
-</div>
-
-<div id="controls">
- <div>
-  <button data-key="up">▲</button><br>
-  <button data-key="left">◀</button>
-  <button data-key="down">▼</button>
-  <button data-key="right">▶</button>
- </div>
- <button id="attack">⚔️</button>
-</div>
-
+<div id="auth"><div id="authBox"><h2>JuegoWeb</h2><input id="email" type="email" placeholder="Correo"><input id="password" type="password" placeholder="Contraseña"><input id="username" type="text" placeholder="Nombre del personaje"><button id="register">Crear cuenta</button><button id="login">Iniciar sesión</button><div id="authMsg"></div></div></div>
+<div id="controls"><div><button data-key="up">▲</button><br><button data-key="left">◀</button><button data-key="down">▼</button><button data-key="right">▶</button></div><button id="attack">⚔️</button></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const SUPABASE_URL="https://oidzzijqgviqpasoucyo.supabase.co";
 const SUPABASE_KEY="sb_publishable_bSdTv3Mfz3qLRLpBdHqpNw_jjdjaXwj";
 const {createClient}=window.supabase;
 const db=createClient(SUPABASE_URL,SUPABASE_KEY);
-
-const canvas=document.getElementById("game"),ctx=canvas.getContext("2d");
-let W,H;
-function resize(){W=innerWidth;H=innerHeight;canvas.width=W*devicePixelRatio;canvas.height=H*devicePixelRatio;ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0)}
-addEventListener("resize",resize);resize();
-
-const player={x:innerWidth/2,y:innerHeight/2,hp:100,xp:0,level:1,gold:0};
-const enemy={x:innerWidth/2+130,y:innerHeight/2,hp:50,maxHp:50};
-const keys={up:false,down:false,left:false,right:false};
-let user=null, saving=false;
-
-document.querySelectorAll("[data-key]").forEach(b=>{
- const k=b.dataset.key;
- const on=e=>{e.preventDefault();keys[k]=true};
- const off=e=>{e.preventDefault();keys[k]=false};
- b.addEventListener("pointerdown",on);b.addEventListener("pointerup",off);
- b.addEventListener("pointercancel",off);b.addEventListener("pointerleave",off);
-});
-
+const canvas=document.getElementById("game"),ctx=canvas.getContext("2d");let W,H;
+function resize(){W=innerWidth;H=innerHeight;canvas.width=W*devicePixelRatio;canvas.height=H*devicePixelRatio;ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0)}addEventListener("resize",resize);resize();
+const player={x:innerWidth/2,y:innerHeight/2,hp:100,xp:0,level:1,gold:0};const enemy={x:innerWidth/2+130,y:innerHeight/2,hp:50,maxHp:50};const keys={up:false,down:false,left:false,right:false};let user=null,saving=false;
+document.querySelectorAll("[data-key]").forEach(b=>{const k=b.dataset.key;const on=e=>{e.preventDefault();keys[k]=true};const off=e=>{e.preventDefault();keys[k]=false};b.addEventListener("pointerdown",on);b.addEventListener("pointerup",off);b.addEventListener("pointercancel",off);b.addEventListener("pointerleave",off)});
 function msg(t){document.getElementById("authMsg").textContent=t}
-
 async function createAccount(){
- const email=document.getElementById("email").value.trim();
- const password=document.getElementById("password").value;
- const username=document.getElementById("username").value.trim();
+ const email=document.getElementById("email").value.trim(),password=document.getElementById("password").value,username=document.getElementById("username").value.trim();
  if(!email||password.length<6||!username){msg("Completa correo, contraseña (6+) y nombre.");return}
  msg("Creando cuenta...");
- const {data,error}=await db.auth.signUp({email,password});
+ const {data,error}=await db.auth.signUp({email,password,options:{data:{username}}});
  if(error){msg(error.message);return}
- if(!data.user){msg("Revisa tu correo para confirmar la cuenta.");return}
- const {error:pe}=await db.from("players").insert({id:data.user.id,username});
- if(pe){msg(pe.message);return}
- user=data.user; await loadServerPlayer(); showGame();
+ if(!data.user){msg("No se pudo crear el usuario.");return}
+ user=data.user;
+ if(!data.session){msg("Cuenta creada. Si Supabase todavía pide confirmación, revisa la opción Confirm email.");return}
+ await loadServerPlayer();showGame();
 }
 async function login(){
- const email=document.getElementById("email").value.trim();
- const password=document.getElementById("password").value;
+ const email=document.getElementById("email").value.trim(),password=document.getElementById("password").value;
  if(!email||!password){msg("Escribe correo y contraseña.");return}
  msg("Entrando...");
  const {data,error}=await db.auth.signInWithPassword({email,password});
  if(error){msg(error.message);return}
- user=data.user; await loadServerPlayer(); showGame();
+ user=data.user;await loadServerPlayer();showGame();
 }
 async function loadServerPlayer(){
  if(!user)return;
@@ -111,63 +51,21 @@ async function loadServerPlayer(){
  Object.assign(player,{level:data.level,xp:data.xp,gold:data.gold,hp:data.hp,x:data.pos_x||W/2,y:data.pos_y||H/2});
 }
 async function saveServer(){
- if(!user||saving)return;
- saving=true;
- await db.from("players").update({
-  level:player.level,xp:player.xp,gold:player.gold,hp:player.hp,
-  pos_x:player.x,pos_y:player.y,updated_at:new Date().toISOString()
- }).eq("id",user.id);
+ if(!user||saving)return;saving=true;
+ await db.from("players").update({level:player.level,xp:player.xp,gold:player.gold,hp:player.hp,pos_x:player.x,pos_y:player.y,updated_at:new Date().toISOString()}).eq("id",user.id);
  saving=false;
 }
 function showGame(){document.getElementById("auth").hidden=true;document.getElementById("logout").hidden=false}
 async function logout(){await db.auth.signOut();location.reload()}
-
 async function attack(){
  const d=Math.hypot(player.x-enemy.x,player.y-enemy.y);
- if(d<100&&enemy.hp>0){
-  enemy.hp-=25;
-  if(enemy.hp<=0){
-   player.xp+=50;player.gold+=10;enemy.hp=enemy.maxHp;
-   enemy.x=80+Math.random()*(W-160);enemy.y=100+Math.random()*(H-180);
-   if(player.xp>=100){player.xp-=100;player.level++;player.hp=100}
-   await saveServer();
-  }
- }
+ if(d<100&&enemy.hp>0){enemy.hp-=25;if(enemy.hp<=0){player.xp+=50;player.gold+=10;enemy.hp=enemy.maxHp;enemy.x=80+Math.random()*(W-160);enemy.y=100+Math.random()*(H-180);if(player.xp>=100){player.xp-=100;player.level++;player.hp=100}await saveServer()}}
 }
-document.getElementById("attack").addEventListener("pointerdown",attack);
-document.getElementById("register").onclick=createAccount;
-document.getElementById("login").onclick=login;
-document.getElementById("logout").onclick=logout;
-
-async function start(){
- const {data}=await db.auth.getSession();
- if(data.session){user=data.session.user;await loadServerPlayer();showGame()}
-}
-start();
-
-function update(){
- const speed=3;
- if(keys.up)player.y-=speed;if(keys.down)player.y+=speed;
- if(keys.left)player.x-=speed;if(keys.right)player.x+=speed;
- player.x=Math.max(25,Math.min(W-25,player.x));
- player.y=Math.max(70,Math.min(H-25,player.y));
-}
-function draw(){
- ctx.clearRect(0,0,W,H);
- ctx.fillStyle="#d4a45c";ctx.fillRect(0,0,W,H);
- ctx.strokeStyle="#c08d48";
- for(let x=0;x<W;x+=64){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke()}
- for(let y=0;y<H;y+=64){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke()}
- ctx.fillStyle="#8b2222";ctx.beginPath();ctx.arc(enemy.x,enemy.y,25,0,Math.PI*2);ctx.fill();
- ctx.fillStyle="#111";ctx.fillRect(enemy.x-25,enemy.y-40,50,6);
- ctx.fillStyle="#e33";ctx.fillRect(enemy.x-25,enemy.y-40,50*(enemy.hp/enemy.maxHp),6);
- ctx.fillStyle="#2878d0";ctx.beginPath();ctx.arc(player.x,player.y,22,0,Math.PI*2);ctx.fill();
- document.getElementById("hp").textContent=player.hp;
- document.getElementById("xp").textContent=player.xp;
- document.getElementById("level").textContent=player.level;
- document.getElementById("gold").textContent=player.gold;
-}
-function loop(){update();draw();requestAnimationFrame(loop)} loop();
+document.getElementById("attack").addEventListener("pointerdown",attack);document.getElementById("register").onclick=createAccount;document.getElementById("login").onclick=login;document.getElementById("logout").onclick=logout;
+async function start(){const {data}=await db.auth.getSession();if(data.session){user=data.session.user;await loadServerPlayer();showGame()}}start();
+function update(){const speed=3;if(keys.up)player.y-=speed;if(keys.down)player.y+=speed;if(keys.left)player.x-=speed;if(keys.right)player.x+=speed;player.x=Math.max(25,Math.min(W-25,player.x));player.y=Math.max(70,Math.min(H-25,player.y))}
+function draw(){ctx.clearRect(0,0,W,H);ctx.fillStyle="#d4a45c";ctx.fillRect(0,0,W,H);ctx.strokeStyle="#c08d48";for(let x=0;x<W;x+=64){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke()}for(let y=0;y<H;y+=64){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke()}ctx.fillStyle="#8b2222";ctx.beginPath();ctx.arc(enemy.x,enemy.y,25,0,Math.PI*2);ctx.fill();ctx.fillStyle="#111";ctx.fillRect(enemy.x-25,enemy.y-40,50,6);ctx.fillStyle="#e33";ctx.fillRect(enemy.x-25,enemy.y-40,50*(enemy.hp/enemy.maxHp),6);ctx.fillStyle="#2878d0";ctx.beginPath();ctx.arc(player.x,player.y,22,0,Math.PI*2);ctx.fill();document.getElementById("hp").textContent=player.hp;document.getElementById("xp").textContent=player.xp;document.getElementById("level").textContent=player.level;document.getElementById("gold").textContent=player.gold}
+function loop(){update();draw();requestAnimationFrame(loop)}loop();
 </script>
 </body>
 </html>
