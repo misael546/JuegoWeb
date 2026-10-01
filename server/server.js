@@ -10,7 +10,7 @@ const WORLD = { w: 6000, h: 4400 };
 const MAX_PLAYERS = 16;
 const SAFE_ZONE = { x: 3000, y: 2200, r: 300 };
 
-const SERVER_VERSION = '20261001-60';
+const SERVER_VERSION = '20261001-61';
 
 const AMMO_PACK_SIZE = 50;
 const AMMO_PACK_COST = 50;
@@ -32,6 +32,7 @@ const DEATH_HP_LOSS = 0.10;
 const DEATH_DAMAGE_LOSS = 0.05;
 const DEATH_DEFENSE_LOSS = 0.05;
 const DEATH_GOLD_LOSS = 0.10;
+const DEATH_XP_LOSS = 0.10;
 const TICK_MS = 100;
 const ENEMY_SYNC_MS = 100;
 
@@ -245,6 +246,21 @@ function applyDeathPenalty(p) {
   p.damagePenalty = Math.max(0, (Number(p.damagePenalty) || 0) + damageBefore * DEATH_DAMAGE_LOSS);
   p.defensePenalty = Math.max(0, (Number(p.defensePenalty) || 0) + defenseBefore * DEATH_DEFENSE_LOSS);
   p.gold = Math.max(0, Math.floor((Number(p.gold) || 0) * (1 - DEATH_GOLD_LOSS)));
+  p.xp = Math.max(0, Math.floor((Number(p.xp) || 0) * (1 - DEATH_XP_LOSS)));
+  applyCombatStats(p);
+}
+
+function respawnAfterDeath(p) {
+  if (!p?.room) return;
+  const spawn = spawnPosition(p.room);
+  p.x = spawn.x;
+  p.y = spawn.y;
+  p.angle = 0;
+  p.alive = true;
+  p.frozen = false;
+  p.lastShot = 0;
+  p.lastStateAt = Date.now();
+  p.stateViolations = 0;
   applyCombatStats(p);
 }
 
@@ -875,6 +891,20 @@ function handleShot(ws) {
       const lostScore = target.score || 0;
 
       applyDeathPenalty(target);
+      const deathState = {
+        x: spawnPosition(shooter.room).x,
+        y: spawnPosition(shooter.room).y,
+        hp: target.hp,
+        maxHp: maxHpForLevel(target.level),
+        xp: target.xp,
+        gold: target.gold,
+        damage: target.damage,
+        defense: target.defense,
+        level: target.level
+      };
+      respawnAfterDeath(target);
+      deathState.x = target.x;
+      deathState.y = target.y;
 
       shooter.kills = (shooter.kills || 0) + 1;
       shooter.pvpKills = (shooter.pvpKills || 0) + 1;
@@ -889,7 +919,8 @@ function handleShot(ws) {
       send(targetPlayer.ws, {
         type: 'pvp_dead',
         killer: shooter.name,
-        lostScore
+        lostScore,
+        respawn: deathState
       });
 
       sendStats(target);
@@ -1440,6 +1471,7 @@ setInterval(() => {
             const lostScore = target.score || 0;
 
             applyDeathPenalty(target);
+            respawnAfterDeath(target);
             void persistPlayer(target);
 
             const foundTarget = findPlayer(target.id, room);
@@ -1447,7 +1479,18 @@ setInterval(() => {
             if (foundTarget) {
               send(foundTarget.ws, {
                 type: 'pve_dead',
-                lostScore
+                lostScore,
+                respawn: {
+                  x: target.x,
+                  y: target.y,
+                  hp: target.hp,
+                  maxHp: maxHpForLevel(target.level),
+                  xp: target.xp,
+                  gold: target.gold,
+                  damage: target.damage,
+                  defense: target.defense,
+                  level: target.level
+                }
               });
               sendStats(target);
             }
