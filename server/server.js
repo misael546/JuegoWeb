@@ -5,7 +5,7 @@ const PORT = process.env.PORT || 10000;
 const WORLD = {w:6000,h:4400};
 const MAX_PLAYERS = 16;
 const SAFE_ZONE = {x:3000,y:2200,r:300};
-const SERVER_VERSION = "20261001-34";
+const SERVER_VERSION = "20261001-40";
 const SERVER_STARTED_AT = Date.now();
 function inSafeZone(x,y,pad=0){return Math.hypot(x-SAFE_ZONE.x,y-SAFE_ZONE.y)<=SAFE_ZONE.r+pad;}
 const clients = new Map();
@@ -14,6 +14,8 @@ const rooms = new Map();
 const roomEnemies = new Map();
 rooms.set("OPEN",new Set());
 roomEnemies.set("OPEN",[]);
+const PUBLIC_ROOMS=["12345","67890"];
+for(const code of PUBLIC_ROOMS){rooms.set(code,new Set());roomEnemies.set(code,[]);}
 const CODE_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 
 function makeCode(){
@@ -76,7 +78,7 @@ function leaveRoom(ws){
   const room=rooms.get(code);
   if(room){
     room.delete(ws);
-    if(room.size===0 && code!=="OPEN"){ rooms.delete(code); roomEnemies.delete(code); }
+    if(room.size===0 && code!=="OPEN" && !PUBLIC_ROOMS.includes(code)){ rooms.delete(code); roomEnemies.delete(code); }
     else { broadcastRoom(code,{type:"player_leave",id:p.id}); sendPlayerList(code); }
   }
   p.room="";
@@ -84,7 +86,7 @@ function leaveRoom(ws){
 function joinRoom(ws,requestedCode,create=false){
   const p=clients.get(ws);
   if(!p)return;
-  let code=String(requestedCode||"").toUpperCase().replace(/[^A-Z0-9]/g,"").slice(0,4);
+  let code=String(requestedCode||"").toUpperCase().replace(/[^A-Z0-9]/g,"").slice(0,5);
   if(create || !code){
     code=makeCode();
     rooms.set(code,new Set());
