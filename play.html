@@ -22,7 +22,7 @@
 #upgrade{position:fixed;right:10px;top:74px;width:auto;padding:0 12px;z-index:4;display:none}
 #restart{display:none}
 #controls{position:fixed;inset:auto 0 0;display:flex;justify-content:space-between;align-items:flex-end;padding:16px;z-index:5;pointer-events:none}
-.joy{width:112px;height:112px;border:1px solid #41516d;background:#07101dcc;border-radius:50%;position:relative;pointer-events:auto}
+.joy{touch-action:none;user-select:none;-webkit-user-select:none;width:112px;height:112px;border:1px solid #41516d;background:#07101dcc;border-radius:50%;position:relative;pointer-events:auto}
 .stick{position:absolute;width:48px;height:48px;border-radius:50%;left:32px;top:32px;background:#39e7ff99;border:1px solid #8ff5ff}
 #fire{width:86px;height:86px;border-radius:50%;border:1px solid #ff6680;background:#701a30cc;color:white;font-size:25px;font-weight:bold;pointer-events:auto}
 #connectionOverlay{position:fixed;inset:0;background:#050811e8;display:none;align-items:center;justify-content:center;z-index:30;text-align:center;padding:20px}#connectionCard{width:min(340px,100%);background:#0b1020;border:1px solid #26344e;border-radius:16px;padding:24px;display:grid;gap:9px;box-shadow:0 15px 60px #000}#connectionTitle{color:#39e7ff;letter-spacing:1px}#connectionText{color:#9ca9bd;font-size:13px;line-height:1.4}#connectionSpinner{width:28px;height:28px;border:3px solid #26344e;border-top-color:#39e7ff;border-radius:50%;margin:0 auto 5px;animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}#death{position:fixed;inset:0;background:#000b;display:none;align-items:center;justify-content:center;z-index:10;text-align:center}
@@ -450,14 +450,18 @@ function setupJoystick(id){
     moveY=clamp(y/max,-1,1);
   }
   el.addEventListener("pointerdown",e=>{
+    if(e.pointerType==="mouse" && e.button!==0)return;
     e.preventDefault();
-    if(active)return;
+    if(active)reset();
     active=true;pointerId=e.pointerId;
     try{el.setPointerCapture(pointerId)}catch{}
     set(e);
   });
   el.addEventListener("pointermove",e=>{
-    if(active && e.pointerId===pointerId){e.preventDefault();set(e)}
+    if(active && e.pointerId===pointerId){
+      e.preventDefault();
+      set(e);
+    }
   });
   el.addEventListener("pointerup",e=>{
     if(e.pointerId===pointerId){e.preventDefault();reset()}
@@ -465,10 +469,19 @@ function setupJoystick(id){
   el.addEventListener("pointercancel",e=>{
     if(e.pointerId===pointerId)reset();
   });
-  el.addEventListener("lostpointercapture",reset);
+  el.addEventListener("lostpointercapture",e=>{
+    if(active && (pointerId===null || e.pointerId===pointerId))reset();
+  });
+  return reset;
 }
 
-setupJoystick("moveJoy");
+const resetMoveJoystick=setupJoystick("moveJoy");
+addEventListener("resize",resetMoveJoystick);
+addEventListener("orientationchange",resetMoveJoystick);
+addEventListener("blur",resetMoveJoystick);
+document.addEventListener("visibilitychange",()=>{
+  if(document.hidden)resetMoveJoystick();
+});
 
 addEventListener("keydown",e=>{const k=e.key.toLowerCase();if(k in keys){keys[k]=true;e.preventDefault()}});
 addEventListener("keyup",e=>{const k=e.key.toLowerCase();if(k in keys){keys[k]=false;e.preventDefault()}});
