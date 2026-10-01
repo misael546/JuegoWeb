@@ -10,7 +10,7 @@ const WORLD = { w: 6000, h: 4400 };
 const MAX_PLAYERS = 16;
 const SAFE_ZONE = { x: 3000, y: 2200, r: 300 };
 
-const SERVER_VERSION = '20261001-61';
+const SERVER_VERSION = '20261001-62';
 
 const AMMO_PACK_SIZE = 50;
 const AMMO_PACK_COST = 50;
@@ -190,20 +190,26 @@ function capturePlayerData(p) {
   };
 }
 
-async function persistPlayer(p) {
-  if (!p?.saveKey) return null;
-  const data = capturePlayerData(p);
-  savedPlayers.set(p.saveKey, data);
+function persistPlayer(p) {
+  if (!p?.saveKey) return Promise.resolve(null);
 
-  try {
-    await storage.ready;
-    await storage.savePlayerData(p.saveKey, data);
-  } catch (error) {
-    console.error('[STORAGE SAVE]', error?.message || error);
-  }
+  const write = async () => {
+    const data = capturePlayerData(p);
+    savedPlayers.set(p.saveKey, data);
 
-  p.lastPersistAt = Date.now();
-  return data;
+    try {
+      await storage.ready;
+      await storage.savePlayerData(p.saveKey, data);
+    } catch (error) {
+      console.error('[STORAGE SAVE]', error?.message || error);
+    }
+
+    p.lastPersistAt = Date.now();
+    return data;
+  };
+
+  p.persistChain = (p.persistChain || Promise.resolve()).then(write, write);
+  return p.persistChain;
 }
 
 async function loadSavedPlayer(saveKey) {
@@ -730,7 +736,10 @@ function handleShot(ws) {
 
   if (!shooter || !shooter.room || !shooter.alive) return;
 
-  if (inSafeZone(shooter.x, shooter.y, 24)) return;
+  if (inSafeZone(shooter.x, shooter.y, 24)) {
+    send(ws, { type: 'shot_result', ok: false, reason: 'safe_zone', ammo: shooter.ammo || 0 });
+    return;
+  }
 
   if ((shooter.ammo || 0) <= 0) {
     send(ws, { type: 'ammo_empty' });
@@ -740,7 +749,10 @@ function handleShot(ws) {
   const now = Date.now();
   const cooldown = Math.max(100, Math.min(1000, Number(shooter.fireRate) || 350));
 
-  if (now - shooter.lastShot < cooldown) return;
+  if (now - shooter.lastShot < cooldown) {
+    send(ws, { type: 'shot_result', ok: false, reason: 'cooldown', ammo: shooter.ammo || 0 });
+    return;
+  }
 
   shooter.lastShot = now;
 
@@ -821,6 +833,16 @@ function handleShot(ws) {
   }
 
   shooter.ammo = Math.max(0, (shooter.ammo || 0) - 1);
+
+  send(ws, {
+    type: 'shot_result',
+    ok: true,
+    ammo: shooter.ammo,
+    x: shooter.x,
+    y: shooter.y,
+    angle: shooter.angle,
+    damage
+  });
 
   sendStats(shooter);
 
@@ -1009,6 +1031,7 @@ function createPlayer(ws) {
     lastChatAt: 0,
     lastPersistAt: 0,
     lastEnemySyncAt: 0,
+    persistChain: Promise.resolve(),
     hasSaved: false,
     joined: false,
     ws
