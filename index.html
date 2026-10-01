@@ -741,7 +741,8 @@ function setupJoystick(id){
   el.addEventListener("lostpointercapture",()=>reset());
   return reset;
 }
-const resetMoveJoystick=setupJoystick("moveJoy");\nconst controlDefaults={joySize:112,fireSize:86,joyX:8,joyY:8,fireX:8,fireY:8};
+const resetMoveJoystick=setupJoystick("moveJoy");
+const controlDefaults={joySize:112,fireSize:86,joyX:8,joyY:8,fireX:8,fireY:8};
 let controlConfig={...controlDefaults};
 try{const saved=JSON.parse(localStorage.getItem("neon_core_controls")||"null");if(saved)controlConfig={...controlDefaults,...saved};}catch{}
 function applyControlConfig(){
