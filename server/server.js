@@ -5,9 +5,10 @@ const PORT = process.env.PORT || 10000;
 const WORLD = {w:6000,h:4400};
 const MAX_PLAYERS = 16;
 const SAFE_ZONE = {x:3000,y:2200,r:300};
-const SERVER_VERSION = "20261001-52";
+const SERVER_VERSION = "20261001-53";
 const AMMO_PACK_SIZE=50,AMMO_PACK_COST=50,MAX_AMMO=120;
 const SHOP_NPC={x:3000,y:2380,r:160};
+const BANK_NPC={x:3000,y:2050,r:150};
 const WEAPONS={blaster:{name:"BLASTER",cost:0,damage:25,fireRate:350},pulse:{name:"PULSE",cost:150,damage:18,fireRate:170},cannon:{name:"CANNON",cost:300,damage:65,fireRate:700}};
 const HP_REGEN_PER_SEC=3;
 const SERVER_STARTED_AT = Date.now();
@@ -44,7 +45,187 @@ function sendPlayerList(code){
 }
 function sendStats(p){
   if(!p || !p.ws)return;
-  send(p.ws,{type:"server_stats",kills:p.kills,pvpKills:p.pvpKills,score:p.score,xp:p.xp,level:p.level,damage:p.damage,defense:p.defense,fireRate:p.fireRate,maxHp:100+(p.level-1)*15,xpNeed:100,killsToLevel:5-(p.kills%5||5),gold:p.gold||0,ammo:p.ammo??0,maxAmmo:MAX_AMMO,shopNpc:SHOP_NPC});
+  send(p.ws,{type:"server_stats",kills:p.kills,pvpKills:p.pvpKills,score:p.score,xp:p.xp,level:p.level,damage:p.damage,defense:p.defense,fireRate:p.fireRate,maxHp:100+(p.level-1)*15,xpNeed:100,killsToLevel:5-(p.kills%5||5),gold:p.gold||0,diamonds:p.diamonds||0,bankedGold:p.bankedGold||0,bankedDiamonds:p.bankedDiamonds||0,ammo:p.ammo??0,maxAmmo:MAX_AMMO,shopNpc:SHOP_NPC,bankNpc:BANK_NPC});
+}
+function makeEnemy(){
+  const elite=Math.random()<.2;
+  const r=elite?27:21;
+  const shapes=["square","triangle","hex"];
+  let x=0,y=0;
+  do{x=Math.random()*(WORLD.w-200)+100;y=Math.random()*(WORLD.h-200)+100;}while(inSafeZone(x,y,60));
+  return {id:Math.random().toString(36).slice(2,10),x,y,r,hp:elite?85:50,maxHp:elite?85:50,speed:elite?55:75,damage:elite?14:9,kind:elite?"elite":"drone",shape:shapes[Math.floor(Math.random()*shapes.length)]};
+}
+function ensureRoomEnemies(code){
+  if(!roomEnemies.has(code)){
+    const list=[];
+    for(let i=0;i<18;i++)list.push(makeEnemy());
+    roomEnemies.set(code,list);
+  }
+  return roomEnemies.get(code);
+}
+function sendEnemyState(code){
+  const room=rooms.get(code);
+  if(!room || !room.size)return;
+  broadcastRoom(code,{type:"enemy_state",enemies:ensureRoomEnemies(code)});
+}
+function broadcastRoom(code,msg,except=null){
+  const room=rooms.get(code);
+  if(!room)return;
+  const data=JSON.stringify(msg);
+  for(const ws of room){
+    if(ws!==except && ws.readyState===1) ws.send(data);
+  }
+}
+function leaveRoom(ws){
+  const p=clients.get(ws);
+  if(!p || !p.room)return;
+  const code=p.room;
+  const room=rooms.get(code);
+  if(room){
+    room.delete(ws);
+    if(room.size===0 && code!=="OPEN" && !PUBLIC_ROOMS.includes(code)){ rooms.delete(code); roomEnemies.delete(code); }
+    else { broadcastRoom(code,{type:"player_leave",id:p.id}); sendPlayerList(code); }
+  }
+  p.room="";
+}
+function joinRoom(ws,requestedCode,create=false){
+  const p=clients.get(ws);
+  if(!p)return;
+  let code=String(requestedCode||"").toUpperCase().replace(/[^A-Z0-9]/g,"").slice(0,5);
+  if(create || !code){
+    code=makeCode();
+    rooms.set(code,new Set());
+  }
+  const room=rooms.get(code);
+  if(!room){
+    send(ws,{type:"room_error",message:"Sala no encontrada"});
+    return;
+  }
+  if(room.size>=MAX_PLAYERS){
+    send(ws,{type:"room_error",message:"Sala llena"});
+    return;
+  }
+  leaveRoom(ws);
+  room.add(ws);
+  ensureRoomEnemies(code);
+  p.room=code;
+  p.ws=ws;
+  const spawn=spawnPosition(code);
+  if(!p.hasSaved){p.x=spawn.x;p.y=spawn.y;p.hp=100;}
+  p.angle=0;
+  p.alive=true;
+  p.hasSaved=false;
+  send(ws,{type:"room_joined",code,players:publicPlayers(room),enemies:ensureRoomEnemies(code),safeZone:SAFE_ZONE,spawnProtectionMs:5000});
+  sendStats(p);
+  broadcastRoom(code,{type:"player_join",player:p},ws);
+  sendPlayerList(code);
+}
+function clamp(v,a,b){return Math.max(a,Math.min(b,v))}
+function spawnPosition(code){
+  const room=rooms.get(code)||new Set();
+  const index=room.size;
+  const spots=[
+    [3000,2200],[2900,2200],[3100,2200],[3000,2100],
+    [2750,2200],[3250,2200],[3000,1900],[3000,2500],
+    [2700,1900],[3300,1900],[2700,2500],[3300,2500],
+    [2850,1850],[3150,1850],[2850,2550],[3150,2550]
+  ];
+  const s=spots[index%spots.length];
+  return {x:s[0],y:s[1]};
+}
+function persistPlayer(p){
+  if(!p || !p.saveKey)return;
+  savedPlayers.set(p.saveKey,{
+    name:p.name,x:p.x,y:p.y,level:p.level,hp:p.hp,damage:p.damage,defense:p.defense,fireRate:p.fireRate,
+    score:p.score,kills:p.kills,xp:p.xp,pvpKills:p.pvpKills,gold:p.gold||0,bankedGold:p.bankedGold||0,
+    ammo:p.ammo||0,weapon:p.weapon||"blaster"
+  });
+}
+function shopBuy(ws,weapon){
+  const p=clients.get(ws);
+  if(!p||!p.room||!p.alive)return;
+  if(Math.hypot(p.x-SHOP_NPC.x,p.y-SHOP_NPC.y)>SHOP_NPC.r){
+    send(ws,{type:"shop_result",ok:false,message:"Acércate al vendedor de munición."});
+    return;
+  }
+  const item=WEAPONS[String(weapon||"").toLowerCase()];
+  if(!item){send(ws,{type:"shop_result",ok:false,message:"Arma no disponible."});return;}
+  if(p.weapon===weapon){send(ws,{type:"shop_result",ok:false,message:"Ya tienes equipada "+item.name+".",weapon:p.weapon});return;}
+  const gold=Number(p.gold)||0;
+  if(gold<item.cost){send(ws,{type:"shop_result",ok:false,message:"Necesitas "+item.cost+" de oro para "+item.name+"."});return;}
+  p.gold=gold-item.cost;p.weapon=weapon;
+  p.damage=item.damage+(p.level-1)*5;
+  p.fireRate=Math.max(100,item.fireRate-(p.level-1)*4);
+  persistPlayer(p);
+  send(ws,{type:"shop_result",ok:true,message:"Equipada "+item.name+".",weapon:p.weapon,gold:p.gold,damage:p.damage,fireRate:p.fireRate});
+  sendStats(p);
+}
+function depositGold(ws){
+  const p=clients.get(ws);
+  if(!p||!p.room||!p.alive)return;
+  if(Math.hypot(p.x-BANK_NPC.x,p.y-BANK_NPC.y)>BANK_NPC.r){
+    send(ws,{type:"deposit_result",ok:false,message:"Acércate al BANCO."});
+    return;
+  }
+  const gold=Math.max(0,Number(p.gold)||0),diamonds=Math.max(0,Number(p.diamonds)||0);
+  if(gold<=0&&diamonds<=0){
+    send(ws,{type:"deposit_result",ok:false,message:"No tienes oro ni diamantes para guardar."});
+    return;
+  }
+  p.gold=0;p.diamonds=0;
+  p.bankedGold=(Number(p.bankedGold)||0)+gold;
+  p.bankedDiamonds=(Number(p.bankedDiamonds)||0)+diamonds;
+  persistPlayer(p);
+  send(ws,{type:"deposit_result",ok:true,message:"Recursos asegurados en el banco.",gold:p.gold,diamonds:p.diamonds,bankedGold:p.bankedGold,bankedDiamonds:p.bankedDiamonds});
+  sendStats(p);
+}onst http = require("http");
+const { WebSocketServer } = require("ws");
+
+const PORT = process.env.PORT || 10000;
+const WORLD = {w:6000,h:4400};
+const MAX_PLAYERS = 16;
+const SAFE_ZONE = {x:3000,y:2200,r:300};
+const SERVER_VERSION = "20261001-53";
+const AMMO_PACK_SIZE=50,AMMO_PACK_COST=50,MAX_AMMO=120;
+const SHOP_NPC={x:3000,y:2380,r:160};
+const BANK_NPC={x:3000,y:2050,r:150};
+const WEAPONS={blaster:{name:"BLASTER",cost:0,damage:25,fireRate:350},pulse:{name:"PULSE",cost:150,damage:18,fireRate:170},cannon:{name:"CANNON",cost:300,damage:65,fireRate:700}};
+const HP_REGEN_PER_SEC=3;
+const SERVER_STARTED_AT = Date.now();
+function inSafeZone(x,y,pad=0){return Math.hypot(x-SAFE_ZONE.x,y-SAFE_ZONE.y)<=SAFE_ZONE.r+pad;}
+const clients = new Map();
+const savedPlayers = new Map();
+const rooms = new Map();
+const roomEnemies = new Map();
+rooms.set("OPEN",new Set());
+roomEnemies.set("OPEN",[]);
+const PUBLIC_ROOMS=["12345","67890"];
+for(const code of PUBLIC_ROOMS){rooms.set(code,new Set());roomEnemies.set(code,[]);}
+const CODE_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+
+function makeCode(){
+  let code="";
+  do{
+    code="";
+    for(let i=0;i<4;i++) code += CODE_CHARS[Math.floor(Math.random()*CODE_CHARS.length)];
+  }while(rooms.has(code));
+  return code;
+}
+function send(ws,msg){
+  if(ws.readyState===1) ws.send(JSON.stringify(msg));
+}
+function roomPlayers(room){
+  return [...room].map(ws=>clients.get(ws)).filter(Boolean);
+}
+function publicPlayers(room){
+  return roomPlayers(room).map(p=>({id:p.id,name:p.name,x:p.x,y:p.y,angle:p.angle,hp:p.hp,alive:p.alive,level:p.level,score:p.score,kills:p.kills,xp:p.xp,damage:p.damage,defense:p.defense,fireRate:p.fireRate,color:p.color}));
+}
+function sendPlayerList(code){
+  broadcastRoom(code,{type:"player_list",players:publicPlayers(rooms.get(code)||new Set())});
+}
+function sendStats(p){
+  if(!p || !p.ws)return;
+  send(p.ws,{type:"server_stats",kills:p.kills,pvpKills:p.pvpKills,score:p.score,xp:p.xp,level:p.level,damage:p.damage,defense:p.defense,fireRate:p.fireRate,maxHp:100+(p.level-1)*15,xpNeed:100,killsToLevel:5-(p.kills%5||5),gold:p.gold||0,diamonds:p.diamonds||0,bankedGold:p.bankedGold||0,bankedDiamonds:p.bankedDiamonds||0,ammo:p.ammo??0,maxAmmo:MAX_AMMO,shopNpc:SHOP_NPC,bankNpc:BANK_NPC});
 }
 function makeEnemy(){
   const elite=Math.random()<.2;
@@ -278,7 +459,7 @@ wss.on("connection",(ws)=>{
   const id=Math.random().toString(36).slice(2,10);
   const player={
     id,name:"Jugador",saveKey:"",x:3000,y:2200,angle:0,hp:100,level:1,
-    damage:25,defense:0,fireRate:280,score:0,kills:0,xp:0,pvpKills:0,gold:0,ammo:60,bankedGold:0,weapon:"blaster",
+    damage:25,defense:0,fireRate:280,score:0,kills:0,xp:0,pvpKills:0,gold:0,diamonds:0,bankedGold:0,bankedDiamonds:0,ammo:60,weapon:"blaster",
     color:"#39e7ff",room:"",alive:true,frozen:false,lastShot:0,speed:205,lastStateAt:Date.now(),stateViolations:0,lastChatAt:0
   };
   player.ws=ws;
@@ -317,7 +498,7 @@ wss.on("connection",(ws)=>{
           p.x=Number.isFinite(saved.x)?saved.x:p.x;
           p.y=Number.isFinite(saved.y)?saved.y:p.y;
           p.level=Number(saved.level)||1;p.hp=Number(saved.hp)||100;p.damage=Number(saved.damage)||25;p.defense=Number(saved.defense)||0;p.fireRate=Number(saved.fireRate)||280;
-          p.score=saved.score;p.kills=saved.kills;p.xp=saved.xp;p.pvpKills=Number(saved.pvpKills)||0;p.gold=Number(saved.gold)||0;p.bankedGold=Number(saved.bankedGold)||0;p.ammo=Math.max(0,Math.min(MAX_AMMO,Number(saved.ammo)??60));p.weapon=WEAPONS[saved.weapon]?saved.weapon:"blaster";p.damage=WEAPONS[p.weapon].damage+(p.level-1)*5;p.fireRate=Math.max(100,WEAPONS[p.weapon].fireRate-(p.level-1)*4);
+          p.score=saved.score;p.kills=saved.kills;p.xp=saved.xp;p.pvpKills=Number(saved.pvpKills)||0;p.gold=Number(saved.gold)||0;p.bankedGold=Number(saved.bankedGold)||0;p.diamonds=Number(saved.diamonds)||0;p.bankedDiamonds=Number(saved.bankedDiamonds)||0;p.ammo=Math.max(0,Math.min(MAX_AMMO,Number(saved.ammo)??60));p.weapon=WEAPONS[saved.weapon]?saved.weapon:"blaster";p.damage=WEAPONS[p.weapon].damage+(p.level-1)*5;p.fireRate=Math.max(100,WEAPONS[p.weapon].fireRate-(p.level-1)*4);
         }
         p.color=String(msg.color||"#39e7ff");
         if(msg.room) joinRoom(ws,msg.room,false);
@@ -385,7 +566,7 @@ wss.on("connection",(ws)=>{
         p.hp=clamp(p.hp,0,100+(p.level-1)*15);
         const data={
           name:p.name,x:p.x,y:p.y,level:p.level,hp:p.hp,damage:p.damage,defense:p.defense,fireRate:p.fireRate,
-          score:p.score,kills:p.kills,xp:p.xp,pvpKills:p.pvpKills,gold:p.gold||0,bankedGold:p.bankedGold||0,ammo:p.ammo||0,weapon:p.weapon||"blaster"
+          score:p.score,kills:p.kills,xp:p.xp,pvpKills:p.pvpKills,gold:p.gold||0,bankedGold:p.bankedGold||0,diamonds:p.diamonds||0,bankedDiamonds:p.bankedDiamonds||0,ammo:p.ammo||0,weapon:p.weapon||"blaster"
         };
         if(p.saveKey)savedPlayers.set(p.saveKey,data);
         send(ws,{type:"save_ok",savedAt:Date.now(),data});
