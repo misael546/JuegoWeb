@@ -5,7 +5,7 @@ const PORT = process.env.PORT || 10000;
 const WORLD = {w:6000,h:4400};
 const MAX_PLAYERS = 16;
 const SAFE_ZONE = {x:3000,y:2200,r:300};
-const SERVER_VERSION = "20261001-42";
+const SERVER_VERSION = "20261001-43";
 const AMMO_PACK_SIZE=50,AMMO_PACK_COST=50,MAX_AMMO=120;
 const SHOP_NPC={x:3000,y:2380,r:95};
 const WEAPONS={blaster:{name:"BLASTER",cost:0,damage:25,fireRate:350},pulse:{name:"PULSE",cost:150,damage:18,fireRate:170},cannon:{name:"CANNON",cost:300,damage:65,fireRate:700}};
@@ -249,7 +249,7 @@ wss.on("connection",(ws)=>{
   const player={
     id,name:"Jugador",saveKey:"",x:3000,y:2200,angle:0,hp:100,level:1,
     damage:25,defense:0,fireRate:280,score:0,kills:0,xp:0,pvpKills:0,gold:0,ammo:60,bankedGold:0,weapon:"blaster",
-    color:"#39e7ff",room:"",alive:true,frozen:false,lastShot:0
+    color:"#39e7ff",room:"",alive:true,frozen:false,lastShot:0,speed:205,lastStateAt:Date.now(),stateViolations:0
   };
   player.ws=ws;
   clients.set(ws,player);
@@ -300,12 +300,34 @@ wss.on("connection",(ws)=>{
       if(msg.type==="join_room") joinRoom(ws,msg.code,false);
 
       if(msg.type==="state" && p.room && !p.frozen){
-        p.x=clamp(Number.isFinite(msg.x)?msg.x:p.x,35,WORLD.w-35);
-        p.y=clamp(Number.isFinite(msg.y)?msg.y:p.y,35,WORLD.h-35);
+        // IDENTIDAD: el servidor usa esta conexión WebSocket como identidad real.
+        // Nunca aceptamos un id enviado por el cliente.
+        const nx=Number.isFinite(msg.x)?msg.x:p.x;
+        const ny=Number.isFinite(msg.y)?msg.y:p.y;
+        const now=Date.now();
+        const elapsed=Math.max(0.05,Math.min(1.0,(now-p.lastStateAt)/1000));
+        const distance=Math.hypot(nx-p.x,ny-p.y);
+        const maxDistance=p.speed*elapsed+45;
+
+        // Anti-teleport básico: una conexión no puede mover su tanque
+        // a una distancia imposible aunque manipule el JavaScript del cliente.
+        if(distance>maxDistance){
+          p.stateViolations++;
+          send(ws,{type:"state_rejected",x:p.x,y:p.y,reason:"movement_limit"});
+          if(p.stateViolations>=8){
+            try{ws.close(4003,"movement_violation");}catch{}
+          }
+          return;
+        }
+
+        p.stateViolations=Math.max(0,p.stateViolations-1);
+        p.lastStateAt=now;
+        p.x=clamp(nx,35,WORLD.w-35);
+        p.y=clamp(ny,35,WORLD.h-35);
         p.angle=Number.isFinite(msg.angle)?msg.angle:p.angle;
-        // Progresión, daño, defensa y cadencia son autoritativos del servidor.
-        // El cliente solo reporta posición y dirección.
-        // El servidor mantiene el HP autoritativo; no aceptar HP del cliente.
+
+        // HP, daño, defensa, XP, oro, munición, arma y cadencia
+        // pertenecen exclusivamente al servidor.
         broadcastRoom(p.room,{type:"player_update",player:p},ws);
         sendPlayerList(p.room);
       }
@@ -318,7 +340,9 @@ wss.on("connection",(ws)=>{
       if(msg.type==="save" && p.room){
         p.frozen=true;
         p.angle=Number.isFinite(msg.angle)?msg.angle:p.angle;
-        p.hp=clamp(Number.isFinite(msg.hp)?msg.hp:p.hp,0,100);
+        // El cliente NO puede modificar su vida al guardar.
+        // Se persiste únicamente el estado que ya posee el servidor.
+        p.hp=clamp(p.hp,0,100+(p.level-1)*15);
         const data={
           name:p.name,x:p.x,y:p.y,level:p.level,hp:p.hp,damage:p.damage,defense:p.defense,fireRate:p.fireRate,
           score:p.score,kills:p.kills,xp:p.xp,pvpKills:p.pvpKills,gold:p.gold||0,bankedGold:p.bankedGold||0,ammo:p.ammo||0,weapon:p.weapon||"blaster"
