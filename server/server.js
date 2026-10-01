@@ -173,7 +173,7 @@ function handleShot(ws){
       if(shooter.kills%5===0){shooter.level++;shooter.xp=0;shooter.damage+=5;shooter.defense+=2;shooter.fireRate=Math.max(140,shooter.fireRate-8);}
       send(targetPlayer.ws,{type:"pvp_dead",killer:shooter.name,lostScore});
       broadcastRoom(shooter.room,{type:"pvp_kill",killer:shooter.id,target:targetPlayer.p.id});
-      send(shooter.ws,{type:"server_stats",kills:shooter.kills,score:shooter.score,xp:shooter.xp,level:shooter.level,damage:shooter.damage,defense:shooter.defense,fireRate:shooter.fireRate});
+      send(shooter.ws,{type:"server_stats",kills:shooter.kills,score:shooter.score,xp:shooter.xp,level:shooter.level,damage:shooter.damage,defense:shooter.defense,fireRate:shooter.fireRate,maxHp:100+(shooter.level-1)*15,xpNeed:100,killsToLevel:5-(shooter.kills%5||5)});
     }
     return;
   }
@@ -188,7 +188,7 @@ function handleShot(ws){
       if(index>=0)enemies.splice(index,1);
       shooter.kills=(shooter.kills||0)+1;shooter.score=(shooter.score||0)+reward;shooter.xp=(shooter.xp||0)+xp;
       if(shooter.kills%5===0){shooter.level++;shooter.xp=0;shooter.damage+=5;shooter.defense+=2;shooter.fireRate=Math.max(140,shooter.fireRate-8);}
-      send(shooter.ws,{type:"server_stats",kills:shooter.kills,score:shooter.score,xp:shooter.xp,level:shooter.level,damage:shooter.damage,defense:shooter.defense,fireRate:shooter.fireRate});
+      send(shooter.ws,{type:"server_stats",kills:shooter.kills,score:shooter.score,xp:shooter.xp,level:shooter.level,damage:shooter.damage,defense:shooter.defense,fireRate:shooter.fireRate,maxHp:100+(shooter.level-1)*15,xpNeed:100,killsToLevel:5-(shooter.kills%5||5)});
       broadcastRoom(shooter.room,{type:"enemy_dead",id:targetEnemy.id,killer:shooter.id});
     }
   }
@@ -234,7 +234,7 @@ wss.on("connection",(ws)=>{
         if(saved){
           p.x=Number.isFinite(saved.x)?saved.x:p.x;
           p.y=Number.isFinite(saved.y)?saved.y:p.y;
-          p.level=saved.level;p.hp=saved.hp;p.damage=saved.damage;p.defense=Number(saved.defense)||0;p.fireRate=saved.fireRate;
+          p.level=Number(saved.level)||1;p.hp=Number(saved.hp)||100;p.damage=Number(saved.damage)||25;p.defense=Number(saved.defense)||0;p.fireRate=Number(saved.fireRate)||280;
           p.score=saved.score;p.kills=saved.kills;p.xp=saved.xp;
         }
         p.color=String(msg.color||"#39e7ff");
