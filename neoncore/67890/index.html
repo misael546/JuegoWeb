@@ -9,7 +9,7 @@
 <script>
 (function(){
   try{
-    var v="20261001-105";
+    var v="20261001-106";
     var k="neon_core_build";
     window.NEON_CORE_BUILD=v;
     var old=localStorage.getItem(k);
@@ -112,7 +112,7 @@ addEventListener("resize",resize);resize();
 
 const world={w:6000,h:4400};
 const p={x:3000,y:2200,r:16,angle:0,hp:100,maxHp:100,xp:0,level:1,score:0,kills:0,pvpKills:0,damage:25,defense:0,speed:205,fireRate:350,lastShot:0,alive:true,gold:0,diamonds:0,ammo:60,maxAmmo:120,weapon:"blaster"};
-const shopNpc={x:3000,y:2380,r:30};const weaponNames={blaster:"BLASTER",pulse:"PULSE",cannon:"CANNON"};
+const shopNpc={x:3600,y:2200,r:30};const weaponNames={blaster:"BLASTER",pulse:"PULSE",cannon:"CANNON"};
 const weaponStats={blaster:{damage:25,fireRate:350},pulse:{damage:18,fireRate:170},cannon:{damage:65,fireRate:700}};let shopOpen=false;
 let bullets=[],enemies=[],drops=[],particles=[],walls=[],hitTexts=[];
 let serverXpNeed=100,serverKillsToLevel=5,serverDamageXp=0,serverDamageXpNeed=100,serverDamageLevel=1,serverDefenseXp=0,serverDefenseXpNeed=100,serverDefenseLevel=1;
