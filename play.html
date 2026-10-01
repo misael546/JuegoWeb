@@ -9,17 +9,20 @@
 <script>
 (function(){
   try{
-    var v="20261001-21";
-    var k="neon_core_page_version";
+    var v="20261001-22";
+    var k="neon_core_build";
+    window.NEON_CORE_BUILD=v;
     var old=localStorage.getItem(k);
-    if(old!==v){
-      localStorage.setItem(k,v);
-      if(!location.search.includes("v="+v)){
-        var u=new URL(location.href);
-        u.searchParams.set("v",v);
-        location.replace(u.toString());
-      }
-    }
+    if(old!==v) localStorage.setItem(k,v);
+    window.setTimeout(function(){
+      fetch(location.pathname+"?update_check="+Date.now(),{
+        cache:"no-store",
+        headers:{"Cache-Control":"no-cache"}
+      }).then(function(r){return r.text();}).then(function(html){
+        var m=html.match(/window\.NEON_CORE_BUILD\s*=\s*"([^"]+)"/);
+        if(m && m[1]!==window.NEON_CORE_BUILD) location.reload();
+      }).catch(function(){});
+    },1500);
   }catch(e){}
 })();
 </script>
