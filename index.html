@@ -414,7 +414,13 @@ document.getElementById("copyRoom").addEventListener("click",async()=>{
 });
 const invitedRoom=(new URLSearchParams(location.search).get("room")||"").toUpperCase().replace(/[^A-Z0-9]/g,"").slice(0,4);
 const saved=loadName();
-if(saved){document.getElementById("username").value=saved;playerName=saved;document.getElementById("playerName").textContent=saved;document.getElementById("nameBox").style.display="none";document.getElementById("nameTag").style.display="block";document.getElementById("logout").style.display="block";loadStats();connectMultiplayer(invitedRoom&&invitedRoom.length===4?"join":"quick",invitedRoom&&invitedRoom.length===4?invitedRoom.toUpperCase():"")}
+if(saved){
+  document.getElementById("username").value=saved;
+  playerName="";
+  document.getElementById("nameBox").style.display="flex";
+  document.getElementById("nameTag").style.display="none";
+  document.getElementById("logout").style.display="none";
+}
 
 function loop(now){
   const dt=Math.min(.033,(now-last)/1000);last=now;update(dt);draw();requestAnimationFrame(loop)
