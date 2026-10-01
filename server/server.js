@@ -134,10 +134,18 @@ function handleShot(ws){
 
   if(target.p.hp<=0){
     target.p.alive=false;
+    const lostScore=target.p.score||0;
+    target.p.level=1;
+    target.p.hp=0;
+    target.p.damage=25;
+    target.p.fireRate=280;
+    target.p.xp=0;
+    target.p.score=0;
+    target.p.kills=0;
     shooter.kills=(shooter.kills||0)+1;
     shooter.score=(shooter.score||0)+25;
     shooter.xp=(shooter.xp||0)+40;
-    send(target.ws,{type:"pvp_dead",killer:shooter.name});
+    send(target.ws,{type:"pvp_dead",killer:shooter.name,lostScore});
     broadcastRoom(shooter.room,{
       type:"pvp_kill",
       killer:shooter.id,
@@ -206,7 +214,8 @@ wss.on("connection",(ws)=>{
       if(msg.type==="fire") handleShot(ws);
 
       if(msg.type==="respawn" && p.room){
-        p.x=1500;p.y=1100;p.angle=0;p.hp=100;p.alive=true;p.lastShot=0;
+        p.x=1500;p.y=1100;p.angle=0;p.hp=100;p.alive=true;
+        p.level=1;p.damage=25;p.fireRate=280;p.xp=0;p.score=0;p.kills=0;p.lastShot=0;
         send(ws,{type:"respawn_ok",x:p.x,y:p.y,hp:p.hp});
         broadcastRoom(p.room,{type:"player_update",player:p},ws);
         sendPlayerList(p.room);
