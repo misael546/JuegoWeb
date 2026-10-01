@@ -16,7 +16,7 @@
 #nameCard h1{margin:0 0 5px;font-size:30px;letter-spacing:2px;color:#39e7ff}
 #nameCard p{color:#9ca9bd;margin:0 0 16px}
 #nameCard input{width:100%;padding:13px;border:1px solid #33415d;background:#111a2d;color:white;border-radius:10px;font-size:16px;outline:none}
-#nameCard button,#upgrade,#restart{width:100%;min-height:44px;border:0;border-radius:10px;margin-top:10px;background:#183d58;color:#fff;font-weight:bold}
+#nameCard button,#upgrade,#restart{width:100%;min-height:44px;border:0;border-radius:10px;margin-top:10px;background:#183d58;color:#fff;font-weight:bold}\n#roomActions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}#roomActions button{margin-top:0}#roomCodeInput{width:100%;padding:13px;border:1px solid #33415d;background:#111a2d;color:white;border-radius:10px;font-size:16px;outline:none;margin-top:8px;text-transform:uppercase}#roomPanel{position:fixed;top:10px;left:50%;transform:translateX(-50%);z-index:6;display:none;align-items:center;gap:8px;background:rgba(5,8,17,.9);border:1px solid #26344e;border-radius:12px;padding:7px 9px;font-size:13px;backdrop-filter:blur(5px)}#roomCode{font-weight:900;letter-spacing:2px;color:#39e7ff}#copyRoom{border:1px solid #33415d;background:#111a2d;color:#fff;border-radius:8px;padding:7px 9px}
 #nameMsg{font-size:13px;color:#ff8b8b;min-height:18px;margin-top:8px}
 #logout{position:fixed;top:10px;right:10px;z-index:4;border:1px solid #26344e;border-radius:9px;padding:8px 10px;background:#050811dd;color:white}
 #upgrade{position:fixed;right:10px;top:92px;width:auto;padding:0 12px;z-index:4;display:none}
@@ -45,7 +45,7 @@
 </div>
 
 <div id="nameTag" style="display:none">🛡️ <span id="playerName"></span></div>
-<button id="logout" style="display:none">Nombre</button>
+<button id="logout" style="display:none">Nombre</button>\n<div id="roomPanel"><span>SALA</span><span id="roomCode">----</span><button id="copyRoom" type="button">COPIAR</button></div>
 <button id="upgrade">MEJORAR · 50 ⚔</button>
 
 <div id="nameBox">
@@ -88,21 +88,29 @@ const keys={w:false,a:false,s:false,d:false};
 const pointer={x:W/2,y:H/2,down:false};
 let moveX=0,moveY=0;
 const remotePlayers=new Map();
-let multiplayerSocket=null,multiplayerId="",lastNetSend=0;
+let multiplayerSocket=null,multiplayerId="",lastNetSend=0,currentRoom="";
 const MULTIPLAYER_SERVER=localStorage.getItem("neon_core_server_url")||"wss://neon-core-multiplayer.onrender.com/ws";
-function connectMultiplayer(){
+function setRoomPanel(code){
+  currentRoom=code||"";
+  const panel=document.getElementById("roomPanel"),label=document.getElementById("roomCode");
+  if(label)label.textContent=currentRoom||"----";
+  if(panel)panel.style.display=currentRoom?"flex":"none";
+}
+function connectMultiplayer(roomMode="quick",roomCode=""){
+  if(multiplayerSocket && multiplayerSocket.readyState<=1) multiplayerSocket.close();
+
   if(!MULTIPLAYER_SERVER || !("WebSocket" in window)) return;
   try{
     multiplayerSocket=new WebSocket(MULTIPLAYER_SERVER);
     multiplayerSocket.addEventListener("open",()=>{
-      multiplayerSocket.send(JSON.stringify({type:"join",name:playerName||"Jugador",color:"#39e7ff"}));
+      multiplayerSocket.send(JSON.stringify({type:"join",name:playerName||"Jugador",color:"#39e7ff",room:roomMode==="join"?roomCode:"",createRoom:roomMode==="create"}));
       const tag=document.getElementById("nameTag");
       if(tag)tag.textContent=(playerName||"Jugador")+" · ONLINE";
     });
     multiplayerSocket.addEventListener("message",e=>{
       try{
         const m=JSON.parse(e.data);
-        if(m.type==="welcome"){
+        if(m.type==="room_joined"){\n          setRoomPanel(m.code);\n          remotePlayers.clear();\n          for(const q of (m.players||[])) if(q.id!==multiplayerId) remotePlayers.set(q.id,q);\n        }else if(m.type==="room_error"){\n          const msg=document.getElementById("nameMsg"); if(msg)msg.textContent=m.message||"No se pudo entrar a la sala.";\n        }else if(m.type==="connected"){\n          multiplayerId=m.id;\n        }else if(m.type==="welcome"){
           multiplayerId=m.id;
           remotePlayers.clear();
           for(const q of (m.players||[])) if(q.id!==multiplayerId) remotePlayers.set(q.id,q);
@@ -378,7 +386,21 @@ function enterGame(){
   document.getElementById("logout").style.display="block";
   connectMultiplayer();
 }
-document.getElementById("nameForm").addEventListener("submit",e=>{e.preventDefault();enterGame()});
+document.getElementById("nameForm").addEventListener("submit",e=>{e.preventDefault();enterGame("quick")});
+document.getElementById("createRoom").addEventListener("click",()=>enterGame("create"));
+document.getElementById("joinRoom").addEventListener("click",()=>{
+  const code=document.getElementById("roomCodeInput").value.trim().toUpperCase();
+  if(code.length!==4){document.getElementById("nameMsg").textContent="Escribe un código de 4 caracteres.";return}
+  enterGame("join",code);
+});
+document.getElementById("roomCodeInput").addEventListener("input",e=>{e.target.value=e.target.value.toUpperCase().replace(/[^A-Z0-9]/g,"").slice(0,4)});
+document.getElementById("copyRoom").addEventListener("click",async()=>{
+  const code=currentRoom;
+  if(!code)return;
+  const text="NEON CORE · SALA "+code;
+  try{await navigator.clipboard.writeText(text)}catch{}
+  const b=document.getElementById("copyRoom");b.textContent="COPIADO";setTimeout(()=>b.textContent="COPIAR",900);
+});
 document.getElementById("logout").addEventListener("click",()=>{
   document.getElementById("username").value=playerName;
   document.getElementById("nameBox").style.display="flex";
@@ -386,7 +408,7 @@ document.getElementById("logout").addEventListener("click",()=>{
 });
 
 const saved=loadName();
-if(saved){document.getElementById("username").value=saved;playerName=saved;document.getElementById("playerName").textContent=saved;document.getElementById("nameBox").style.display="none";document.getElementById("nameTag").style.display="block";document.getElementById("logout").style.display="block";loadStats();connectMultiplayer()}
+if(saved){document.getElementById("username").value=saved;playerName=saved;document.getElementById("playerName").textContent=saved;document.getElementById("nameBox").style.display="none";document.getElementById("nameTag").style.display="block";document.getElementById("logout").style.display="block";loadStats();connectMultiplayer(invitedRoom&&invitedRoom.length===4?"join":"quick",invitedRoom&&invitedRoom.length===4?invitedRoom.toUpperCase():"")}
 
 function loop(now){
   const dt=Math.min(.033,(now-last)/1000);last=now;update(dt);draw();requestAnimationFrame(loop)
