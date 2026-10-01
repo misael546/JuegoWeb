@@ -1586,6 +1586,7 @@ setInterval(() => {
 }, TICK_MS);
 
 setInterval(() => {
+  const now = Date.now();
   for (const [code, room] of rooms) {
     if (!room.size) continue;
 
