@@ -9,7 +9,7 @@
 <script>
 (function(){
   try{
-    var v="20261001-13";
+    var v="20261001-14";
     var k="neon_core_page_version";
     var old=localStorage.getItem(k);
     if(old!==v){
@@ -237,9 +237,14 @@ function connectMultiplayer(roomMode="quick",roomCode=""){
           enemies.length=0;
           for(const e of next) enemies.push(e);
         }else if(m.type==="enemy_hit"){
-          const e=enemies.find(x=>x.id===m.id); if(e)e.hp=m.hp;
+          const e=enemies.find(x=>x.id===m.id);
+          if(e){
+            e.hp=m.hp;
+            if(Number(m.hp)<=0)enemyExplosion(e);
+          }
         }else if(m.type==="enemy_dead"){
-          const e=enemies.find(x=>x.id===m.id); if(e){burst(e.x,e.y,e.kind==="elite"?"#ff9f43":"#ff3b81",18);e.dead=true;}
+          const e=enemies.find(x=>x.id===m.id);
+          if(e)enemyExplosion(e);
         }else if(m.type==="pve_damage"){
           p.hp=Math.max(0,p.hp-(Number(m.amount)||0));
           burst(p.x,p.y,"#ff5474",4);
@@ -264,7 +269,7 @@ function connectMultiplayer(roomMode="quick",roomCode=""){
           if(Number.isFinite(m.damage))p.damage=m.damage;
           if(Number.isFinite(m.defense))p.defense=m.defense;
           if(Number.isFinite(m.fireRate))p.fireRate=m.fireRate;
-          levelCheck();saveStats();
+          saveStats();
         }else if(m.type==="respawn_ok"){
           p.x=m.x;p.y=m.y;p.hp=p.maxHp;p.alive=true;
           document.getElementById("death").style.display="none";
@@ -297,8 +302,8 @@ function dist(a,b){return Math.hypot(a.x-b.x,a.y-b.y)}
 function clamp(v,a,b){return Math.max(a,Math.min(b,v))}
 function saveName(n){try{localStorage.setItem("neon_core_name",n)}catch(e){}}
 function loadName(){try{return localStorage.getItem("neon_core_name")||""}catch(e){return""}}
-function saveStats(){try{localStorage.setItem("neon_core_stats",JSON.stringify({level:p.level,score:p.score,kills:p.kills,damage:p.damage,maxHp:p.maxHp,speed:p.speed,fireRate:p.fireRate}))}catch(e){}}
-function loadStats(){try{const s=JSON.parse(localStorage.getItem("neon_core_stats")||"null");if(s){Object.assign(p,{level:s.level||1,score:s.score||0,kills:s.kills||0,damage:s.damage||25,maxHp:s.maxHp||100,speed:s.speed||205,fireRate:s.fireRate||280,hp:s.maxHp||100})}}catch(e){}}
+function saveStats(){try{localStorage.setItem("neon_core_stats",JSON.stringify({level:p.level,score:p.score,kills:p.kills,damage:p.damage,defense:p.defense,maxHp:p.maxHp,speed:p.speed,fireRate:p.fireRate}))}catch(e){}}
+function loadStats(){try{const s=JSON.parse(localStorage.getItem("neon_core_stats")||"null");if(s){Object.assign(p,{level:s.level||1,score:s.score||0,kills:s.kills||0,damage:s.damage||25,defense:s.defense||0,maxHp:s.maxHp||100,speed:s.speed||205,fireRate:s.fireRate||280,hp:s.maxHp||100})}}catch(e){}}
 
 function spawnEnemy(){return null;}
 
@@ -307,7 +312,17 @@ for(let i=0;i<55;i++){
 }
 
 function burst(x,y,color,n=10){
-  for(let i=0;i<n;i++)particles.push({x,y,vx:rand(-120,120),vy:rand(-120,120),life:rand(.25,.6),color});
+  for(let i=0;i<n;i++){
+    const a=Math.random()*Math.PI*2,sp=rand(90,260);
+    particles.push({x,y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,life:rand(.35,.8),maxLife:.8,color,size:rand(3,7)});
+  }
+  particles.push({x,y,vx:0,vy:0,life:.38,maxLife:.38,color,size:18,ring:true});
+  particles.push({x,y,vx:0,vy:0,life:.22,maxLife:.22,color,size:8,ring:true});
+}
+function enemyExplosion(e){
+  if(!e || e.dead)return;
+  burst(e.x,e.y,e.kind==="elite"?"#ff9f43":"#ff3b81",26);
+  e.dead=true;
 }
 
 function fire(){
@@ -367,13 +382,7 @@ function damagePlayer(amount){
     setTimeout(returnToMenu,50);
   }
 }
-function levelCheck(){
-  const need=100+(p.level-1)*45;
-  if(p.xp>=need){
-    p.xp-=need;p.level++;p.maxHp+=15;p.hp=p.maxHp;p.damage+=5;p.speed+=4;
-    p.fireRate=Math.max(120,p.fireRate-12);burst(p.x,p.y,"#39e7ff",24);saveStats();
-  }
-}
+function levelCheck(){ return false; }
 function hitWall(b){
   for(const w of walls){
     if(b.x>w.x-w.w/2&&b.x<w.x+w.w/2&&b.y>w.y-w.h/2&&b.y<w.y+w.h/2){
@@ -408,7 +417,9 @@ function update(dt){
     if(b.life<=0||b.range>1000||b.x<0||b.y<0||b.x>world.w||b.y>world.h||hitWall(b))b.dead=true;
   }
 
-  for(const q of particles){q.x+=q.vx*dt;q.y+=q.vy*dt;q.vx*=.96;q.vy*=.96;q.life-=dt}
+  for(const q of particles){
+    q.x+=q.vx*dt;q.y+=q.vy*dt;q.vx*=.96;q.vy*=.96;q.life-=dt;
+  }
   bullets=bullets.filter(x=>!x.dead);enemies=enemies.filter(x=>!x.dead);particles=particles.filter(x=>x.life>0);walls=walls.filter(x=>!x.dead);
 
   camera.x+=(p.x-camera.x)*Math.min(1,dt*7);camera.y+=(p.y-camera.y)*Math.min(1,dt*7);
@@ -541,7 +552,19 @@ function draw(){
     drawNameTag(e.kind==="elite"?"ÉLITE":"ENEMIGO",e.x,e.y,e.r,e.kind==="elite"?"#ff9f43":"#ff5474");
     const x=sx(e.x),y=sy(e.y)-e.r-10;ctx.fillStyle="#161c2a";ctx.fillRect(x-25,y,50,5);ctx.fillStyle=e.kind==="elite"?"#ff9f43":"#ff5474";ctx.fillRect(x-25,y,50*(e.hp/e.maxHp),5);
   }
-  for(const q of particles){ctx.globalAlpha=Math.max(0,q.life/.6);ctx.fillStyle=q.color;ctx.beginPath();ctx.arc(sx(q.x),sy(q.y),3,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1}
+  for(const q of particles){
+    const alpha=Math.max(0,q.life/(q.maxLife||.6));
+    ctx.globalAlpha=alpha;
+    ctx.fillStyle=q.color;
+    if(q.ring){
+      const progress=1-alpha;
+      ctx.strokeStyle=q.color;ctx.lineWidth=3;
+      ctx.beginPath();ctx.arc(sx(q.x),sy(q.y),q.size*(1+progress*2.8),0,Math.PI*2);ctx.stroke();
+    }else{
+      ctx.beginPath();ctx.arc(sx(q.x),sy(q.y),q.size||3,0,Math.PI*2);ctx.fill();
+    }
+    ctx.globalAlpha=1;
+  }
   drawTank(p.x,p.y,p.angle);
   drawNameTag(playerName,p.x,p.y,p.r,"#39e7ff");
 
@@ -550,7 +573,9 @@ function draw(){
   document.getElementById("level").textContent="Nv. "+p.level;
   document.getElementById("score").textContent=p.score;
   document.getElementById("kills").textContent=p.kills;
-  const need=100+(p.level-1)*45;
+  document.getElementById("damageStat").textContent=p.damage;
+  document.getElementById("defenseStat").textContent=p.defense;
+  const need=100;
   document.getElementById("xp").textContent=p.xp;document.getElementById("xpNeed").textContent=need;
   document.getElementById("hpFill").style.width=clamp(p.hp/p.maxHp*100,0,100)+"%";
   document.getElementById("xpFill").style.width=clamp(p.xp/need*100,0,100)+"%";
