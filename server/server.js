@@ -6,7 +6,9 @@ const WORLD = {w:3000,h:2200};
 const MAX_PLAYERS = 16;
 const clients = new Map();
 const rooms = new Map();
+const roomEnemies = new Map();
 rooms.set("OPEN",new Set());
+roomEnemies.set("OPEN",[]);
 const CODE_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 
 function makeCode(){
@@ -29,6 +31,24 @@ function publicPlayers(room){
 function sendPlayerList(code){
   broadcastRoom(code,{type:"player_list",players:publicPlayers(rooms.get(code)||new Set())});
 }
+function makeEnemy(){
+  const elite=Math.random()<.2;
+  const r=elite?27:21;
+  return {id:Math.random().toString(36).slice(2,10),x:Math.random()*(WORLD.w-200)+100,y:Math.random()*(WORLD.h-200)+100,r,hp:elite?85:50,maxHp:elite?85:50,speed:elite?55:75,damage:elite?14:9,kind:elite?"elite":"drone"};
+}
+function ensureRoomEnemies(code){
+  if(!roomEnemies.has(code)){
+    const list=[];
+    for(let i=0;i<18;i++)list.push(makeEnemy());
+    roomEnemies.set(code,list);
+  }
+  return roomEnemies.get(code);
+}
+function sendEnemyState(code){
+  const room=rooms.get(code);
+  if(!room || !room.size)return;
+  broadcastRoom(code,{type:"enemy_state",enemies:ensureRoomEnemies(code)});
+}
 function broadcastRoom(code,msg,except=null){
   const room=rooms.get(code);
   if(!room)return;
@@ -44,7 +64,7 @@ function leaveRoom(ws){
   const room=rooms.get(code);
   if(room){
     room.delete(ws);
-    if(room.size===0 && code!=="OPEN") rooms.delete(code);
+    if(room.size===0 && code!=="OPEN"){ rooms.delete(code); roomEnemies.delete(code); }
     else { broadcastRoom(code,{type:"player_leave",id:p.id}); sendPlayerList(code); }
   }
   p.room="";
@@ -68,12 +88,13 @@ function joinRoom(ws,requestedCode,create=false){
   }
   leaveRoom(ws);
   room.add(ws);
+  ensureRoomEnemies(code);
   p.room=code;
   const spawn=spawnPosition(code);
   p.x=spawn.x;p.y=spawn.y;p.angle=0;
   p.hp=100;
   p.alive=true;
-  send(ws,{type:"room_joined",code,players:roomPlayers(room)});
+  send(ws,{type:"room_joined",code,players:publicPlayers(room),enemies:ensureRoomEnemies(code)});
   broadcastRoom(code,{type:"player_join",player:p},ws);
   sendPlayerList(code);
 }
@@ -109,63 +130,62 @@ function handleShot(ws){
   if(!room)return;
   const damage=clamp(Number(shooter.damage)||25,10,150);
   const maxRange=1000;
-  let target=null,best=Infinity;
+  let targetPlayer=null,targetEnemy=null,best=Infinity;
 
   for(const otherWs of room){
-    const targetPlayer=clients.get(otherWs);
-    if(!targetPlayer || targetPlayer===shooter || !targetPlayer.alive)continue;
-    const dx=targetPlayer.x-shooter.x,dy=targetPlayer.y-shooter.y;
+    const targetPlayerData=clients.get(otherWs);
+    if(!targetPlayerData || targetPlayerData===shooter || !targetPlayerData.alive)continue;
+    const dx=targetPlayerData.x-shooter.x,dy=targetPlayerData.y-shooter.y;
     const d=Math.hypot(dx,dy);
     if(d>maxRange)continue;
     let diff=Math.atan2(dy,dx)-shooter.angle;
     diff=Math.atan2(Math.sin(diff),Math.cos(diff));
     const hitWidth=.16 + 24/Math.max(d,60);
-    if(Math.abs(diff)<=hitWidth && d<best){
-      best=d;
-      target={ws:otherWs,p:targetPlayer};
-    }
+    if(Math.abs(diff)<=hitWidth && d<best){best=d;targetPlayer={ws:otherWs,p:targetPlayerData};}
   }
 
-  broadcastRoom(shooter.room,{
-    type:"player_shot",
-    id:shooter.id,
-    x:shooter.x,
-    y:shooter.y,
-    angle:shooter.angle
-  });
+  const enemies=ensureRoomEnemies(shooter.room);
+  for(const enemy of enemies){
+    const dx=enemy.x-shooter.x,dy=enemy.y-shooter.y;
+    const d=Math.hypot(dx,dy);
+    if(d>maxRange)continue;
+    let diff=Math.atan2(dy,dx)-shooter.angle;
+    diff=Math.atan2(Math.sin(diff),Math.cos(diff));
+    const hitWidth=.16 + enemy.r/Math.max(d,60);
+    if(Math.abs(diff)<=hitWidth && d<best){best=d;targetEnemy=enemy;targetPlayer=null;}
+  }
 
-  if(!target)return;
+  broadcastRoom(shooter.room,{type:"player_shot",id:shooter.id,x:shooter.x,y:shooter.y,angle:shooter.angle});
 
-  target.p.hp=clamp(target.p.hp-damage,0,100);
-  send(target.ws,{type:"pvp_damage",from:shooter.id,amount:damage,hp:target.p.hp});
-  broadcastRoom(shooter.room,{
-    type:"pvp_hit",
-    shooter:shooter.id,
-    target:target.p.id,
-    amount:damage,
-    hp:target.p.hp
-  });
+  if(targetPlayer){
+    targetPlayer.p.hp=clamp(targetPlayer.p.hp-damage,0,100);
+    send(targetPlayer.ws,{type:"pvp_damage",from:shooter.id,amount:damage,hp:targetPlayer.p.hp});
+    broadcastRoom(shooter.room,{type:"pvp_hit",shooter:shooter.id,target:targetPlayer.p.id,amount:damage,hp:targetPlayer.p.hp});
+    if(targetPlayer.p.hp<=0){
+      targetPlayer.p.alive=false;
+      const lostScore=targetPlayer.p.score||0;
+      targetPlayer.p.level=1;targetPlayer.p.hp=0;targetPlayer.p.damage=25;targetPlayer.p.fireRate=280;
+      targetPlayer.p.xp=0;targetPlayer.p.score=0;targetPlayer.p.kills=0;
+      shooter.kills=(shooter.kills||0)+1;shooter.score=(shooter.score||0)+25;shooter.xp=(shooter.xp||0)+40;
+      send(targetPlayer.ws,{type:"pvp_dead",killer:shooter.name,lostScore});
+      broadcastRoom(shooter.room,{type:"pvp_kill",killer:shooter.id,target:targetPlayer.p.id});
+      send(shooter.ws,{type:"server_stats",kills:shooter.kills,score:shooter.score,xp:shooter.xp});
+    }
+    return;
+  }
 
-  if(target.p.hp<=0){
-    target.p.alive=false;
-    const lostScore=target.p.score||0;
-    target.p.level=1;
-    target.p.hp=0;
-    target.p.damage=25;
-    target.p.fireRate=280;
-    target.p.xp=0;
-    target.p.score=0;
-    target.p.kills=0;
-    shooter.kills=(shooter.kills||0)+1;
-    shooter.score=(shooter.score||0)+25;
-    shooter.xp=(shooter.xp||0)+40;
-    send(target.ws,{type:"pvp_dead",killer:shooter.name,lostScore});
-    broadcastRoom(shooter.room,{
-      type:"pvp_kill",
-      killer:shooter.id,
-      target:target.p.id
-    });
-    send(shooter.ws,{type:"server_stats",kills:shooter.kills,score:shooter.score,xp:shooter.xp});
+  if(targetEnemy){
+    targetEnemy.hp=clamp(targetEnemy.hp-damage,0,targetEnemy.maxHp);
+    broadcastRoom(shooter.room,{type:"enemy_hit",id:targetEnemy.id,hp:targetEnemy.hp});
+    if(targetEnemy.hp<=0){
+      const reward=targetEnemy.kind==="elite"?30:12;
+      const xp=targetEnemy.kind==="elite"?35:20;
+      const index=enemies.findIndex(e=>e.id===targetEnemy.id);
+      if(index>=0)enemies.splice(index,1);
+      shooter.kills=(shooter.kills||0)+1;shooter.score=(shooter.score||0)+reward;shooter.xp=(shooter.xp||0)+xp;
+      send(shooter.ws,{type:"server_stats",kills:shooter.kills,score:shooter.score,xp:shooter.xp});
+      broadcastRoom(shooter.room,{type:"enemy_dead",id:targetEnemy.id,killer:shooter.id});
+    }
   }
 }
 
@@ -220,7 +240,7 @@ wss.on("connection",(ws)=>{
         p.level=clamp(Number(msg.level)||1,1,1000);
         p.damage=clamp(Number(msg.damage)||25,10,150);
         p.fireRate=clamp(Number(msg.fireRate)||280,100,500);
-        if(p.alive)p.hp=clamp(Number.isFinite(msg.hp)?msg.hp:p.hp,0,100);
+        // El servidor mantiene el HP autoritativo; no aceptar HP del cliente.
         broadcastRoom(p.room,{type:"player_update",player:p},ws);
         sendPlayerList(p.room);
       }
@@ -231,7 +251,7 @@ wss.on("connection",(ws)=>{
         const spawn=spawnPosition(p.room);
         p.x=spawn.x;p.y=spawn.y;p.angle=0;p.hp=100;p.alive=true;
         p.level=1;p.damage=25;p.fireRate=280;p.xp=0;p.score=0;p.kills=0;p.lastShot=0;
-        send(ws,{type:"respawn_ok",x:p.x,y:p.y,hp:p.hp});
+        send(ws,{type:"respawn_ok",x:p.x,y:p.y,hp:p.hp,enemies:ensureRoomEnemies(p.room)});
         broadcastRoom(p.room,{type:"player_update",player:p},ws);
         sendPlayerList(p.room);
       }
@@ -245,9 +265,38 @@ wss.on("connection",(ws)=>{
 });
 
 setInterval(()=>{
+  const dt=.1;
   for(const [code,room] of rooms){
-    if(room.size) broadcastRoom(code,{type:"server_time",players:roomPlayers(room).length});
+    if(!room.size)continue;
+    const enemies=ensureRoomEnemies(code);
+    const players=roomPlayers(room).filter(p=>p.alive);
+    for(const enemy of enemies){
+      let target=null,best=Infinity;
+      for(const pl of players){
+        const d=Math.hypot(pl.x-enemy.x,pl.y-enemy.y);
+        if(d<best){best=d;target=pl;}
+      }
+      if(target && best<700){
+        const dx=(target.x-enemy.x)/Math.max(best,1),dy=(target.y-enemy.y)/Math.max(best,1);
+        enemy.x=clamp(enemy.x+dx*enemy.speed*dt,35,WORLD.w-35);
+        enemy.y=clamp(enemy.y+dy*enemy.speed*dt,35,WORLD.h-35);
+        if(best<enemy.r+24){
+          target.hp=clamp(target.hp-enemy.damage*dt,0,100);
+          send(findPlayer(target.id,room)?.ws||null,{type:"pve_damage",amount:enemy.damage*dt,hp:target.hp});
+          if(target.hp<=0 && target.alive){
+            target.alive=false;
+            const lostScore=target.score||0;
+            target.level=1;target.hp=0;target.damage=25;target.fireRate=280;target.xp=0;target.score=0;target.kills=0;
+            const found=findPlayer(target.id,room);
+            if(found)send(found.ws,{type:"pve_dead,lostScore".replace(",",":")});
+            if(found)send(found.ws,{type:"pve_dead",lostScore});
+          }
+        }
+      }
+    }
+    while(enemies.length<18)enemies.push(makeEnemy());
+    broadcastRoom(code,{type:"enemy_state",enemies});
   }
-},1000);
+},100);
 
 httpServer.listen(PORT,()=>console.log("Neon Core multiplayer server listening on "+PORT));
