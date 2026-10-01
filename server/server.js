@@ -170,10 +170,10 @@ function handleShot(ws){
       targetPlayer.p.level=1;targetPlayer.p.hp=0;targetPlayer.p.damage=25;targetPlayer.p.defense=0;targetPlayer.p.fireRate=280;
       targetPlayer.p.xp=0;targetPlayer.p.score=0;targetPlayer.p.kills=0;
       shooter.kills=(shooter.kills||0)+1;shooter.score=(shooter.score||0)+25;shooter.xp=(shooter.xp||0)+40;
-      if(shooter.kills%5===0){shooter.level++;shooter.damage+=5;shooter.defense+=2;shooter.fireRate=Math.max(140,shooter.fireRate-8);}
+      if(shooter.kills%5===0){shooter.level++;shooter.xp=0;shooter.damage+=5;shooter.defense+=2;shooter.fireRate=Math.max(140,shooter.fireRate-8);}
       send(targetPlayer.ws,{type:"pvp_dead",killer:shooter.name,lostScore});
       broadcastRoom(shooter.room,{type:"pvp_kill",killer:shooter.id,target:targetPlayer.p.id});
-      send(shooter.ws,{type:"server_stats",kills:shooter.kills,score:shooter.score,xp:shooter.xp});
+      send(shooter.ws,{type:"server_stats",kills:shooter.kills,score:shooter.score,xp:shooter.xp,level:shooter.level,damage:shooter.damage,defense:shooter.defense,fireRate:shooter.fireRate});
     }
     return;
   }
@@ -187,7 +187,7 @@ function handleShot(ws){
       const index=enemies.findIndex(e=>e.id===targetEnemy.id);
       if(index>=0)enemies.splice(index,1);
       shooter.kills=(shooter.kills||0)+1;shooter.score=(shooter.score||0)+reward;shooter.xp=(shooter.xp||0)+xp;
-      if(shooter.kills%5===0){shooter.level++;shooter.damage+=5;shooter.defense+=2;shooter.fireRate=Math.max(140,shooter.fireRate-8);}
+      if(shooter.kills%5===0){shooter.level++;shooter.xp=0;shooter.damage+=5;shooter.defense+=2;shooter.fireRate=Math.max(140,shooter.fireRate-8);}
       send(shooter.ws,{type:"server_stats",kills:shooter.kills,score:shooter.score,xp:shooter.xp,level:shooter.level,damage:shooter.damage,defense:shooter.defense,fireRate:shooter.fireRate});
       broadcastRoom(shooter.room,{type:"enemy_dead",id:targetEnemy.id,killer:shooter.id});
     }
@@ -251,9 +251,8 @@ wss.on("connection",(ws)=>{
         p.x=clamp(Number.isFinite(msg.x)?msg.x:p.x,35,WORLD.w-35);
         p.y=clamp(Number.isFinite(msg.y)?msg.y:p.y,35,WORLD.h-35);
         p.angle=Number.isFinite(msg.angle)?msg.angle:p.angle;
-        p.level=clamp(Number(msg.level)||1,1,1000);
-        p.damage=clamp(Number(msg.damage)||25,10,150);
-        p.fireRate=clamp(Number(msg.fireRate)||280,100,500);
+        // Progresión, daño, defensa y cadencia son autoritativos del servidor.
+        // El cliente solo reporta posición y dirección.
         // El servidor mantiene el HP autoritativo; no aceptar HP del cliente.
         broadcastRoom(p.room,{type:"player_update",player:p},ws);
         sendPlayerList(p.room);
