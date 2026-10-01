@@ -299,6 +299,24 @@ function drawTank(x,y,angle,color="#39e7ff",r=24){
   ctx.fillStyle="#dffbff";ctx.fillRect(r+7,-3,12,6);
   ctx.restore();
 }
+function drawEnemy(e,angle){
+  const color=e.kind==="elite"?"#ff9f43":"#ff3b81";
+  const r=e.r;
+  ctx.save();ctx.translate(sx(e.x),sy(e.y));ctx.rotate(angle);
+  ctx.fillStyle="rgba(0,0,0,.35)";ctx.beginPath();ctx.arc(2,3,r+2,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle=color;
+  ctx.beginPath();
+  ctx.moveTo(r,0);
+  for(let i=1;i<8;i++){
+    const a=i*Math.PI*2/8;
+    const rr=i%2? r*.72:r;
+    ctx.lineTo(Math.cos(a)*rr,Math.sin(a)*rr);
+  }
+  ctx.closePath();ctx.fill();
+  ctx.fillStyle="#ffd6e3";
+  ctx.beginPath();ctx.arc(r*.28,-r*.18,3,0,Math.PI*2);ctx.fill();
+  ctx.restore();
+}
 function drawNameTag(name,x,y,r,color="#ffffff"){
   const tx=sx(x),ty=sy(y)-r-18;
   ctx.save();
@@ -351,7 +369,7 @@ function draw(){
   }
   for(const e of enemies){
     const enemyAngle=Math.atan2(p.y-e.y,p.x-e.x);
-    drawTank(e.x,e.y,enemyAngle,e.kind==="elite"?"#ff9f43":"#ff3b81",e.r);
+    drawEnemy(e,enemyAngle);
     drawNameTag(e.kind==="elite"?"ÉLITE":"ENEMIGO",e.x,e.y,e.r,e.kind==="elite"?"#ff9f43":"#ff5474");
     const x=sx(e.x),y=sy(e.y)-e.r-10;ctx.fillStyle="#161c2a";ctx.fillRect(x-25,y,50,5);ctx.fillStyle=e.kind==="elite"?"#ff9f43":"#ff5474";ctx.fillRect(x-25,y,50*(e.hp/e.maxHp),5);
   }
