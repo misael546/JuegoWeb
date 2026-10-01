@@ -9,6 +9,7 @@ const SERVER_VERSION = "20261001-42";
 const AMMO_PACK_SIZE=50,AMMO_PACK_COST=50,MAX_AMMO=120;
 const SHOP_NPC={x:3000,y:2380,r:95};
 const WEAPONS={blaster:{name:"BLASTER",cost:0,damage:25,fireRate:350},pulse:{name:"PULSE",cost:150,damage:18,fireRate:170},cannon:{name:"CANNON",cost:300,damage:65,fireRate:700}};
+const HP_REGEN_PER_SEC=3;
 const SERVER_STARTED_AT = Date.now();
 function inSafeZone(x,y,pad=0){return Math.hypot(x-SAFE_ZONE.x,y-SAFE_ZONE.y)<=SAFE_ZONE.r+pad;}
 const clients = new Map();
@@ -168,7 +169,15 @@ function handleShot(ws){
   }
 
   const enemies=ensureRoomEnemies(shooter.room);
-  for(const enemy of enemies){
+  for(const pl of players){
+      const maxHp=100+(pl.level-1)*15;
+      if(pl.hp>0 && pl.hp<maxHp){
+        const before=pl.hp;
+        pl.hp=clamp(pl.hp+HP_REGEN_PER_SEC*dt,0,maxHp);
+        if(pl.hp>before) send(pl.ws,{type:"hp_regen",hp:pl.hp,maxHp});
+      }
+    }
+    for(const enemy of enemies){
     const dx=enemy.x-shooter.x,dy=enemy.y-shooter.y;
     const d=Math.hypot(dx,dy);
     if(d>maxRange)continue;
