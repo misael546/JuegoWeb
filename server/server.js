@@ -24,7 +24,7 @@ function roomPlayers(room){
   return [...room].map(ws=>clients.get(ws)).filter(Boolean);
 }
 function publicPlayers(room){
-  return roomPlayers(room).map(p=>({id:p.id,name:p.name,alive:p.alive,level:p.level,score:p.score,kills:p.kills}));
+  return roomPlayers(room).map(p=>({id:p.id,name:p.name,x:p.x,y:p.y,angle:p.angle,hp:p.hp,alive:p.alive,level:p.level,score:p.score,kills:p.kills,color:p.color}));
 }
 function sendPlayerList(code){
   broadcastRoom(code,{type:"player_list",players:publicPlayers(rooms.get(code)||new Set())});
