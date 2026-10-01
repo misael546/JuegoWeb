@@ -9,7 +9,7 @@
 <script>
 (function(){
   try{
-    var v="20261001-02";
+    var v="20261001-03";
     var k="neon_core_page_version";
     var old=localStorage.getItem(k);
     if(old!==v){
@@ -39,7 +39,7 @@
 #nameCard button,#upgrade,#restart{width:100%;min-height:44px;border:0;border-radius:10px;margin-top:10px;background:#183d58;color:#fff;font-weight:bold}
 #roomActions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}#roomActions button{margin-top:0}#roomCodeInput{width:100%;padding:13px;border:1px solid #33415d;background:#111a2d;color:white;border-radius:10px;font-size:16px;outline:none;margin-top:8px;text-transform:uppercase}#roomPanel{position:fixed;top:74px;left:50%;transform:translateX(-50%);z-index:6;display:none;align-items:center;gap:8px;background:rgba(5,8,17,.9);border:1px solid #26344e;border-radius:12px;padding:7px 9px;font-size:13px;backdrop-filter:blur(5px)}#playersPanel{position:fixed;top:74px;right:10px;z-index:6;display:none;width:min(220px,calc(100vw - 20px));background:rgba(5,8,17,.9);border:1px solid #26344e;border-radius:12px;padding:9px 10px;font-size:12px;backdrop-filter:blur(5px)}#playersPanel b{color:#39e7ff}#playersList{margin-top:6px;display:grid;gap:4px;max-height:180px;overflow:auto}.onlinePlayer{display:flex;justify-content:space-between;gap:8px;color:#dce6f5}.onlinePlayer small{color:#7cff72}#roomCode{font-weight:900;letter-spacing:2px;color:#39e7ff}#copyRoom{border:1px solid #33415d;background:#111a2d;color:#fff;border-radius:8px;padding:7px 9px}
 #nameMsg{font-size:13px;color:#ff8b8b;min-height:18px;margin-top:8px}
-#upgrade{position:fixed;right:10px;top:74px;width:auto;padding:0 12px;z-index:4;display:none}
+#gameActions{position:fixed;left:10px;top:74px;z-index:7;display:none;gap:7px}#gameActions button{min-height:40px;border:1px solid #33415d;background:#0b1020;color:#fff;border-radius:9px;padding:0 12px;font-weight:bold}#saveGame{background:#183d58!important}#upgrade{position:fixed;right:10px;top:74px;width:auto;padding:0 12px;z-index:4;display:none}
 #restart{display:none}
 #controls{position:fixed;inset:auto 0 0;display:flex;justify-content:space-between;align-items:flex-end;padding:16px;z-index:5;pointer-events:none}
 .joy{touch-action:none;user-select:none;-webkit-user-select:none;width:112px;height:112px;border:1px solid #41516d;background:#07101dcc;border-radius:50%;position:relative;pointer-events:auto}
@@ -49,7 +49,7 @@
 #deathCard{background:#0b1020;border:1px solid #26344e;border-radius:16px;padding:22px;width:min(330px,90%)}
 #deathCard h2{color:#ff5474;margin:0 0 8px}
 @media(min-width:800px){#controls{opacity:.3}#controls:hover{opacity:1}}
-#roomActions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}#roomActions button{width:100%;min-height:44px;border:0;border-radius:10px;background:#183d58;color:#fff;font-weight:bold}#roomCodeInput{width:100%;padding:13px;border:1px solid #33415d;background:#111a2d;color:white;border-radius:10px;font-size:16px;outline:none;margin-top:8px;text-transform:uppercase}#roomPanel{position:fixed;top:74px;left:50%;transform:translateX(-50%);z-index:6;display:none;align-items:center;gap:8px;background:rgba(5,8,17,.9);border:1px solid #26344e;border-radius:12px;padding:7px 9px;font-size:13px;backdrop-filter:blur(5px)}#roomCode{font-weight:900;letter-spacing:2px;color:#39e7ff}#copyRoom{border:1px solid #33415d;background:#111a2d;color:#fff;border-radius:8px;padding:7px 9px}@media(max-width:799px){#hud{top:8px;left:8px;right:8px}.panel{padding:7px 8px;font-size:12px}#bars{min-width:0;width:min(190px,58vw)}#hud>.panel:last-child{white-space:nowrap}#roomPanel{top:74px;max-width:46vw;font-size:11px;padding:6px 7px}#roomPanel #copyRoom{padding:6px 7px}#upgrade{top:74px;right:8px;min-height:38px;padding:0 9px;font-size:11px}#nameTag{left:8px;bottom:128px;font-size:11px;padding:5px 8px}#playersPanel{top:74px;right:8px;width:min(180px,48vw);padding:7px 8px;font-size:11px}#playersList{max-height:130px;gap:3px}#controls{padding:12px}.joy{width:100px;height:100px}.stick{width:44px;height:44px;left:28px;top:28px}#fire{width:78px;height:78px}}@media(max-width:430px){#hud>.panel:last-child{max-width:105px;overflow:hidden;text-overflow:ellipsis}#roomPanel{left:50%;transform:translateX(-50%)}#nameTag{max-width:42vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}#playersPanel{max-width:45vw}.onlinePlayer{font-size:10px}} </style>
+#roomActions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}#roomActions button{width:100%;min-height:44px;border:0;border-radius:10px;background:#183d58;color:#fff;font-weight:bold}#roomCodeInput{width:100%;padding:13px;border:1px solid #33415d;background:#111a2d;color:white;border-radius:10px;font-size:16px;outline:none;margin-top:8px;text-transform:uppercase}#roomPanel{position:fixed;top:74px;left:50%;transform:translateX(-50%);z-index:6;display:none;align-items:center;gap:8px;background:rgba(5,8,17,.9);border:1px solid #26344e;border-radius:12px;padding:7px 9px;font-size:13px;backdrop-filter:blur(5px)}#roomCode{font-weight:900;letter-spacing:2px;color:#39e7ff}#copyRoom{border:1px solid #33415d;background:#111a2d;color:#fff;border-radius:8px;padding:7px 9px}@media(max-width:799px){#hud{top:8px;left:8px;right:8px}.panel{padding:7px 8px;font-size:12px}#bars{min-width:0;width:min(190px,58vw)}#hud>.panel:last-child{white-space:nowrap}#roomPanel{top:74px;max-width:46vw;font-size:11px;padding:6px 7px}#roomPanel #copyRoom{padding:6px 7px}#gameActions{top:74px;left:8px}#gameActions button{min-height:38px;padding:0 9px;font-size:11px}#upgrade{top:74px;right:8px;min-height:38px;padding:0 9px;font-size:11px}#nameTag{left:8px;bottom:128px;font-size:11px;padding:5px 8px}#playersPanel{top:74px;right:8px;width:min(180px,48vw);padding:7px 8px;font-size:11px}#playersList{max-height:130px;gap:3px}#controls{padding:12px}.joy{width:100px;height:100px}.stick{width:44px;height:44px;left:28px;top:28px}#fire{width:78px;height:78px}}@media(max-width:430px){#hud>.panel:last-child{max-width:105px;overflow:hidden;text-overflow:ellipsis}#roomPanel{left:50%;transform:translateX(-50%)}#nameTag{max-width:42vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}#playersPanel{max-width:45vw}.onlinePlayer{font-size:10px}} </style>
 </head>
 <body>
 <canvas id="game"></canvas>
@@ -69,7 +69,7 @@
 <div id="roomPanel"><span>SALA</span><span id="roomCode">----</span><button id="copyRoom" type="button">COPIAR</button></div>
 <div id="playersPanel"><b>JUGADORES CONECTADOS · <span id="playersCount">0</span></b><div id="playersList"></div></div>
 
-<button id="upgrade">MEJORAR · 50 ⚔</button>
+<div id="gameActions"><button id="saveGame" type="button">GUARDAR</button><button id="resumeGame" type="button" style="display:none">CONTINUAR</button></div><button id="upgrade">MEJORAR · 50 ⚔</button>
 
 <div id="nameBox">
   <form id="nameForm">
@@ -168,7 +168,17 @@ function connectMultiplayer(roomMode="quick",roomCode=""){
     multiplayerSocket.addEventListener("message",e=>{
       try{
         const m=JSON.parse(e.data);
-        if(m.type==="room_joined"){
+        if(m.type==="save_ok"){
+          savedFrozen=true;gameActive=false;resetAllControls();
+          saveGameBtn.textContent="GUARDADO";
+          resumeGameBtn.style.display="block";
+          saveGameBtn.disabled=true;
+        }else if(m.type==="resume_ok"){
+          savedFrozen=false;gameActive=true;
+          saveGameBtn.textContent="GUARDAR";
+          saveGameBtn.disabled=false;
+          resumeGameBtn.style.display="none";
+        }else if(m.type==="room_joined"){
           setConnectionStatus("CONECTADO","Listo. Entrando a la arena…",false);
           setRoomPanel(m.code);
           const me=(m.players||[]).find(q=>q.id===multiplayerId);
@@ -567,8 +577,24 @@ const nameMsg=document.getElementById("nameMsg");
 const createRoomBtn=document.getElementById("createRoom");
 const joinRoomBtn=document.getElementById("joinRoom");
 const roomCodeInput=document.getElementById("roomCodeInput");
+saveGameBtn.addEventListener("click",()=>{
+  if(!multiplayerSocket||multiplayerSocket.readyState!==1||!currentRoom||!p.alive)return;
+  resetAllControls();
+  gameActive=false;
+  savedFrozen=true;
+  multiplayerSocket.send(JSON.stringify({type:"save",x:p.x,y:p.y,angle:p.angle,hp:p.hp}));
+});
+resumeGameBtn.addEventListener("click",()=>{
+  if(!multiplayerSocket||multiplayerSocket.readyState!==1||!currentRoom)return;
+  multiplayerSocket.send(JSON.stringify({type:"resume"}));
+});
 const restartBtn=document.getElementById("restart");
 const upgradeBtn=document.getElementById("upgrade");
+const saveGameBtn=document.getElementById("saveGame");
+const resumeGameBtn=document.getElementById("resumeGame");
+let savedFrozen=false;
+let saveKey="";
+try{saveKey=localStorage.getItem("neon_core_save_key")||"";if(!saveKey){saveKey="p_"+Math.random().toString(36).slice(2)+Date.now().toString(36);localStorage.setItem("neon_core_save_key",saveKey);}}catch(e){saveKey="guest_"+Math.random().toString(36).slice(2)}
 const copyRoomBtn=document.getElementById("copyRoom");
 
 function startGame(mode="quick",code=""){
@@ -581,6 +607,7 @@ function startGame(mode="quick",code=""){
   playerName=n;
   saveName(n);
   gameActive=false;
+  savedFrozen=false;
   enemies.length=0;
   nameMsg.textContent="";
   nameBox.style.display="none";
