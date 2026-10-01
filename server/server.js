@@ -10,7 +10,7 @@ const WORLD = { w: 6000, h: 4400 };
 const MAX_PLAYERS = 16;
 const SAFE_ZONE = { x: 3000, y: 2200, r: 300 };
 
-const SERVER_VERSION = '20261001-106';
+const SERVER_VERSION = '20261001-107';
 
 const AMMO_PACK_SIZE = 50;
 const AMMO_PACK_COST = 50;
@@ -216,8 +216,6 @@ function sendStats(p) {
 function capturePlayerData(p) {
   return {
     name: p.name,
-    x: p.x,
-    y: p.y,
     level: p.level,
     hp: p.hp,
     damage: p.damage,
@@ -671,11 +669,10 @@ async function joinRoom(ws, requestedCode, create = false) {
 
   const spawn = spawnPosition(code);
 
-  if (!p.hasSaved) {
-    p.x = spawn.x;
-    p.y = spawn.y;
-    p.hp = maxHpForLevel(p.level);
-  }
+  // Cada entrada a una sala inicia en la zona segura, sin importar la posición anterior.
+  p.x = spawn.x;
+  p.y = spawn.y;
+  p.hp = maxHpForLevel(p.level);
 
   p.angle = 0;
   p.alive = true;
@@ -1352,8 +1349,7 @@ wss.on('connection', (ws) => {
         p.hasSaved = !!saved;
 
         if (saved) {
-          p.x = Number.isFinite(Number(saved.x)) ? Number(saved.x) : p.x;
-          p.y = Number.isFinite(Number(saved.y)) ? Number(saved.y) : p.y;
+          // La posición nunca se persiste: cada nueva conexión empieza en la zona segura.
           p.level = clamp(Number(saved.level) || 1, 1, 1000);
           const savedHp = Number(saved.hp);
           p.hp = savedHp > 0 ? savedHp : maxHpForLevel(p.level);
