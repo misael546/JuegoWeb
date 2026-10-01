@@ -309,8 +309,10 @@ setInterval(()=>{
       }
       if(target){
         const dx=(target.x-enemy.x)/Math.max(best,1),dy=(target.y-enemy.y)/Math.max(best,1);
-        enemy.x=clamp(enemy.x+dx*enemy.speed*dt,35,WORLD.w-35);
-        enemy.y=clamp(enemy.y+dy*enemy.speed*dt,35,WORLD.h-35);
+        enemy.vx=dx*enemy.speed;
+        enemy.vy=dy*enemy.speed;
+        enemy.x=clamp(enemy.x+enemy.vx*dt,35,WORLD.w-35);
+        enemy.y=clamp(enemy.y+enemy.vy*dt,35,WORLD.h-35);
         if(best<enemy.r+24){
           target.hp=clamp(target.hp-enemy.damage*dt,0,100);
           send(findPlayer(target.id,room)?.ws||null,{type:"pve_damage",amount:enemy.damage*dt,hp:target.hp});
