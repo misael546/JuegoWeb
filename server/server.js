@@ -10,7 +10,7 @@ const WORLD = { w: 6000, h: 4400 };
 const MAX_PLAYERS = 16;
 const SAFE_ZONE = { x: 3000, y: 2200, r: 300 };
 
-const SERVER_VERSION = '20261001-100';
+const SERVER_VERSION = '20261001-101';
 
 const AMMO_PACK_SIZE = 50;
 const AMMO_PACK_COST = 50;
@@ -1220,7 +1220,16 @@ const httpServer = http.createServer(async (req, res) => {
         version: SERVER_VERSION,
         startedAt: SERVER_STARTED_AT,
         storage: storage.enabled ? 'postgres' : 'memory',
-        status: 'online'
+        status: 'online',
+        diagnostics: {
+          rooms: rooms.size,
+          players: clients.size,
+          publicRooms: PUBLIC_ROOMS.length,
+          walls: WORLD_WALLS.length,
+          enemyTarget: 18,
+          storageConfigured: Boolean(process.env.DATABASE_URL),
+          storageReady: storage.enabled
+        }
       })
     );
   }
@@ -1233,11 +1242,14 @@ const httpServer = http.createServer(async (req, res) => {
 
 const wss = new WebSocketServer({
   server: httpServer,
-  path: '/ws'
+  path: '/ws',
+  maxPayload: 16 * 1024
 });
 
 wss.on('connection', (ws) => {
   const player = createPlayer(ws);
+  ws.isAlive = true;
+  ws.on('pong', () => { ws.isAlive = true; });
   clients.set(ws, player);
 
   send(ws, {
@@ -1727,6 +1739,42 @@ process.on('SIGINT', async () => {
   } catch {}
   process.exit(0);
 });
+
+function runServerDiagnostics() {
+  const problems = [];
+  if (WORLD.w <= 0 || WORLD.h <= 0) problems.push('WORLD inválido');
+  if (MAX_PLAYERS < 1) problems.push('MAX_PLAYERS inválido');
+  if (PUBLIC_ROOMS.some((code) => !rooms.has(code))) problems.push('Sala pública ausente');
+  if (WORLD_WALLS.length < 20) problems.push('Muy pocos muros');
+  if (Object.keys(WEAPONS).length < 3) problems.push('Arsenal incompleto');
+
+  if (problems.length) {
+    console.error('[DIAGNOSTIC] FAIL ' + problems.join(' | '));
+    return false;
+  }
+
+  console.log(
+    '[DIAGNOSTIC] PASS build=' + SERVER_VERSION +
+    ' rooms=' + rooms.size +
+    ' walls=' + WORLD_WALLS.length +
+    ' weapons=' + Object.keys(WEAPONS).length +
+    ' storage=' + (storage.enabled ? 'postgres' : 'memory')
+  );
+  return true;
+}
+
+runServerDiagnostics();
+
+const websocketHeartbeat = setInterval(() => {
+  for (const ws of wss.clients) {
+    if (ws.isAlive === false) {
+      try { ws.terminate(); } catch {}
+      continue;
+    }
+    ws.isAlive = false;
+    try { ws.ping(); } catch {}
+  }
+}, 30000);
 
 httpServer.listen(PORT, () => {
   console.log(
