@@ -9,7 +9,7 @@
 <script>
 (function(){
   try{
-    var v="20261001-22";
+    var v="20261001-26";
     var k="neon_core_build";
     window.NEON_CORE_BUILD=v;
     var old=localStorage.getItem(k);
@@ -38,10 +38,10 @@
 #nameCard h1{margin:0 0 5px;font-size:30px;letter-spacing:2px;color:#39e7ff}
 #nameCard p{color:#9ca9bd;margin:0 0 16px}
 #nameCard input{width:100%;padding:13px;border:1px solid #33415d;background:#111a2d;color:white;border-radius:10px;font-size:16px;outline:none}
-#nameCard button,#upgrade,#restart{width:100%;min-height:44px;border:0;border-radius:10px;margin-top:10px;background:#183d58;color:#fff;font-weight:bold}
+#nameCard button,#restart{width:100%;min-height:44px;border:0;border-radius:10px;margin-top:10px;background:#183d58;color:#fff;font-weight:bold}
 #playersPanel{position:fixed;top:10px;right:10px;width:min(210px,46vw);background:rgba(5,8,17,.88);border:1px solid #26344e;border-radius:12px;padding:8px 10px;font-size:12px;backdrop-filter:blur(5px);z-index:6;display:none;pointer-events:none}#playersList{display:grid;gap:4px;margin-top:6px;max-height:150px;overflow:auto}.onlinePlayer{display:flex;justify-content:space-between;gap:8px;color:#fff}.onlinePlayer small{color:#6ff3b0;font-size:10px}#roomActions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}#roomActions button{margin-top:0}#roomCodeInput{width:100%;padding:13px;border:1px solid #33415d;background:#111a2d;color:white;border-radius:10px;font-size:16px;outline:none;margin-top:8px;text-transform:uppercase}
 #nameMsg{font-size:13px;color:#ff8b8b;min-height:18px;margin-top:8px}
-#gameActions{position:fixed;left:10px;top:74px;z-index:7;display:none;gap:7px}#gameActions button{min-height:40px;border:1px solid #33415d;background:#0b1020;color:#fff;border-radius:9px;padding:0 12px;font-weight:bold}#saveGame{background:#183d58!important}#upgrade{position:fixed;right:10px;top:74px;width:auto;padding:0 12px;z-index:4;display:none}
+#gameActions{position:fixed;left:10px;top:74px;z-index:7;display:none;gap:7px}#gameActions button{min-height:40px;border:1px solid #33415d;background:#0b1020;color:#fff;border-radius:9px;padding:0 12px;font-weight:bold}#saveGame{background:#183d58!important}
 #restart{display:none}
 #controls{position:fixed;inset:auto 0 0;display:flex;justify-content:space-between;align-items:flex-end;padding:16px;z-index:5;pointer-events:none}
 .joy{touch-action:none;user-select:none;-webkit-user-select:none;width:112px;height:112px;border:1px solid #41516d;background:#07101dcc;border-radius:50%;position:relative;pointer-events:auto}
@@ -51,19 +51,18 @@
 #deathCard{background:#0b1020;border:1px solid #26344e;border-radius:16px;padding:22px;width:min(330px,90%)}
 #deathCard h2{color:#ff5474;margin:0 0 8px}
 @media(min-width:800px){#controls{opacity:.3}#controls:hover{opacity:1}}
-#roomActions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}#roomActions button{width:100%;min-height:44px;border:0;border-radius:10px;background:#183d58;color:#fff;font-weight:bold}#roomCodeInput{width:100%;padding:13px;border:1px solid #33415d;background:#111a2d;color:white;border-radius:10px;font-size:16px;outline:none;margin-top:8px;text-transform:uppercase}@media(max-width:799px){#hud{top:8px;left:8px;right:8px}.panel{padding:7px 8px;font-size:12px}#bars{min-width:0;width:min(190px,58vw)}#hud>.panel:last-child{white-space:nowrap}#gameActions{top:74px;left:8px}#gameActions button{min-height:38px;padding:0 9px;font-size:11px}#upgrade{top:74px;right:8px;min-height:38px;padding:0 9px;font-size:11px}#playersPanel{top:74px;right:8px;width:min(180px,48vw);padding:7px 8px;font-size:11px}#playersList{max-height:130px;gap:3px}#controls{padding:12px}.joy{width:100px;height:100px}.stick{width:44px;height:44px;left:28px;top:28px}#fire{width:78px;height:78px}}@media(max-width:430px){#hud>.panel:last-child{max-width:105px;overflow:hidden;text-overflow:ellipsis}#playersPanel{max-width:45vw}.onlinePlayer{font-size:10px}} </style>
+#roomActions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}#roomActions button{width:100%;min-height:44px;border:0;border-radius:10px;background:#183d58;color:#fff;font-weight:bold}#roomCodeInput{width:100%;padding:13px;border:1px solid #33415d;background:#111a2d;color:white;border-radius:10px;font-size:16px;outline:none;margin-top:8px;text-transform:uppercase}@media(max-width:799px){#hud{top:8px;left:8px;right:8px}.panel{padding:7px 8px;font-size:12px}#bars{min-width:0;width:min(190px,58vw)}#hud>.panel:last-child{white-space:nowrap}#gameActions{top:74px;left:8px}#gameActions button{min-height:38px;padding:0 9px;font-size:11px}#playersPanel{top:74px;right:8px;width:min(180px,48vw);padding:7px 8px;font-size:11px}#playersList{max-height:130px;gap:3px}#controls{padding:12px}.joy{width:100px;height:100px}.stick{width:44px;height:44px;left:28px;top:28px}#fire{width:78px;height:78px}}@media(max-width:430px){#hud>.panel:last-child{max-width:105px;overflow:hidden;text-overflow:ellipsis}#playersPanel{max-width:45vw}.onlinePlayer{font-size:10px}} </style>
 </head>
 <body>
 <canvas id="game"></canvas>
 
 <div id="hud">
   <div class="panel" id="bars">
-    <b>NEON CORE</b> · <span id="level">Nv. 1</span> · ⚔ <span id="score">0</span>
+    <b>NEON CORE</b> · <span id="level">Nv. 1</span> · ☠ <span id="pvpKills">0</span>
     <div class="bar"><i id="hpFill"></i></div>
     <div class="bar xpbar"><i id="xpFill"></i></div>
-    <small>❤️ <span id="hp">100</span>/<span id="maxHp">100</span> · XP <span id="xp">0</span>/<span id="xpNeed">100</span> · ⚔ <span id="damageStat">25</span> · 🛡 <span id="defenseStat">0</span></small>
+    <small>❤️ <span id="hp">100</span>/<span id="maxHp">100</span> · XP <span id="xp">0</span>/<span id="xpNeed">100</span> · ⚔ <span id="damageStat">25</span> · 🛡 <span id="defenseStat">0</span> · 🎯 <span id="kills">0</span></small>
   </div>
-  <div class="panel">🎯 <span id="kills">0</span> eliminaciones</div>
 </div>
 
 <div id="connectionOverlay" aria-live="polite"><div id="connectionCard"><div id="connectionSpinner"></div><b id="connectionTitle">CONECTANDO AL SERVIDOR</b><span id="connectionText">Despertando el servidor multiplayer…</span></div></div>
@@ -71,17 +70,19 @@
 
 <div id="playersPanel"><b>JUGADORES CONECTADOS · <span id="playersCount">0</span></b><div id="playersList"></div></div>
 
-<div id="gameActions"><button id="saveGame" type="button">GUARDAR</button><button id="resumeGame" type="button" style="display:none">CONTINUAR</button></div><button id="upgrade">MEJORAR · 50 ⚔</button>
+<div id="gameActions"><button id="saveGame" type="button">GUARDAR</button><button id="resumeGame" type="button" style="display:none">CONTINUAR</button></div>
 
 <div id="nameBox">
   <form id="nameForm">
     <div id="nameCard">
       <h1>NEON CORE</h1>
-      <p>Elige tu nombre y entra a la arena.</p>
+      <p>Escribe tu nombre y entra a las salas públicas.</p>
       <input id="username" maxlength="20" autocomplete="off" placeholder="Nombre del tanque" required>
-      <button type="submit">ENTRAR RÁPIDO</button>
-      <div id="roomActions"><button type="button" id="createRoom">CREAR SALA</button><button type="button" id="joinRoom">UNIRME</button></div>
-      <input id="roomCodeInput" maxlength="4" autocomplete="off" placeholder="CÓDIGO DE SALA · EJ. N7K4">
+      <button type="submit">SALAS PÚBLICAS</button>
+      <div id="privateRoomTools" style="display:none" aria-hidden="true">
+        <div id="roomActions"><button type="button" id="createRoom">CREAR SALA PRIVADA</button><button type="button" id="joinRoom">UNIRME A PRIVADA</button></div>
+        <input id="roomCodeInput" maxlength="4" autocomplete="off" placeholder="CÓDIGO DE SALA · EJ. N7K4">
+      </div>
       <div id="nameMsg"></div>
     </div>
   </form>
@@ -90,7 +91,7 @@
 <div id="death">
   <div id="deathCard">
     <h2>TANQUE DESTRUIDO</h2>
-    <p>Tu puntuación: <b id="deathScore">0</b></p>
+    
     <button id="restart">VOLVER AL MENÚ</button>
   </div>
 </div>
@@ -108,7 +109,7 @@ function resize(){W=innerWidth;H=innerHeight;DPR=Math.min(devicePixelRatio||1,2)
 addEventListener("resize",resize);resize();
 
 const world={w:3000,h:2200};
-const p={x:1500,y:1100,r:24,angle:0,hp:100,maxHp:100,xp:0,level:1,score:0,kills:0,damage:25,defense:0,speed:205,fireRate:280,lastShot:0,alive:true};
+const p={x:1500,y:1100,r:24,angle:0,hp:100,maxHp:100,xp:0,level:1,score:0,kills:0,pvpKills:0,damage:25,defense:0,speed:205,fireRate:280,lastShot:0,alive:true};
 let bullets=[],enemies=[],drops=[],particles=[],walls=[];
 let serverXpNeed=100,serverKillsToLevel=5;
 let gameActive=false;
@@ -182,6 +183,7 @@ function connectMultiplayer(roomMode="quick",roomCode=""){
             if(Number.isFinite(me.level))p.level=me.level;
             if(Number.isFinite(me.score))p.score=me.score;
             if(Number.isFinite(me.kills))p.kills=me.kills;
+            if(Number.isFinite(me.pvpKills))p.pvpKills=me.pvpKills;
             if(Number.isFinite(me.xp))p.xp=me.xp;
             if(Number.isFinite(me.damage))p.damage=me.damage;
             if(Number.isFinite(me.fireRate))p.fireRate=me.fireRate;
@@ -205,6 +207,7 @@ function connectMultiplayer(roomMode="quick",roomCode=""){
             if(Number.isFinite(me.level))p.level=me.level;
             if(Number.isFinite(me.score))p.score=me.score;
             if(Number.isFinite(me.kills))p.kills=me.kills;
+            if(Number.isFinite(me.pvpKills))p.pvpKills=me.pvpKills;
             if(Number.isFinite(me.xp))p.xp=me.xp;
             if(Number.isFinite(me.damage))p.damage=me.damage;
             if(Number.isFinite(me.defense))p.defense=me.defense;
@@ -260,19 +263,20 @@ function connectMultiplayer(roomMode="quick",roomCode=""){
           burst(p.x,p.y,"#ff5474",4);
         }else if(m.type==="pve_dead"){
           const lostScore=p.score;p.hp=0;p.alive=false;resetProgressOnDeath();
-          document.getElementById("deathScore").textContent=Number.isFinite(m.lostScore)?m.lostScore:lostScore;
+          
           gameActive=false;enemies.length=0;setTimeout(returnToMenu,50);
         }else if(m.type==="pvp_damage"){
           p.hp=Math.max(0,p.hp-(Number(m.amount)||0));
           burst(p.x,p.y,"#ff5474",8);
         }else if(m.type==="pvp_dead"){
           const lostScore=p.score;p.hp=0;p.alive=false;resetProgressOnDeath();
-          document.getElementById("deathScore").textContent=lostScore;
+          
           gameActive=false;
           enemies.length=0;
           setTimeout(returnToMenu,50);
         }else if(m.type==="server_stats"){
           if(Number.isFinite(m.kills))p.kills=m.kills;
+          if(Number.isFinite(m.pvpKills))p.pvpKills=m.pvpKills;
           if(Number.isFinite(m.score))p.score=m.score;
           if(Number.isFinite(m.xp))p.xp=m.xp;
           if(Number.isFinite(m.level))p.level=m.level;
@@ -363,6 +367,7 @@ function resetProgressOnDeath(){
   p.xp=0;
   p.score=0;
   p.kills=0;
+  p.pvpKills=0;
   saveStats();
 }
 function returnToMenu(){
@@ -372,7 +377,6 @@ function returnToMenu(){
   document.getElementById("nameBox").style.display="flex";
   document.getElementById("nameMsg").textContent="";
   document.getElementById("playersPanel").style.display="none";
-  document.getElementById("upgrade").style.display="none";
   currentRoom="";
   remotePlayers.clear();
   if(multiplayerSocket){
@@ -587,7 +591,7 @@ function draw(){
   document.getElementById("hp").textContent=Math.ceil(p.hp);
   document.getElementById("maxHp").textContent=p.maxHp;
   document.getElementById("level").textContent="Nv. "+p.level;
-  document.getElementById("score").textContent=p.score;
+  document.getElementById("pvpKills").textContent=p.pvpKills;
   document.getElementById("kills").textContent=p.kills;
   document.getElementById("damageStat").textContent=p.damage;
   document.getElementById("defenseStat").textContent=p.defense;
@@ -595,7 +599,6 @@ function draw(){
   document.getElementById("xp").textContent=p.xp;document.getElementById("xpNeed").textContent=need;
   document.getElementById("hpFill").style.width=clamp(p.hp/p.maxHp*100,0,100)+"%";
   document.getElementById("xpFill").style.width=clamp(p.xp/need*100,0,100)+"%";
-  document.getElementById("upgrade").style.display=p.alive?"block":"none";
 }
 
 function setupJoystick(id){
@@ -660,7 +663,6 @@ const joinRoomBtn=document.getElementById("joinRoom");
 const roomCodeInput=document.getElementById("roomCodeInput");
 
 const restartBtn=document.getElementById("restart");
-const upgradeBtn=document.getElementById("upgrade");
 const saveGameBtn=document.getElementById("saveGame");
 const resumeGameBtn=document.getElementById("resumeGame");
 saveGameBtn.addEventListener("click",()=>{
@@ -720,13 +722,6 @@ roomCodeInput.addEventListener("input",()=>{
 });
 
 restartBtn.addEventListener("click",()=>returnToMenu());
-
-upgradeBtn.addEventListener("click",()=>{
-  if(!p.alive)return;
-  if(p.score<50)return;
-  p.score-=50;p.damage+=5;p.fireRate=Math.max(120,p.fireRate-8);
-  saveStats();
-});
 
 
 username.value=loadName();
