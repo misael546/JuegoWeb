@@ -10,7 +10,7 @@ const WORLD = { w: 6000, h: 4400 };
 const MAX_PLAYERS = 16;
 const SAFE_ZONE = { x: 3000, y: 2200, r: 300 };
 
-const SERVER_VERSION = '20261001-64';
+const SERVER_VERSION = '20261001-65';
 
 const AMMO_PACK_SIZE = 50;
 const AMMO_PACK_COST = 50;
@@ -75,6 +75,34 @@ function xpToNextLevel(level) {
   return 100 * Math.max(1, Number(level) || 1);
 }
 
+function masteryXpToNextLevel(level) {
+  return 100 * Math.max(1, Number(level) || 1);
+}
+
+function masteryLevelFromXp(xp) {
+  let level = 1;
+  let remaining = Math.max(0, Number(xp) || 0);
+
+  while (level < 1000 && remaining >= masteryXpToNextLevel(level)) {
+    remaining -= masteryXpToNextLevel(level);
+    level += 1;
+  }
+
+  return level;
+}
+
+function masteryXpIntoLevel(xp) {
+  let level = 1;
+  let remaining = Math.max(0, Number(xp) || 0);
+
+  while (level < 1000 && remaining >= masteryXpToNextLevel(level)) {
+    remaining -= masteryXpToNextLevel(level);
+    level += 1;
+  }
+
+  return remaining;
+}
+
 function inSafeZone(x, y, pad = 0) {
   return Math.hypot(x - SAFE_ZONE.x, y - SAFE_ZONE.y) <= SAFE_ZONE.r + pad;
 }
@@ -123,6 +151,8 @@ function publicPlayer(p) {
     pvpKills: p.pvpKills,
     damage: p.damage,
     defense: p.defense,
+    damageXp: p.damageXp,
+    defenseXp: p.defenseXp,
     fireRate: p.fireRate,
     speed: p.speed,
     color: p.color,
@@ -160,6 +190,12 @@ function sendStats(p) {
     speed: p.speed,
     maxHp: maxHpForLevel(p.level),
     xpNeed: xpToNextLevel(p.level),
+    damageXp: p.damageXp,
+    damageXpNeed: masteryXpToNextLevel(masteryLevelFromXp(p.damageXp)),
+    damageLevel: masteryLevelFromXp(p.damageXp),
+    defenseXp: p.defenseXp,
+    defenseXpNeed: masteryXpToNextLevel(masteryLevelFromXp(p.defenseXp)),
+    defenseLevel: masteryLevelFromXp(p.defenseXp),
     killsToLevel: nextKills,
     gold: p.gold || 0,
     diamonds: p.diamonds || 0,
@@ -189,6 +225,8 @@ function capturePlayerData(p) {
     diamonds: p.diamonds || 0,
     ammo: clamp(Number(p.ammo) || 0, 0, MAX_AMMO),
     weapon: WEAPONS[p.weapon] ? p.weapon : 'blaster',
+    damageXp: Math.max(0, Number(p.damageXp) || 0),
+    defenseXp: Math.max(0, Number(p.defenseXp) || 0),
     damagePenalty: Math.max(0, Number(p.damagePenalty) || 0),
     defensePenalty: Math.max(0, Number(p.defensePenalty) || 0)
   };
@@ -238,12 +276,62 @@ async function loadSavedPlayer(saveKey) {
 function applyCombatStats(p) {
   const item = WEAPONS[p.weapon] || WEAPONS.blaster;
   p.weapon = WEAPONS[p.weapon] ? p.weapon : 'blaster';
+
+  const damageMasteryLevel = masteryLevelFromXp(p.damageXp);
+  const defenseMasteryLevel = masteryLevelFromXp(p.defenseXp);
+
   const baseDamage = item.damage + Math.max(0, p.level - 1) * 5;
+  const masteryDamage = Math.max(0, damageMasteryLevel - 1) * 3;
   const baseDefense = Math.max(0, p.level - 1) * 2;
-  p.damage = Math.max(5, Math.round(baseDamage - (Number(p.damagePenalty) || 0)));
+  const masteryDefense = Math.max(0, defenseMasteryLevel - 1);
+
+  p.damage = Math.max(
+    5,
+    Math.round(baseDamage + masteryDamage - (Number(p.damagePenalty) || 0))
+  );
   p.fireRate = Math.max(100, item.fireRate - Math.max(0, p.level - 1) * 4);
-  p.defense = Math.max(0, Math.round(baseDefense - (Number(p.defensePenalty) || 0)));
+  p.defense = Math.max(
+    0,
+    Math.round(baseDefense + masteryDefense - (Number(p.defensePenalty) || 0))
+  );
   p.speed = speedForLevel(p.level);
+}
+
+function addDamageXp(p, amount) {
+  p.damageXp = Math.max(0, Number(p.damageXp) || 0) + Math.max(0, Number(amount) || 0);
+  applyCombatStats(p);
+}
+
+function addDefenseXp(p, amount) {
+  p.defenseXp = Math.max(0, Number(p.defenseXp) || 0) + Math.max(0, Number(amount) || 0);
+  applyCombatStats(p);
+}
+
+function applyMasteryDeathLoss(p) {
+  // La muerte quita una parte del progreso de daño y defensa.
+  // Si el progreso perdido cruza un nivel de maestría, el atributo baja.
+  const damageLevel = masteryLevelFromXp(p.damageXp);
+  const defenseLevel = masteryLevelFromXp(p.defenseXp);
+  const damageIntoLevel = masteryXpIntoLevel(p.damageXp);
+  const defenseIntoLevel = masteryXpIntoLevel(p.defenseXp);
+
+  const damageLoss = Math.max(1, Math.floor(masteryXpToNextLevel(damageLevel) * DEATH_DAMAGE_LOSS));
+  const defenseLoss = Math.max(1, Math.floor(masteryXpToNextLevel(defenseLevel) * DEATH_DEFENSE_LOSS));
+
+  p.damageXp = Math.max(0, Number(p.damageXp || 0) - damageLoss);
+  p.defenseXp = Math.max(0, Number(p.defenseXp || 0) - defenseLoss);
+
+  // Si estaba en el nivel 1 de maestría, nunca baja por debajo de 1.
+  // Si pierde el progreso que tenía dentro de su nivel, vuelve al nivel anterior
+  // y conserva el progreso restante desde 0 de ese nivel.
+  if (damageLevel > 1 && damageIntoLevel < damageLoss) {
+    p.damageXp = Math.max(0, p.damageXp);
+  }
+  if (defenseLevel > 1 && defenseIntoLevel < defenseLoss) {
+    p.defenseXp = Math.max(0, p.defenseXp);
+  }
+
+  applyCombatStats(p);
 }
 
 function applyDeathPenalty(p) {
@@ -263,6 +351,8 @@ function applyDeathPenalty(p) {
 
   p.level = level;
   p.xp = xp;
+
+  applyMasteryDeathLoss(p);
 
   const maxHp = maxHpForLevel(level);
   p.hp = Math.max(1, Math.floor(maxHp * (1 - DEATH_HP_LOSS)));
@@ -909,11 +999,15 @@ function handleShot(ws) {
     const target = targetPlayer.p;
     const targetMaxHp = maxHpForLevel(target.level);
 
+    const actualDamage = Math.max(1, damage - (target.defense || 0));
+
     target.hp = clamp(
-      target.hp - Math.max(1, damage - (target.defense || 0)),
+      target.hp - actualDamage,
       0,
       targetMaxHp
     );
+
+    addDefenseXp(target, actualDamage);
 
     send(targetPlayer.ws, {
       type: 'pvp_damage',
@@ -957,6 +1051,7 @@ function handleShot(ws) {
       shooter.pvpKills = (shooter.pvpKills || 0) + 1;
       shooter.score = (shooter.score || 0) + 25;
       shooter.xp = (shooter.xp || 0) + 40;
+      addDamageXp(shooter, 20);
 
       levelUpIfNeeded(shooter);
 
@@ -1006,6 +1101,7 @@ function handleShot(ws) {
       shooter.kills = (shooter.kills || 0) + 1;
       shooter.score = (shooter.score || 0) + reward;
       shooter.xp = (shooter.xp || 0) + xp;
+      addDamageXp(shooter, xp);
 
       levelUpIfNeeded(shooter);
 
@@ -1042,6 +1138,8 @@ function createPlayer(ws) {
     score: 0,
     kills: 0,
     xp: 0,
+    damageXp: 0,
+    defenseXp: 0,
     pvpKills: 0,
     gold: 0,
     diamonds: 0,
@@ -1158,6 +1256,8 @@ wss.on('connection', (ws) => {
           p.score = Number(saved.score) || 0;
           p.kills = Number(saved.kills) || 0;
           p.xp = Number(saved.xp) || 0;
+          p.damageXp = Math.max(0, Number(saved.damageXp) || 0);
+          p.defenseXp = Math.max(0, Number(saved.defenseXp) || 0);
           p.pvpKills = Number(saved.pvpKills) || 0;
           p.gold = Math.max(0, Number(saved.gold) || 0);
           p.diamonds = Math.max(0, Number(saved.diamonds) || 0);
@@ -1491,13 +1591,17 @@ setInterval(() => {
         }
 
         if (best < enemy.r + 24) {
+          const actualDamage =
+            Math.max(0.5, enemy.damage - (target.defense || 0)) *
+            (TICK_MS / 1000);
+
           target.hp = clamp(
-            target.hp -
-              Math.max(0.5, enemy.damage - (target.defense || 0)) *
-                (TICK_MS / 1000),
+            target.hp - actualDamage,
             0,
             maxHpForLevel(target.level)
           );
+
+          addDefenseXp(target, actualDamage);
 
           const found = findPlayer(target.id, room);
           if (found) {
