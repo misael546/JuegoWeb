@@ -327,47 +327,17 @@ function connectMultiplayer(roomMode="quick",roomCode=""){
           if(Number.isFinite(m.maxHp))p.maxHp=m.maxHp;
           burst(p.x,p.y,"#ff5474",4);
         }else if(m.type==="pve_dead"){
-          const lostScore=p.score;
           const r=m.respawn||{};
-          p.x=Number.isFinite(Number(r.x))?Number(r.x):safeZone.x;
-          p.y=Number.isFinite(Number(r.y))?Number(r.y):safeZone.y;
-          p.hp=Number.isFinite(Number(r.hp))?Number(r.hp):Math.max(1,p.maxHp*0.9);
-          p.maxHp=Number.isFinite(Number(r.maxHp))?Number(r.maxHp):p.maxHp;
-          p.xp=Number.isFinite(Number(r.xp))?Number(r.xp):p.xp;
-          p.gold=Number.isFinite(Number(r.gold))?Number(r.gold):p.gold;
-          p.damage=Number.isFinite(Number(r.damage))?Number(r.damage):p.damage;
-          p.defense=Number.isFinite(Number(r.defense))?Number(r.defense):p.defense;
-          if(Number.isFinite(Number(r.level)))p.level=Number(r.level);
-          p.alive=true;
-          spawnProtectionUntil=performance.now()+5000;
-          gameActive=true;
+          applyServerRespawn(r);
           enemies.length=0;
-          document.getElementById("death").style.display="none";
-          updateResourceHud();
-          updateHud();
         }else if(m.type==="pvp_damage"){
           p.hp=Number.isFinite(m.hp)?m.hp:Math.max(0,p.hp-(Number(m.amount)||0));
           if(Number.isFinite(m.maxHp))p.maxHp=m.maxHp;
           burst(p.x,p.y,"#ff5474",8);
         }else if(m.type==="pvp_dead"){
-          const lostScore=p.score;
           const r=m.respawn||{};
-          p.x=Number.isFinite(Number(r.x))?Number(r.x):safeZone.x;
-          p.y=Number.isFinite(Number(r.y))?Number(r.y):safeZone.y;
-          p.hp=Number.isFinite(Number(r.hp))?Number(r.hp):Math.max(1,p.maxHp*0.9);
-          p.maxHp=Number.isFinite(Number(r.maxHp))?Number(r.maxHp):p.maxHp;
-          p.xp=Number.isFinite(Number(r.xp))?Number(r.xp):p.xp;
-          p.gold=Number.isFinite(Number(r.gold))?Number(r.gold):p.gold;
-          p.damage=Number.isFinite(Number(r.damage))?Number(r.damage):p.damage;
-          p.defense=Number.isFinite(Number(r.defense))?Number(r.defense):p.defense;
-          if(Number.isFinite(Number(r.level)))p.level=Number(r.level);
-          p.alive=true;
-          spawnProtectionUntil=performance.now()+5000;
-          gameActive=true;
+          applyServerRespawn(r);
           enemies.length=0;
-          document.getElementById("death").style.display="none";
-          updateResourceHud();
-          updateHud();
         }else if(m.type==="server_stats"){
           if(Number.isFinite(m.kills))p.kills=m.kills;
           if(Number.isFinite(m.pvpKills))p.pvpKills=m.pvpKills;
@@ -492,6 +462,30 @@ function returnToMenu(){
   resetAllControls();
   username.value=loadName();
   username.focus();
+}
+function applyServerRespawn(r){
+  r=r||{};
+  if(Number.isFinite(Number(r.x)))p.x=Number(r.x);
+  if(Number.isFinite(Number(r.y)))p.y=Number(r.y);
+  if(Number.isFinite(Number(r.hp)))p.hp=Math.max(1,Number(r.hp));
+  if(Number.isFinite(Number(r.maxHp)))p.maxHp=Number(r.maxHp);
+  if(Number.isFinite(Number(r.level)))p.level=Number(r.level);
+  if(Number.isFinite(Number(r.xp)))p.xp=Number(r.xp);
+  if(Number.isFinite(Number(r.gold)))p.gold=Math.max(0,Number(r.gold));
+  if(Number.isFinite(Number(r.damage)))p.damage=Number(r.damage);
+  if(Number.isFinite(Number(r.defense)))p.defense=Number(r.defense);
+  if(Number.isFinite(Number(r.speed)))p.speed=Number(r.speed);
+  p.alive=true;
+  p.lastShot=0;
+  moveX=0;
+  moveY=0;
+  resetAllControls();
+  bullets.length=0;
+  gameActive=true;
+  spawnProtectionUntil=performance.now()+5000;
+  document.getElementById("death").style.display="none";
+  updateResourceHud();
+  updateHud();
 }
 function damagePlayer(amount){
   if(!p.alive)return;
