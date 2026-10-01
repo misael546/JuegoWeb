@@ -24,7 +24,6 @@
 #controls{position:fixed;inset:auto 0 0;display:flex;justify-content:space-between;align-items:flex-end;padding:16px;z-index:5;pointer-events:none}
 .joy{width:112px;height:112px;border:1px solid #41516d;background:#07101dcc;border-radius:50%;position:relative;pointer-events:auto}
 .stick{position:absolute;width:48px;height:48px;border-radius:50%;left:32px;top:32px;background:#39e7ff99;border:1px solid #8ff5ff}
-#aimJoy .stick{background:#a855f799;border-color:#d7a8ff}
 #fire{width:86px;height:86px;border-radius:50%;border:1px solid #ff6680;background:#701a30cc;color:white;font-size:25px;font-weight:bold;pointer-events:auto}
 #death{position:fixed;inset:0;background:#000b;display:none;align-items:center;justify-content:center;z-index:10;text-align:center}
 #deathCard{background:#0b1020;border:1px solid #26344e;border-radius:16px;padding:22px;width:min(330px,90%)}
@@ -72,7 +71,6 @@
 <div id="controls">
   <div class="joy" id="moveJoy"><div class="stick"></div></div>
   <button id="fire">●</button>
-  <div class="joy" id="aimJoy"><div class="stick"></div></div>
 </div>
 
 <script>
@@ -88,7 +86,7 @@ let bullets=[],enemies=[],drops=[],particles=[],walls=[];
 let camera={x:p.x,y:p.y},last=performance.now(),playerName="";
 const keys={w:false,a:false,s:false,d:false};
 const pointer={x:W/2,y:H/2,down:false};
-let moveX=0,moveY=0,aimActive=false,aimX=0,aimY=0;
+let moveX=0,moveY=0;
 
 function rand(a,b){return a+Math.random()*(b-a)}
 function dist(a,b){return Math.hypot(a.x-b.x,a.y-b.y)}
@@ -160,12 +158,16 @@ function update(dt){
   if(!p.alive)return;
   let mx=(keys.d?1:0)-(keys.a?1:0),my=(keys.s?1:0)-(keys.w?1:0);
   if(Math.hypot(moveX,moveY)>.1){mx=moveX;my=moveY}
-  const ml=Math.hypot(mx,my)||1;
-  p.x+=mx/ml*p.speed*dt;p.y+=my/ml*p.speed*dt;
+  const ml=Math.hypot(mx,my);
+  if(ml>.1){
+    const nx=mx/ml,ny=my/ml;
+    p.angle=Math.atan2(ny,nx);
+    p.x+=nx*p.speed*Math.min(1,ml)*dt;
+    p.y+=ny*p.speed*Math.min(1,ml)*dt;
+  }
   p.x=clamp(p.x,35,world.w-35);p.y=clamp(p.y,35,world.h-35);
 
-  if(aimActive&&Math.hypot(aimX,aimY)>.15)p.angle=Math.atan2(aimY,aimX);
-  else if(innerWidth>700)p.angle=Math.atan2(pointer.y-H/2,pointer.x-W/2);
+  if(innerWidth>700 && ml<=.1)p.angle=Math.atan2(pointer.y-H/2,pointer.x-W/2);
 
   if(pointer.down)fire();
 
@@ -263,20 +265,21 @@ function draw(){
   document.getElementById("upgrade").style.display=p.alive?"block":"none";
 }
 
-function setupJoystick(id,mode){
+function setupJoystick(id){
   const el=document.getElementById(id),stick=el.querySelector(".stick"),state={active:false};
   function set(e){
     const r=el.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2;
-    let x=e.clientX-cx,y=e.clientY-cy,len=Math.hypot(x,y),max=40;if(len>max){x=x/len*max;y=y/len*max}
+    let x=e.clientX-cx,y=e.clientY-cy,len=Math.hypot(x,y),max=40;
+    if(len>max){x=x/len*max;y=y/len*max}
     stick.style.transform="translate("+x+"px,"+y+"px)";
-    if(mode==="move"){moveX=x/max;moveY=y/max}else{aimX=x/max;aimY=y/max;aimActive=len>.12}
+    moveX=x/max;moveY=y/max;
   }
   el.addEventListener("pointerdown",e=>{e.preventDefault();state.active=true;el.setPointerCapture(e.pointerId);set(e)});
   el.addEventListener("pointermove",e=>{if(state.active)set(e)});
-  function end(){state.active=false;stick.style.transform="translate(0,0)";if(mode==="move"){moveX=0;moveY=0}else{aimX=0;aimY=0;aimActive=false}}
+  function end(){state.active=false;stick.style.transform="translate(0,0)";moveX=0;moveY=0}
   el.addEventListener("pointerup",end);el.addEventListener("pointercancel",end);
 }
-setupJoystick("moveJoy","move");setupJoystick("aimJoy","aim");
+setupJoystick("moveJoy");
 
 addEventListener("keydown",e=>{const k=e.key.toLowerCase();if(k in keys){keys[k]=true;e.preventDefault()}});
 addEventListener("keyup",e=>{const k=e.key.toLowerCase();if(k in keys){keys[k]=false;e.preventDefault()}});
