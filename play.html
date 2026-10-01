@@ -445,19 +445,43 @@ function draw(){
 }
 
 function setupJoystick(id){
-  const el=document.getElementById(id),stick=el.querySelector(".stick"),state={active:false};
+  const el=document.getElementById(id),stick=el.querySelector(".stick");
+  let active=false,pointerId=null;
+  function reset(){
+    active=false;pointerId=null;
+    stick.style.transform="translate(0,0)";
+    moveX=0;moveY=0;
+  }
   function set(e){
-    const r=el.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2;
-    let x=e.clientX-cx,y=e.clientY-cy,len=Math.hypot(x,y),max=40;
+    const r=el.getBoundingClientRect();
+    const cx=r.left+r.width/2,cy=r.top+r.height/2;
+    const max=Math.max(1,(r.width-stick.offsetWidth)/2);
+    let x=e.clientX-cx,y=e.clientY-cy;
+    const len=Math.hypot(x,y);
     if(len>max){x=x/len*max;y=y/len*max}
     stick.style.transform="translate("+x+"px,"+y+"px)";
-    moveX=x/max;moveY=y/max;
+    moveX=clamp(x/max,-1,1);
+    moveY=clamp(y/max,-1,1);
   }
-  el.addEventListener("pointerdown",e=>{e.preventDefault();state.active=true;el.setPointerCapture(e.pointerId);set(e)});
-  el.addEventListener("pointermove",e=>{if(state.active)set(e)});
-  function end(){state.active=false;stick.style.transform="translate(0,0)";moveX=0;moveY=0}
-  el.addEventListener("pointerup",end);el.addEventListener("pointercancel",end);
+  el.addEventListener("pointerdown",e=>{
+    e.preventDefault();
+    if(active)return;
+    active=true;pointerId=e.pointerId;
+    try{el.setPointerCapture(pointerId)}catch{}
+    set(e);
+  });
+  el.addEventListener("pointermove",e=>{
+    if(active && e.pointerId===pointerId){e.preventDefault();set(e)}
+  });
+  el.addEventListener("pointerup",e=>{
+    if(e.pointerId===pointerId){e.preventDefault();reset()}
+  });
+  el.addEventListener("pointercancel",e=>{
+    if(e.pointerId===pointerId)reset();
+  });
+  el.addEventListener("lostpointercapture",reset);
 }
+
 setupJoystick("moveJoy");
 
 addEventListener("keydown",e=>{const k=e.key.toLowerCase();if(k in keys){keys[k]=true;e.preventDefault()}});
