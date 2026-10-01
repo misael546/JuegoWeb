@@ -982,7 +982,11 @@ let saveKey="";
 try{saveKey=localStorage.getItem("neon_core_save_key")||"";if(!saveKey){saveKey="p_"+Math.random().toString(36).slice(2)+Date.now().toString(36);localStorage.setItem("neon_core_save_key",saveKey);}}catch(e){saveKey="guest_"+Math.random().toString(36).slice(2)}
 
 function startGame(mode="quick",code=""){
-  const n=String(username.value||"").trim().slice(0,20);
+  let n=String(username.value||"").trim().slice(0,20);
+  if(!n && PUBLIC_ROOM_CODE){
+    n="Jugador-"+Math.random().toString(36).slice(2,7).toUpperCase();
+    username.value=n;
+  }
   if(!n){
     nameMsg.textContent="Escribe un nombre para entrar.";
     username.focus();
