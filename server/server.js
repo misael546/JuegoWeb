@@ -8,6 +8,7 @@ const SAFE_ZONE = {x:3000,y:2200,r:300};
 const SERVER_VERSION = "20261001-42";
 const AMMO_PACK_SIZE=50,AMMO_PACK_COST=50,MAX_AMMO=120;
 const SHOP_NPC={x:3000,y:2380,r:95};
+const WEAPONS={blaster:{name:"BLASTER",cost:0,damage:25,fireRate:350},pulse:{name:"PULSE",cost:150,damage:18,fireRate:170},cannon:{name:"CANNON",cost:300,damage:65,fireRate:700}};
 const SERVER_STARTED_AT = Date.now();
 function inSafeZone(x,y,pad=0){return Math.hypot(x-SAFE_ZONE.x,y-SAFE_ZONE.y)<=SAFE_ZONE.r+pad;}
 const clients = new Map();
@@ -238,7 +239,7 @@ wss.on("connection",(ws)=>{
   const id=Math.random().toString(36).slice(2,10);
   const player={
     id,name:"Jugador",saveKey:"",x:3000,y:2200,angle:0,hp:100,level:1,
-    damage:25,defense:0,fireRate:280,score:0,kills:0,xp:0,pvpKills:0,gold:0,ammo:60,
+    damage:25,defense:0,fireRate:280,score:0,kills:0,xp:0,pvpKills:0,gold:0,ammo:60,bankedGold:0,weapon:"blaster",
     color:"#39e7ff",room:"",alive:true,frozen:false,lastShot:0
   };
   player.ws=ws;
@@ -260,7 +261,7 @@ wss.on("connection",(ws)=>{
           p.x=Number.isFinite(saved.x)?saved.x:p.x;
           p.y=Number.isFinite(saved.y)?saved.y:p.y;
           p.level=Number(saved.level)||1;p.hp=Number(saved.hp)||100;p.damage=Number(saved.damage)||25;p.defense=Number(saved.defense)||0;p.fireRate=Number(saved.fireRate)||280;
-          p.score=saved.score;p.kills=saved.kills;p.xp=saved.xp;p.pvpKills=Number(saved.pvpKills)||0;p.gold=Number(saved.gold)||0;p.ammo=Math.max(0,Math.min(MAX_AMMO,Number(saved.ammo)??60));
+          p.score=saved.score;p.kills=saved.kills;p.xp=saved.xp;p.pvpKills=Number(saved.pvpKills)||0;p.gold=Number(saved.gold)||0;p.bankedGold=Number(saved.bankedGold)||0;p.ammo=Math.max(0,Math.min(MAX_AMMO,Number(saved.ammo)??60));p.weapon=WEAPONS[saved.weapon]?saved.weapon:"blaster";p.damage=WEAPONS[p.weapon].damage+(p.level-1)*5;p.fireRate=Math.max(100,WEAPONS[p.weapon].fireRate-(p.level-1)*4);
         }
         p.color=String(msg.color||"#39e7ff");
         if(msg.room) joinRoom(ws,msg.room,false);
@@ -285,6 +286,8 @@ wss.on("connection",(ws)=>{
 
       if(msg.type==="fire" && !p.frozen) handleShot(ws);
       if(msg.type==="buy_ammo" && !p.frozen) buyAmmo(ws);
+      if(msg.type==="buy_weapon" && !p.frozen) shopBuy(ws,msg.weapon);
+      if(msg.type==="deposit_gold" && !p.frozen) depositGold(ws);
 
       if(msg.type==="save" && p.room){
         p.frozen=true;
@@ -292,7 +295,7 @@ wss.on("connection",(ws)=>{
         p.hp=clamp(Number.isFinite(msg.hp)?msg.hp:p.hp,0,100);
         const data={
           name:p.name,x:p.x,y:p.y,level:p.level,hp:p.hp,damage:p.damage,defense:p.defense,fireRate:p.fireRate,
-          score:p.score,kills:p.kills,xp:p.xp,pvpKills:p.pvpKills,gold:p.gold||0,ammo:p.ammo||0
+          score:p.score,kills:p.kills,xp:p.xp,pvpKills:p.pvpKills,gold:p.gold||0,bankedGold:p.bankedGold||0,ammo:p.ammo||0,weapon:p.weapon||"blaster"
         };
         if(p.saveKey)savedPlayers.set(p.saveKey,data);
         send(ws,{type:"save_ok",savedAt:Date.now(),data});
