@@ -1,494 +1,1547 @@
-const http = require("http");
-const { WebSocketServer } = require("ws");
+'use strict';
 
-const PORT = process.env.PORT || 10000;
-const WORLD = {w:6000,h:4400};
+const http = require('http');
+const { WebSocketServer } = require('ws');
+const storage = require('./storage');
+
+const PORT = Number(process.env.PORT || 10000);
+
+const WORLD = { w: 6000, h: 4400 };
 const MAX_PLAYERS = 16;
-const SAFE_ZONE = {x:3000,y:2200,r:300};
-const SERVER_VERSION = "20261001-55";
-const AMMO_PACK_SIZE=50,AMMO_PACK_COST=50,MAX_AMMO=120;
-const SHOP_NPC={x:3000,y:2380,r:30};
-const BANK_NPC={x:3000,y:2050,r:30};
-const WEAPONS={blaster:{name:"BLASTER",cost:0,damage:25,fireRate:350},pulse:{name:"PULSE",cost:150,damage:18,fireRate:170},cannon:{name:"CANNON",cost:300,damage:65,fireRate:700}};
-const HP_REGEN_PER_SEC=3;
+const SAFE_ZONE = { x: 3000, y: 2200, r: 300 };
+
+const SERVER_VERSION = '20261001-57';
+
+const AMMO_PACK_SIZE = 50;
+const AMMO_PACK_COST = 50;
+const MAX_AMMO = 120;
+
+const SHOP_NPC = { x: 3000, y: 2380, r: 30 };
+const BANK_NPC = { x: 3000, y: 2050, r: 30 };
+
+const WEAPONS = {
+  blaster: { name: 'BLASTER', cost: 0, damage: 25, fireRate: 350 },
+  pulse: { name: 'PULSE', cost: 150, damage: 18, fireRate: 170 },
+  cannon: { name: 'CANNON', cost: 300, damage: 65, fireRate: 700 }
+};
+
+const HP_REGEN_PER_SEC = 3;
+const WORLD_WALL_COUNT = 55;
+const WORLD_WALL_SEED = 739281;
+const AUTOSAVE_MS = 5000;
+const TICK_MS = 100;
+const ENEMY_SYNC_MS = 100;
+
 const SERVER_STARTED_AT = Date.now();
-function inSafeZone(x,y,pad=0){return Math.hypot(x-SAFE_ZONE.x,y-SAFE_ZONE.y)<=SAFE_ZONE.r+pad;}
+
 const clients = new Map();
 const savedPlayers = new Map();
+
 const rooms = new Map();
 const roomEnemies = new Map();
-rooms.set("OPEN",new Set());
-roomEnemies.set("OPEN",[]);
-const PUBLIC_ROOMS=["12345","67890"];
-for(const code of PUBLIC_ROOMS){rooms.set(code,new Set());roomEnemies.set(code,[]);}
-const CODE_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+const roomWalls = new Map();
 
-function makeCode(){
-  let code="";
-  do{
-    code="";
-    for(let i=0;i<4;i++) code += CODE_CHARS[Math.floor(Math.random()*CODE_CHARS.length)];
-  }while(rooms.has(code));
+const PUBLIC_ROOMS = ['12345', '67890'];
+
+rooms.set('OPEN', new Set());
+roomEnemies.set('OPEN', []);
+roomWalls.set('OPEN', []);
+
+for (const code of PUBLIC_ROOMS) {
+  rooms.set(code, new Set());
+  roomEnemies.set(code, []);
+  roomWalls.set(code, []);
+}
+
+const CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+
+function clamp(value, min, max) {
+  return Math.max(min, Math.min(max, value));
+}
+
+function maxHpForLevel(level) {
+  return 100 + Math.max(0, Number(level || 1) - 1) * 15;
+}
+
+function speedForLevel(level) {
+  return 205 + Math.max(0, Number(level || 1) - 1) * 4;
+}
+
+function inSafeZone(x, y, pad = 0) {
+  return Math.hypot(x - SAFE_ZONE.x, y - SAFE_ZONE.y) <= SAFE_ZONE.r + pad;
+}
+
+function makeCode() {
+  let code = '';
+  do {
+    code = '';
+    for (let i = 0; i < 4; i++) {
+      code += CODE_CHARS[Math.floor(Math.random() * CODE_CHARS.length)];
+    }
+  } while (rooms.has(code));
   return code;
 }
-function send(ws,msg){
-  if(ws.readyState===1) ws.send(JSON.stringify(msg));
-}
-function roomPlayers(room){
-  return [...room].map(ws=>clients.get(ws)).filter(Boolean);
-}
-function publicPlayers(room){
-  return roomPlayers(room).map(p=>({id:p.id,name:p.name,x:p.x,y:p.y,angle:p.angle,hp:p.hp,alive:p.alive,level:p.level,score:p.score,kills:p.kills,xp:p.xp,damage:p.damage,defense:p.defense,fireRate:p.fireRate,color:p.color}));
-}
-function sendPlayerList(code){
-  broadcastRoom(code,{type:"player_list",players:publicPlayers(rooms.get(code)||new Set())});
-}
-function sendStats(p){
-  if(!p || !p.ws)return;
-  send(p.ws,{type:"server_stats",kills:p.kills,pvpKills:p.pvpKills,score:p.score,xp:p.xp,level:p.level,damage:p.damage,defense:p.defense,fireRate:p.fireRate,maxHp:100+(p.level-1)*15,xpNeed:100,killsToLevel:5-(p.kills%5||5),gold:p.gold||0,diamonds:p.diamonds||0,bankedGold:p.bankedGold||0,bankedDiamonds:p.bankedDiamonds||0,ammo:p.ammo??0,maxAmmo:MAX_AMMO,shopNpc:SHOP_NPC,bankNpc:BANK_NPC});
-}
-function makeEnemy(){
-  const elite=Math.random()<.2;
-  const r=elite?27:21;
-  const shapes=["square","triangle","hex"];
-  let x=0,y=0;
-  do{x=Math.random()*(WORLD.w-200)+100;y=Math.random()*(WORLD.h-200)+100;}while(inSafeZone(x,y,60));
-  return {id:Math.random().toString(36).slice(2,10),x,y,r,hp:elite?85:50,maxHp:elite?85:50,speed:elite?55:75,damage:elite?14:9,kind:elite?"elite":"drone",shape:shapes[Math.floor(Math.random()*shapes.length)]};
-}
-function ensureRoomEnemies(code){
-  if(!roomEnemies.has(code)){
-    const list=[];
-    for(let i=0;i<18;i++)list.push(makeEnemy());
-    roomEnemies.set(code,list);
-  }
-  return roomEnemies.get(code);
-}
-function sendEnemyState(code){
-  const room=rooms.get(code);
-  if(!room || !room.size)return;
-  broadcastRoom(code,{type:"enemy_state",enemies:ensureRoomEnemies(code)});
-}
-function broadcastRoom(code,msg,except=null){
-  const room=rooms.get(code);
-  if(!room)return;
-  const data=JSON.stringify(msg);
-  for(const ws of room){
-    if(ws!==except && ws.readyState===1) ws.send(data);
+
+function send(ws, message) {
+  if (!ws || ws.readyState !== 1) return false;
+  try {
+    ws.send(JSON.stringify(message));
+    return true;
+  } catch (error) {
+    console.error('[WS SEND]', error?.message || error);
+    return false;
   }
 }
-function leaveRoom(ws){
-  const p=clients.get(ws);
-  if(!p || !p.room)return;
-  const code=p.room;
-  const room=rooms.get(code);
-  if(room){
-    room.delete(ws);
-    if(room.size===0 && code!=="OPEN" && !PUBLIC_ROOMS.includes(code)){ rooms.delete(code); roomEnemies.delete(code); }
-    else { broadcastRoom(code,{type:"player_leave",id:p.id}); sendPlayerList(code); }
-  }
-  p.room="";
+
+function roomPlayers(room) {
+  return [...(room || [])].map((ws) => clients.get(ws)).filter(Boolean);
 }
-function joinRoom(ws,requestedCode,create=false){
-  const p=clients.get(ws);
-  if(!p)return;
-  let code=String(requestedCode||"").toUpperCase().replace(/[^A-Z0-9]/g,"").slice(0,5);
-  if(create || !code){
-    code=makeCode();
-    rooms.set(code,new Set());
-  }
-  const room=rooms.get(code);
-  if(!room){
-    send(ws,{type:"room_error",message:"Sala no encontrada"});
-    return;
-  }
-  if(room.size>=MAX_PLAYERS){
-    send(ws,{type:"room_error",message:"Sala llena"});
-    return;
-  }
-  leaveRoom(ws);
-  room.add(ws);
-  ensureRoomEnemies(code);
-  p.room=code;
-  p.ws=ws;
-  const spawn=spawnPosition(code);
-  if(!p.hasSaved){p.x=spawn.x;p.y=spawn.y;p.hp=100;}
-  p.angle=0;
-  p.alive=true;
-  p.hasSaved=false;
-  send(ws,{type:"room_joined",code,players:publicPlayers(room),enemies:ensureRoomEnemies(code),safeZone:SAFE_ZONE,spawnProtectionMs:5000});
-  sendStats(p);
-  broadcastRoom(code,{type:"player_join",player:p},ws);
-  sendPlayerList(code);
+
+function publicPlayer(p) {
+  if (!p) return null;
+  return {
+    id: p.id,
+    name: p.name,
+    x: p.x,
+    y: p.y,
+    angle: p.angle,
+    hp: p.hp,
+    maxHp: maxHpForLevel(p.level),
+    alive: p.alive,
+    level: p.level,
+    score: p.score,
+    kills: p.kills,
+    xp: p.xp,
+    pvpKills: p.pvpKills,
+    damage: p.damage,
+    defense: p.defense,
+    fireRate: p.fireRate,
+    speed: p.speed,
+    color: p.color,
+    weapon: p.weapon
+  };
 }
-function clamp(v,a,b){return Math.max(a,Math.min(b,v))}
-function spawnPosition(code){
-  const room=rooms.get(code)||new Set();
-  const index=room.size;
-  const spots=[
-    [3000,2200],[2900,2200],[3100,2200],[3000,2100],
-    [2750,2200],[3250,2200],[3000,1900],[3000,2500],
-    [2700,1900],[3300,1900],[2700,2500],[3300,2500],
-    [2850,1850],[3150,1850],[2850,2550],[3150,2550]
-  ];
-  const s=spots[index%spots.length];
-  return {x:s[0],y:s[1]};
+
+function publicPlayers(room) {
+  return roomPlayers(room).map(publicPlayer);
 }
-function persistPlayer(p){
-  if(!p || !p.saveKey)return;
-  savedPlayers.set(p.saveKey,{
-    name:p.name,x:p.x,y:p.y,level:p.level,hp:p.hp,damage:p.damage,defense:p.defense,fireRate:p.fireRate,
-    score:p.score,kills:p.kills,xp:p.xp,pvpKills:p.pvpKills,gold:p.gold||0,bankedGold:p.bankedGold||0,diamonds:p.diamonds||0,bankedDiamonds:p.bankedDiamonds||0,
-    ammo:p.ammo||0,weapon:p.weapon||"blaster"
+
+function sendPlayerList(code) {
+  const room = rooms.get(code);
+  if (!room) return;
+  broadcastRoom(code, {
+    type: 'player_list',
+    players: publicPlayers(room)
   });
 }
-function shopBuy(ws,weapon){
-  const p=clients.get(ws);
-  if(!p){return;}
-  if(!p.room){send(ws,{type:"shop_result",ok:false,message:"No estás dentro de una sala."});return;}
-  if(!p.alive){send(ws,{type:"shop_result",ok:false,message:"No puedes comprar estando destruido."});return;}
-  if(Math.hypot(p.x-SHOP_NPC.x,p.y-SHOP_NPC.y)>SHOP_NPC.r){
-    send(ws,{type:"shop_result",ok:false,message:"Acércate al vendedor de munición."});
-    return;
-  }
-  const item=WEAPONS[String(weapon||"").toLowerCase()];
-  if(!item){send(ws,{type:"shop_result",ok:false,message:"Arma no disponible."});return;}
-  if(p.weapon===weapon){send(ws,{type:"shop_result",ok:false,message:"Ya tienes equipada "+item.name+".",weapon:p.weapon});return;}
-  const gold=Number(p.gold)||0;
-  if(gold<item.cost){send(ws,{type:"shop_result",ok:false,message:"Necesitas "+item.cost+" de oro para "+item.name+"."});return;}
-  p.gold=gold-item.cost;p.weapon=weapon;
-  p.damage=item.damage+(p.level-1)*5;
-  p.fireRate=Math.max(100,item.fireRate-(p.level-1)*4);
-  persistPlayer(p);
-  send(ws,{type:"shop_result",ok:true,message:"Equipada "+item.name+".",weapon:p.weapon,gold:p.gold,damage:p.damage,fireRate:p.fireRate});
-  sendStats(p);
+
+function sendStats(p) {
+  if (!p?.ws) return;
+  const nextKills = p.kills % 5 === 0 ? 5 : 5 - (p.kills % 5);
+
+  send(p.ws, {
+    type: 'server_stats',
+    kills: p.kills,
+    pvpKills: p.pvpKills,
+    score: p.score,
+    xp: p.xp,
+    level: p.level,
+    damage: p.damage,
+    defense: p.defense,
+    fireRate: p.fireRate,
+    speed: p.speed,
+    maxHp: maxHpForLevel(p.level),
+    xpNeed: 100,
+    killsToLevel: nextKills,
+    gold: p.gold || 0,
+    diamonds: p.diamonds || 0,
+    bankedGold: p.bankedGold || 0,
+    bankedDiamonds: p.bankedDiamonds || 0,
+    ammo: p.ammo ?? 0,
+    maxAmmo: MAX_AMMO,
+    weapon: p.weapon,
+    shopNpc: SHOP_NPC,
+    bankNpc: BANK_NPC
+  });
 }
-function depositGold(ws){
-  const p=clients.get(ws);
-  if(!p){
-    return;
-  }
-  if(!p.room){
-    send(ws,{type:"deposit_result",ok:false,message:"No estás dentro de una sala."});
-    return;
-  }
-  if(!p.alive){
-    send(ws,{type:"deposit_result",ok:false,message:"No puedes usar el banco estando destruido."});
-    return;
-  }
-  if(Math.hypot(p.x-BANK_NPC.x,p.y-BANK_NPC.y)>BANK_NPC.r){
-    send(ws,{type:"deposit_result",ok:false,message:"Acércate al BANCO."});
-    return;
-  }
-  const gold=Math.max(0,Number(p.gold)||0);
-  const diamonds=Math.max(0,Number(p.diamonds)||0);
-  if(gold<=0&&diamonds<=0){
-    send(ws,{type:"deposit_result",ok:false,message:"No tienes oro ni diamantes para guardar."});
-    return;
-  }
-  p.gold=0;
-  p.diamonds=0;
-  p.bankedGold=(Number(p.bankedGold)||0)+gold;
-  p.bankedDiamonds=(Number(p.bankedDiamonds)||0)+diamonds;
-  persistPlayer(p);
-  send(ws,{type:"deposit_result",ok:true,message:"Recursos asegurados en el banco.",gold:p.gold,diamonds:p.diamonds,bankedGold:p.bankedGold,bankedDiamonds:p.bankedDiamonds});
-  sendStats(p);
+
+function capturePlayerData(p) {
+  return {
+    name: p.name,
+    x: p.x,
+    y: p.y,
+    level: p.level,
+    hp: p.hp,
+    damage: p.damage,
+    defense: p.defense,
+    fireRate: p.fireRate,
+    speed: p.speed,
+    score: p.score,
+    kills: p.kills,
+    xp: p.xp,
+    pvpKills: p.pvpKills,
+    gold: p.gold || 0,
+    bankedGold: p.bankedGold || 0,
+    diamonds: p.diamonds || 0,
+    bankedDiamonds: p.bankedDiamonds || 0,
+    ammo: clamp(Number(p.ammo) || 0, 0, MAX_AMMO),
+    weapon: WEAPONS[p.weapon] ? p.weapon : 'blaster'
+  };
 }
-function buyAmmo(ws){const p=clients.get(ws);if(!p){return;}if(!p.room){send(ws,{type:"shop_result",ok:false,message:"No estás dentro de una sala."});return;}if(!p.alive){send(ws,{type:"shop_result",ok:false,message:"No puedes comprar estando destruido."});return;}if(Math.hypot(p.x-SHOP_NPC.x,p.y-SHOP_NPC.y)>SHOP_NPC.r){send(ws,{type:"shop_result",ok:false,message:"Acércate al vendedor de munición."});return;}const ammo=Number(p.ammo)||0,gold=Number(p.gold)||0;if(ammo>=MAX_AMMO){send(ws,{type:"shop_result",ok:false,message:"Munición al máximo."});return;}if(gold<AMMO_PACK_COST){send(ws,{type:"shop_result",ok:false,message:"Necesitas 50 de oro."});return;}p.gold=gold-AMMO_PACK_COST;p.ammo=Math.min(MAX_AMMO,ammo+AMMO_PACK_SIZE);persistPlayer(p);send(ws,{type:"shop_result",ok:true,message:"Compraste "+(p.ammo-ammo)+" balas.",gold:p.gold,ammo:p.ammo,maxAmmo:MAX_AMMO});sendStats(p);}
-function findPlayer(id,room){
-  for(const ws of room||[]) {
-    const p=clients.get(ws);
-    if(p && p.id===id)return {ws,p};
+
+async function persistPlayer(p) {
+  if (!p?.saveKey) return;
+  const data = capturePlayerData(p);
+  savedPlayers.set(p.saveKey, data);
+
+  try {
+    await storage.ready;
+    await storage.savePlayerData(p.saveKey, data);
+  } catch (error) {
+    console.error('[STORAGE SAVE]', error?.message || error);
+  }
+
+  p.lastPersistAt = Date.now();
+}
+
+async function loadSavedPlayer(saveKey) {
+  if (!saveKey) return null;
+  const cached = savedPlayers.get(saveKey);
+  if (cached) return { ...cached };
+
+  try {
+    await storage.ready;
+    const data = await storage.loadPlayerData(saveKey);
+    if (data) {
+      savedPlayers.set(saveKey, data);
+      return { ...data };
+    }
+  } catch (error) {
+    console.error('[STORAGE LOAD]', error?.message || error);
+  }
+
+  return null;
+}
+
+function applyCombatStats(p) {
+  const item = WEAPONS[p.weapon] || WEAPONS.blaster;
+  p.weapon = WEAPONS[p.weapon] ? p.weapon : 'blaster';
+  p.damage = item.damage + Math.max(0, p.level - 1) * 5;
+  p.fireRate = Math.max(100, item.fireRate - Math.max(0, p.level - 1) * 4);
+  p.defense = Math.max(0, p.level - 1) * 2;
+  p.speed = speedForLevel(p.level);
+}
+
+function resetProgressAfterDeath(p) {
+  p.level = 1;
+  p.hp = 0;
+  p.xp = 0;
+  p.score = 0;
+  p.kills = 0;
+  p.pvpKills = 0;
+  applyCombatStats(p);
+}
+
+function levelUpIfNeeded(p) {
+  if ((p.kills || 0) <= 0 || p.kills % 5 !== 0) return;
+  p.level += 1;
+  p.xp = 0;
+  p.hp = Math.min(maxHpForLevel(p.level), Math.max(1, p.hp));
+  applyCombatStats(p);
+}
+
+function seededRandomFactory(seed) {
+  let state = seed >>> 0;
+  return function random() {
+    state = (Math.imul(state, 1664525) + 1013904223) >>> 0;
+    return state / 4294967296;
+  };
+}
+
+function createWorldWalls() {
+  const random = seededRandomFactory(WORLD_WALL_SEED);
+  const walls = [];
+
+  for (let i = 0; i < WORLD_WALL_COUNT; i++) {
+    let created = null;
+
+    for (let attempt = 0; attempt < 80 && !created; attempt++) {
+      const w = Math.round(45 + random() * 85);
+      const h = Math.round(45 + random() * 85);
+      const x = Math.round(120 + random() * (WORLD.w - 240));
+      const y = Math.round(120 + random() * (WORLD.h - 240));
+
+      if (Math.hypot(x - SAFE_ZONE.x, y - SAFE_ZONE.y) < SAFE_ZONE.r + 120) {
+        continue;
+      }
+
+      let overlaps = false;
+      for (const wall of walls) {
+        const overlapX = Math.abs(x - wall.x) < (w + wall.w) / 2 + 12;
+        const overlapY = Math.abs(y - wall.y) < (h + wall.h) / 2 + 12;
+        if (overlapX && overlapY) {
+          overlaps = true;
+          break;
+        }
+      }
+
+      if (!overlaps) {
+        created = {
+          id: 'w' + (i + 1),
+          x,
+          y,
+          w,
+          h,
+          hp: 100,
+          maxHp: 100
+        };
+      }
+    }
+
+    if (created) walls.push(created);
+  }
+
+  return walls;
+}
+
+const WORLD_WALLS = createWorldWalls();
+
+function ensureRoomWalls(code) {
+  if (!roomWalls.has(code) || !roomWalls.get(code)?.length) {
+    roomWalls.set(
+      code,
+      WORLD_WALLS.map((wall) => ({ ...wall }))
+    );
+  }
+  return roomWalls.get(code);
+}
+
+function sendWallState(code) {
+  broadcastRoom(code, {
+    type: 'wall_state',
+    walls: ensureRoomWalls(code)
+  });
+}
+
+function collidesWithWall(x, y, radius, walls) {
+  for (const wall of walls || []) {
+    const closestX = clamp(x, wall.x - wall.w / 2, wall.x + wall.w / 2);
+    const closestY = clamp(y, wall.y - wall.h / 2, wall.y + wall.h / 2);
+    if (Math.hypot(x - closestX, y - closestY) < radius + 2) return wall;
   }
   return null;
 }
-function handleShot(ws){
-  const shooter=clients.get(ws);
-  if(!shooter || !shooter.room || !shooter.alive)return;
-  if(inSafeZone(shooter.x,shooter.y,24))return;
-  if((shooter.ammo||0)<=0){send(ws,{type:"ammo_empty"});return;}
-  const now=Date.now();
-  const cooldown=Math.max(100,Math.min(500,Number(shooter.fireRate)||280));
-  if(now-shooter.lastShot<cooldown)return;
-  shooter.lastShot=now;
 
-  const room=rooms.get(shooter.room);
-  if(!room)return;
-  const damage=clamp(Number(shooter.damage)||25,10,150);
-  const maxRange=1000;
-  let targetPlayer=null,targetEnemy=null,best=Infinity;
+function rayAabbDistance(originX, originY, dirX, dirY, wall) {
+  const minX = wall.x - wall.w / 2;
+  const maxX = wall.x + wall.w / 2;
+  const minY = wall.y - wall.h / 2;
+  const maxY = wall.y + wall.h / 2;
 
-  for(const otherWs of room){
-    const targetPlayerData=clients.get(otherWs);
-    if(!targetPlayerData || targetPlayerData===shooter || !targetPlayerData.alive || inSafeZone(targetPlayerData.x,targetPlayerData.y,24))continue;
-    const dx=targetPlayerData.x-shooter.x,dy=targetPlayerData.y-shooter.y;
-    const d=Math.hypot(dx,dy);
-    if(d>maxRange)continue;
-    let diff=Math.atan2(dy,dx)-shooter.angle;
-    diff=Math.atan2(Math.sin(diff),Math.cos(diff));
-    const hitWidth=.16 + 24/Math.max(d,60);
-    if(Math.abs(diff)<=hitWidth && d<best){best=d;targetPlayer={ws:otherWs,p:targetPlayerData};}
+  let txMin = -Infinity;
+  let txMax = Infinity;
+  let tyMin = -Infinity;
+  let tyMax = Infinity;
+
+  if (Math.abs(dirX) < 1e-9) {
+    if (originX < minX || originX > maxX) return Infinity;
+  } else {
+    const tx1 = (minX - originX) / dirX;
+    const tx2 = (maxX - originX) / dirX;
+    txMin = Math.min(tx1, tx2);
+    txMax = Math.max(tx1, tx2);
   }
 
-  const enemies=ensureRoomEnemies(shooter.room);
-  for(const enemy of enemies){
-    const dx=enemy.x-shooter.x,dy=enemy.y-shooter.y;
-    const d=Math.hypot(dx,dy);
-    if(d>maxRange)continue;
-    let diff=Math.atan2(dy,dx)-shooter.angle;
-    diff=Math.atan2(Math.sin(diff),Math.cos(diff));
-    const hitWidth=.16 + enemy.r/Math.max(d,60);
-    if(Math.abs(diff)<=hitWidth && d<best){best=d;targetEnemy=enemy;targetPlayer=null;}
+  if (Math.abs(dirY) < 1e-9) {
+    if (originY < minY || originY > maxY) return Infinity;
+  } else {
+    const ty1 = (minY - originY) / dirY;
+    const ty2 = (maxY - originY) / dirY;
+    tyMin = Math.min(ty1, ty2);
+    tyMax = Math.max(ty1, ty2);
   }
 
-  shooter.ammo=Math.max(0,(shooter.ammo||0)-1);sendStats(shooter);
-  broadcastRoom(shooter.room,{type:"player_shot",id:shooter.id,x:shooter.x,y:shooter.y,angle:shooter.angle});
+  const entry = Math.max(txMin, tyMin);
+  const exit = Math.min(txMax, tyMax);
 
-  if(targetPlayer){
-    targetPlayer.p.hp=clamp(targetPlayer.p.hp-Math.max(1,damage-(targetPlayer.p.defense||0)),0,100);
-    send(targetPlayer.ws,{type:"pvp_damage",from:shooter.id,amount:damage,hp:targetPlayer.p.hp});
-    broadcastRoom(shooter.room,{type:"pvp_hit",shooter:shooter.id,target:targetPlayer.p.id,amount:damage,hp:targetPlayer.p.hp});
-    if(targetPlayer.p.hp<=0){
-      targetPlayer.p.alive=false;
-      const lostScore=targetPlayer.p.score||0;
-      targetPlayer.p.level=1;targetPlayer.p.hp=0;targetPlayer.p.damage=25;targetPlayer.p.defense=0;targetPlayer.p.fireRate=280;
-      targetPlayer.p.xp=0;targetPlayer.p.score=0;targetPlayer.p.kills=0;targetPlayer.p.pvpKills=0;
-      shooter.kills=(shooter.kills||0)+1;shooter.pvpKills=(shooter.pvpKills||0)+1;shooter.score=(shooter.score||0)+25;shooter.xp=(shooter.xp||0)+40;
-      if(shooter.kills%5===0){shooter.level++;shooter.xp=0;shooter.damage+=5;shooter.defense+=2;shooter.fireRate=Math.max(140,shooter.fireRate-8);}
-      send(targetPlayer.ws,{type:"pvp_dead",killer:shooter.name,lostScore});
-      broadcastRoom(shooter.room,{type:"pvp_kill",killer:shooter.id,target:targetPlayer.p.id});
-      sendStats(shooter);
-    }
-    return;
+  if (exit < 0 || entry > exit) return Infinity;
+  return entry >= 0 ? entry : exit >= 0 ? 0 : Infinity;
+}
+
+function makeEnemy() {
+  const elite = Math.random() < 0.2;
+  const r = elite ? 27 : 21;
+  const shapes = ['square', 'triangle', 'hex'];
+
+  let x = 0;
+  let y = 0;
+
+  do {
+    x = Math.random() * (WORLD.w - 200) + 100;
+    y = Math.random() * (WORLD.h - 200) + 100;
+  } while (
+    inSafeZone(x, y, 60) ||
+    collidesWithWall(x, y, r, WORLD_WALLS)
+  );
+
+  return {
+    id: Math.random().toString(36).slice(2, 10),
+    x,
+    y,
+    r,
+    hp: elite ? 85 : 50,
+    maxHp: elite ? 85 : 50,
+    speed: elite ? 55 : 75,
+    damage: elite ? 14 : 9,
+    kind: elite ? 'elite' : 'drone',
+    shape: shapes[Math.floor(Math.random() * shapes.length)]
+  };
+}
+
+function ensureRoomEnemies(code) {
+  if (!roomEnemies.has(code)) {
+    roomEnemies.set(code, []);
   }
 
-  if(targetEnemy){
-    targetEnemy.hp=clamp(targetEnemy.hp-damage,0,targetEnemy.maxHp);
-    broadcastRoom(shooter.room,{type:"enemy_hit",id:targetEnemy.id,hp:targetEnemy.hp});
-    if(targetEnemy.hp<=0){
-      const reward=targetEnemy.kind==="elite"?30:12;
-      const xp=targetEnemy.kind==="elite"?35:20;
-      shooter.gold=(shooter.gold||0)+reward;
-      const index=enemies.findIndex(e=>e.id===targetEnemy.id);
-      if(index>=0)enemies.splice(index,1);
-      shooter.kills=(shooter.kills||0)+1;shooter.score=(shooter.score||0)+reward;shooter.xp=(shooter.xp||0)+xp;
-      if(shooter.kills%5===0){shooter.level++;shooter.xp=0;shooter.damage+=5;shooter.defense+=2;shooter.fireRate=Math.max(140,shooter.fireRate-8);}
-      sendStats(shooter);
-      broadcastRoom(shooter.room,{type:"enemy_dead",id:targetEnemy.id,killer:shooter.id});
+  const list = roomEnemies.get(code);
+  while (list.length < 18) list.push(makeEnemy());
+  return list;
+}
+
+function sendEnemyState(code) {
+  const room = rooms.get(code);
+  if (!room || !room.size) return;
+  broadcastRoom(code, {
+    type: 'enemy_state',
+    enemies: ensureRoomEnemies(code)
+  });
+}
+
+function broadcastRoom(code, message, except = null) {
+  const room = rooms.get(code);
+  if (!room || !room.size) return;
+
+  const data = JSON.stringify(message);
+
+  for (const ws of room) {
+    if (ws === except || ws.readyState !== 1) continue;
+    try {
+      ws.send(data);
+    } catch (error) {
+      console.error('[WS BROADCAST]', error?.message || error);
     }
   }
 }
 
-const httpServer=http.createServer((req,res)=>{
-  if(req.url==="/health" || req.url==="/"){
-    res.writeHead(200,{"Content-Type":"application/json","Access-Control-Allow-Origin":"*","Cache-Control":"no-store"});
-    return res.end(JSON.stringify({
-      ok:true,
-      game:"Neon Core",
-      players:clients.size,
-      rooms:rooms.size,
-      pvp:true,
-      version:SERVER_VERSION,
-      startedAt:SERVER_STARTED_AT,
-      status:"online"
-    }));
+async function leaveRoom(ws) {
+  const p = clients.get(ws);
+  if (!p || !p.room) {
+    if (p?.saveKey) void persistPlayer(p);
+    return;
   }
-  res.writeHead(404);res.end();
+
+  const code = p.room;
+
+  if (p.saveKey) {
+    await persistPlayer(p);
+  }
+
+  const room = rooms.get(code);
+  if (room) {
+    room.delete(ws);
+
+    if (room.size === 0 && code !== 'OPEN' && !PUBLIC_ROOMS.includes(code)) {
+      rooms.delete(code);
+      roomEnemies.delete(code);
+      roomWalls.delete(code);
+    } else {
+      broadcastRoom(code, {
+        type: 'player_leave',
+        id: p.id
+      });
+      sendPlayerList(code);
+    }
+  }
+
+  p.room = '';
+}
+
+async function joinRoom(ws, requestedCode, create = false) {
+  const p = clients.get(ws);
+  if (!p) return;
+
+  let code = String(requestedCode || '')
+    .toUpperCase()
+    .replace(/[^A-Z0-9]/g, '')
+    .slice(0, 5);
+
+  if (create || !code) {
+    code = makeCode();
+    rooms.set(code, new Set());
+    roomEnemies.set(code, []);
+    roomWalls.set(code, WORLD_WALLS.map((wall) => ({ ...wall })));
+  }
+
+  const room = rooms.get(code);
+
+  if (!room) {
+    send(ws, { type: 'room_error', message: 'Sala no encontrada' });
+    return;
+  }
+
+  if (room.size >= MAX_PLAYERS) {
+    send(ws, { type: 'room_error', message: 'Sala llena' });
+    return;
+  }
+
+  await leaveRoom(ws);
+
+  room.add(ws);
+  ensureRoomEnemies(code);
+  ensureRoomWalls(code);
+
+  p.room = code;
+
+  const spawn = spawnPosition(code);
+
+  if (!p.hasSaved) {
+    p.x = spawn.x;
+    p.y = spawn.y;
+    p.hp = maxHpForLevel(p.level);
+  }
+
+  p.angle = 0;
+  p.alive = true;
+  p.hasSaved = false;
+  p.lastStateAt = Date.now();
+  p.stateViolations = 0;
+  p.lastShot = 0;
+
+  p.x = clamp(p.x, 35, WORLD.w - 35);
+  p.y = clamp(p.y, 35, WORLD.h - 35);
+  p.hp = clamp(Number(p.hp) || maxHpForLevel(p.level), 1, maxHpForLevel(p.level));
+  applyCombatStats(p);
+
+  send(ws, {
+    type: 'room_joined',
+    code,
+    players: publicPlayers(room),
+    enemies: ensureRoomEnemies(code),
+    walls: ensureRoomWalls(code),
+    safeZone: SAFE_ZONE,
+    spawnProtectionMs: 5000
+  });
+
+  sendStats(p);
+
+  broadcastRoom(
+    code,
+    {
+      type: 'player_join',
+      player: publicPlayer(p)
+    },
+    ws
+  );
+
+  sendPlayerList(code);
+}
+
+function spawnPosition(code) {
+  const room = rooms.get(code) || new Set();
+  const index = room.size;
+
+  const spots = [
+    [3000, 2200],
+    [2900, 2200],
+    [3100, 2200],
+    [3000, 2100],
+    [2750, 2200],
+    [3250, 2200],
+    [3000, 1900],
+    [3000, 2500],
+    [2700, 1900],
+    [3300, 1900],
+    [2700, 2500],
+    [3300, 2500],
+    [2850, 1850],
+    [3150, 1850],
+    [2850, 2550],
+    [3150, 2550]
+  ];
+
+  const spot = spots[index % spots.length];
+  return { x: spot[0], y: spot[1] };
+}
+
+function findPlayer(id, room) {
+  for (const ws of room || []) {
+    const p = clients.get(ws);
+    if (p && p.id === id) return { ws, p };
+  }
+  return null;
+}
+
+function shopBuy(ws, requestedWeapon) {
+  const p = clients.get(ws);
+  if (!p) return;
+
+  const weapon = String(requestedWeapon || '').toLowerCase();
+  const item = WEAPONS[weapon];
+
+  if (!p.room) {
+    send(ws, { type: 'shop_result', ok: false, message: 'No estás dentro de una sala.' });
+    return;
+  }
+
+  if (!p.alive) {
+    send(ws, { type: 'shop_result', ok: false, message: 'No puedes comprar estando destruido.' });
+    return;
+  }
+
+  if (Math.hypot(p.x - SHOP_NPC.x, p.y - SHOP_NPC.y) > SHOP_NPC.r) {
+    send(ws, { type: 'shop_result', ok: false, message: 'Acércate al vendedor de munición.' });
+    return;
+  }
+
+  if (!item) {
+    send(ws, { type: 'shop_result', ok: false, message: 'Arma no disponible.' });
+    return;
+  }
+
+  if (p.weapon === weapon) {
+    send(ws, {
+      type: 'shop_result',
+      ok: false,
+      message: 'Ya tienes equipada ' + item.name + '.',
+      weapon: p.weapon
+    });
+    return;
+  }
+
+  const gold = Math.max(0, Number(p.gold) || 0);
+
+  if (gold < item.cost) {
+    send(ws, {
+      type: 'shop_result',
+      ok: false,
+      message: 'Necesitas ' + item.cost + ' de oro para ' + item.name + '.'
+    });
+    return;
+  }
+
+  p.gold = gold - item.cost;
+  p.weapon = weapon;
+  applyCombatStats(p);
+
+  void persistPlayer(p);
+
+  send(ws, {
+    type: 'shop_result',
+    ok: true,
+    message: 'Equipada ' + item.name + '.',
+    weapon: p.weapon,
+    gold: p.gold,
+    damage: p.damage,
+    defense: p.defense,
+    fireRate: p.fireRate,
+    speed: p.speed
+  });
+
+  sendStats(p);
+  sendPlayerList(p.room);
+}
+
+function depositGold(ws) {
+  const p = clients.get(ws);
+
+  if (!p) return;
+
+  if (!p.room) {
+    send(ws, { type: 'deposit_result', ok: false, message: 'No estás dentro de una sala.' });
+    return;
+  }
+
+  if (!p.alive) {
+    send(ws, { type: 'deposit_result', ok: false, message: 'No puedes usar el banco estando destruido.' });
+    return;
+  }
+
+  if (Math.hypot(p.x - BANK_NPC.x, p.y - BANK_NPC.y) > BANK_NPC.r) {
+    send(ws, { type: 'deposit_result', ok: false, message: 'Acércate al BANCO.' });
+    return;
+  }
+
+  const gold = Math.max(0, Number(p.gold) || 0);
+  const diamonds = Math.max(0, Number(p.diamonds) || 0);
+
+  if (gold <= 0 && diamonds <= 0) {
+    send(ws, {
+      type: 'deposit_result',
+      ok: false,
+      message: 'No tienes oro ni diamantes para guardar.'
+    });
+    return;
+  }
+
+  p.gold = 0;
+  p.diamonds = 0;
+  p.bankedGold = (Number(p.bankedGold) || 0) + gold;
+  p.bankedDiamonds = (Number(p.bankedDiamonds) || 0) + diamonds;
+
+  void persistPlayer(p);
+
+  send(ws, {
+    type: 'deposit_result',
+    ok: true,
+    message: 'Recursos asegurados en el banco.',
+    gold: p.gold,
+    diamonds: p.diamonds,
+    bankedGold: p.bankedGold,
+    bankedDiamonds: p.bankedDiamonds
+  });
+
+  sendStats(p);
+  sendPlayerList(p.room);
+}
+
+function buyAmmo(ws) {
+  const p = clients.get(ws);
+  if (!p) return;
+
+  if (!p.room) {
+    send(ws, { type: 'shop_result', ok: false, message: 'No estás dentro de una sala.' });
+    return;
+  }
+
+  if (!p.alive) {
+    send(ws, { type: 'shop_result', ok: false, message: 'No puedes comprar estando destruido.' });
+    return;
+  }
+
+  if (Math.hypot(p.x - SHOP_NPC.x, p.y - SHOP_NPC.y) > SHOP_NPC.r) {
+    send(ws, {
+      type: 'shop_result',
+      ok: false,
+      message: 'Acércate al vendedor de munición.'
+    });
+    return;
+  }
+
+  const ammo = clamp(Number(p.ammo) || 0, 0, MAX_AMMO);
+  const gold = Math.max(0, Number(p.gold) || 0);
+
+  if (ammo >= MAX_AMMO) {
+    send(ws, { type: 'shop_result', ok: false, message: 'Munición al máximo.' });
+    return;
+  }
+
+  if (gold < AMMO_PACK_COST) {
+    send(ws, { type: 'shop_result', ok: false, message: 'Necesitas 50 de oro.' });
+    return;
+  }
+
+  const purchased = Math.min(AMMO_PACK_SIZE, MAX_AMMO - ammo);
+  p.gold = gold - AMMO_PACK_COST;
+  p.ammo = ammo + purchased;
+
+  void persistPlayer(p);
+
+  send(ws, {
+    type: 'shop_result',
+    ok: true,
+    message: 'Compraste ' + purchased + ' balas.',
+    gold: p.gold,
+    ammo: p.ammo,
+    maxAmmo: MAX_AMMO
+  });
+
+  sendStats(p);
+}
+
+function handleShot(ws) {
+  const shooter = clients.get(ws);
+
+  if (!shooter || !shooter.room || !shooter.alive) return;
+
+  if (inSafeZone(shooter.x, shooter.y, 24)) return;
+
+  if ((shooter.ammo || 0) <= 0) {
+    send(ws, { type: 'ammo_empty' });
+    return;
+  }
+
+  const now = Date.now();
+  const cooldown = Math.max(100, Math.min(1000, Number(shooter.fireRate) || 350));
+
+  if (now - shooter.lastShot < cooldown) return;
+
+  shooter.lastShot = now;
+
+  const room = rooms.get(shooter.room);
+  if (!room) return;
+
+  const damage = clamp(Number(shooter.damage) || 25, 10, 150);
+  const maxRange = 1000;
+
+  let targetPlayer = null;
+  let targetEnemy = null;
+  let best = Infinity;
+
+  const dirX = Math.cos(shooter.angle);
+  const dirY = Math.sin(shooter.angle);
+
+  for (const otherWs of room) {
+    const targetPlayerData = clients.get(otherWs);
+
+    if (
+      !targetPlayerData ||
+      targetPlayerData === shooter ||
+      !targetPlayerData.alive ||
+      inSafeZone(targetPlayerData.x, targetPlayerData.y, 24)
+    ) {
+      continue;
+    }
+
+    const dx = targetPlayerData.x - shooter.x;
+    const dy = targetPlayerData.y - shooter.y;
+    const d = Math.hypot(dx, dy);
+
+    if (d > maxRange) continue;
+
+    let diff = Math.atan2(dy, dx) - shooter.angle;
+    diff = Math.atan2(Math.sin(diff), Math.cos(diff));
+
+    const hitWidth = 0.16 + 24 / Math.max(d, 60);
+
+    if (Math.abs(diff) <= hitWidth && d < best) {
+      best = d;
+      targetPlayer = { ws: otherWs, p: targetPlayerData };
+      targetEnemy = null;
+    }
+  }
+
+  const enemies = ensureRoomEnemies(shooter.room);
+
+  for (const enemy of enemies) {
+    const dx = enemy.x - shooter.x;
+    const dy = enemy.y - shooter.y;
+    const d = Math.hypot(dx, dy);
+
+    if (d > maxRange) continue;
+
+    let diff = Math.atan2(dy, dx) - shooter.angle;
+    diff = Math.atan2(Math.sin(diff), Math.cos(diff));
+
+    const hitWidth = 0.16 + enemy.r / Math.max(d, 60);
+
+    if (Math.abs(diff) <= hitWidth && d < best) {
+      best = d;
+      targetEnemy = enemy;
+      targetPlayer = null;
+    }
+  }
+
+  const walls = ensureRoomWalls(shooter.room);
+  let nearestWall = null;
+  let nearestWallDistance = Infinity;
+
+  for (const wall of walls) {
+    const distance = rayAabbDistance(shooter.x, shooter.y, dirX, dirY, wall);
+    if (distance >= 0 && distance <= maxRange && distance < nearestWallDistance) {
+      nearestWallDistance = distance;
+      nearestWall = wall;
+    }
+  }
+
+  shooter.ammo = Math.max(0, (shooter.ammo || 0) - 1);
+
+  sendStats(shooter);
+
+  broadcastRoom(shooter.room, {
+    type: 'player_shot',
+    id: shooter.id,
+    x: shooter.x,
+    y: shooter.y,
+    angle: shooter.angle
+  });
+
+  if (nearestWall && nearestWallDistance <= best) {
+    nearestWall.hp = clamp(nearestWall.hp - damage * 0.8, 0, nearestWall.maxHp);
+
+    broadcastRoom(shooter.room, {
+      type: 'wall_hit',
+      id: nearestWall.id,
+      hp: nearestWall.hp,
+      x: nearestWall.x,
+      y: nearestWall.y
+    });
+
+    if (nearestWall.hp <= 0) {
+      const index = walls.findIndex((wall) => wall.id === nearestWall.id);
+      if (index >= 0) walls.splice(index, 1);
+
+      broadcastRoom(shooter.room, {
+        type: 'wall_dead',
+        id: nearestWall.id
+      });
+    }
+
+    return;
+  }
+
+  if (targetPlayer) {
+    const target = targetPlayer.p;
+    const targetMaxHp = maxHpForLevel(target.level);
+
+    target.hp = clamp(
+      target.hp - Math.max(1, damage - (target.defense || 0)),
+      0,
+      targetMaxHp
+    );
+
+    send(targetPlayer.ws, {
+      type: 'pvp_damage',
+      from: shooter.id,
+      amount: damage,
+      hp: target.hp,
+      maxHp: targetMaxHp
+    });
+
+    broadcastRoom(shooter.room, {
+      type: 'pvp_hit',
+      shooter: shooter.id,
+      target: target.id,
+      amount: damage,
+      hp: target.hp,
+      maxHp: targetMaxHp
+    });
+
+    if (target.hp <= 0) {
+      target.alive = false;
+
+      const lostScore = target.score || 0;
+
+      resetProgressAfterDeath(target);
+
+      shooter.kills = (shooter.kills || 0) + 1;
+      shooter.pvpKills = (shooter.pvpKills || 0) + 1;
+      shooter.score = (shooter.score || 0) + 25;
+      shooter.xp = (shooter.xp || 0) + 40;
+
+      levelUpIfNeeded(shooter);
+
+      void persistPlayer(target);
+      void persistPlayer(shooter);
+
+      send(targetPlayer.ws, {
+        type: 'pvp_dead',
+        killer: shooter.name,
+        lostScore
+      });
+
+      sendStats(target);
+      sendStats(shooter);
+
+      broadcastRoom(shooter.room, {
+        type: 'pvp_kill',
+        killer: shooter.id,
+        target: target.id
+      });
+
+      sendPlayerList(shooter.room);
+    }
+
+    return;
+  }
+
+  if (targetEnemy) {
+    targetEnemy.hp = clamp(targetEnemy.hp - damage, 0, targetEnemy.maxHp);
+
+    broadcastRoom(shooter.room, {
+      type: 'enemy_hit',
+      id: targetEnemy.id,
+      hp: targetEnemy.hp
+    });
+
+    if (targetEnemy.hp <= 0) {
+      const reward = targetEnemy.kind === 'elite' ? 30 : 12;
+      const xp = targetEnemy.kind === 'elite' ? 35 : 20;
+
+      shooter.gold = (shooter.gold || 0) + reward;
+
+      const index = enemies.findIndex((enemy) => enemy.id === targetEnemy.id);
+      if (index >= 0) enemies.splice(index, 1);
+
+      shooter.kills = (shooter.kills || 0) + 1;
+      shooter.score = (shooter.score || 0) + reward;
+      shooter.xp = (shooter.xp || 0) + xp;
+
+      levelUpIfNeeded(shooter);
+
+      void persistPlayer(shooter);
+
+      sendStats(shooter);
+
+      broadcastRoom(shooter.room, {
+        type: 'enemy_dead',
+        id: targetEnemy.id,
+        killer: shooter.id
+      });
+    }
+  }
+}
+
+function createPlayer(ws) {
+  const id = Math.random().toString(36).slice(2, 10);
+
+  const player = {
+    id,
+    name: 'Jugador',
+    saveKey: '',
+    x: SAFE_ZONE.x,
+    y: SAFE_ZONE.y,
+    angle: 0,
+    hp: 100,
+    level: 1,
+    damage: 25,
+    defense: 0,
+    fireRate: 350,
+    score: 0,
+    kills: 0,
+    xp: 0,
+    pvpKills: 0,
+    gold: 0,
+    diamonds: 0,
+    bankedGold: 0,
+    bankedDiamonds: 0,
+    ammo: 60,
+    weapon: 'blaster',
+    color: '#39e7ff',
+    room: '',
+    alive: true,
+    frozen: false,
+    lastShot: 0,
+    speed: 205,
+    lastStateAt: Date.now(),
+    stateViolations: 0,
+    lastChatAt: 0,
+    lastPersistAt: 0,
+    lastEnemySyncAt: 0,
+    hasSaved: false,
+    ws
+  };
+
+  return player;
+}
+
+const httpServer = http.createServer(async (req, res) => {
+  if (req.url === '/health' || req.url === '/') {
+    res.writeHead(200, {
+      'Content-Type': 'application/json',
+      'Access-Control-Allow-Origin': '*',
+      'Cache-Control': 'no-store'
+    });
+
+    return res.end(
+      JSON.stringify({
+        ok: true,
+        game: 'Neon Core',
+        players: clients.size,
+        rooms: rooms.size,
+        pvp: true,
+        version: SERVER_VERSION,
+        startedAt: SERVER_STARTED_AT,
+        storage: storage.enabled ? 'postgres' : 'memory',
+        status: 'online'
+      })
+    );
+  }
+
+  res.writeHead(404, {
+    'Content-Type': 'text/plain; charset=utf-8'
+  });
+  res.end('Not Found');
 });
 
-const wss=new WebSocketServer({server:httpServer,path:"/ws"});
+const wss = new WebSocketServer({
+  server: httpServer,
+  path: '/ws'
+});
 
-wss.on("connection",(ws)=>{
-  const id=Math.random().toString(36).slice(2,10);
-  const player={
-    id,name:"Jugador",saveKey:"",x:3000,y:2200,angle:0,hp:100,level:1,
-    damage:25,defense:0,fireRate:280,score:0,kills:0,xp:0,pvpKills:0,gold:0,diamonds:0,bankedGold:0,bankedDiamonds:0,ammo:60,weapon:"blaster",
-    color:"#39e7ff",room:"",alive:true,frozen:false,lastShot:0,speed:205,lastStateAt:Date.now(),stateViolations:0,lastChatAt:0
-  };
-  player.ws=ws;
-  clients.set(ws,player);
-  send(ws,{type:"connected",id});
+wss.on('connection', (ws) => {
+  const player = createPlayer(ws);
+  clients.set(ws, player);
 
-  ws.on("message",(raw)=>{
-    try{
-      const msg=JSON.parse(raw.toString());
-      const p=clients.get(ws);
-      if(!p)return;
+  send(ws, {
+    type: 'connected',
+    id: player.id
+  });
 
-      if(msg.type==="join"){
-        p.name=String(msg.name||"Jugador").slice(0,20);
-        p.saveKey=String(msg.saveKey||"").replace(/[^a-zA-Z0-9_-]/g,"").slice(0,80);
+  ws.on('message', async (raw) => {
+    try {
+      const msg = JSON.parse(raw.toString());
+      const p = clients.get(ws);
 
-        // Un solo tanque por dispositivo/partida: si el navegador abrió otra conexión
-        // con la misma saveKey (por Atrás/Adelante, caché o reconexión), expulsamos
-        // la conexión anterior antes de crear la nueva.
-        if(p.saveKey){
-          // Una sola sesión activa por dispositivo/origen.
-          // La primera conexión conserva el control; la segunda se rechaza.
-          for(const [oldWs,oldP] of clients){
-            if(oldWs!==ws && oldP && oldP.saveKey===p.saveKey){
-              send(ws,{type:"duplicate_session",message:"Ya tienes una sesión activa de Neon Core en este dispositivo."});
-              try{ws.close(4001,"duplicate_session");}catch{}
+      if (!p || !msg || typeof msg.type !== 'string') return;
+
+      if (msg.type === 'join') {
+        p.name = String(msg.name || 'Jugador').trim().slice(0, 20) || 'Jugador';
+        p.saveKey = String(msg.saveKey || '')
+          .replace(/[^a-zA-Z0-9_-]/g, '')
+          .slice(0, 80);
+
+        if (p.saveKey) {
+          for (const [oldWs, oldP] of clients) {
+            if (oldWs !== ws && oldP?.saveKey && oldP.saveKey === p.saveKey) {
+              send(ws, {
+                type: 'duplicate_session',
+                message: 'Ya tienes una sesión activa de Neon Core en este dispositivo.'
+              });
+
+              try {
+                ws.close(4001, 'duplicate_session');
+              } catch {}
+
               clients.delete(ws);
               return;
             }
           }
         }
 
-        const saved=p.saveKey?savedPlayers.get(p.saveKey):null;
-        p.hasSaved=!!saved;
-        if(saved){
-          p.x=Number.isFinite(saved.x)?saved.x:p.x;
-          p.y=Number.isFinite(saved.y)?saved.y:p.y;
-          p.level=Number(saved.level)||1;p.hp=Number(saved.hp)||100;p.damage=Number(saved.damage)||25;p.defense=Number(saved.defense)||0;p.fireRate=Number(saved.fireRate)||280;
-          p.score=saved.score;p.kills=saved.kills;p.xp=saved.xp;p.pvpKills=Number(saved.pvpKills)||0;p.gold=Number(saved.gold)||0;p.bankedGold=Number(saved.bankedGold)||0;p.diamonds=Number(saved.diamonds)||0;p.bankedDiamonds=Number(saved.bankedDiamonds)||0;p.ammo=Math.max(0,Math.min(MAX_AMMO,Number(saved.ammo)??60));p.weapon=WEAPONS[saved.weapon]?saved.weapon:"blaster";p.damage=WEAPONS[p.weapon].damage+(p.level-1)*5;p.fireRate=Math.max(100,WEAPONS[p.weapon].fireRate-(p.level-1)*4);
+        const saved = await loadSavedPlayer(p.saveKey);
+        p.hasSaved = !!saved;
+
+        if (saved) {
+          p.x = Number.isFinite(Number(saved.x)) ? Number(saved.x) : p.x;
+          p.y = Number.isFinite(Number(saved.y)) ? Number(saved.y) : p.y;
+          p.level = clamp(Number(saved.level) || 1, 1, 1000);
+          p.hp = Number(saved.hp) || maxHpForLevel(p.level);
+          p.score = Number(saved.score) || 0;
+          p.kills = Number(saved.kills) || 0;
+          p.xp = Number(saved.xp) || 0;
+          p.pvpKills = Number(saved.pvpKills) || 0;
+          p.gold = Math.max(0, Number(saved.gold) || 0);
+          p.bankedGold = Math.max(0, Number(saved.bankedGold) || 0);
+          p.diamonds = Math.max(0, Number(saved.diamonds) || 0);
+          p.bankedDiamonds = Math.max(0, Number(saved.bankedDiamonds) || 0);
+          p.ammo = clamp(Number(saved.ammo) || 0, 0, MAX_AMMO);
+          p.weapon = WEAPONS[saved.weapon] ? saved.weapon : 'blaster';
         }
-        p.color=String(msg.color||"#39e7ff");
-        if(msg.room) joinRoom(ws,msg.room,false);
-        else if(msg.createRoom) joinRoom(ws,"",true);
-        else joinRoom(ws,"OPEN",false);
-        if(p.room) { broadcastRoom(p.room,{type:"player_update",player:p},ws); sendPlayerList(p.room); }
+
+        if (msg.color) {
+          const color = String(msg.color);
+          p.color = /^#[0-9a-fA-F]{6}$/.test(color) ? color : '#39e7ff';
+        }
+
+        applyCombatStats(p);
+
+        if (msg.room) {
+          await joinRoom(ws, msg.room, false);
+        } else if (msg.createRoom) {
+          await joinRoom(ws, '', true);
+        } else {
+          await joinRoom(ws, 'OPEN', false);
+        }
+
+        if (p.room) {
+          broadcastRoom(
+            p.room,
+            {
+              type: 'player_update',
+              player: publicPlayer(p)
+            },
+            ws
+          );
+          sendPlayerList(p.room);
+        }
+
+        return;
       }
 
-      if(msg.type==="chat"){
-        if(!p.room || p.frozen)return;
-        const now=Date.now();
-        if(now-(p.lastChatAt||0)<700)return;
-        const text=String(msg.text||"").replace(/[\\u0000-\\u001F\\u007F]/g," ").trim().slice(0,120);
-        if(!text)return;
-        p.lastChatAt=now;
-        broadcastRoom(p.room,{type:"chat",id:p.id,name:p.name,text,at:now});
+      if (msg.type === 'chat') {
+        if (!p.room || p.frozen) return;
+
+        const now = Date.now();
+        if (now - (p.lastChatAt || 0) < 700) return;
+
+        const text = String(msg.text || '')
+          .replace(/[\u0000-\u001F\u007F]/g, ' ')
+          .trim()
+          .slice(0, 120);
+
+        if (!text) return;
+
+        p.lastChatAt = now;
+
+        broadcastRoom(p.room, {
+          type: 'chat',
+          id: p.id,
+          name: p.name,
+          text,
+          at: now
+        });
+
+        return;
       }
 
-      if(msg.type==="create_room") joinRoom(ws,"",true);
-      if(msg.type==="join_room") joinRoom(ws,msg.code,false);
+      if (msg.type === 'create_room') {
+        await joinRoom(ws, '', true);
+        return;
+      }
 
-      if(msg.type==="state" && p.room && !p.frozen){
-        // IDENTIDAD: el servidor usa esta conexión WebSocket como identidad real.
-        // Nunca aceptamos un id enviado por el cliente.
-        const nx=Number.isFinite(msg.x)?msg.x:p.x;
-        const ny=Number.isFinite(msg.y)?msg.y:p.y;
-        const now=Date.now();
-        const elapsed=Math.max(0.05,Math.min(1.0,(now-p.lastStateAt)/1000));
-        const distance=Math.hypot(nx-p.x,ny-p.y);
-        const maxDistance=p.speed*elapsed+45;
+      if (msg.type === 'join_room') {
+        await joinRoom(ws, msg.code, false);
+        return;
+      }
 
-        // Anti-teleport básico: una conexión no puede mover su tanque
-        // a una distancia imposible aunque manipule el JavaScript del cliente.
-        if(distance>maxDistance){
-          p.stateViolations++;
-          send(ws,{type:"state_rejected",x:p.x,y:p.y,reason:"movement_limit"});
-          if(p.stateViolations>=8){
-            try{ws.close(4003,"movement_violation");}catch{}
+      if (msg.type === 'state') {
+        if (!p.room || p.frozen || !p.alive) return;
+
+        const nx = Number.isFinite(Number(msg.x)) ? Number(msg.x) : p.x;
+        const ny = Number.isFinite(Number(msg.y)) ? Number(msg.y) : p.y;
+        const now = Date.now();
+
+        const elapsed = Math.max(
+          0.05,
+          Math.min(1, (now - p.lastStateAt) / 1000)
+        );
+
+        const distance = Math.hypot(nx - p.x, ny - p.y);
+        const maxDistance = p.speed * elapsed + 45;
+
+        if (distance > maxDistance) {
+          p.stateViolations += 1;
+
+          send(ws, {
+            type: 'state_rejected',
+            x: p.x,
+            y: p.y,
+            reason: 'movement_limit'
+          });
+
+          if (p.stateViolations >= 8) {
+            try {
+              ws.close(4003, 'movement_violation');
+            } catch {}
           }
+
           return;
         }
 
-        p.stateViolations=Math.max(0,p.stateViolations-1);
-        p.lastStateAt=now;
-        p.x=clamp(nx,35,WORLD.w-35);
-        p.y=clamp(ny,35,WORLD.h-35);
-        p.angle=Number.isFinite(msg.angle)?msg.angle:p.angle;
+        const walls = ensureRoomWalls(p.room);
+        if (collidesWithWall(nx, ny, 16, walls)) {
+          send(ws, {
+            type: 'state_rejected',
+            x: p.x,
+            y: p.y,
+            reason: 'wall'
+          });
+          return;
+        }
 
-        // HP, daño, defensa, XP, oro, munición, arma y cadencia
-        // pertenecen exclusivamente al servidor.
-        broadcastRoom(p.room,{type:"player_update",player:p},ws);
+        p.stateViolations = Math.max(0, p.stateViolations - 1);
+        p.lastStateAt = now;
+        p.x = clamp(nx, 35, WORLD.w - 35);
+        p.y = clamp(ny, 35, WORLD.h - 35);
+
+        if (Number.isFinite(Number(msg.angle))) {
+          p.angle = Number(msg.angle);
+        }
+
+        broadcastRoom(
+          p.room,
+          {
+            type: 'player_update',
+            player: publicPlayer(p)
+          },
+          ws
+        );
+
         sendPlayerList(p.room);
+        return;
       }
 
-      if(msg.type==="fire" && !p.frozen) handleShot(ws);
-      if(msg.type==="buy_ammo" && !p.frozen) buyAmmo(ws);
-      if(msg.type==="buy_weapon" && !p.frozen) shopBuy(ws,msg.weapon);
-      if(msg.type==="deposit_gold" && !p.frozen) depositGold(ws);
+      if (msg.type === 'fire') {
+        if (!p.frozen) handleShot(ws);
+        return;
+      }
 
-      if(msg.type==="save" && p.room){
-        p.frozen=true;
-        p.angle=Number.isFinite(msg.angle)?msg.angle:p.angle;
-        // El cliente NO puede modificar su vida al guardar.
-        // Se persiste únicamente el estado que ya posee el servidor.
-        p.hp=clamp(p.hp,0,100+(p.level-1)*15);
-        const data={
-          name:p.name,x:p.x,y:p.y,level:p.level,hp:p.hp,damage:p.damage,defense:p.defense,fireRate:p.fireRate,
-          score:p.score,kills:p.kills,xp:p.xp,pvpKills:p.pvpKills,gold:p.gold||0,bankedGold:p.bankedGold||0,diamonds:p.diamonds||0,bankedDiamonds:p.bankedDiamonds||0,ammo:p.ammo||0,weapon:p.weapon||"blaster"
-        };
-        if(p.saveKey)savedPlayers.set(p.saveKey,data);
-        send(ws,{type:"save_ok",savedAt:Date.now(),data});
-        broadcastRoom(p.room,{type:"player_update",player:p});
+      if (msg.type === 'buy_ammo') {
+        if (!p.frozen) buyAmmo(ws);
+        return;
+      }
+
+      if (msg.type === 'buy_weapon') {
+        if (!p.frozen) shopBuy(ws, msg.weapon);
+        return;
+      }
+
+      if (msg.type === 'deposit_gold') {
+        if (!p.frozen) depositGold(ws);
+        return;
+      }
+
+      if (msg.type === 'save') {
+        if (!p.room) return;
+
+        p.frozen = true;
+        if (Number.isFinite(Number(msg.angle))) {
+          p.angle = Number(msg.angle);
+        }
+
+        p.hp = clamp(p.hp, 0, maxHpForLevel(p.level));
+
+        await persistPlayer(p);
+
+        send(ws, {
+          type: 'save_ok',
+          savedAt: Date.now(),
+          data: capturePlayerData(p)
+        });
+
+        broadcastRoom(p.room, {
+          type: 'player_update',
+          player: publicPlayer(p)
+        });
+
         sendPlayerList(p.room);
+        return;
       }
 
-      if(msg.type==="resume" && p.room){
-        p.frozen=false;
-        send(ws,{type:"resume_ok"});
+      if (msg.type === 'resume') {
+        if (!p.room) return;
+
+        p.frozen = false;
+        send(ws, { type: 'resume_ok' });
+        return;
       }
 
-      if(msg.type==="respawn" && p.room){
-        const spawn=spawnPosition(p.room);
-        p.x=spawn.x;p.y=spawn.y;p.angle=0;p.hp=100;p.alive=true;
-        p.level=1;p.damage=25;p.defense=0;p.fireRate=280;p.xp=0;p.score=0;p.kills=0;p.pvpKills=0;p.ammo=Math.max(30,Math.min(MAX_AMMO,p.ammo||0));p.lastShot=0;
-        send(ws,{type:"respawn_ok",x:p.x,y:p.y,hp:p.hp,enemies:ensureRoomEnemies(p.room),safeZone:SAFE_ZONE,spawnProtectionMs:5000});
+      if (msg.type === 'respawn') {
+        if (!p.room) return;
+
+        const spawn = spawnPosition(p.room);
+
+        p.x = spawn.x;
+        p.y = spawn.y;
+        p.angle = 0;
+        p.alive = true;
+        p.frozen = false;
+        p.hp = maxHpForLevel(p.level);
+        p.ammo = Math.max(30, clamp(Number(p.ammo) || 0, 0, MAX_AMMO));
+        p.lastShot = 0;
+        applyCombatStats(p);
+
+        await persistPlayer(p);
+
+        send(ws, {
+          type: 'respawn_ok',
+          x: p.x,
+          y: p.y,
+          hp: p.hp,
+          maxHp: maxHpForLevel(p.level),
+          speed: p.speed,
+          weapon: p.weapon,
+          enemies: ensureRoomEnemies(p.room),
+          walls: ensureRoomWalls(p.room),
+          safeZone: SAFE_ZONE,
+          spawnProtectionMs: 5000
+        });
+
         sendStats(p);
-        broadcastRoom(p.room,{type:"player_update",player:p},ws);
+        broadcastRoom(p.room, {
+          type: 'player_update',
+          player: publicPlayer(p)
+        }, ws);
         sendPlayerList(p.room);
       }
-    }catch{}
+    } catch (error) {
+      console.error('[WS MESSAGE]', error?.stack || error);
+      try {
+        send(ws, {
+          type: 'server_error',
+          message: 'El servidor rechazó una operación inválida.'
+        });
+      } catch {}
+    }
   });
 
-  ws.on("close",()=>{
-    leaveRoom(ws);
-    clients.delete(ws);
+  ws.on('close', () => {
+    void (async () => {
+      try {
+        const current = clients.get(ws);
+        if (current?.saveKey) await persistPlayer(current);
+        await leaveRoom(ws);
+      } catch (error) {
+        console.error('[WS CLOSE]', error?.message || error);
+      } finally {
+        clients.delete(ws);
+      }
+    })();
+  });
+
+  ws.on('error', (error) => {
+    console.error('[WS ERROR]', error?.message || error);
   });
 });
 
-setInterval(()=>{
-  const dt=.05;
-  for(const p of clients.values()){
-    if(!p.room||!p.alive||p.frozen)continue;
-    const maxHp=100+(p.level-1)*15;
-    if(p.hp<maxHp){
-      p.hp=Math.min(maxHp,p.hp+HP_REGEN_PER_SEC*dt);
-      send(p.ws,{type:"hp_regen",hp:p.hp,maxHp});
+const storageReady = storage.initStorage().catch((error) => {
+  console.error('[STORAGE INIT]', error?.stack || error);
+  return false;
+});
+
+storage.ready = storageReady;
+
+setInterval(() => {
+  const now = Date.now();
+  const dt = TICK_MS / 1000;
+
+  for (const p of clients.values()) {
+    if (!p.room || !p.alive || p.frozen) continue;
+
+    const maxHp = maxHpForLevel(p.level);
+
+    if (p.hp < maxHp) {
+      p.hp = Math.min(maxHp, p.hp + HP_REGEN_PER_SEC * dt);
+
+      send(p.ws, {
+        type: 'hp_regen',
+        hp: p.hp,
+        maxHp
+      });
+    }
+
+    if (p.saveKey && now - p.lastPersistAt >= AUTOSAVE_MS) {
+      void persistPlayer(p);
     }
   }
+}, TICK_MS);
 
-  for(const [code,room] of rooms){
-    if(!room.size)continue;
-    const enemies=ensureRoomEnemies(code);
-    const players=roomPlayers(room).filter(p=>p.alive&&!p.frozen);
-    for(const enemy of enemies){
-      let target=null,best=Infinity;
-      for(const pl of players){
-        const d=Math.hypot(pl.x-enemy.x,pl.y-enemy.y);
-        if(d<best){best=d;target=pl;}
-      }
-      if(target && inSafeZone(target.x,target.y,24)) target=null;
-      if(target){
-        const dx=(target.x-enemy.x)/Math.max(best,1),dy=(target.y-enemy.y)/Math.max(best,1);
-        enemy.vx=dx*enemy.speed;
-        enemy.vy=dy*enemy.speed;
-        enemy.x=clamp(enemy.x+enemy.vx*dt,35,WORLD.w-35);
-        enemy.y=clamp(enemy.y+enemy.vy*dt,35,WORLD.h-35);
-        if(inSafeZone(enemy.x,enemy.y,enemy.r)){
-          const dx=enemy.x-SAFE_ZONE.x,dy=enemy.y-SAFE_ZONE.y,d=Math.max(1,Math.hypot(dx,dy));
-          enemy.x=SAFE_ZONE.x+(dx/d)*(SAFE_ZONE.r+enemy.r+4);
-          enemy.y=SAFE_ZONE.y+(dy/d)*(SAFE_ZONE.r+enemy.r+4);
+setInterval(() => {
+  for (const [code, room] of rooms) {
+    if (!room.size) continue;
+
+    const enemies = ensureRoomEnemies(code);
+    const walls = ensureRoomWalls(code);
+    const players = roomPlayers(room).filter((p) => p.alive && !p.frozen);
+
+    for (const enemy of enemies) {
+      let target = null;
+      let best = Infinity;
+
+      for (const pl of players) {
+        const d = Math.hypot(pl.x - enemy.x, pl.y - enemy.y);
+        if (d < best) {
+          best = d;
+          target = pl;
         }
-        if(best<enemy.r+24){
-          target.hp=clamp(target.hp-Math.max(.5,enemy.damage-(target.defense||0))*dt,0,100);
-          send(findPlayer(target.id,room)?.ws||null,{type:"pve_damage",amount:enemy.damage*dt,hp:target.hp});
-          if(target.hp<=0 && target.alive && !target.frozen){
-            target.alive=false;
-            const lostScore=target.score||0;
-            target.level=1;target.hp=0;target.damage=25;target.defense=0;target.fireRate=280;target.xp=0;target.score=0;target.kills=0;target.pvpKills=0;
-            const found=findPlayer(target.id,room);
-            if(found)send(found.ws,{type:"pve_dead,lostScore".replace(",",":")});
-            if(found)send(found.ws,{type:"pve_dead",lostScore});
+      }
+
+      if (target && inSafeZone(target.x, target.y, 24)) target = null;
+
+      if (target) {
+        const distance = Math.max(best, 1);
+        const dx = (target.x - enemy.x) / distance;
+        const dy = (target.y - enemy.y) / distance;
+
+        enemy.vx = dx * enemy.speed;
+        enemy.vy = dy * enemy.speed;
+
+        const nextX = clamp(enemy.x + enemy.vx * (TICK_MS / 1000), 35, WORLD.w - 35);
+        const nextY = clamp(enemy.y + enemy.vy * (TICK_MS / 1000), 35, WORLD.h - 35);
+
+        if (!collidesWithWall(nextX, nextY, enemy.r, walls)) {
+          enemy.x = nextX;
+          enemy.y = nextY;
+        }
+
+        if (inSafeZone(enemy.x, enemy.y, enemy.r)) {
+          const dxSafe = enemy.x - SAFE_ZONE.x;
+          const dySafe = enemy.y - SAFE_ZONE.y;
+          const dSafe = Math.max(1, Math.hypot(dxSafe, dySafe));
+
+          enemy.x =
+            SAFE_ZONE.x + (dxSafe / dSafe) * (SAFE_ZONE.r + enemy.r + 4);
+          enemy.y =
+            SAFE_ZONE.y + (dySafe / dSafe) * (SAFE_ZONE.r + enemy.r + 4);
+        }
+
+        if (best < enemy.r + 24) {
+          target.hp = clamp(
+            target.hp -
+              Math.max(0.5, enemy.damage - (target.defense || 0)) *
+                (TICK_MS / 1000),
+            0,
+            maxHpForLevel(target.level)
+          );
+
+          const found = findPlayer(target.id, room);
+          if (found) {
+            send(found.ws, {
+              type: 'pve_damage',
+              amount: enemy.damage * (TICK_MS / 1000),
+              hp: target.hp,
+              maxHp: maxHpForLevel(target.level)
+            });
+          }
+
+          if (target.hp <= 0 && target.alive && !target.frozen) {
+            target.alive = false;
+
+            const lostScore = target.score || 0;
+
+            resetProgressAfterDeath(target);
+            void persistPlayer(target);
+
+            const foundTarget = findPlayer(target.id, room);
+
+            if (foundTarget) {
+              send(foundTarget.ws, {
+                type: 'pve_dead',
+                lostScore
+              });
+              sendStats(target);
+            }
+
+            sendPlayerList(code);
           }
         }
       }
     }
-    while(enemies.length<18)enemies.push(makeEnemy());
-    broadcastRoom(code,{type:"enemy_state",enemies});
-  }
-},50);
 
-httpServer.listen(PORT,()=>console.log("Neon Core multiplayer server listening on "+PORT));
+    while (enemies.length < 18) enemies.push(makeEnemy());
+
+    broadcastRoom(code, {
+      type: 'enemy_state',
+      enemies
+    });
+  }
+}, ENEMY_SYNC_MS);
+
+process.on('SIGTERM', async () => {
+  for (const p of clients.values()) {
+    await persistPlayer(p);
+  }
+  try {
+    await storage.closeStorage();
+  } catch {}
+  process.exit(0);
+});
+
+process.on('SIGINT', async () => {
+  for (const p of clients.values()) {
+    await persistPlayer(p);
+  }
+  try {
+    await storage.closeStorage();
+  } catch {}
+  process.exit(0);
+});
+
+httpServer.listen(PORT, () => {
+  console.log(
+    'Neon Core multiplayer server listening on ' +
+      PORT +
+      ' · version ' +
+      SERVER_VERSION
+  );
+});
