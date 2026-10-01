@@ -9,7 +9,7 @@
 <script>
 (function(){
   try{
-    var v="20261001-14";
+    var v="20261001-15";
     var k="neon_core_page_version";
     var old=localStorage.getItem(k);
     if(old!==v){
@@ -190,6 +190,7 @@ function connectMultiplayer(roomMode="quick",roomCode=""){
             if(Number.isFinite(me.xp))p.xp=me.xp;
             if(Number.isFinite(me.damage))p.damage=me.damage;
             if(Number.isFinite(me.fireRate))p.fireRate=me.fireRate;
+            if(Number.isFinite(me.defense))p.defense=me.defense;
             p.maxHp=100+(p.level-1)*15;
             p.speed=205+(p.level-1)*4;
           }
@@ -269,7 +270,6 @@ function connectMultiplayer(roomMode="quick",roomCode=""){
           if(Number.isFinite(m.damage))p.damage=m.damage;
           if(Number.isFinite(m.defense))p.defense=m.defense;
           if(Number.isFinite(m.fireRate))p.fireRate=m.fireRate;
-          saveStats();
         }else if(m.type==="respawn_ok"){
           p.x=m.x;p.y=m.y;p.hp=p.maxHp;p.alive=true;
           document.getElementById("death").style.display="none";
@@ -294,7 +294,7 @@ function sendMultiplayerState(dt){
   lastNetSend+=dt;
   if(lastNetSend<.05)return;
   lastNetSend=0;
-  multiplayerSocket.send(JSON.stringify({type:"state",x:p.x,y:p.y,angle:p.angle,hp:p.hp,level:p.level,damage:p.damage,fireRate:p.fireRate}));
+  multiplayerSocket.send(JSON.stringify({type:"state",x:p.x,y:p.y,angle:p.angle}));
 }
 
 function rand(a,b){return a+Math.random()*(b-a)}
@@ -302,8 +302,8 @@ function dist(a,b){return Math.hypot(a.x-b.x,a.y-b.y)}
 function clamp(v,a,b){return Math.max(a,Math.min(b,v))}
 function saveName(n){try{localStorage.setItem("neon_core_name",n)}catch(e){}}
 function loadName(){try{return localStorage.getItem("neon_core_name")||""}catch(e){return""}}
-function saveStats(){try{localStorage.setItem("neon_core_stats",JSON.stringify({level:p.level,score:p.score,kills:p.kills,damage:p.damage,defense:p.defense,maxHp:p.maxHp,speed:p.speed,fireRate:p.fireRate}))}catch(e){}}
-function loadStats(){try{const s=JSON.parse(localStorage.getItem("neon_core_stats")||"null");if(s){Object.assign(p,{level:s.level||1,score:s.score||0,kills:s.kills||0,damage:s.damage||25,defense:s.defense||0,maxHp:s.maxHp||100,speed:s.speed||205,fireRate:s.fireRate||280,hp:s.maxHp||100})}}catch(e){}}
+function saveStats(){}
+function loadStats(){}
 
 function spawnEnemy(){return null;}
 
