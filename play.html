@@ -9,7 +9,7 @@
 <script>
 (function(){
   try{
-    var v="20261001-16";
+    var v="20261001-17";
     var k="neon_core_page_version";
     var old=localStorage.getItem(k);
     if(old!==v){
@@ -204,6 +204,18 @@ function connectMultiplayer(roomMode="quick",roomCode=""){
         }else if(m.type==="connected"){
           multiplayerId=m.id;
         }else if(m.type==="player_list"){
+          const me=(m.players||[]).find(q=>q.id===multiplayerId);
+          if(me){
+            if(Number.isFinite(me.level))p.level=me.level;
+            if(Number.isFinite(me.score))p.score=me.score;
+            if(Number.isFinite(me.kills))p.kills=me.kills;
+            if(Number.isFinite(me.xp))p.xp=me.xp;
+            if(Number.isFinite(me.damage))p.damage=me.damage;
+            if(Number.isFinite(me.defense))p.defense=me.defense;
+            if(Number.isFinite(me.fireRate))p.fireRate=me.fireRate;
+            p.maxHp=100+(p.level-1)*15;
+            p.speed=205+(p.level-1)*4;
+          }
           updatePlayersFromList(m.players||[]);
         }else if(m.type==="welcome"){
           multiplayerId=m.id;
