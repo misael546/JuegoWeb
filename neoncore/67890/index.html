@@ -9,7 +9,7 @@
 <script>
 (function(){
   try{
-    var v="20261001-102";
+    var v="20261001-103";
     var k="neon_core_build";
     window.NEON_CORE_BUILD=v;
     var old=localStorage.getItem(k);
@@ -26,7 +26,7 @@
   }catch(e){}
 })();
 </script>
-<title>Neon Core · Build 101</title>
+<title>Neon Core · Build 103</title>
 <style>
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#050811;color:#fff;font-family:Arial,sans-serif;touch-action:none}
 #game{display:block;width:100vw;height:100vh}
@@ -191,6 +191,7 @@ function connectMultiplayer(roomMode="quick",roomCode=""){
   const keepName=playerName||String(username.value||"").trim();
   if(keepName){playerName=keepName;username.value=keepName;saveName(keepName);}
 
+  document.getElementById("nameBox").style.display="none";
   setConnectionStatus("CONECTANDO AL SERVIDOR","Despertando el servidor multiplayer…");
   if(multiplayerSocket && multiplayerSocket.readyState<=1) multiplayerSocket.close();
 
@@ -499,6 +500,7 @@ function returnToMenu(){
   document.getElementById("nameMsg").textContent="";
   document.getElementById("playersPanel").style.display="none";
   currentRoom="";
+  setConnectionStatus("", "", false);
   remotePlayers.clear();
   if(multiplayerSocket){
     try{multiplayerSocket.close()}catch{}
@@ -689,7 +691,7 @@ function smoothEnemies(dt){
     e.y+=errorY*correction;
   }
 }
-const bankNpc={x:3000,y:2050,r:30};let bankOpen=false;
+const bankNpc={x:3000,y:1800,r:24};let bankOpen=false;
 function ensureBankUi(){
   if(document.getElementById("bankPanel"))return;
   const style=document.createElement("style");
@@ -702,7 +704,7 @@ function ensureBankUi(){
 function sendBankCommand(type){if(!multiplayerSocket||multiplayerSocket.readyState!==1)return;multiplayerSocket.send(JSON.stringify({type}));}
 function updateBank(){
   ensureBankUi();
-  const near=Math.hypot(p.x-bankNpc.x,p.y-bankNpc.y)<=180;
+  const near=Math.hypot(p.x-bankNpc.x,p.y-bankNpc.y)<=95;
   const box=document.getElementById("bankPanel");
   bankOpen=near&&p.alive;
   box.style.display=bankOpen?"block":"none";
@@ -716,9 +718,9 @@ function drawBankNpc(){
   const x=sx(bankNpc.x),y=sy(bankNpc.y);ctx.save();
   ctx.fillStyle="rgba(169,140,255,.10)";ctx.beginPath();ctx.arc(x,y,bankNpc.r,0,Math.PI*2);ctx.fill();
   ctx.strokeStyle="#a98cff";ctx.lineWidth=2;ctx.setLineDash([8,7]);ctx.beginPath();ctx.arc(x,y,bankNpc.r,0,Math.PI*2);ctx.stroke();ctx.setLineDash([]);
-  ctx.fillStyle="#111020";ctx.beginPath();ctx.arc(x,y,25,0,Math.PI*2);ctx.fill();ctx.strokeStyle="#a98cff";ctx.lineWidth=3;ctx.stroke();
+  ctx.fillStyle="#111020";ctx.beginPath();ctx.arc(x,y,20,0,Math.PI*2);ctx.fill();ctx.strokeStyle="#a98cff";ctx.lineWidth=3;ctx.stroke();
   ctx.fillStyle="#c6b3ff";ctx.font="bold 18px Arial";ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText("$",x,y);
-  ctx.fillStyle="#fff";ctx.font="bold 11px Arial";ctx.fillText("BANCO",x,y-38);ctx.restore();
+  ctx.fillStyle="#fff";ctx.font="bold 11px Arial";ctx.fillText("BANCO",x,y-32);ctx.restore();
 }
 function showShopMsg(msg){const e=document.getElementById("shopMsg");if(e)e.textContent=msg;}
 function updateWeaponHud(){const el=document.getElementById("weaponName");if(el)el.textContent=weaponNames[p.weapon]||"BLASTER";}
