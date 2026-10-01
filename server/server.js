@@ -92,9 +92,10 @@ function joinRoom(ws,requestedCode,create=false){
   ensureRoomEnemies(code);
   p.room=code;
   const spawn=spawnPosition(code);
-  if(!saved){p.x=spawn.x;p.y=spawn.y;p.hp=100;}
+  if(!p.hasSaved){p.x=spawn.x;p.y=spawn.y;p.hp=100;}
   p.angle=0;
   p.alive=true;
+  p.hasSaved=false;
   send(ws,{type:"room_joined",code,players:publicPlayers(room),enemies:ensureRoomEnemies(code)});
   broadcastRoom(code,{type:"player_join",player:p},ws);
   sendPlayerList(code);
@@ -226,6 +227,7 @@ wss.on("connection",(ws)=>{
         p.name=String(msg.name||"Jugador").slice(0,20);
         p.saveKey=String(msg.saveKey||"").replace(/[^a-zA-Z0-9_-]/g,"").slice(0,80);
         const saved=p.saveKey?savedPlayers.get(p.saveKey):null;
+        p.hasSaved=!!saved;
         if(saved){
           p.x=Number.isFinite(saved.x)?saved.x:p.x;
           p.y=Number.isFinite(saved.y)?saved.y:p.y;
