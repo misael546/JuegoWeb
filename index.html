@@ -299,31 +299,42 @@ function drawTank(x,y,angle,color="#39e7ff",r=24){
   ctx.fillStyle="#dffbff";ctx.fillRect(r+7,-3,12,6);
   ctx.restore();
 }
-function drawEnemy(e,angle){
+function drawEnemy(e){
   const color=e.kind==="elite"?"#ff9f43":"#ff3b81";
   const r=e.r;
-  ctx.save();ctx.translate(sx(e.x),sy(e.y));
+  // Tres zonas visuales: izquierda = cuadrado, centro = triángulo, derecha = hexágono.
+  const zone=e.x<world.w/3?0:(e.x<world.w*2/3?1:2);
+  ctx.save();
+  ctx.translate(sx(e.x),sy(e.y));
   ctx.fillStyle="rgba(0,0,0,.35)";
-  ctx.beginPath();ctx.ellipse(2,5,r+3,r*.7,0,0,Math.PI*2);ctx.fill();
-
-  // Mobs: cuerpo orgánico, ojos y patas. Sin torreta, cañón ni forma de tanque.
-  ctx.strokeStyle=color;ctx.lineWidth=5;ctx.lineCap="round";
-  const legs=e.kind==="elite"?6:4;
-  for(let i=0;i<legs;i++){
-    const a=(i/legs)*Math.PI*2;
-    ctx.beginPath();
-    ctx.moveTo(Math.cos(a)*r*.55,Math.sin(a)*r*.45);
-    ctx.lineTo(Math.cos(a)*r*1.25,Math.sin(a)*r*1.05);
-    ctx.stroke();
-  }
+  ctx.beginPath();ctx.arc(3,5,r+3,0,Math.PI*2);ctx.fill();
   ctx.fillStyle=color;
-  ctx.beginPath();ctx.ellipse(0,0,r,r*.78,0,0,Math.PI*2);ctx.fill();
-  ctx.fillStyle=e.kind==="elite"?"#fff0c2":"#ffd6e3";
-  ctx.beginPath();ctx.arc(-r*.32,-r*.16,r*.2,0,Math.PI*2);ctx.arc(r*.32,-r*.16,r*.2,0,Math.PI*2);ctx.fill();
-  ctx.fillStyle="#111827";
-  ctx.beginPath();ctx.arc(-r*.32,-r*.16,r*.09,0,Math.PI*2);ctx.arc(r*.32,-r*.16,r*.09,0,Math.PI*2);ctx.fill();
-  ctx.fillStyle="#111827";
-  ctx.beginPath();ctx.arc(0,r*.25,r*.22,0,Math.PI);ctx.fill();
+  ctx.strokeStyle=e.kind==="elite"?"#ffd08a":"#ff9fba";
+  ctx.lineWidth=3;
+  ctx.beginPath();
+  if(zone===0){
+    ctx.rect(-r,-r,r*2,r*2);
+  }else if(zone===1){
+    ctx.moveTo(0,-r*1.15);
+    ctx.lineTo(r*1.05,r*.9);
+    ctx.lineTo(-r*1.05,r*.9);
+    ctx.closePath();
+  }else{
+    for(let i=0;i<6;i++){
+      const a=-Math.PI/2+i*Math.PI/3;
+      const px=Math.cos(a)*r,py=Math.sin(a)*r;
+      if(i===0)ctx.moveTo(px,py);else ctx.lineTo(px,py);
+    }
+    ctx.closePath();
+  }
+  ctx.fill();ctx.stroke();
+  // Núcleo simple: sin torreta, cañón ni piezas de tanque.
+  ctx.fillStyle="#0b1020";
+  ctx.beginPath();ctx.arc(0,0,r*.22,0,Math.PI*2);ctx.fill();
+  if(e.kind==="elite"){
+    ctx.strokeStyle="#fff0c2";ctx.lineWidth=2;
+    ctx.beginPath();ctx.arc(0,0,r*.62,0,Math.PI*2);ctx.stroke();
+  }
   ctx.restore();
 }
 function drawNameTag(name,x,y,r,color="#ffffff"){
@@ -378,7 +389,7 @@ function draw(){
   }
   for(const e of enemies){
     const enemyAngle=Math.atan2(p.y-e.y,p.x-e.x);
-    drawEnemy(e,enemyAngle);
+    drawEnemy(e);
     drawNameTag(e.kind==="elite"?"ÉLITE":"ENEMIGO",e.x,e.y,e.r,e.kind==="elite"?"#ff9f43":"#ff5474");
     const x=sx(e.x),y=sy(e.y)-e.r-10;ctx.fillStyle="#161c2a";ctx.fillRect(x-25,y,50,5);ctx.fillStyle=e.kind==="elite"?"#ff9f43":"#ff5474";ctx.fillRect(x-25,y,50*(e.hp/e.maxHp),5);
   }
