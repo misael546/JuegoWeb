@@ -35,7 +35,7 @@ function sendPlayerList(code){
 function makeEnemy(){
   const elite=Math.random()<.2;
   const r=elite?27:21;
-  return {id:Math.random().toString(36).slice(2,10),x:Math.random()*(WORLD.w-200)+100,y:Math.random()*(WORLD.h-200)+100,r,hp:elite?85:50,maxHp:elite?85:50,speed:elite?55:75,damage:elite?14:9,kind:elite?"elite":"drone"};
+  const shapes=["square","triangle","hex"];\n  return {id:Math.random().toString(36).slice(2,10),x:Math.random()*(WORLD.w-200)+100,y:Math.random()*(WORLD.h-200)+100,r,hp:elite?85:50,maxHp:elite?85:50,speed:elite?55:75,damage:elite?14:9,kind:elite?"elite":"drone",shape:shapes[Math.floor(Math.random()*shapes.length)]};
 }
 function ensureRoomEnemies(code){
   if(!roomEnemies.has(code)){
