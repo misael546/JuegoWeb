@@ -9,7 +9,7 @@
 <script>
 (function(){
   try{
-    var v="20261001-115";
+    var v="20261001-116";
     var k="neon_core_build";
     window.NEON_CORE_BUILD=v;
     var old=localStorage.getItem(k);
@@ -26,7 +26,7 @@
   }catch(e){}
 })();
 </script>
-<title>Neon Core · Build 114</title>
+<title>Neon Core · Build 116</title>
 <style>
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#050811;color:#fff;font-family:Arial,sans-serif;touch-action:none}
 #game{display:block;width:100vw;height:100vh}
@@ -57,7 +57,7 @@
 </script>
 </head>
 <body>
-<canvas id="game"></canvas><div id="buildDisplay">NEON CORE · BUILD 114</div>
+<canvas id="game"></canvas><div id="buildDisplay">NEON CORE · BUILD 116</div>
 
 <div id="hud">
   <div class="panel" id="bars">
@@ -134,6 +134,8 @@ function updateControlMode(){
 updateControlMode();
 const remotePlayers=new Map();
 let multiplayerSocket=null,multiplayerId="",lastNetSend=0,currentRoom="",multiplayerConnectTimer=null;
+let movementTelemetry={inputSince:0,lastX:p.x,lastY:p.y,lastReport:0};
+
 const MULTIPLAYER_SERVER="wss://neon-core-multiplayer.onrender.com/ws";
 const RENDER_HEALTH_URL=MULTIPLAYER_SERVER.replace(/^wss:/,"https:").replace(/^ws:/,"http:").replace(/\/ws$/,"/health");
 let renderStatusTimer=null,renderServerVersion="",renderServerStartedAt=0;
@@ -343,9 +345,15 @@ function connectMultiplayer(roomMode="quick",roomCode=""){ const publicRoomAuto=
         }else if(m.type==="state_rejected"){
           if(Number.isFinite(m.x))p.x=m.x;
           if(Number.isFinite(m.y))p.y=m.y;
-        }else if(m.type==="state_sync"){
-          if(Number.isFinite(m.x))p.x=m.x;
-          if(Number.isFinite(m.y))p.y=m.y;
+         }else if(m.type==="state_sync"){
+          // Las correcciones pequeñas son autoritativas; evitamos que una
+          // respuesta atrasada con coordenadas inválidas congele al cliente.
+          if(Number.isFinite(m.x) && Number.isFinite(m.y)){
+            const correction=Math.hypot(m.x-p.x,m.y-p.y);
+            if(correction<=90){
+              p.x=m.x;p.y=m.y;
+            }
+          }
         }else if(m.type==="enemy_hit"){
           const e=enemies.find(x=>x.id===m.id);
           if(e){
@@ -588,6 +596,9 @@ function hitWall(b){
 
 function update(dt){
   if(!gameActive)return;
+  // Guardia de movimiento: una respuesta incompleta del servidor nunca puede
+  // dejar la velocidad local en 0/NaN.
+  if(!Number.isFinite(p.speed) || p.speed<=0) p.speed=205;
   if(multiplayerReady && multiplayerSocket && multiplayerSocket.readyState===1){
     multiplayerReady=false;
     setConnectionStatus("","",false);
@@ -598,6 +609,10 @@ function update(dt){
   if(Math.hypot(moveX,moveY)>.1){mx=moveX;my=moveY}
   const ml=Math.hypot(mx,my);
   if(ml>.1){
+    if(!movementTelemetry.inputSince)movementTelemetry.inputSince=performance.now();
+  }else{
+    movementTelemetry.inputSince=0;
+  }
     const nx=mx/ml,ny=my/ml;
     p.angle=Math.atan2(ny,nx);
     p.x+=nx*p.speed*Math.min(1,ml)*dt;
@@ -620,6 +635,14 @@ function update(dt){
 
   camera.x+=(p.x-camera.x)*Math.min(1,dt*7);camera.y+=(p.y-camera.y)*Math.min(1,dt*7);
   sendMultiplayerState(dt);
+  if(movementTelemetry.inputSince && performance.now()-movementTelemetry.inputSince>500 && performance.now()-movementTelemetry.lastReport>1500){
+    const moved=Math.hypot(p.x-movementTelemetry.lastX,p.y-movementTelemetry.lastY);
+    if(moved<2) console.warn("[NEON CORE MOVEMENT] input activo pero posición no cambia",{
+      gameActive,alive:p.alive,speed:p.speed,x:p.x,y:p.y,moveX,moveY,
+      socket:multiplayerSocket?multiplayerSocket.readyState:null,currentRoom
+    });
+    movementTelemetry.lastX=p.x;movementTelemetry.lastY=p.y;movementTelemetry.lastReport=performance.now();
+  }
 }
 
 function sx(x){return x-camera.x+W/2}
