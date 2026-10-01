@@ -10,7 +10,7 @@ const WORLD = { w: 6000, h: 4400 };
 const MAX_PLAYERS = 16;
 const SAFE_ZONE = { x: 3000, y: 2200, r: 300 };
 
-const SERVER_VERSION = '20261001-57';
+const SERVER_VERSION = '20261001-58';
 
 const AMMO_PACK_SIZE = 50;
 const AMMO_PACK_COST = 50;
@@ -18,6 +18,7 @@ const MAX_AMMO = 120;
 
 const SHOP_NPC = { x: 3000, y: 2380, r: 30 };
 const BANK_NPC = { x: 3000, y: 2050, r: 30 };
+const SAVE_NPC = { x: 3000, y: 2200, r: 34 };
 
 const WEAPONS = {
   blaster: { name: 'BLASTER', cost: 0, damage: 25, fireRate: 350 },
@@ -161,7 +162,8 @@ function sendStats(p) {
     maxAmmo: MAX_AMMO,
     weapon: p.weapon,
     shopNpc: SHOP_NPC,
-    bankNpc: BANK_NPC
+    bankNpc: BANK_NPC,
+    saveNpc: SAVE_NPC
   });
 }
 
@@ -702,6 +704,17 @@ function depositGold(ws) {
 
   sendStats(p);
   sendPlayerList(p.room);
+}
+
+function saveProgressAtNpc(ws) {
+  const p = clients.get(ws);
+  if (!p) return;
+  if (!p.room) { send(ws, { type: 'save_result', ok: false, message: 'No estás dentro de una sala.' }); return; }
+  if (!p.alive) { send(ws, { type: 'save_result', ok: false, message: 'No puedes guardar estando destruido.' }); return; }
+  if (Math.hypot(p.x - SAVE_NPC.x, p.y - SAVE_NPC.y) > SAVE_NPC.r) { send(ws, { type: 'save_result', ok: false, message: 'Acércate al NPC SAVE.' }); return; }
+  p.hp = clamp(p.hp, 0, maxHpForLevel(p.level));
+  await persistPlayer(p);
+  send(ws, { type: 'save_result', ok: true, message: 'Progreso guardado correctamente.', savedAt: Date.now(), data: capturePlayerData(p) });
 }
 
 function buyAmmo(ws) {
@@ -1285,6 +1298,11 @@ wss.on('connection', (ws) => {
 
       if (msg.type === 'deposit_gold') {
         if (!p.frozen) depositGold(ws);
+        return;
+      }
+
+      if (msg.type === 'save_progress') {
+        if (!p.frozen) await saveProgressAtNpc(ws);
         return;
       }
 
