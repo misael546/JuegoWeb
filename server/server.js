@@ -10,7 +10,7 @@ const WORLD = { w: 6000, h: 4400 };
 const MAX_PLAYERS = 16;
 const SAFE_ZONE = { x: 3000, y: 2200, r: 300 };
 
-const SERVER_VERSION = '20261001-63';
+const SERVER_VERSION = '20261001-64';
 
 const AMMO_PACK_SIZE = 50;
 const AMMO_PACK_COST = 50;
@@ -69,6 +69,10 @@ function maxHpForLevel(level) {
 
 function speedForLevel(level) {
   return 205 + Math.max(0, Number(level || 1) - 1) * 4;
+}
+
+function xpToNextLevel(level) {
+  return 100 * Math.max(1, Number(level) || 1);
 }
 
 function inSafeZone(x, y, pad = 0) {
@@ -155,7 +159,7 @@ function sendStats(p) {
     fireRate: p.fireRate,
     speed: p.speed,
     maxHp: maxHpForLevel(p.level),
-    xpNeed: 100,
+    xpNeed: xpToNextLevel(p.level),
     killsToLevel: nextKills,
     gold: p.gold || 0,
     diamonds: p.diamonds || 0,
@@ -243,15 +247,26 @@ function applyCombatStats(p) {
 }
 
 function applyDeathPenalty(p) {
-  // La muerte NO baja el nivel ni elimina ataque/defensa.
-  // Solo aplica la pérdida de progreso prevista: vida, XP y oro.
-  const levelBefore = clamp(Number(p.level) || 1, 1, 1000);
-  const maxHp = maxHpForLevel(levelBefore);
+  // La muerte conserva ataque/defensa y solo baja progreso.
+  // Se pierde 10% del XP necesario para el nivel actual.
+  // Si el XP no alcanza, se pierde exactamente 1 nivel (sin bajar de nivel 1).
+  let level = clamp(Number(p.level) || 1, 1, 1000);
+  let xp = Math.max(0, Number(p.xp) || 0);
+  const xpLoss = Math.max(1, Math.floor(xpToNextLevel(level) * DEATH_XP_LOSS));
 
-  p.level = levelBefore;
+  xp -= xpLoss;
+
+  if (xp < 0) {
+    level = Math.max(1, level - 1);
+    xp = 0;
+  }
+
+  p.level = level;
+  p.xp = xp;
+
+  const maxHp = maxHpForLevel(level);
   p.hp = Math.max(1, Math.floor(maxHp * (1 - DEATH_HP_LOSS)));
   p.gold = Math.max(0, Math.floor((Number(p.gold) || 0) * (1 - DEATH_GOLD_LOSS)));
-  p.xp = Math.max(0, Math.floor((Number(p.xp) || 0) * (1 - DEATH_XP_LOSS)));
 
   // Nunca acumular penalizaciones de ataque/defensa por morir.
   p.damagePenalty = 0;
@@ -274,11 +289,18 @@ function respawnAfterDeath(p) {
 }
 
 function levelUpIfNeeded(p) {
-  if ((p.kills || 0) <= 0 || p.kills % 5 !== 0) return;
-  p.level += 1;
-  p.xp = 0;
-  p.hp = Math.min(maxHpForLevel(p.level), Math.max(1, p.hp));
-  applyCombatStats(p);
+  let changed = false;
+
+  while (p.level < 1000 && p.xp >= xpToNextLevel(p.level)) {
+    p.xp -= xpToNextLevel(p.level);
+    p.level += 1;
+    changed = true;
+  }
+
+  if (changed) {
+    p.hp = Math.min(maxHpForLevel(p.level), Math.max(1, p.hp));
+    applyCombatStats(p);
+  }
 }
 
 function seededRandomFactory(seed) {
