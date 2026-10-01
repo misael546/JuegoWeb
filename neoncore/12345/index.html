@@ -9,7 +9,7 @@
 <script>
 (function(){
   try{
-    var v="20261001-117";
+    var v="20261001-118";
     var k="neon_core_build";
     window.NEON_CORE_BUILD=v;
     var old=localStorage.getItem(k);
@@ -26,7 +26,7 @@
   }catch(e){}
 })();
 </script>
-<title>Neon Core · Build 117</title>
+<title>Neon Core · Build 118</title>
 <style>
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#050811;color:#fff;font-family:Arial,sans-serif;touch-action:none}
 #game{display:block;width:100vw;height:100vh}
@@ -57,7 +57,7 @@
 </script>
 </head>
 <body>
-<canvas id="game"></canvas><div id="buildDisplay">NEON CORE · BUILD 117</div>
+<canvas id="game"></canvas><div id="buildDisplay">NEON CORE · BUILD 118</div>
 
 <div id="hud">
   <div class="panel" id="bars">
@@ -898,44 +898,23 @@ function draw(){
 
 function setupJoystick(id){
   const el=document.getElementById(id),stick=el.querySelector(".stick");
-  let active=false,pointerId=null;
-  function reset(){
-    active=false;pointerId=null;
-    stick.style.transform="translate(0,0)";
-    moveX=0;moveY=0;
-  }
+  let active=false,pointerId=null,inputOwner="";
+  function reset(){active=false;pointerId=null;inputOwner="";stick.style.transform="translate(0,0)";moveX=0;moveY=0;}
   function set(e){
-    const r=el.getBoundingClientRect();
-    const cx=r.left+r.width/2,cy=r.top+r.height/2;
-    const max=Math.max(1,(r.width-stick.offsetWidth)/2);
-    let x=e.clientX-cx,y=e.clientY-cy;
-    const len=Math.hypot(x,y);
+    const r=el.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2;
+    const max=Math.max(1,(r.width-stick.offsetWidth)/2);let x=e.clientX-cx,y=e.clientY-cy,len=Math.hypot(x,y);
     if(len>max){x=x/len*max;y=y/len*max}
-    stick.style.transform="translate("+x+"px,"+y+"px)";
-    moveX=clamp(x/max,-1,1);
-    moveY=clamp(y/max,-1,1);
+    stick.style.transform="translate("+x+"px,"+y+"px)";moveX=clamp(x/max,-1,1);moveY=clamp(y/max,-1,1);
   }
-  el.addEventListener("pointerdown",e=>{
-    if(e.pointerType==="mouse" && e.button!==0)return;
-    e.preventDefault();
-    reset();
-    active=true;pointerId=e.pointerId;
-    try{el.setPointerCapture(pointerId)}catch{}
-    set(e);
-  },{passive:false});
-  el.addEventListener("pointermove",e=>{
-    if(active && e.pointerId===pointerId){
-      e.preventDefault();set(e);
-    }
-  },{passive:false});
-  const finish=e=>{
-    if(pointerId===null || e.pointerId===pointerId){e.preventDefault();reset()}
-  };
-  el.addEventListener("pointerup",finish,{passive:false});
-  el.addEventListener("pointercancel",finish,{passive:false});
-  el.addEventListener("lostpointercapture",()=>reset());
-  // B117: Pointer Events es la única ruta de entrada táctil.
-  // Evitamos mezclar touch handlers con pointer capture en Android/iOS.
+  el.addEventListener("pointerdown",e=>{if(e.pointerType==="mouse"&&e.button!==0)return;e.preventDefault();reset();active=true;pointerId=e.pointerId;inputOwner="pointer";try{el.setPointerCapture(pointerId)}catch{}set(e);},{passive:false});
+  el.addEventListener("pointermove",e=>{if(active&&inputOwner==="pointer"&&e.pointerId===pointerId){e.preventDefault();set(e);}},{passive:false});
+  const pf=e=>{if(inputOwner==="pointer"&&(pointerId===null||e.pointerId===pointerId)){e.preventDefault();reset();}};
+  el.addEventListener("pointerup",pf,{passive:false});el.addEventListener("pointercancel",pf,{passive:false});
+  el.addEventListener("lostpointercapture",()=>{if(inputOwner==="pointer")reset();});
+  el.addEventListener("touchstart",e=>{if(inputOwner==="pointer")return;const t=e.touches&&e.touches[0];if(!t)return;e.preventDefault();active=true;pointerId=t.identifier;inputOwner="touch";set(t);},{passive:false});
+  el.addEventListener("touchmove",e=>{if(!active||inputOwner!=="touch")return;const t=[...e.touches||[]].find(x=>x.identifier===pointerId)||e.touches&&e.touches[0];if(!t)return;e.preventDefault();set(t);},{passive:false});
+  const tf=e=>{if(inputOwner!=="touch")return;e.preventDefault();reset();};
+  el.addEventListener("touchend",tf,{passive:false});el.addEventListener("touchcancel",tf,{passive:false});
   return reset;
 }
 const resetMoveJoystick=setupJoystick("moveJoy");
