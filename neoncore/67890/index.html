@@ -9,7 +9,7 @@
 <script>
 (function(){
   try{
-    var v="20261001-101";
+    var v="20261001-102";
     var k="neon_core_build";
     window.NEON_CORE_BUILD=v;
     var old=localStorage.getItem(k);
@@ -360,7 +360,7 @@ function connectMultiplayer(roomMode="quick",roomCode=""){
           if(Number.isFinite(m.maxHp))p.maxHp=m.maxHp;
           if(m.weapon&&weaponStats[m.weapon])p.weapon=m.weapon;
           if(Number.isFinite(m.xpNeed))serverXpNeed=m.xpNeed;if(Number.isFinite(m.damageXp))serverDamageXp=m.damageXp;if(Number.isFinite(m.damageXpNeed))serverDamageXpNeed=m.damageXpNeed;if(Number.isFinite(m.damageLevel))serverDamageLevel=m.damageLevel;if(Number.isFinite(m.defenseXp))serverDefenseXp=m.defenseXp;if(Number.isFinite(m.defenseXpNeed))serverDefenseXpNeed=m.defenseXpNeed;if(Number.isFinite(m.defenseLevel))serverDefenseLevel=m.defenseLevel;
-          if(Number.isFinite(m.killsToLevel))serverKillsToLevel=m.killsToLevel;if(Number.isFinite(m.gold))p.gold=m.gold;if(Number.isFinite(m.diamonds))p.diamonds=m.diamonds;if(Number.isFinite(m.ammo))p.ammo=m.ammo;if(Number.isFinite(m.maxAmmo))p.maxAmmo=m.maxAmmo;if(m.shopNpc){shopNpc.x=Number(m.shopNpc.x)||shopNpc.x;shopNpc.y=Number(m.shopNpc.y)||shopNpc.y;shopNpc.r=Number(m.shopNpc.r)||shopNpc.r;}if(m.weapon)p.weapon=m.weapon;updateResourceHud();
+          if(Number.isFinite(m.killsToLevel))serverKillsToLevel=m.killsToLevel;if(Number.isFinite(m.bankedGold))p.bankedGold=m.bankedGold;if(Number.isFinite(m.bankedDiamonds))p.bankedDiamonds=m.bankedDiamonds;if(m.bankNpc){bankNpc.x=Number(m.bankNpc.x)||bankNpc.x;bankNpc.y=Number(m.bankNpc.y)||bankNpc.y;bankNpc.r=Number(m.bankNpc.r)||bankNpc.r;}if(Number.isFinite(m.gold))p.gold=m.gold;if(Number.isFinite(m.diamonds))p.diamonds=m.diamonds;if(Number.isFinite(m.ammo))p.ammo=m.ammo;if(Number.isFinite(m.maxAmmo))p.maxAmmo=m.maxAmmo;if(m.shopNpc){shopNpc.x=Number(m.shopNpc.x)||shopNpc.x;shopNpc.y=Number(m.shopNpc.y)||shopNpc.y;shopNpc.r=Number(m.shopNpc.r)||shopNpc.r;}if(m.weapon)p.weapon=m.weapon;updateResourceHud();
         }else if(m.type==="hp_regen"){p.hp=Math.min(Number(m.maxHp)||p.maxHp,Number(m.hp)||p.hp);updateHud();
         }else if(m.type==="ammo_empty"){p.ammo=0;updateResourceHud();showShopMsg("Sin munición. Ve con el vendedor.");
         }else if(m.type==="shot_result"){
@@ -378,7 +378,7 @@ function connectMultiplayer(roomMode="quick",roomCode=""){
             });
           }
           updateResourceHud();
-        }else if(m.type==="shop_result"){if(Number.isFinite(m.gold))p.gold=m.gold;if(Number.isFinite(m.ammo))p.ammo=m.ammo;if(Number.isFinite(m.maxAmmo))p.maxAmmo=m.maxAmmo;if(m.weapon)p.weapon=m.weapon;showShopMsg(m.message||"");updateResourceHud();
+        }else if(m.type==="bank_result"){if(Number.isFinite(m.gold))p.gold=m.gold;if(Number.isFinite(m.diamonds))p.diamonds=m.diamonds;if(Number.isFinite(m.bankedGold))p.bankedGold=m.bankedGold;if(Number.isFinite(m.bankedDiamonds))p.bankedDiamonds=m.bankedDiamonds;const bm=document.getElementById("bankMsg");if(bm)bm.textContent=m.message||"";updateBank();updateResourceHud();}else if(m.type==="shop_result"){if(Number.isFinite(m.gold))p.gold=m.gold;if(Number.isFinite(m.ammo))p.ammo=m.ammo;if(Number.isFinite(m.maxAmmo))p.maxAmmo=m.maxAmmo;if(m.weapon)p.weapon=m.weapon;showShopMsg(m.message||"");updateResourceHud();
         }else if(m.type==="respawn_ok"){
           if(m.safeZone){safeZone=m.safeZone;}
           spawnProtectionUntil=performance.now()+(Number(m.spawnProtectionMs)||5000);
@@ -689,6 +689,37 @@ function smoothEnemies(dt){
     e.y+=errorY*correction;
   }
 }
+const bankNpc={x:3000,y:2050,r:30};let bankOpen=false;
+function ensureBankUi(){
+  if(document.getElementById("bankPanel"))return;
+  const style=document.createElement("style");
+  style.textContent="#bankPanel{position:fixed;left:50%;bottom:112px;transform:translateX(-50%);z-index:9;display:none;min-width:min(320px,90vw);background:rgba(5,8,17,.96);border:1px solid #a98cff;border-radius:14px;padding:12px;text-align:center;box-shadow:0 8px 30px #000}#bankPanel b{display:block;color:#c6b3ff}#bankPanel span{display:block;color:#c8d3e5;font-size:12px;margin:5px 0}.bankBalances{display:grid;gap:5px;margin:8px 0}.bankBalances span{background:#0b1424;border:1px solid #26344e;border-radius:7px;padding:5px}.bankBtn{width:100%;min-height:40px;border:0;border-radius:9px;background:#5b3fa3;color:#fff;font-weight:bold;margin-top:5px}.bankMsg{display:block;color:#9ca9bd;margin-top:7px;font-size:11px}";
+  document.head.appendChild(style);
+  document.body.insertAdjacentHTML("beforeend",'<div id="bankPanel"><b>🏦 BANCO NEON</b><span>Guarda tus recursos para protegerlos al morir.</span><div class="bankBalances"><span>🪙 Bolsa: <b id="bankWalletGold">0</b></span><span>💎 Bolsa: <b id="bankWalletDiamonds">0</b></span><span>🛡 Banco: <b id="bankSavedGold">0</b> 🪙 · <b id="bankSavedDiamonds">0</b> 💎</span></div><button class="bankBtn" id="depositBankBtn">GUARDAR TODO</button><button class="bankBtn" id="withdrawBankBtn">RETIRAR TODO</button><small class="bankMsg" id="bankMsg">Acércate al banco.</small></div>');
+  document.getElementById("depositBankBtn").addEventListener("click",()=>sendBankCommand("deposit_bank"));
+  document.getElementById("withdrawBankBtn").addEventListener("click",()=>sendBankCommand("withdraw_bank"));
+}
+function sendBankCommand(type){if(!multiplayerSocket||multiplayerSocket.readyState!==1)return;multiplayerSocket.send(JSON.stringify({type}));}
+function updateBank(){
+  ensureBankUi();
+  const near=Math.hypot(p.x-bankNpc.x,p.y-bankNpc.y)<=180;
+  const box=document.getElementById("bankPanel");
+  bankOpen=near&&p.alive;
+  box.style.display=bankOpen?"block":"none";
+  if(!near)return;
+  document.getElementById("bankWalletGold").textContent=p.gold||0;
+  document.getElementById("bankWalletDiamonds").textContent=p.diamonds||0;
+  document.getElementById("bankSavedGold").textContent=p.bankedGold||0;
+  document.getElementById("bankSavedDiamonds").textContent=p.bankedDiamonds||0;
+}
+function drawBankNpc(){
+  const x=sx(bankNpc.x),y=sy(bankNpc.y);ctx.save();
+  ctx.fillStyle="rgba(169,140,255,.10)";ctx.beginPath();ctx.arc(x,y,bankNpc.r,0,Math.PI*2);ctx.fill();
+  ctx.strokeStyle="#a98cff";ctx.lineWidth=2;ctx.setLineDash([8,7]);ctx.beginPath();ctx.arc(x,y,bankNpc.r,0,Math.PI*2);ctx.stroke();ctx.setLineDash([]);
+  ctx.fillStyle="#111020";ctx.beginPath();ctx.arc(x,y,25,0,Math.PI*2);ctx.fill();ctx.strokeStyle="#a98cff";ctx.lineWidth=3;ctx.stroke();
+  ctx.fillStyle="#c6b3ff";ctx.font="bold 18px Arial";ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText("$",x,y);
+  ctx.fillStyle="#fff";ctx.font="bold 11px Arial";ctx.fillText("BANCO",x,y-38);ctx.restore();
+}
 function showShopMsg(msg){const e=document.getElementById("shopMsg");if(e)e.textContent=msg;}
 function updateWeaponHud(){const el=document.getElementById("weaponName");if(el)el.textContent=weaponNames[p.weapon]||"BLASTER";}
 function updateHud(){
@@ -697,7 +728,7 @@ function updateHud(){
   updateResourceHud();
 }
 function updateResourceHud(){updateWeaponHud();const g=document.getElementById("gold"),d=document.getElementById("diamonds"),a=document.getElementById("ammo"),m=document.getElementById("maxAmmo"),f=document.getElementById("fire");if(g)g.textContent=p.gold||0;if(d)d.textContent=p.diamonds||0;if(a)a.textContent=p.ammo||0;if(m)m.textContent=p.maxAmmo||120;if(f)f.disabled=(p.ammo||0)<=0;}
-function updateAmmoShop(){const near=Math.hypot(p.x-shopNpc.x,p.y-shopNpc.y)<=90;const box=document.getElementById("ammoShop");if(!box)return;shopOpen=near&&p.alive;box.style.display=shopOpen?"block":"none";if(near){const b=document.getElementById("buyAmmoBtn");if(b)b.disabled=!multiplayerSocket||multiplayerSocket.readyState!==1||(p.ammo||0)>=p.maxAmmo;showShopMsg((p.ammo||0)>=p.maxAmmo?"Munición al máximo.":(p.gold||0)<50?"Necesitas 50 de oro.":"50 balas por 50 de oro.");}}
+function updateAmmoShop(){const near=Math.hypot(p.x-shopNpc.x,p.y-shopNpc.y)<=180;const box=document.getElementById("ammoShop");if(!box)return;shopOpen=near&&p.alive;box.style.display=shopOpen?"block":"none";if(near){const b=document.getElementById("buyAmmoBtn");if(b)b.disabled=!multiplayerSocket||multiplayerSocket.readyState!==1||(p.ammo||0)>=p.maxAmmo;showShopMsg((p.ammo||0)>=p.maxAmmo?"Munición al máximo.":(p.gold||0)<50?"Necesitas 50 de oro.":"50 balas por 50 de oro.");}}
 function drawShopNpc(){const x=sx(shopNpc.x),y=sy(shopNpc.y);ctx.save();ctx.fillStyle="rgba(57,231,255,.08)";ctx.beginPath();ctx.arc(x,y,shopNpc.r,0,Math.PI*2);ctx.fill();ctx.strokeStyle="#39e7ff";ctx.lineWidth=2;ctx.setLineDash([8,7]);ctx.beginPath();ctx.arc(x,y,shopNpc.r,0,Math.PI*2);ctx.stroke();ctx.setLineDash([]);ctx.fillStyle="#09111f";ctx.beginPath();ctx.arc(x,y,25,0,Math.PI*2);ctx.fill();ctx.strokeStyle="#39e7ff";ctx.lineWidth=3;ctx.stroke();ctx.fillStyle="#39e7ff";ctx.font="bold 20px Arial";ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText("M",x,y);ctx.fillStyle="#fff";ctx.font="bold 11px Arial";ctx.fillText("MUNICIÓN",x,y-38);ctx.restore();}
 function drawMinimap(){
   const mm=document.getElementById("minimap");
@@ -757,7 +788,7 @@ function draw(){
     ctx.globalAlpha=.45;ctx.font="bold 11px Arial";ctx.fillText("PROTECCIÓN DE SPAWN",zsx,zsy+zrad+18);
   }
   ctx.restore();
-  drawShopNpc();
+  drawBankNpc();drawShopNpc();
 
   for(const w of walls){
     const x=sx(w.x-w.w/2),y=sy(w.y-w.h/2);
@@ -795,7 +826,7 @@ function draw(){
   }
   drawTank(p.x,p.y,p.angle,"#39e7ff",p.r,p.weapon||"blaster");
   drawNameTag(playerName,p.x,p.y,p.r,"#39e7ff");
-  drawMinimap();updateAmmoShop();updateResourceHud();
+  drawMinimap();updateAmmoShop();updateBank();updateResourceHud();
 
   document.getElementById("hp").textContent=Math.ceil(p.hp);
   document.getElementById("maxHp").textContent=p.maxHp;
