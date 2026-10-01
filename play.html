@@ -9,7 +9,7 @@
 <script>
 (function(){
   try{
-    var v="20261001-31";
+    var v="20261001-32";
     var k="neon_core_build";
     window.NEON_CORE_BUILD=v;
     var old=localStorage.getItem(k);
@@ -41,7 +41,7 @@
 #nameCard button,#restart{width:100%;min-height:44px;border:0;border-radius:10px;margin-top:10px;background:#183d58;color:#fff;font-weight:bold}
 #minimapWrap{position:fixed;top:10px;right:10px;width:180px;height:135px;background:rgba(5,8,17,.9);border:1px solid #26344e;border-radius:12px;padding:6px;z-index:6;pointer-events:none;backdrop-filter:blur(5px)}#minimap{display:block;width:100%;height:100%;border-radius:8px}#minimapTitle{position:absolute;left:10px;top:8px;font-size:10px;font-weight:bold;color:#dffbff;text-shadow:0 1px 2px #000}#playersPanel{position:fixed;top:153px;right:10px;width:min(210px,46vw);background:rgba(5,8,17,.88);border:1px solid #26344e;border-radius:12px;padding:8px 10px;font-size:12px;backdrop-filter:blur(5px);z-index:6;display:none;pointer-events:none}#playersList{display:grid;gap:4px;margin-top:6px;max-height:150px;overflow:auto}.onlinePlayer{display:flex;justify-content:space-between;gap:8px;color:#fff}.onlinePlayer small{color:#6ff3b0;font-size:10px}#roomActions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}#roomActions button{margin-top:0}#roomCodeInput{width:100%;padding:13px;border:1px solid #33415d;background:#111a2d;color:white;border-radius:10px;font-size:16px;outline:none;margin-top:8px;text-transform:uppercase}
 #nameMsg{font-size:13px;color:#ff8b8b;min-height:18px;margin-top:8px}
-#gameActions{position:fixed;left:10px;top:74px;z-index:7;display:none;gap:7px}#gameActions button{min-height:40px;border:1px solid #33415d;background:#0b1020;color:#fff;border-radius:9px;padding:0 12px;font-weight:bold}#saveGame{background:#183d58!important}
+#controlConfigBtn{position:fixed;right:10px;bottom:10px;z-index:8;width:44px;height:44px;border:1px solid #33415d;background:#0b1020;color:#fff;border-radius:12px;font-size:20px;display:none}#controlEditor{position:fixed;inset:0;background:#000b;display:none;align-items:center;justify-content:center;padding:20px;z-index:25}#controlCard{width:min(360px,100%);background:#0b1020;border:1px solid #26344e;border-radius:16px;padding:18px;box-shadow:0 15px 60px #000}#controlCard h2{margin:0 0 6px;color:#39e7ff;font-size:20px}#controlCard p{margin:0 0 14px;color:#9ca9bd;font-size:12px;line-height:1.4}.controlRow{display:grid;grid-template-columns:1fr auto;align-items:center;gap:12px;margin:12px 0}.controlRow input{width:160px}.controlActions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}.controlActions button{min-height:44px;border:0;border-radius:10px;background:#183d58;color:#fff;font-weight:bold}.controlActions button:last-child{background:#26344e}#gameActions{position:fixed;left:10px;top:74px;z-index:7;display:none;gap:7px}#gameActions button{min-height:40px;border:1px solid #33415d;background:#0b1020;color:#fff;border-radius:9px;padding:0 12px;font-weight:bold}#saveGame{background:#183d58!important}
 #restart{display:none}
 #controls{position:fixed;inset:auto 0 0;display:flex;justify-content:space-between;align-items:flex-end;padding:16px;z-index:5;pointer-events:none}
 .joy{touch-action:none;user-select:none;-webkit-user-select:none;width:112px;height:112px;border:1px solid #41516d;background:#07101dcc;border-radius:50%;position:relative;pointer-events:auto}
@@ -51,7 +51,7 @@
 #deathCard{background:#0b1020;border:1px solid #26344e;border-radius:16px;padding:22px;width:min(330px,90%)}
 #deathCard h2{color:#ff5474;margin:0 0 8px}
 @media(min-width:800px){#controls{opacity:.3}#controls:hover{opacity:1}}
-#roomActions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}#roomActions button{width:100%;min-height:44px;border:0;border-radius:10px;background:#183d58;color:#fff;font-weight:bold}#roomCodeInput{width:100%;padding:13px;border:1px solid #33415d;background:#111a2d;color:white;border-radius:10px;font-size:16px;outline:none;margin-top:8px;text-transform:uppercase}@media(max-width:799px){#hud{top:8px;left:8px;right:8px}.panel{padding:7px 8px;font-size:12px}#bars{min-width:0;width:min(190px,58vw)}#hud>.panel:last-child{white-space:nowrap}#gameActions{top:74px;left:8px}#gameActions button{min-height:38px;padding:0 9px;font-size:11px}#minimapWrap{top:8px;right:8px;width:min(150px,42vw);height:min(112px,32vw);padding:5px}#playersPanel{top:126px;right:8px;width:min(180px,48vw);padding:7px 8px;font-size:11px}#playersList{max-height:130px;gap:3px}#controls{padding:12px}.joy{width:100px;height:100px}.stick{width:44px;height:44px;left:28px;top:28px}#fire{width:78px;height:78px}}@media(max-width:430px){#hud>.panel:last-child{max-width:105px;overflow:hidden;text-overflow:ellipsis}#playersPanel{max-width:45vw}.onlinePlayer{font-size:10px}} </style>
+#roomActions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}#roomActions button{width:100%;min-height:44px;border:0;border-radius:10px;background:#183d58;color:#fff;font-weight:bold}#roomCodeInput{width:100%;padding:13px;border:1px solid #33415d;background:#111a2d;color:white;border-radius:10px;font-size:16px;outline:none;margin-top:8px;text-transform:uppercase}@media(max-width:799px){#controlConfigBtn{display:block}#hud{top:8px;left:8px;right:8px}.panel{padding:7px 8px;font-size:12px}#bars{min-width:0;width:min(190px,58vw)}#hud>.panel:last-child{white-space:nowrap}#gameActions{top:74px;left:8px}#gameActions button{min-height:38px;padding:0 9px;font-size:11px}#minimapWrap{top:8px;right:8px;width:min(150px,42vw);height:min(112px,32vw);padding:5px}#playersPanel{top:126px;right:8px;width:min(180px,48vw);padding:7px 8px;font-size:11px}#playersList{max-height:130px;gap:3px}#controls{padding:12px}.joy{width:100px;height:100px}.stick{width:44px;height:44px;left:28px;top:28px}#fire{width:78px;height:78px}}@media(max-width:430px){#hud>.panel:last-child{max-width:105px;overflow:hidden;text-overflow:ellipsis}#playersPanel{max-width:45vw}.onlinePlayer{font-size:10px}} </style>
 </head>
 <body>
 <canvas id="game"></canvas>
@@ -98,6 +98,8 @@
   </div>
 </div>
 
+<button id="controlConfigBtn" type="button" aria-label="Configurar controles">⚙</button>
+<div id="controlEditor"><div id="controlCard"><h2>CONTROLES</h2><p>Ajusta posición y tamaño del joystick y botón de disparo. Los cambios quedan guardados en este dispositivo.</p><div class="controlRow"><label for="joySize">Joystick</label><input id="joySize" type="range" min="80" max="170" value="112"></div><div class="controlRow"><label for="fireSize">Disparo</label><input id="fireSize" type="range" min="60" max="130" value="86"></div><div class="controlRow"><label for="joyX">Joystick X</label><input id="joyX" type="range" min="0" max="100" value="8"></div><div class="controlRow"><label for="joyY">Joystick Y</label><input id="joyY" type="range" min="0" max="100" value="8"></div><div class="controlRow"><label for="fireX">Disparo X</label><input id="fireX" type="range" min="0" max="100" value="8"></div><div class="controlRow"><label for="fireY">Disparo Y</label><input id="fireY" type="range" min="0" max="100" value="8"></div><div class="controlActions"><button id="controlReset" type="button">Restablecer</button><button id="controlDone" type="button">Listo</button></div></div></div>
 <div id="controls">
   <div class="joy" id="moveJoy"><div class="stick"></div></div>
   <button id="fire">●</button>
@@ -696,7 +698,28 @@ function setupJoystick(id){
   el.addEventListener("lostpointercapture",()=>reset());
   return reset;
 }
-const resetMoveJoystick=setupJoystick("moveJoy");
+const resetMoveJoystick=setupJoystick("moveJoy");\nconst controlDefaults={joySize:112,fireSize:86,joyX:8,joyY:8,fireX:8,fireY:8};
+let controlConfig={...controlDefaults};
+try{const saved=JSON.parse(localStorage.getItem("neon_core_controls")||"null");if(saved)controlConfig={...controlDefaults,...saved};}catch{}
+function applyControlConfig(){
+  const joy=document.getElementById("moveJoy"),fireEl=document.getElementById("fire");
+  const clampPct=v=>Math.max(0,Math.min(100,Number(v)||0));
+  joy.style.width=controlConfig.joySize+"px";joy.style.height=controlConfig.joySize+"px";
+  joy.style.left=clampPct(controlConfig.joyX)+"%";joy.style.bottom=clampPct(controlConfig.joyY)+"%";joy.style.transform="translateX(-"+clampPct(controlConfig.joyX)+"%)";
+  fireEl.style.width=controlConfig.fireSize+"px";fireEl.style.height=controlConfig.fireSize+"px";
+  fireEl.style.position="fixed";fireEl.style.right=clampPct(controlConfig.fireX)+"%";fireEl.style.bottom=clampPct(controlConfig.fireY)+"%";fireEl.style.transform="translateX("+clampPct(controlConfig.fireX)+"%)";
+  const stick=joy.querySelector(".stick");if(stick){stick.style.left=((controlConfig.joySize-48)/2)+"px";stick.style.top=((controlConfig.joySize-48)/2)+"px";}
+}
+function saveControlConfig(){try{localStorage.setItem("neon_core_controls",JSON.stringify(controlConfig));}catch{}applyControlConfig();}
+const controlEditor=document.getElementById("controlEditor"),controlConfigBtn=document.getElementById("controlConfigBtn");
+const controlInputs={joySize:document.getElementById("joySize"),fireSize:document.getElementById("fireSize"),joyX:document.getElementById("joyX"),joyY:document.getElementById("joyY"),fireX:document.getElementById("fireX"),fireY:document.getElementById("fireY")};
+function syncControlInputs(){for(const k in controlInputs)controlInputs[k].value=controlConfig[k];}
+for(const [k,input] of Object.entries(controlInputs))input.addEventListener("input",()=>{controlConfig[k]=Number(input.value);saveControlConfig();});
+syncControlInputs();applyControlConfig();
+controlConfigBtn.addEventListener("click",()=>{syncControlInputs();controlEditor.style.display="flex";});
+document.getElementById("controlDone").addEventListener("click",()=>{controlEditor.style.display="none";});
+document.getElementById("controlReset").addEventListener("click",()=>{controlConfig={...controlDefaults};syncControlInputs();saveControlConfig();});
+
 
 function resetAllControls(){
   resetMoveJoystick();
