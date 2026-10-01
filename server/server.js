@@ -5,7 +5,9 @@ const PORT = process.env.PORT || 10000;
 const WORLD = {w:6000,h:4400};
 const MAX_PLAYERS = 16;
 const SAFE_ZONE = {x:3000,y:2200,r:300};
-const SERVER_VERSION = "20261001-40";
+const SERVER_VERSION = "20261001-42";
+const AMMO_PACK_SIZE=50,AMMO_PACK_COST=50,MAX_AMMO=120;
+const SHOP_NPC={x:3000,y:2380,r:95};
 const SERVER_STARTED_AT = Date.now();
 function inSafeZone(x,y,pad=0){return Math.hypot(x-SAFE_ZONE.x,y-SAFE_ZONE.y)<=SAFE_ZONE.r+pad;}
 const clients = new Map();
@@ -40,7 +42,7 @@ function sendPlayerList(code){
 }
 function sendStats(p){
   if(!p || !p.ws)return;
-  send(p.ws,{type:"server_stats",kills:p.kills,pvpKills:p.pvpKills,score:p.score,xp:p.xp,level:p.level,damage:p.damage,defense:p.defense,fireRate:p.fireRate,maxHp:100+(p.level-1)*15,xpNeed:100,killsToLevel:5-(p.kills%5||5)});
+  send(p.ws,{type:"server_stats",kills:p.kills,pvpKills:p.pvpKills,score:p.score,xp:p.xp,level:p.level,damage:p.damage,defense:p.defense,fireRate:p.fireRate,maxHp:100+(p.level-1)*15,xpNeed:100,killsToLevel:5-(p.kills%5||5),gold:p.gold||0,ammo:p.ammo??0,maxAmmo:MAX_AMMO,shopNpc:SHOP_NPC});
 }
 function makeEnemy(){
   const elite=Math.random()<.2;
@@ -128,6 +130,7 @@ function spawnPosition(code){
   const s=spots[index%spots.length];
   return {x:s[0],y:s[1]};
 }
+function buyAmmo(ws){const p=clients.get(ws);if(!p||!p.room||!p.alive)return;if(Math.hypot(p.x-SHOP_NPC.x,p.y-SHOP_NPC.y)>SHOP_NPC.r){send(ws,{type:"shop_result",ok:false,message:"Acércate al vendedor de munición."});return;}const ammo=Number(p.ammo)||0,gold=Number(p.gold)||0;if(ammo>=MAX_AMMO){send(ws,{type:"shop_result",ok:false,message:"Munición al máximo."});return;}if(gold<AMMO_PACK_COST){send(ws,{type:"shop_result",ok:false,message:"Necesitas 50 de oro."});return;}p.gold=gold-AMMO_PACK_COST;p.ammo=Math.min(MAX_AMMO,ammo+AMMO_PACK_SIZE);send(ws,{type:"shop_result",ok:true,message:"Compraste "+(p.ammo-ammo)+" balas.",gold:p.gold,ammo:p.ammo,maxAmmo:MAX_AMMO});sendStats(p);}
 function findPlayer(id,room){
   for(const ws of room||[]) {
     const p=clients.get(ws);
@@ -138,6 +141,8 @@ function findPlayer(id,room){
 function handleShot(ws){
   const shooter=clients.get(ws);
   if(!shooter || !shooter.room || !shooter.alive)return;
+  if(inSafeZone(shooter.x,shooter.y,24))return;
+  if((shooter.ammo||0)<=0){send(ws,{type:"ammo_empty"});return;}
   const now=Date.now();
   const cooldown=Math.max(100,Math.min(500,Number(shooter.fireRate)||280));
   if(now-shooter.lastShot<cooldown)return;
@@ -162,7 +167,6 @@ function handleShot(ws){
   }
 
   const enemies=ensureRoomEnemies(shooter.room);
-  if(inSafeZone(shooter.x,shooter.y,24)) return;
   for(const enemy of enemies){
     const dx=enemy.x-shooter.x,dy=enemy.y-shooter.y;
     const d=Math.hypot(dx,dy);
@@ -173,6 +177,7 @@ function handleShot(ws){
     if(Math.abs(diff)<=hitWidth && d<best){best=d;targetEnemy=enemy;targetPlayer=null;}
   }
 
+  shooter.ammo=Math.max(0,(shooter.ammo||0)-1);sendStats(shooter);
   broadcastRoom(shooter.room,{type:"player_shot",id:shooter.id,x:shooter.x,y:shooter.y,angle:shooter.angle});
 
   if(targetPlayer){
@@ -199,11 +204,12 @@ function handleShot(ws){
     if(targetEnemy.hp<=0){
       const reward=targetEnemy.kind==="elite"?30:12;
       const xp=targetEnemy.kind==="elite"?35:20;
+      shooter.gold=(shooter.gold||0)+reward;
       const index=enemies.findIndex(e=>e.id===targetEnemy.id);
       if(index>=0)enemies.splice(index,1);
       shooter.kills=(shooter.kills||0)+1;shooter.score=(shooter.score||0)+reward;shooter.xp=(shooter.xp||0)+xp;
       if(shooter.kills%5===0){shooter.level++;shooter.xp=0;shooter.damage+=5;shooter.defense+=2;shooter.fireRate=Math.max(140,shooter.fireRate-8);}
-      send(shooter.ws,{type:"server_stats",kills:shooter.kills,score:shooter.score,xp:shooter.xp,level:shooter.level,damage:shooter.damage,defense:shooter.defense,fireRate:shooter.fireRate,maxHp:100+(shooter.level-1)*15,xpNeed:100,killsToLevel:5-(shooter.kills%5||5)});
+      sendStats(shooter);
       broadcastRoom(shooter.room,{type:"enemy_dead",id:targetEnemy.id,killer:shooter.id});
     }
   }
@@ -232,7 +238,7 @@ wss.on("connection",(ws)=>{
   const id=Math.random().toString(36).slice(2,10);
   const player={
     id,name:"Jugador",saveKey:"",x:3000,y:2200,angle:0,hp:100,level:1,
-    damage:25,defense:0,fireRate:280,score:0,kills:0,xp:0,pvpKills:0,
+    damage:25,defense:0,fireRate:280,score:0,kills:0,xp:0,pvpKills:0,gold:0,ammo:60,
     color:"#39e7ff",room:"",alive:true,frozen:false,lastShot:0
   };
   player.ws=ws;
@@ -254,7 +260,7 @@ wss.on("connection",(ws)=>{
           p.x=Number.isFinite(saved.x)?saved.x:p.x;
           p.y=Number.isFinite(saved.y)?saved.y:p.y;
           p.level=Number(saved.level)||1;p.hp=Number(saved.hp)||100;p.damage=Number(saved.damage)||25;p.defense=Number(saved.defense)||0;p.fireRate=Number(saved.fireRate)||280;
-          p.score=saved.score;p.kills=saved.kills;p.xp=saved.xp;p.pvpKills=Number(saved.pvpKills)||0;
+          p.score=saved.score;p.kills=saved.kills;p.xp=saved.xp;p.pvpKills=Number(saved.pvpKills)||0;p.gold=Number(saved.gold)||0;p.ammo=Math.max(0,Math.min(MAX_AMMO,Number(saved.ammo)??60));
         }
         p.color=String(msg.color||"#39e7ff");
         if(msg.room) joinRoom(ws,msg.room,false);
@@ -278,6 +284,7 @@ wss.on("connection",(ws)=>{
       }
 
       if(msg.type==="fire" && !p.frozen) handleShot(ws);
+      if(msg.type==="buy_ammo" && !p.frozen) buyAmmo(ws);
 
       if(msg.type==="save" && p.room){
         p.frozen=true;
@@ -285,7 +292,7 @@ wss.on("connection",(ws)=>{
         p.hp=clamp(Number.isFinite(msg.hp)?msg.hp:p.hp,0,100);
         const data={
           name:p.name,x:p.x,y:p.y,level:p.level,hp:p.hp,damage:p.damage,defense:p.defense,fireRate:p.fireRate,
-          score:p.score,kills:p.kills,xp:p.xp,pvpKills:p.pvpKills
+          score:p.score,kills:p.kills,xp:p.xp,pvpKills:p.pvpKills,gold:p.gold||0,ammo:p.ammo||0
         };
         if(p.saveKey)savedPlayers.set(p.saveKey,data);
         send(ws,{type:"save_ok",savedAt:Date.now(),data});
@@ -301,7 +308,7 @@ wss.on("connection",(ws)=>{
       if(msg.type==="respawn" && p.room){
         const spawn=spawnPosition(p.room);
         p.x=spawn.x;p.y=spawn.y;p.angle=0;p.hp=100;p.alive=true;
-        p.level=1;p.damage=25;p.defense=0;p.fireRate=280;p.xp=0;p.score=0;p.kills=0;p.pvpKills=0;p.lastShot=0;
+        p.level=1;p.damage=25;p.defense=0;p.fireRate=280;p.xp=0;p.score=0;p.kills=0;p.pvpKills=0;p.ammo=Math.max(30,Math.min(MAX_AMMO,p.ammo||0));p.lastShot=0;
         send(ws,{type:"respawn_ok",x:p.x,y:p.y,hp:p.hp,enemies:ensureRoomEnemies(p.room),safeZone:SAFE_ZONE,spawnProtectionMs:5000});
         sendStats(p);
         broadcastRoom(p.room,{type:"player_update",player:p},ws);
