@@ -9,7 +9,7 @@
 <script>
 (function(){
   try{
-    var v="20261001-114";
+    var v="20261001-115";
     var k="neon_core_build";
     window.NEON_CORE_BUILD=v;
     var old=localStorage.getItem(k);
@@ -32,7 +32,7 @@
 #game{display:block;width:100vw;height:100vh}
 #hud{position:fixed;top:10px;left:10px;right:10px;display:flex;justify-content:space-between;align-items:flex-start;gap:8px;pointer-events:none;z-index:3}
 .panel{background:rgba(5,8,17,.82);border:1px solid #26344e;border-radius:12px;padding:8px 10px;font-size:13px;backdrop-filter:blur(5px)}
-#bars{min-width:190px}#score{opacity:.45;font-size:11px}.bar{height:16px;background:#182033;border-radius:9px;overflow:hidden;margin-top:5px;position:relative;border:1px solid #26344e}.bar i{display:block;height:100%;width:100%;background:#36e0ff}.xpbar i{background:#a855f7}.barLabel{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:bold;color:#fff;text-shadow:0 1px 2px #000;pointer-events:none}
+#bars{min-width:190px}#score{opacity:.45;font-size:11px}.buildBadge{display:inline-block;margin-left:6px;padding:2px 6px;border:1px solid #39e7ff;border-radius:6px;color:#39e7ff;font-size:10px;font-weight:900;letter-spacing:1px;vertical-align:middle}.bar{height:16px;background:#182033;border-radius:9px;overflow:hidden;margin-top:5px;position:relative;border:1px solid #26344e}.bar i{display:block;height:100%;width:100%;background:#36e0ff}.xpbar i{background:#a855f7}.barLabel{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:bold;color:#fff;text-shadow:0 1px 2px #000;pointer-events:none}
 #nameBox{position:fixed;inset:0;background:#000b;display:flex;align-items:center;justify-content:center;padding:20px;z-index:20}
 #nameCard{width:min(380px,100%);background:#0b1020;border:1px solid #26344e;border-radius:18px;padding:22px;box-shadow:0 15px 60px #000}
 #nameCard h1{margin:0 0 5px;font-size:30px;letter-spacing:2px;color:#39e7ff}
@@ -58,7 +58,7 @@
 
 <div id="hud">
   <div class="panel" id="bars">
-    <b>NEON CORE</b> · <span id="level">Nv. 1</span> · ☠ <span id="pvpKills">0</span>
+    <b>NEON CORE</b><span class="buildBadge">B115</span> · <span id="level">Nv. 1</span> · ☠ <span id="pvpKills">0</span>
     <div class="bar"><i id="hpFill"></i><span class="barLabel">❤️ <span id="hp">100</span>/<span id="maxHp">100</span></span></div>
     <div class="bar xpbar"><i id="xpFill"></i><span class="barLabel">XP <span id="xp">0</span>/<span id="xpNeed">100</span></span></div>
     <small>⚔ <span id="damageStat">25</span> · 🛡 <span id="defenseStat">0</span> · 🎯 <span id="kills">0</span></small>
