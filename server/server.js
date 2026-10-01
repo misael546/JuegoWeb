@@ -10,7 +10,7 @@ const WORLD = { w: 6000, h: 4400 };
 const MAX_PLAYERS = 16;
 const SAFE_ZONE = { x: 3000, y: 2200, r: 300 };
 
-const SERVER_VERSION = '20261001-58';
+const SERVER_VERSION = '20261001-59';
 
 const AMMO_PACK_SIZE = 50;
 const AMMO_PACK_COST = 50;
@@ -18,7 +18,7 @@ const MAX_AMMO = 120;
 
 const SHOP_NPC = { x: 3000, y: 2380, r: 30 };
 const BANK_NPC = { x: 3000, y: 2050, r: 30 };
-const SAVE_NPC = { x: 3000, y: 2200, r: 34 };
+const SAVE_NPC = { x: 3000, y: 1750, r: 34 };
 
 const WEAPONS = {
   blaster: { name: 'BLASTER', cost: 0, damage: 25, fireRate: 350 },
@@ -192,15 +192,32 @@ function capturePlayerData(p) {
 }
 
 async function persistPlayer(p) {
-  if (!p?.saveKey) return;
+  if (!p?.saveKey) return null;
   const data = capturePlayerData(p);
   savedPlayers.set(p.saveKey, data);
+  p.lastSavedData = { ...data };
 
   try {
     await storage.ready;
     await storage.savePlayerData(p.saveKey, data);
   } catch (error) {
     console.error('[STORAGE SAVE]', error?.message || error);
+  }
+
+  p.lastPersistAt = Date.now();
+  return data;
+}
+
+async function persistSavedCheckpoint(p) {
+  if (!p?.saveKey || !p.lastSavedData) return;
+
+  savedPlayers.set(p.saveKey, { ...p.lastSavedData });
+
+  try {
+    await storage.ready;
+    await storage.savePlayerData(p.saveKey, p.lastSavedData);
+  } catch (error) {
+    console.error('[STORAGE CHECKPOINT]', error?.message || error);
   }
 
   p.lastPersistAt = Date.now();
@@ -445,7 +462,7 @@ async function leaveRoom(ws) {
   const code = p.room;
 
   if (p.saveKey) {
-    await persistPlayer(p);
+    await persistSavedCheckpoint(p);
   }
 
   const room = rooms.get(code);
@@ -706,15 +723,23 @@ function depositGold(ws) {
   sendPlayerList(p.room);
 }
 
-function saveProgressAtNpc(ws) {
+async function saveProgressAtNpc(ws) {
   const p = clients.get(ws);
   if (!p) return;
   if (!p.room) { send(ws, { type: 'save_result', ok: false, message: 'No estás dentro de una sala.' }); return; }
   if (!p.alive) { send(ws, { type: 'save_result', ok: false, message: 'No puedes guardar estando destruido.' }); return; }
   if (Math.hypot(p.x - SAVE_NPC.x, p.y - SAVE_NPC.y) > SAVE_NPC.r) { send(ws, { type: 'save_result', ok: false, message: 'Acércate al NPC SAVE.' }); return; }
-  p.hp = clamp(p.hp, 0, maxHpForLevel(p.level));
-  await persistPlayer(p);
-  send(ws, { type: 'save_result', ok: true, message: 'Progreso guardado correctamente.', savedAt: Date.now(), data: capturePlayerData(p) });
+
+  p.hp = clamp(p.hp, 1, maxHpForLevel(p.level));
+  const data = await persistPlayer(p);
+
+  send(ws, {
+    type: 'save_result',
+    ok: true,
+    message: 'Progreso guardado correctamente.',
+    savedAt: Date.now(),
+    data
+  });
 }
 
 function buyAmmo(ws) {
@@ -943,7 +968,7 @@ function handleShot(ws) {
 
       levelUpIfNeeded(shooter);
 
-      void persistPlayer(target);
+      void persistSavedCheckpoint(target);
       void persistPlayer(shooter);
 
       send(targetPlayer.ws, {
@@ -1041,6 +1066,7 @@ function createPlayer(ws) {
     lastPersistAt: 0,
     lastEnemySyncAt: 0,
     hasSaved: false,
+    lastSavedData: null,
     joined: false,
     ws
   };
@@ -1154,6 +1180,7 @@ wss.on('connection', (ws) => {
         }
 
         applyCombatStats(p);
+        p.lastSavedData = { ...capturePlayerData(p) };
         p.joined = true;
 
         if (msg.room) {
@@ -1351,12 +1378,32 @@ wss.on('connection', (ws) => {
         p.angle = 0;
         p.alive = true;
         p.frozen = false;
-        p.hp = maxHpForLevel(p.level);
-        p.ammo = Math.max(30, clamp(Number(p.ammo) || 0, 0, MAX_AMMO));
+        const checkpoint = p.lastSavedData ? { ...p.lastSavedData } : null;
+
+        if (checkpoint) {
+          p.x = Number.isFinite(Number(checkpoint.x)) ? Number(checkpoint.x) : p.x;
+          p.y = Number.isFinite(Number(checkpoint.y)) ? Number(checkpoint.y) : p.y;
+          p.level = clamp(Number(checkpoint.level) || 1, 1, 1000);
+          p.hp = Number(checkpoint.hp) > 0 ? Number(checkpoint.hp) : maxHpForLevel(p.level);
+          p.score = Number(checkpoint.score) || 0;
+          p.kills = Number(checkpoint.kills) || 0;
+          p.xp = Number(checkpoint.xp) || 0;
+          p.pvpKills = Number(checkpoint.pvpKills) || 0;
+          p.gold = Math.max(0, Number(checkpoint.gold) || 0);
+          p.diamonds = Math.max(0, Number(checkpoint.diamonds) || 0);
+          p.bankedGold = Math.max(0, Number(checkpoint.bankedGold) || 0);
+          p.bankedDiamonds = Math.max(0, Number(checkpoint.bankedDiamonds) || 0);
+          p.ammo = clamp(Number(checkpoint.ammo) || 0, 0, MAX_AMMO);
+          p.weapon = WEAPONS[checkpoint.weapon] ? checkpoint.weapon : 'blaster';
+        } else {
+          p.hp = maxHpForLevel(p.level);
+          p.ammo = Math.max(30, clamp(Number(p.ammo) || 0, 0, MAX_AMMO));
+        }
+
         p.lastShot = 0;
         applyCombatStats(p);
 
-        await persistPlayer(p);
+        await persistSavedCheckpoint(p);
 
         send(ws, {
           type: 'respawn_ok',
@@ -1394,7 +1441,7 @@ wss.on('connection', (ws) => {
     void (async () => {
       try {
         const current = clients.get(ws);
-        if (current?.saveKey) await persistPlayer(current);
+        if (current?.saveKey) await persistSavedCheckpoint(current);
         await leaveRoom(ws);
       } catch (error) {
         console.error('[WS CLOSE]', error?.message || error);
@@ -1436,7 +1483,7 @@ setInterval(() => {
     }
 
     if (p.saveKey && now - p.lastPersistAt >= AUTOSAVE_MS) {
-      void persistPlayer(p);
+      void persistSavedCheckpoint(p);
     }
   }
 }, TICK_MS);
@@ -1515,7 +1562,7 @@ setInterval(() => {
             const lostScore = target.score || 0;
 
             resetProgressAfterDeath(target);
-            void persistPlayer(target);
+            void persistSavedCheckpoint(target);
 
             const foundTarget = findPlayer(target.id, room);
 
@@ -1544,7 +1591,7 @@ setInterval(() => {
 
 process.on('SIGTERM', async () => {
   for (const p of clients.values()) {
-    await persistPlayer(p);
+    await persistSavedCheckpoint(p);
   }
   try {
     await storage.closeStorage();
@@ -1554,7 +1601,7 @@ process.on('SIGTERM', async () => {
 
 process.on('SIGINT', async () => {
   for (const p of clients.values()) {
-    await persistPlayer(p);
+    await persistSavedCheckpoint(p);
   }
   try {
     await storage.closeStorage();
