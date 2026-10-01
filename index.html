@@ -9,7 +9,7 @@
 <script>
 (function(){
   try{
-    var v="20261001-27";
+    var v="20261001-28";
     var k="neon_core_build";
     window.NEON_CORE_BUILD=v;
     var old=localStorage.getItem(k);
@@ -114,6 +114,8 @@ let bullets=[],enemies=[],drops=[],particles=[],walls=[];
 let serverXpNeed=100,serverKillsToLevel=5;
 let gameActive=false;
 let camera={x:p.x,y:p.y},last=performance.now(),playerName="";
+let safeZone={x:1500,y:1100,r:300};
+let spawnProtectionUntil=0;
 const keys={w:false,a:false,s:false,d:false};
 const pointer={x:W/2,y:H/2,down:false};
 let moveX=0,moveY=0;
@@ -176,6 +178,8 @@ function connectMultiplayer(roomMode="quick",roomCode=""){
           saveGameBtn.disabled=false;
           resumeGameBtn.style.display="none";
         }else if(m.type==="room_joined"){
+          if(m.safeZone){safeZone=m.safeZone;}
+          spawnProtectionUntil=performance.now()+(Number(m.spawnProtectionMs)||5000);
           setConnectionStatus("CONECTADO","Listo. Entrando a la arena…",false);
           const me=(m.players||[]).find(q=>q.id===multiplayerId);
           if(me){
@@ -287,6 +291,8 @@ function connectMultiplayer(roomMode="quick",roomCode=""){
           if(Number.isFinite(m.xpNeed))serverXpNeed=m.xpNeed;
           if(Number.isFinite(m.killsToLevel))serverKillsToLevel=m.killsToLevel;
         }else if(m.type==="respawn_ok"){
+          if(m.safeZone){safeZone=m.safeZone;}
+          spawnProtectionUntil=performance.now()+(Number(m.spawnProtectionMs)||5000);
           p.x=m.x;p.y=m.y;p.hp=p.maxHp;p.alive=true;
           document.getElementById("death").style.display="none";
         }else if(m.type==="player_leave"){
@@ -550,6 +556,20 @@ function draw(){
   for(let y=oy;y<H;y+=grid){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke()}
 
   ctx.strokeStyle="#26344e";ctx.strokeRect(sx(0),sy(0),world.w,world.h);
+
+  // Zona segura visible: los enemigos no pueden entrar y los jugadores no reciben daño dentro.
+  const zsx=sx(safeZone.x),zsy=sy(safeZone.y);
+  const zrad=safeZone.r;
+  ctx.save();
+  ctx.fillStyle="rgba(57,231,255,.055)";
+  ctx.beginPath();ctx.arc(zsx,zsy,zrad,0,Math.PI*2);ctx.fill();
+  ctx.strokeStyle="#39e7ff";ctx.lineWidth=3;ctx.setLineDash([14,10]);
+  ctx.globalAlpha=.9;ctx.beginPath();ctx.arc(zsx,zsy,zrad,0,Math.PI*2);ctx.stroke();ctx.setLineDash([]);
+  ctx.globalAlpha=.75;ctx.fillStyle="#39e7ff";ctx.font="bold 12px Arial";ctx.textAlign="center";ctx.fillText("ZONA SEGURA",zsx,zsy-zrad-10);
+  if(performance.now()<spawnProtectionUntil){
+    ctx.globalAlpha=.45;ctx.font="bold 11px Arial";ctx.fillText("PROTECCIÓN DE SPAWN",zsx,zsy+zrad+18);
+  }
+  ctx.restore();
 
   for(const w of walls){
     const x=sx(w.x-w.w/2),y=sy(w.y-w.h/2);
