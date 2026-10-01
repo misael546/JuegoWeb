@@ -5,7 +5,7 @@ const PORT = process.env.PORT || 10000;
 const WORLD = {w:6000,h:4400};
 const MAX_PLAYERS = 16;
 const SAFE_ZONE = {x:3000,y:2200,r:300};
-const SERVER_VERSION = "20261001-51";
+const SERVER_VERSION = "20261001-52";
 const AMMO_PACK_SIZE=50,AMMO_PACK_COST=50,MAX_AMMO=120;
 const SHOP_NPC={x:3000,y:2380,r:160};
 const WEAPONS={blaster:{name:"BLASTER",cost:0,damage:25,fireRate:350},pulse:{name:"PULSE",cost:150,damage:18,fireRate:170},cannon:{name:"CANNON",cost:300,damage:65,fireRate:700}};
@@ -131,6 +131,44 @@ function spawnPosition(code){
   ];
   const s=spots[index%spots.length];
   return {x:s[0],y:s[1]};
+}
+function persistPlayer(p){
+  if(!p || !p.saveKey)return;
+  savedPlayers.set(p.saveKey,{
+    name:p.name,x:p.x,y:p.y,level:p.level,hp:p.hp,damage:p.damage,defense:p.defense,fireRate:p.fireRate,
+    score:p.score,kills:p.kills,xp:p.xp,pvpKills:p.pvpKills,gold:p.gold||0,bankedGold:p.bankedGold||0,
+    ammo:p.ammo||0,weapon:p.weapon||"blaster"
+  });
+}
+function shopBuy(ws,weapon){
+  const p=clients.get(ws);
+  if(!p||!p.room||!p.alive)return;
+  if(Math.hypot(p.x-SHOP_NPC.x,p.y-SHOP_NPC.y)>SHOP_NPC.r){
+    send(ws,{type:"shop_result",ok:false,message:"Acércate al vendedor de munición."});
+    return;
+  }
+  const item=WEAPONS[String(weapon||"").toLowerCase()];
+  if(!item){send(ws,{type:"shop_result",ok:false,message:"Arma no disponible."});return;}
+  if(p.weapon===weapon){send(ws,{type:"shop_result",ok:false,message:"Ya tienes equipada "+item.name+".",weapon:p.weapon});return;}
+  const gold=Number(p.gold)||0;
+  if(gold<item.cost){send(ws,{type:"shop_result",ok:false,message:"Necesitas "+item.cost+" de oro para "+item.name+"."});return;}
+  p.gold=gold-item.cost;p.weapon=weapon;
+  p.damage=item.damage+(p.level-1)*5;
+  p.fireRate=Math.max(100,item.fireRate-(p.level-1)*4);
+  persistPlayer(p);
+  send(ws,{type:"shop_result",ok:true,message:"Equipada "+item.name+".",weapon:p.weapon,gold:p.gold,damage:p.damage,fireRate:p.fireRate});
+  sendStats(p);
+}
+function depositGold(ws){
+  const p=clients.get(ws);
+  if(!p||!p.room||!p.alive)return;
+  if(!inSafeZone(p.x,p.y)){send(ws,{type:"deposit_result",ok:false,message:"Debes estar en la zona segura."});return;}
+  const amount=Math.max(0,Number(p.gold)||0);
+  if(amount<=0){send(ws,{type:"deposit_result",ok:false,message:"No tienes oro para guardar.",bankedGold:p.bankedGold||0});return;}
+  p.gold=0;p.bankedGold=(Number(p.bankedGold)||0)+amount;
+  persistPlayer(p);
+  send(ws,{type:"deposit_result",ok:true,message:"Oro asegurado: "+amount+".",gold:p.gold,bankedGold:p.bankedGold});
+  sendStats(p);
 }
 function buyAmmo(ws){const p=clients.get(ws);if(!p||!p.room||!p.alive)return;if(Math.hypot(p.x-SHOP_NPC.x,p.y-SHOP_NPC.y)>SHOP_NPC.r){send(ws,{type:"shop_result",ok:false,message:"Acércate al vendedor de munición."});return;}const ammo=Number(p.ammo)||0,gold=Number(p.gold)||0;if(ammo>=MAX_AMMO){send(ws,{type:"shop_result",ok:false,message:"Munición al máximo."});return;}if(gold<AMMO_PACK_COST){send(ws,{type:"shop_result",ok:false,message:"Necesitas 50 de oro."});return;}p.gold=gold-AMMO_PACK_COST;p.ammo=Math.min(MAX_AMMO,ammo+AMMO_PACK_SIZE);send(ws,{type:"shop_result",ok:true,message:"Compraste "+(p.ammo-ammo)+" balas.",gold:p.gold,ammo:p.ammo,maxAmmo:MAX_AMMO});sendStats(p);}
 function findPlayer(id,room){
@@ -380,6 +418,15 @@ wss.on("connection",(ws)=>{
 
 setInterval(()=>{
   const dt=.05;
+  for(const p of clients.values()){
+    if(!p.room||!p.alive||p.frozen)continue;
+    const maxHp=100+(p.level-1)*15;
+    if(p.hp<maxHp){
+      p.hp=Math.min(maxHp,p.hp+HP_REGEN_PER_SEC*dt);
+      send(p.ws,{type:"hp_regen",hp:p.hp,maxHp});
+    }
+  }
+
   for(const [code,room] of rooms){
     if(!room.size)continue;
     const enemies=ensureRoomEnemies(code);
