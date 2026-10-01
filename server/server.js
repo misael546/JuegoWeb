@@ -264,6 +264,23 @@ wss.on("connection",(ws)=>{
       if(msg.type==="join"){
         p.name=String(msg.name||"Jugador").slice(0,20);
         p.saveKey=String(msg.saveKey||"").replace(/[^a-zA-Z0-9_-]/g,"").slice(0,80);
+
+        // Un solo tanque por dispositivo/partida: si el navegador abrió otra conexión
+        // con la misma saveKey (por Atrás/Adelante, caché o reconexión), expulsamos
+        // la conexión anterior antes de crear la nueva.
+        if(p.saveKey){
+          for(const [oldWs,oldP] of clients){
+            if(oldWs!==ws && oldP && oldP.saveKey===p.saveKey){
+              const oldRoom=oldP.room;
+              try{ send(oldWs,{type:"duplicate_session",message:"Esta partida se abrió en otra pestaña o reconexión."}); }catch{}
+              try{ oldWs.close(4001,"duplicate_session"); }catch{}
+              leaveRoom(oldWs);
+              clients.delete(oldWs);
+              if(oldRoom) sendPlayerList(oldRoom);
+            }
+          }
+        }
+
         const saved=p.saveKey?savedPlayers.get(p.saveKey):null;
         p.hasSaved=!!saved;
         if(saved){
