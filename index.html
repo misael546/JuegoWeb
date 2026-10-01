@@ -9,7 +9,7 @@
 <script>
 (function(){
   try{
-    var v="20261001-29";
+    var v="20261001-30";
     var k="neon_core_build";
     window.NEON_CORE_BUILD=v;
     var old=localStorage.getItem(k);
@@ -109,7 +109,7 @@ function resize(){W=innerWidth;H=innerHeight;DPR=Math.min(devicePixelRatio||1,2)
 addEventListener("resize",resize);resize();
 
 const world={w:6000,h:4400};
-const p={x:3000,y:2200,r:24,angle:0,hp:100,maxHp:100,xp:0,level:1,score:0,kills:0,pvpKills:0,damage:25,defense:0,speed:205,fireRate:280,lastShot:0,alive:true};
+const p={x:3000,y:2200,r:16,angle:0,hp:100,maxHp:100,xp:0,level:1,score:0,kills:0,pvpKills:0,damage:25,defense:0,speed:205,fireRate:280,lastShot:0,alive:true};
 let bullets=[],enemies=[],drops=[],particles=[],walls=[];
 let serverXpNeed=100,serverKillsToLevel=5;
 let gameActive=false;
