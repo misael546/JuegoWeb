@@ -196,7 +196,9 @@ function connectMultiplayer(roomMode="quick",roomCode=""){
         }else if(m.type==="pvp_dead"){
           const lostScore=p.score;p.hp=0;p.alive=false;resetProgressOnDeath();
           document.getElementById("deathScore").textContent=lostScore;
-          setTimeout(returnToMenu,350);
+          gameActive=false;
+          enemies.length=0;
+          setTimeout(returnToMenu,50);
         }else if(m.type==="server_stats"){
           p.kills=Number(m.kills)||p.kills;
           p.score=Number(m.score)||p.score;
@@ -305,7 +307,9 @@ function damagePlayer(amount){
     p.hp=0;p.alive=false;
     resetProgressOnDeath();
     document.getElementById("deathScore").textContent=lostScore;
-    setTimeout(returnToMenu,350);
+    gameActive=false;
+    enemies.length=0;
+    setTimeout(returnToMenu,50);
   }
 }
 function levelCheck(){
