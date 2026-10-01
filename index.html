@@ -80,7 +80,7 @@
       <h1>NEON CORE</h1>
       <p>Escribe tu nombre y entra a las salas públicas.</p>
       <input id="username" maxlength="20" autocomplete="off" placeholder="Nombre del tanque" required>
-      <button id="publicRoomsBtn" type="button" onclick="enterPublicRooms();return false;">SALAS PÚBLICAS</button>
+      <button id="publicRoomsBtn" type="button" onclick="enterPublicRooms();return false;">VOLVER A SALAS</button>
       <div id="privateRoomTools" style="display:none" aria-hidden="true">
         <div id="roomActions"><button type="button" id="createRoom">CREAR SALA PRIVADA</button><button type="button" id="joinRoom">UNIRME A PRIVADA</button></div>
         <input id="roomCodeInput" maxlength="4" autocomplete="off" placeholder="CÓDIGO DE SALA · EJ. N7K4">
@@ -820,6 +820,7 @@ function startGame(mode="quick",code=""){
   connectMultiplayer(mode,code);
 }
 
+const PUBLIC_ROOM_CODE=(location.pathname.match(/\/(\d{5})\/?$/)||[])[1]||"";
 const publicRoomsBtn=document.getElementById("publicRoomsBtn");
 function enterPublicRooms(){
   const n=String(username.value||"").trim().slice(0,20);
@@ -831,8 +832,8 @@ function enterPublicRooms(){
   playerName=n;
   saveName(n);
   username.value=n;
-  nameMsg.textContent="Conectando a salas públicas…";
-  startGame("quick","");
+  nameMsg.textContent="Abriendo salas públicas…";
+  location.href=PUBLIC_ROOM_CODE?"../":"neoncore/";
 }
 publicRoomsBtn.addEventListener("click",enterPublicRooms);
 nameForm.addEventListener("submit",e=>{
@@ -864,8 +865,20 @@ restartBtn.addEventListener("click",()=>returnToMenu());
 
 username.value=loadName();
 startRenderMonitor();
+if(PUBLIC_ROOM_CODE){
+  const roomTitle=document.querySelector("#nameCard h1");
+  const roomText=document.querySelector("#nameCard p");
+  if(roomTitle)roomTitle.textContent="NEON CORE · SALA "+PUBLIC_ROOM_CODE;
+  if(roomText)roomText.textContent="Conectando a la sala pública…";
+  const oldBtn=document.getElementById("publicRoomsBtn");
+  if(oldBtn)oldBtn.textContent="VOLVER A SALAS";
+  const savedRoomName=String(username.value||"").trim();
+  if(savedRoomName){
+    setTimeout(()=>startGame("join",PUBLIC_ROOM_CODE),250);
+  }
+}
 username.addEventListener("keydown",e=>{
-  if(e.key==="Enter"){e.preventDefault();startGame("quick","");}
+  if(e.key==="Enter"){e.preventDefault();if(PUBLIC_ROOM_CODE)startGame("join",PUBLIC_ROOM_CODE);else enterPublicRooms();}
 });
 
 addEventListener("keydown",e=>{
