@@ -9,7 +9,7 @@
 <script>
 (function(){
   try{
-    var v="20261001-37";
+    var v="20261001-38";
     var k="neon_core_build";
     window.NEON_CORE_BUILD=v;
     var old=localStorage.getItem(k);
@@ -130,7 +130,7 @@ function updateControlMode(){
 updateControlMode();
 const remotePlayers=new Map();
 let multiplayerSocket=null,multiplayerId="",lastNetSend=0,currentRoom="",multiplayerConnectTimer=null;
-const MULTIPLAYER_SERVER=localStorage.getItem("neon_core_server_url")||"wss://neon-core-multiplayer.onrender.com/ws";
+const MULTIPLAYER_SERVER="wss://neon-core-multiplayer.onrender.com/ws";
 const RENDER_HEALTH_URL=MULTIPLAYER_SERVER.replace(/^wss:/,"https:").replace(/^ws:/,"http:").replace(/\/ws$/,"/health");
 let renderStatusTimer=null,renderServerVersion="",renderServerStartedAt=0;
 async function checkRenderStatus(){
