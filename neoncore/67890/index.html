@@ -9,7 +9,7 @@
 <script>
 (function(){
   try{
-    var v="20261001-46";
+    var v="20261001-47";
     var k="neon_core_build";
     window.NEON_CORE_BUILD=v;
     var old=localStorage.getItem(k);
@@ -47,7 +47,7 @@
 .joy{touch-action:none;user-select:none;-webkit-user-select:none;width:112px;height:112px;border:1px solid #41516d;background:#07101dcc;border-radius:50%;position:relative;pointer-events:auto}
 .stick{position:absolute;width:48px;height:48px;border-radius:50%;left:32px;top:32px;background:#39e7ff99;border:1px solid #8ff5ff}
 #fire{width:86px;height:86px;border-radius:50%;border:2px solid #ff8aa0;background:radial-gradient(circle at 35% 30%,#ff607f,#8e1737 62%,#3b0b1a);color:white;font-size:28px;font-weight:bold;pointer-events:auto;box-shadow:0 0 18px #ff365966,inset 0 0 12px #fff2;display:grid;place-items:center;position:relative;overflow:hidden}#fire:active{transform:scale(.94)}#fire .fireIcon{width:36px;height:36px;border:3px solid #fff;border-radius:50%;position:relative;display:block;box-shadow:0 0 8px #fff8}#fire .fireIcon:after{content:"";position:absolute;width:12px;height:12px;right:-7px;top:-7px;border-radius:50%;background:#fff}
-#chatBox{position:fixed;left:10px;bottom:145px;width:min(330px,calc(100vw - 20px));z-index:12;background:rgba(5,8,17,.9);border:1px solid #26344e;border-radius:12px;padding:8px;backdrop-filter:blur(6px);pointer-events:auto}#chatMessages{height:120px;overflow-y:auto;display:flex;flex-direction:column;gap:4px;font-size:12px;margin-bottom:7px;scrollbar-width:thin}#chatMessages div{word-break:break-word}#chatMessages .chatName{color:#39e7ff;font-weight:bold}#chatForm{display:flex;gap:6px}#chatInput{min-width:0;flex:1;padding:9px 10px;border:1px solid #33415d;background:#111a2d;color:#fff;border-radius:9px;outline:none;font-size:14px}#chatSend{min-width:58px;border:0;border-radius:9px;background:#183d58;color:#fff;font-weight:bold}#chatHint{font-size:10px;color:#74839a;margin-top:4px}@media(max-width:600px){#chatBox{bottom:138px;width:min(300px,calc(100vw - 20px))}#chatMessages{height:90px}}#connectionOverlay{position:fixed;inset:0;background:#050811e8;display:none;align-items:center;justify-content:center;z-index:30;text-align:center;padding:20px}#connectionCard{width:min(340px,100%);background:#0b1020;border:1px solid #26344e;border-radius:16px;padding:24px;display:grid;gap:9px;box-shadow:0 15px 60px #000}#connectionTitle{color:#39e7ff;letter-spacing:1px}#connectionText{color:#9ca9bd;font-size:13px;line-height:1.4}#connectionSpinner{width:28px;height:28px;border:3px solid #26344e;border-top-color:#39e7ff;border-radius:50%;margin:0 auto 5px;animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}#death{position:fixed;inset:0;background:#000b;display:none;align-items:center;justify-content:center;z-index:10;text-align:center}
+#chatToggle{position:fixed;left:10px;bottom:145px;z-index:13;min-width:96px;height:42px;border:1px solid #39e7ff;background:rgba(5,8,17,.94);color:#fff;border-radius:11px;font-weight:bold;pointer-events:auto;box-shadow:0 5px 20px #000}#chatBox{position:fixed;left:10px;bottom:145px;width:min(330px,calc(100vw - 20px));z-index:12;background:rgba(5,8,17,.9);border:1px solid #26344e;border-radius:12px;padding:8px;backdrop-filter:blur(6px);pointer-events:auto}#chatMessages{height:120px;overflow-y:auto;display:flex;flex-direction:column;gap:4px;font-size:12px;margin-bottom:7px;scrollbar-width:thin}#chatMessages div{word-break:break-word}#chatMessages .chatName{color:#39e7ff;font-weight:bold}#chatForm{display:flex;gap:6px}#chatInput{min-width:0;flex:1;padding:9px 10px;border:1px solid #33415d;background:#111a2d;color:#fff;border-radius:9px;outline:none;font-size:14px}#chatSend{min-width:58px;border:0;border-radius:9px;background:#183d58;color:#fff;font-weight:bold}#chatHint{font-size:10px;color:#74839a;margin-top:4px}@media(max-width:600px){#chatToggle{bottom:138px;min-width:90px}#chatBox{bottom:138px;width:min(300px,calc(100vw - 20px))}#chatMessages{height:90px}}#connectionOverlay{position:fixed;inset:0;background:#050811e8;display:none;align-items:center;justify-content:center;z-index:30;text-align:center;padding:20px}#connectionCard{width:min(340px,100%);background:#0b1020;border:1px solid #26344e;border-radius:16px;padding:24px;display:grid;gap:9px;box-shadow:0 15px 60px #000}#connectionTitle{color:#39e7ff;letter-spacing:1px}#connectionText{color:#9ca9bd;font-size:13px;line-height:1.4}#connectionSpinner{width:28px;height:28px;border:3px solid #26344e;border-top-color:#39e7ff;border-radius:50%;margin:0 auto 5px;animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}#death{position:fixed;inset:0;background:#000b;display:none;align-items:center;justify-content:center;z-index:10;text-align:center}
 #deathCard{background:#0b1020;border:1px solid #26344e;border-radius:16px;padding:22px;width:min(330px,90%)}
 #deathCard h2{color:#ff5474;margin:0 0 8px}
 @media(min-width:800px){#controls{opacity:.3}#controls:hover{opacity:1}}
@@ -67,7 +67,7 @@
 
 <div id="minimapWrap"><canvas id="minimap" width="360" height="270"></canvas><span id="minimapTitle">MINIMAPA</span></div><div id="ammoShop" aria-live="polite"><b>🛠 ARSENAL NEON</b><span>Compra armas y munición. El oro se conserva al volver.</span><div class="shopGrid"><button class="shopItem" data-weapon="blaster" type="button"><strong>BLASTER</strong><small>25 daño · 350ms · GRATIS</small></button><button class="shopItem" data-weapon="pulse" type="button"><strong>PULSE</strong><small>18 daño · 170ms · 🪙 150</small></button><button class="shopItem" data-weapon="cannon" type="button"><strong>CANNON</strong><small>65 daño · 700ms · 🪙 300</small></button></div><button id="buyAmmoBtn" type="button">🔸 COMPRAR 50 BALAS · 🪙 50</button><small id="shopMsg">Elige un arma o compra munición.</small></div>
 
-<div id="chatBox" aria-label="Chat del servidor"><div id="chatMessages" aria-live="polite"></div><form id="chatForm"><input id="chatInput" maxlength="120" autocomplete="off" placeholder="Escribe un mensaje…"><button id="chatSend" type="submit">ENVIAR</button></form><div id="chatHint">Enter para enviar · máximo 120 caracteres</div></div>
+<button id="chatToggle" type="button" aria-expanded="false" aria-controls="chatBox">💬 CHAT</button><div id="chatBox" aria-label="Chat del servidor" style="display:none"><div id="chatMessages" aria-live="polite"></div><form id="chatForm"><input id="chatInput" maxlength="120" autocomplete="off" placeholder="Escribe un mensaje…"><button id="chatSend" type="submit">ENVIAR</button></form><div id="chatHint">Enter para enviar · máximo 120 caracteres</div></div>
 
 <div id="connectionOverlay" aria-live="polite"><div id="connectionCard"><div id="connectionSpinner"></div><b id="connectionTitle">CONECTANDO AL SERVIDOR</b><span id="connectionText">Despertando el servidor multiplayer…</span></div></div>
 
@@ -808,6 +808,11 @@ document.addEventListener("visibilitychange",()=>{
   if(document.hidden)resetAllControls();
 });
 
+const chatToggle=document.getElementById("chatToggle"),chatBox=document.getElementById("chatBox");
+let chatOpen=false;
+function setChatOpen(open){chatOpen=!!open;chatBox.style.display=chatOpen?"block":"none";chatToggle.style.display=chatOpen?"none":"block";chatToggle.setAttribute("aria-expanded",String(chatOpen));if(chatOpen)chatInput.focus();}
+chatToggle.addEventListener("click",()=>setChatOpen(true));
+const chatCloseBtn=document.createElement("button");chatCloseBtn.type="button";chatCloseBtn.textContent="×";chatCloseBtn.setAttribute("aria-label","Cerrar chat");chatCloseBtn.style.cssText="position:absolute;right:8px;top:6px;width:28px;height:28px;border:1px solid #33415d;border-radius:7px;background:#111a2d;color:#fff;font-weight:bold";chatBox.insertBefore(chatCloseBtn,chatBox.firstChild);chatCloseBtn.addEventListener("click",()=>setChatOpen(false));
 const chatForm=document.getElementById("chatForm"),chatInput=document.getElementById("chatInput");
 chatForm.addEventListener("submit",e=>{
   e.preventDefault();
@@ -816,7 +821,8 @@ chatForm.addEventListener("submit",e=>{
   multiplayerSocket.send(JSON.stringify({type:"chat",text}));
   chatInput.value="";
 });
-chatInput.addEventListener("keydown",e=>{if(e.key==="Escape"){chatInput.blur();}});
+chatInput.addEventListener("keydown",e=>{if(e.key==="Escape"){chatInput.blur();setChatOpen(false);}});
+setChatOpen(false);
 const nameBox=document.getElementById("nameBox");
 const nameForm=document.getElementById("nameForm");
 const username=document.getElementById("username");
