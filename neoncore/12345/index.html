@@ -185,7 +185,7 @@ function setConnectionStatus(title,text,show=true){
   const overlay=document.getElementById("connectionOverlay"),t=document.getElementById("connectionTitle"),d=document.getElementById("connectionText");
   if(t)t.textContent=title||"CONECTANDO AL SERVIDOR";if(d)d.textContent=text||"";if(overlay)overlay.style.display=show?"flex":"none";
 }
-function connectMultiplayer(roomMode="quick",roomCode=""){
+function connectMultiplayer(roomMode="quick",roomCode=""){ const publicRoomAuto=!!PUBLIC_ROOM_CODE && roomMode==="join" && roomCode===PUBLIC_ROOM_CODE;
   if(multiplayerConnectTimer)clearTimeout(multiplayerConnectTimer);
   currentRoom=roomMode==="quick"?"OPEN":(roomCode||"PRIVATE");
   const keepName=playerName||String(username.value||"").trim();
@@ -401,16 +401,15 @@ function connectMultiplayer(roomMode="quick",roomCode=""){
     });
     multiplayerSocket.addEventListener("error",()=>{
       setConnectionStatus("ESPERANDO AL SERVIDOR","El servidor gratuito puede estar despertando. Reintentando…");
-      nameBox.style.display="flex";
-      username.value=playerName||username.value;
+      if(!publicRoomAuto){ nameBox.style.display="flex"; username.value=playerName||username.value; }
     });
     multiplayerSocket.addEventListener("close",()=>{
       if(multiplayerConnectTimer){clearTimeout(multiplayerConnectTimer);multiplayerConnectTimer=null;}
       multiplayerSocket=null;
       if(!gameActive && currentRoom){
-        setConnectionStatus("RENDER ACTUALIZANDO","Render está reiniciando o desplegando una actualización. Espera unos segundos y vuelve a entrar.",false);
-        nameBox.style.display="flex";
-        username.value=playerName||username.value;
+        setConnectionStatus("RENDER ACTUALIZANDO","La conexión se perdió. Reintentando automáticamente…",true);
+        if(!publicRoomAuto){ nameBox.style.display="flex"; username.value=playerName||username.value; }
+        else multiplayerConnectTimer=setTimeout(()=>connectMultiplayer("join",PUBLIC_ROOM_CODE),1800);
       }else if(currentRoom){
         setConnectionStatus("RENDER ACTUALIZANDO","La conexión se perdió. Render puede estar reiniciando o desplegando una actualización.",false);
       }
@@ -1031,6 +1030,8 @@ if(PUBLIC_ROOM_CODE){
   if(oldBtn)oldBtn.textContent="VOLVER A SALAS";
   const savedRoomName=String(username.value||"").trim();
   if(savedRoomName){
+    nameBox.style.display="none";
+    setConnectionStatus("CONECTANDO A LA SALA","Entrando automáticamente a la sala "+PUBLIC_ROOM_CODE+"…",true);
     setTimeout(()=>startGame("join",PUBLIC_ROOM_CODE),250);
   }
 }
