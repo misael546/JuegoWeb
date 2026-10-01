@@ -195,7 +195,6 @@ async function persistPlayer(p) {
   if (!p?.saveKey) return null;
   const data = capturePlayerData(p);
   savedPlayers.set(p.saveKey, data);
-  p.lastSavedData = { ...data };
 
   try {
     await storage.ready;
