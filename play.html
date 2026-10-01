@@ -108,6 +108,7 @@ addEventListener("resize",resize);resize();
 const world={w:3000,h:2200};
 const p={x:1500,y:1100,r:24,angle:0,hp:100,maxHp:100,xp:0,level:1,score:0,kills:0,damage:25,speed:205,fireRate:280,lastShot:0,alive:true};
 let bullets=[],enemies=[],drops=[],particles=[],walls=[];
+let gameActive=false;
 let camera={x:p.x,y:p.y},last=performance.now(),playerName="";
 const keys={w:false,a:false,s:false,d:false};
 const pointer={x:W/2,y:H/2,down:false};
@@ -170,6 +171,11 @@ function connectMultiplayer(roomMode="quick",roomCode=""){
         if(m.type==="room_joined"){
           setConnectionStatus("CONECTADO","Listo. Entrando a la arena…",false);
           setRoomPanel(m.code);
+          const me=(m.players||[]).find(q=>q.id===multiplayerId);
+          if(me){p.x=me.x;p.y=me.y;p.hp=me.hp||p.maxHp;p.alive=me.alive!==false;}
+          enemies.length=0;
+          for(let i=0;i<18;i++)spawnEnemy();
+          gameActive=true;
           updatePlayersFromList(m.players||[]);
         }else if(m.type==="room_error"){
           const msg=document.getElementById("nameMsg"); if(msg)msg.textContent=m.message||"No se pudo entrar a la sala.";
@@ -270,6 +276,8 @@ function resetProgressOnDeath(){
   saveStats();
 }
 function returnToMenu(){
+  gameActive=false;
+  enemies.length=0;
   document.getElementById("death").style.display="none";
   document.getElementById("nameBox").style.display="flex";
   document.getElementById("nameMsg").textContent="";
@@ -319,6 +327,7 @@ function hitWall(b){
 }
 
 function update(dt){
+  if(!gameActive)return;
   if(!p.alive){sendMultiplayerState(dt);return;}
   let mx=(keys.d?1:0)-(keys.a?1:0),my=(keys.s?1:0)-(keys.w?1:0);
   if(Math.hypot(moveX,moveY)>.1){mx=moveX;my=moveY}
@@ -554,6 +563,8 @@ function startGame(mode="quick",code=""){
   }
   playerName=n;
   saveName(n);
+  gameActive=false;
+  enemies.length=0;
   nameMsg.textContent="";
   nameBox.style.display="none";
   const tag=document.getElementById("nameTag");
