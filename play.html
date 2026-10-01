@@ -9,7 +9,7 @@
 <script>
 (function(){
   try{
-    var v="20261001-04";
+    var v="20261001-05";
     var k="neon_core_page_version";
     var old=localStorage.getItem(k);
     if(old!==v){
@@ -194,7 +194,7 @@ function connectMultiplayer(roomMode="quick",roomCode=""){
             p.speed=205+(p.level-1)*4;
           }
           enemies.length=0;
-          for(const e of (m.enemies||[])) enemies.push(e);
+          for(const e of (m.enemies||[])){e.targetX=e.x;e.targetY=e.y;enemies.push(e);}
           gameActive=true;
           updatePlayersFromList(m.players||[]);
         }else if(m.type==="room_error"){
@@ -222,8 +222,20 @@ function connectMultiplayer(roomMode="quick",roomCode=""){
             }
           }
         }else if(m.type==="enemy_state"){
+          const incoming=m.enemies||[];
+          const byId=new Map(enemies.map(e=>[e.id,e]));
+          const next=[];
+          for(const e of incoming){
+            const old=byId.get(e.id);
+            if(old){
+              old.targetX=e.x;old.targetY=e.y;old.hp=e.hp;old.maxHp=e.maxHp;old.r=e.r;old.kind=e.kind;old.speed=e.speed;old.damage=e.damage;
+              old.dead=false;next.push(old);
+            }else{
+              e.targetX=e.x;e.targetY=e.y;next.push(e);
+            }
+          }
           enemies.length=0;
-          for(const e of (m.enemies||[])) enemies.push(e);
+          for(const e of next) enemies.push(e);
         }else if(m.type==="enemy_hit"){
           const e=enemies.find(x=>x.id===m.id); if(e)e.hp=m.hp;
         }else if(m.type==="enemy_dead"){
@@ -477,6 +489,14 @@ function smoothRemotePlayers(dt){
     other.angle+=da*t;
     other.hp=Number.isFinite(other.targetHp)?other.targetHp:other.hp;
     other.alive=other.targetAlive!==false;
+  }
+}
+function smoothEnemies(dt){
+  const t=Math.min(1,dt*10);
+  for(const e of enemies){
+    if(!Number.isFinite(e.targetX))continue;
+    e.x+=(e.targetX-e.x)*t;
+    e.y+=(e.targetY-e.y)*t;
   }
 }
 function draw(){
