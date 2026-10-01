@@ -9,7 +9,7 @@
 <script>
 (function(){
   try{
-    var v="20261001-17";
+    var v="20261001-18";
     var k="neon_core_page_version";
     var old=localStorage.getItem(k);
     if(old!==v){
@@ -30,7 +30,6 @@
 #hud{position:fixed;top:10px;left:10px;right:10px;display:flex;justify-content:space-between;align-items:flex-start;gap:8px;pointer-events:none;z-index:3}
 .panel{background:rgba(5,8,17,.82);border:1px solid #26344e;border-radius:12px;padding:8px 10px;font-size:13px;backdrop-filter:blur(5px)}
 #bars{min-width:190px}#score{opacity:.45;font-size:11px}.bar{height:7px;background:#182033;border-radius:9px;overflow:hidden;margin-top:5px}.bar i{display:block;height:100%;width:100%;background:#36e0ff}.xpbar i{background:#a855f7}
-#nameTag{position:fixed;left:10px;bottom:132px;background:#050811cc;border:1px solid #26344e;padding:6px 10px;border-radius:9px;font-size:13px;z-index:3}
 #nameBox{position:fixed;inset:0;background:#000b;display:flex;align-items:center;justify-content:center;padding:20px;z-index:20}
 #nameCard{width:min(380px,100%);background:#0b1020;border:1px solid #26344e;border-radius:18px;padding:22px;box-shadow:0 15px 60px #000}
 #nameCard h1{margin:0 0 5px;font-size:30px;letter-spacing:2px;color:#39e7ff}
@@ -49,7 +48,7 @@
 #deathCard{background:#0b1020;border:1px solid #26344e;border-radius:16px;padding:22px;width:min(330px,90%)}
 #deathCard h2{color:#ff5474;margin:0 0 8px}
 @media(min-width:800px){#controls{opacity:.3}#controls:hover{opacity:1}}
-#roomActions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}#roomActions button{width:100%;min-height:44px;border:0;border-radius:10px;background:#183d58;color:#fff;font-weight:bold}#roomCodeInput{width:100%;padding:13px;border:1px solid #33415d;background:#111a2d;color:white;border-radius:10px;font-size:16px;outline:none;margin-top:8px;text-transform:uppercase}#roomPanel{position:fixed;top:74px;left:50%;transform:translateX(-50%);z-index:6;display:none;align-items:center;gap:8px;background:rgba(5,8,17,.9);border:1px solid #26344e;border-radius:12px;padding:7px 9px;font-size:13px;backdrop-filter:blur(5px)}#roomCode{font-weight:900;letter-spacing:2px;color:#39e7ff}#copyRoom{border:1px solid #33415d;background:#111a2d;color:#fff;border-radius:8px;padding:7px 9px}@media(max-width:799px){#hud{top:8px;left:8px;right:8px}.panel{padding:7px 8px;font-size:12px}#bars{min-width:0;width:min(190px,58vw)}#hud>.panel:last-child{white-space:nowrap}#roomPanel{top:74px;max-width:46vw;font-size:11px;padding:6px 7px}#roomPanel #copyRoom{padding:6px 7px}#gameActions{top:74px;left:8px}#gameActions button{min-height:38px;padding:0 9px;font-size:11px}#upgrade{top:74px;right:8px;min-height:38px;padding:0 9px;font-size:11px}#nameTag{left:8px;bottom:128px;font-size:11px;padding:5px 8px}#playersPanel{top:74px;right:8px;width:min(180px,48vw);padding:7px 8px;font-size:11px}#playersList{max-height:130px;gap:3px}#controls{padding:12px}.joy{width:100px;height:100px}.stick{width:44px;height:44px;left:28px;top:28px}#fire{width:78px;height:78px}}@media(max-width:430px){#hud>.panel:last-child{max-width:105px;overflow:hidden;text-overflow:ellipsis}#roomPanel{left:50%;transform:translateX(-50%)}#nameTag{max-width:42vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}#playersPanel{max-width:45vw}.onlinePlayer{font-size:10px}} </style>
+#roomActions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}#roomActions button{width:100%;min-height:44px;border:0;border-radius:10px;background:#183d58;color:#fff;font-weight:bold}#roomCodeInput{width:100%;padding:13px;border:1px solid #33415d;background:#111a2d;color:white;border-radius:10px;font-size:16px;outline:none;margin-top:8px;text-transform:uppercase}#roomPanel{position:fixed;top:74px;left:50%;transform:translateX(-50%);z-index:6;display:none;align-items:center;gap:8px;background:rgba(5,8,17,.9);border:1px solid #26344e;border-radius:12px;padding:7px 9px;font-size:13px;backdrop-filter:blur(5px)}#roomCode{font-weight:900;letter-spacing:2px;color:#39e7ff}#copyRoom{border:1px solid #33415d;background:#111a2d;color:#fff;border-radius:8px;padding:7px 9px}@media(max-width:799px){#hud{top:8px;left:8px;right:8px}.panel{padding:7px 8px;font-size:12px}#bars{min-width:0;width:min(190px,58vw)}#hud>.panel:last-child{white-space:nowrap}#roomPanel{top:74px;max-width:46vw;font-size:11px;padding:6px 7px}#roomPanel #copyRoom{padding:6px 7px}#gameActions{top:74px;left:8px}#gameActions button{min-height:38px;padding:0 9px;font-size:11px}#upgrade{top:74px;right:8px;min-height:38px;padding:0 9px;font-size:11px}#playersPanel{top:74px;right:8px;width:min(180px,48vw);padding:7px 8px;font-size:11px}#playersList{max-height:130px;gap:3px}#controls{padding:12px}.joy{width:100px;height:100px}.stick{width:44px;height:44px;left:28px;top:28px}#fire{width:78px;height:78px}}@media(max-width:430px){#hud>.panel:last-child{max-width:105px;overflow:hidden;text-overflow:ellipsis}#roomPanel{left:50%;transform:translateX(-50%)}#playersPanel{max-width:45vw}.onlinePlayer{font-size:10px}} </style>
 </head>
 <body>
 <canvas id="game"></canvas>
@@ -64,9 +63,9 @@
   <div class="panel">🎯 <span id="kills">0</span> eliminaciones</div>
 </div>
 
-<div id="nameTag" style="display:none">🛡️ <span id="playerName"></span></div><div id="connectionOverlay" aria-live="polite"><div id="connectionCard"><div id="connectionSpinner"></div><b id="connectionTitle">CONECTANDO AL SERVIDOR</b><span id="connectionText">Despertando el servidor multiplayer…</span></div></div>
+<div id="connectionOverlay" aria-live="polite"><div id="connectionCard"><div id="connectionSpinner"></div><b id="connectionTitle">CONECTANDO AL SERVIDOR</b><span id="connectionText">Despertando el servidor multiplayer…</span></div></div>
 
-<div id="roomPanel"><span>SALA</span><span id="roomCode">----</span><button id="copyRoom" type="button">COPIAR</button></div>
+
 <div id="playersPanel"><b>JUGADORES CONECTADOS · <span id="playersCount">0</span></b><div id="playersList"></div></div>
 
 <div id="gameActions"><button id="saveGame" type="button">GUARDAR</button><button id="resumeGame" type="button" style="display:none">CONTINUAR</button></div><button id="upgrade">MEJORAR · 50 ⚔</button>
@@ -143,12 +142,6 @@ function updatePlayersFromList(list){
   for(const q of (list||[])) if(q.id!==multiplayerId) remotePlayers.set(q.id,q);
   renderPlayers(list||[]);
 }
-function setRoomPanel(code){
-  currentRoom=code||"";
-  const panel=document.getElementById("roomPanel"),label=document.getElementById("roomCode");
-  if(label)label.textContent=currentRoom||"----";
-  if(panel)panel.style.display=currentRoom?"flex":"none";
-}
 function setConnectionStatus(title,text,show=true){
   const overlay=document.getElementById("connectionOverlay"),t=document.getElementById("connectionTitle"),d=document.getElementById("connectionText");
   if(t)t.textContent=title||"CONECTANDO AL SERVIDOR";if(d)d.textContent=text||"";if(overlay)overlay.style.display=show?"flex":"none";
@@ -163,8 +156,6 @@ function connectMultiplayer(roomMode="quick",roomCode=""){
     multiplayerSocket.addEventListener("open",()=>{
       setConnectionStatus("CONECTADO","Entrando a la sala…");
       multiplayerSocket.send(JSON.stringify({type:"join",name:playerName||"Jugador",saveKey:saveKey,color:"#39e7ff",room:roomMode==="join"?roomCode:"",createRoom:roomMode==="create"}));
-      const tag=document.getElementById("nameTag");
-      if(tag)tag.textContent=(playerName||"Jugador")+" · ONLINE";
     });
     multiplayerSocket.addEventListener("message",e=>{
       try{
@@ -181,7 +172,6 @@ function connectMultiplayer(roomMode="quick",roomCode=""){
           resumeGameBtn.style.display="none";
         }else if(m.type==="room_joined"){
           setConnectionStatus("CONECTADO","Listo. Entrando a la arena…",false);
-          setRoomPanel(m.code);
           const me=(m.players||[]).find(q=>q.id===multiplayerId);
           if(me){
             p.x=me.x;p.y=me.y;p.hp=Number.isFinite(me.hp)?me.hp:p.maxHp;p.alive=me.alive!==false;
@@ -299,8 +289,6 @@ function connectMultiplayer(roomMode="quick",roomCode=""){
     });
     multiplayerSocket.addEventListener("close",()=>{
       multiplayerSocket=null;
-      const tag=document.getElementById("nameTag");
-      if(tag)tag.textContent=playerName||"";
       if(currentRoom){setConnectionStatus("SERVIDOR EN ESPERA","El servidor se desconectó. Recarga para volver a conectar.");}
     });
   }catch{}
@@ -369,8 +357,6 @@ function returnToMenu(){
   document.getElementById("death").style.display="none";
   document.getElementById("nameBox").style.display="flex";
   document.getElementById("nameMsg").textContent="";
-  document.getElementById("nameTag").style.display="none";
-  document.getElementById("roomPanel").style.display="none";
   document.getElementById("playersPanel").style.display="none";
   document.getElementById("upgrade").style.display="none";
   currentRoom="";
@@ -677,7 +663,6 @@ resumeGameBtn.addEventListener("click",()=>{
 let savedFrozen=false;
 let saveKey="";
 try{saveKey=localStorage.getItem("neon_core_save_key")||"";if(!saveKey){saveKey="p_"+Math.random().toString(36).slice(2)+Date.now().toString(36);localStorage.setItem("neon_core_save_key",saveKey);}}catch(e){saveKey="guest_"+Math.random().toString(36).slice(2)}
-const copyRoomBtn=document.getElementById("copyRoom");
 
 function startGame(mode="quick",code=""){
   const n=String(username.value||"").trim().slice(0,20);
@@ -694,7 +679,6 @@ function startGame(mode="quick",code=""){
   nameMsg.textContent="";
   nameBox.style.display="none";
   const tag=document.getElementById("nameTag");
-  if(tag){tag.style.display="block";tag.textContent=n;}
   connectMultiplayer(mode,code);
 }
 
@@ -731,12 +715,6 @@ upgradeBtn.addEventListener("click",()=>{
   saveStats();
 });
 
-copyRoomBtn.addEventListener("click",async()=>{
-  const code=currentRoom;
-  if(!code)return;
-  try{await navigator.clipboard.writeText(code);copyRoomBtn.textContent="COPIADO";setTimeout(()=>copyRoomBtn.textContent="COPIAR",1200);}
-  catch{copyRoomBtn.textContent=code;setTimeout(()=>copyRoomBtn.textContent="COPIAR",1200);}
-});
 
 username.value=loadName();
 username.addEventListener("keydown",e=>{
