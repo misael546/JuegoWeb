@@ -9,7 +9,7 @@
 <script>
 (function(){
   try{
-    var v="20261001-19";
+    var v="20261001-20";
     var k="neon_core_page_version";
     var old=localStorage.getItem(k);
     if(old!==v){
@@ -146,7 +146,8 @@ function setConnectionStatus(title,text,show=true){
   const overlay=document.getElementById("connectionOverlay"),t=document.getElementById("connectionTitle"),d=document.getElementById("connectionText");
   if(t)t.textContent=title||"CONECTANDO AL SERVIDOR";if(d)d.textContent=text||"";if(overlay)overlay.style.display=show?"flex":"none";
 }
-function connectMultiplayer(roomMode="quick",roomCode=""){\n  currentRoom=roomMode==="quick"?"OPEN":(roomCode||"PRIVATE");
+function connectMultiplayer(roomMode="quick",roomCode=""){
+  currentRoom=roomMode==="quick"?"OPEN":(roomCode||"PRIVATE");
   setConnectionStatus("CONECTANDO AL SERVIDOR","Despertando el servidor multiplayer…");
   if(multiplayerSocket && multiplayerSocket.readyState<=1) multiplayerSocket.close();
 
