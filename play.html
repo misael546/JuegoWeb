@@ -9,7 +9,7 @@
 <script>
 (function(){
   try{
-    var v="20261001-07";
+    var v="20261001-08";
     var k="neon_core_page_version";
     var old=localStorage.getItem(k);
     if(old!==v){
@@ -228,10 +228,10 @@ function connectMultiplayer(roomMode="quick",roomCode=""){
           for(const e of incoming){
             const old=byId.get(e.id);
             if(old){
-              old.targetX=e.x;old.targetY=e.y;old.hp=e.hp;old.maxHp=e.maxHp;old.r=e.r;old.kind=e.kind;old.shape=e.shape||old.shape;old.speed=e.speed;old.damage=e.damage;
+              old.lastTargetX=old.targetX;old.lastTargetY=old.targetY;old.targetX=e.x;old.targetY=e.y;old.vx=(e.x-old.lastTargetX)/0.05;old.vy=(e.y-old.lastTargetY)/0.05;old.hp=e.hp;old.maxHp=e.maxHp;old.r=e.r;old.kind=e.kind;old.shape=e.shape||old.shape;old.speed=e.speed;old.damage=e.damage;
               old.dead=false;next.push(old);
             }else{
-              e.targetX=e.x;e.targetY=e.y;e.shape=e.shape||"triangle";next.push(e);
+              e.targetX=e.x;e.targetY=e.y;e.lastTargetX=e.x;e.lastTargetY=e.y;e.vx=0;e.vy=0;e.shape=e.shape||"triangle";next.push(e);
             }
           }
           enemies.length=0;
@@ -492,11 +492,15 @@ function smoothRemotePlayers(dt){
   }
 }
 function smoothEnemies(dt){
-  const t=Math.min(1,dt*18);
+  const t=Math.min(1,dt*20);
   for(const e of enemies){
     if(!Number.isFinite(e.targetX))continue;
-    e.x+=(e.targetX-e.x)*t;
-    e.y+=(e.targetY-e.y)*t;
+    const vx=Number.isFinite(e.vx)?Math.max(-100,Math.min(100,e.vx)):0;
+    const vy=Number.isFinite(e.vy)?Math.max(-100,Math.min(100,e.vy)):0;
+    const desiredX=e.targetX+vx*0.06;
+    const desiredY=e.targetY+vy*0.06;
+    e.x+=(desiredX-e.x)*t;
+    e.y+=(desiredY-e.y)*t;
   }
 }
 function draw(){
