@@ -57,7 +57,7 @@ jobs:
             const m = html.match(/window\\.NEON_CORE_BUILD\\s*=\\s*["']([^"']+)/);
             if (m) versions.push(m[1]);
           }
-          if (new Set(versions).size !== 1 || versions[0] !== '20261001-100') throw new Error('Build mismatch: ' + versions.join(', '));
+          if (new Set(versions).size !== 1 || versions[0] !== '20261001-101') throw new Error('Build mismatch: ' + versions.join(', '));
           for (const [i, html] of texts.slice(1,3).entries()) {
             if (/bankedGold|bankedDiamonds|BANK_NPC|SAVE_NPC/i.test(html)) throw new Error(files[i+1] + ': legacy bank/save UI reference found');
           }
