@@ -9,7 +9,7 @@
 <script>
 (function(){
   try{
-    var v="20261001-12";
+    var v="20261001-13";
     var k="neon_core_page_version";
     var old=localStorage.getItem(k);
     if(old!==v){
@@ -59,7 +59,7 @@
     <b>NEON CORE</b> · <span id="level">Nv. 1</span> · ⚔ <span id="score">0</span>
     <div class="bar"><i id="hpFill"></i></div>
     <div class="bar xpbar"><i id="xpFill"></i></div>
-    <small>❤️ <span id="hp">100</span>/<span id="maxHp">100</span> · XP <span id="xp">0</span>/<span id="xpNeed">100</span></small>
+    <small>❤️ <span id="hp">100</span>/<span id="maxHp">100</span> · XP <span id="xp">0</span>/<span id="xpNeed">100</span> · ⚔ <span id="damageStat">25</span> · 🛡 <span id="defenseStat">0</span></small>
   </div>
   <div class="panel">🎯 <span id="kills">0</span> eliminaciones</div>
 </div>
@@ -106,7 +106,7 @@ function resize(){W=innerWidth;H=innerHeight;DPR=Math.min(devicePixelRatio||1,2)
 addEventListener("resize",resize);resize();
 
 const world={w:3000,h:2200};
-const p={x:1500,y:1100,r:24,angle:0,hp:100,maxHp:100,xp:0,level:1,score:0,kills:0,damage:25,speed:205,fireRate:280,lastShot:0,alive:true};
+const p={x:1500,y:1100,r:24,angle:0,hp:100,maxHp:100,xp:0,level:1,score:0,kills:0,damage:25,defense:0,speed:205,fireRate:280,lastShot:0,alive:true};
 let bullets=[],enemies=[],drops=[],particles=[],walls=[];
 let gameActive=false;
 let camera={x:p.x,y:p.y},last=performance.now(),playerName="";
@@ -260,6 +260,10 @@ function connectMultiplayer(roomMode="quick",roomCode=""){
           p.kills=Number(m.kills)||p.kills;
           p.score=Number(m.score)||p.score;
           p.xp=Number(m.xp)||p.xp;
+          if(Number.isFinite(m.level))p.level=m.level;
+          if(Number.isFinite(m.damage))p.damage=m.damage;
+          if(Number.isFinite(m.defense))p.defense=m.defense;
+          if(Number.isFinite(m.fireRate))p.fireRate=m.fireRate;
           levelCheck();saveStats();
         }else if(m.type==="respawn_ok"){
           p.x=m.x;p.y=m.y;p.hp=p.maxHp;p.alive=true;
