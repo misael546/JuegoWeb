@@ -219,6 +219,23 @@ function drawTank(x,y,angle,color="#39e7ff",r=24){
   ctx.fillStyle="#dffbff";ctx.fillRect(r+7,-3,12,6);
   ctx.restore();
 }
+function drawNameTag(name,x,y,r,color="#ffffff"){
+  const tx=sx(x),ty=sy(y)-r-18;
+  ctx.save();
+  ctx.font="bold 13px Arial";
+  ctx.textAlign="center";
+  ctx.textBaseline="middle";
+  const pad=7,w=ctx.measureText(name).width+pad*2;
+  ctx.fillStyle="rgba(3,8,18,.78)";
+  ctx.fillRect(tx-w/2,ty-10,w,20);
+  ctx.strokeStyle=color;
+  ctx.globalAlpha=.65;
+  ctx.strokeRect(tx-w/2,ty-10,w,20);
+  ctx.globalAlpha=1;
+  ctx.fillStyle=color;
+  ctx.fillText(name,tx,ty);
+  ctx.restore();
+}
 
 function draw(){
   ctx.clearRect(0,0,W,H);
@@ -246,11 +263,14 @@ function draw(){
 
   for(const b of bullets){ctx.fillStyle="#dffbff";ctx.beginPath();ctx.arc(sx(b.x),sy(b.y),4,0,Math.PI*2);ctx.fill()}
   for(const e of enemies){
-    drawTank(e.x,e.y,Math.atan2(p.y-e.y,p.x-e.x),e.kind==="elite"?"#ff9f43":"#ff3b81",e.r);
+    const enemyAngle=Math.atan2(p.y-e.y,p.x-e.x);
+    drawTank(e.x,e.y,enemyAngle,e.kind==="elite"?"#ff9f43":"#ff3b81",e.r);
+    drawNameTag(e.kind==="elite"?"ÉLITE":"ENEMIGO",e.x,e.y,e.r,e.kind==="elite"?"#ff9f43":"#ff5474");
     const x=sx(e.x),y=sy(e.y)-e.r-10;ctx.fillStyle="#161c2a";ctx.fillRect(x-25,y,50,5);ctx.fillStyle=e.kind==="elite"?"#ff9f43":"#ff5474";ctx.fillRect(x-25,y,50*(e.hp/e.maxHp),5);
   }
   for(const q of particles){ctx.globalAlpha=Math.max(0,q.life/.6);ctx.fillStyle=q.color;ctx.beginPath();ctx.arc(sx(q.x),sy(q.y),3,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1}
   drawTank(p.x,p.y,p.angle);
+  drawNameTag(playerName,p.x,p.y,p.r,"#39e7ff");
 
   document.getElementById("hp").textContent=Math.ceil(p.hp);
   document.getElementById("maxHp").textContent=p.maxHp;
