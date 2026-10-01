@@ -182,9 +182,7 @@ function capturePlayerData(p) {
     xp: p.xp,
     pvpKills: p.pvpKills,
     gold: p.gold || 0,
-    bankedGold: p.bankedGold || 0,
     diamonds: p.diamonds || 0,
-    bankedDiamonds: p.bankedDiamonds || 0,
     ammo: clamp(Number(p.ammo) || 0, 0, MAX_AMMO),
     weapon: WEAPONS[p.weapon] ? p.weapon : 'blaster',
     damagePenalty: Math.max(0, Number(p.damagePenalty) || 0),
@@ -1112,9 +1110,7 @@ wss.on('connection', (ws) => {
           p.xp = Number(saved.xp) || 0;
           p.pvpKills = Number(saved.pvpKills) || 0;
           p.gold = Math.max(0, Number(saved.gold) || 0);
-          p.bankedGold = Math.max(0, Number(saved.bankedGold) || 0);
           p.diamonds = Math.max(0, Number(saved.diamonds) || 0);
-          p.bankedDiamonds = Math.max(0, Number(saved.bankedDiamonds) || 0);
           p.ammo = clamp(Number(saved.ammo) || 0, 0, MAX_AMMO);
           p.weapon = WEAPONS[saved.weapon] ? saved.weapon : 'blaster';
           p.damagePenalty = Math.max(0, Number(saved.damagePenalty) || 0);
@@ -1300,8 +1296,6 @@ wss.on('connection', (ws) => {
           p.pvpKills = Number(checkpoint.pvpKills) || 0;
           p.gold = Math.max(0, Number(checkpoint.gold) || 0);
           p.diamonds = Math.max(0, Number(checkpoint.diamonds) || 0);
-          p.bankedGold = Math.max(0, Number(checkpoint.bankedGold) || 0);
-          p.bankedDiamonds = Math.max(0, Number(checkpoint.bankedDiamonds) || 0);
           p.ammo = clamp(Number(checkpoint.ammo) || 0, 0, MAX_AMMO);
           p.weapon = WEAPONS[checkpoint.weapon] ? checkpoint.weapon : 'blaster';
         } else {
