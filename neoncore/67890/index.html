@@ -9,7 +9,7 @@
 <script>
 (function(){
   try{
-    var v="20261001-107";
+    var v="20261001-108";
     var k="neon_core_build";
     window.NEON_CORE_BUILD=v;
     var old=localStorage.getItem(k);
@@ -26,7 +26,7 @@
   }catch(e){}
 })();
 </script>
-<title>Neon Core · Build 103</title>
+<title>Neon Core · Build 108</title>
 <style>
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#050811;color:#fff;font-family:Arial,sans-serif;touch-action:none}
 #game{display:block;width:100vw;height:100vh}
@@ -57,7 +57,7 @@
 
 <div id="hud">
   <div class="panel" id="bars">
-    <b>NEON CORE</b><span class="buildBadge">B101</span> · <span id="level">Nv. 1</span> · ☠ <span id="pvpKills">0</span>
+    <b>NEON CORE</b><span class="buildBadge">B108</span> · <span id="level">Nv. 1</span> · ☠ <span id="pvpKills">0</span>
     <div class="bar"><i id="hpFill"></i><span class="barLabel">❤️ <span id="hp">100</span>/<span id="maxHp">100</span></span></div>
     <div class="bar xpbar"><i id="xpFill"></i><span class="barLabel">XP <span id="xp">0</span>/<span id="xpNeed">100</span></span></div><div class="bar masterybar"><i id="damageXpFill"></i><span class="barLabel">DAÑO <span id="damageLevel">1</span></span></div><div class="bar masterybar"><i id="defenseXpFill"></i><span class="barLabel">DEFENSA <span id="defenseLevel">1</span></span></div>
     <small>🎯 <span id="kills">0</span></small><div id="resourceHud"><span>🪙 <b id="gold">0</b></span><span>💎 <b id="diamonds">0</b></span><span>🔸 <b id="ammo">60</b>/<b id="maxAmmo">120</b></span></div>
@@ -141,8 +141,12 @@ async function checkRenderStatus(){
     const version=String(data.version||"");
     const startedAt=Number(data.startedAt)||0;
     if(renderServerVersion && (version!==renderServerVersion || startedAt!==renderServerStartedAt)){
-      setConnectionStatus("SERVIDOR ACTUALIZADO","Render terminó una actualización. Puedes entrar de nuevo.",false);
-      if(!gameActive)nameBox.style.display="flex";
+      setConnectionStatus("SERVIDOR ACTUALIZADO","Render terminó una actualización. Neon Core reconectará automáticamente.",true);
+      if(!gameActive && !PUBLIC_ROOM_CODE)nameBox.style.display="flex";
+      if(PUBLIC_ROOM_CODE && playerName){
+        nameBox.style.display="none";
+        if(!multiplayerSocket || multiplayerSocket.readyState!==1) setTimeout(()=>connectMultiplayer("join",PUBLIC_ROOM_CODE),250);
+      }
     }else if(!gameActive && currentRoom){
       setConnectionStatus("SERVIDOR DISPONIBLE","Render está listo. Conectando…",false);
     }
@@ -203,8 +207,14 @@ function connectMultiplayer(roomMode="quick",roomCode=""){ const publicRoomAuto=
     multiplayerConnectTimer=setTimeout(()=>{
       if(multiplayerSocket && multiplayerSocket.readyState!==1){
         setConnectionStatus("NO SE PUDO CONECTAR","Render tardó demasiado en responder. Tu nombre se conservó; pulsa SALAS PÚBLICAS para reintentar.",true);
-        nameBox.style.display="flex";
-        username.value=playerName||keepName;
+        if(!publicRoomAuto){
+          nameBox.style.display="flex";
+          username.value=playerName||keepName;
+        }else{
+          setConnectionStatus("RENDER ACTUALIZANDO","Render tardó demasiado. Reintentando automáticamente…",true);
+          nameBox.style.display="none";
+          multiplayerConnectTimer=setTimeout(()=>connectMultiplayer("join",PUBLIC_ROOM_CODE),1800);
+        }
         try{multiplayerSocket.close()}catch{}
       }
     },15000);
@@ -255,7 +265,11 @@ function connectMultiplayer(roomMode="quick",roomCode=""){ const publicRoomAuto=
           }
         }else if(m.type==="room_error"){
           const msg=document.getElementById("nameMsg"); if(msg)msg.textContent=m.message||"No se pudo entrar a la sala.";
-          nameBox.style.display="flex";
+          if(publicRoomAuto){
+            nameBox.style.display="none";
+            setConnectionStatus("SALA NO DISPONIBLE",m.message||"Reintentando automáticamente…",true);
+            multiplayerConnectTimer=setTimeout(()=>connectMultiplayer("join",PUBLIC_ROOM_CODE),1800);
+          }else nameBox.style.display="flex";
         }else if(m.type==="connected"){
           multiplayerId=m.id;
         }else if(m.type==="player_list"){
