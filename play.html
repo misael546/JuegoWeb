@@ -9,7 +9,7 @@
 <script>
 (function(){
   try{
-    var v="20261001-10";
+    var v="20261001-11";
     var k="neon_core_page_version";
     var old=localStorage.getItem(k);
     if(old!==v){
@@ -228,10 +228,10 @@ function connectMultiplayer(roomMode="quick",roomCode=""){
           for(const e of incoming){
             const old=byId.get(e.id);
             if(old){
-              old.lastTargetX=old.targetX;old.lastTargetY=old.targetY;old.targetX=e.x;old.targetY=e.y;old.vx=(e.x-old.lastTargetX)/0.05;old.vy=(e.y-old.lastTargetY)/0.05;old.hp=e.hp;old.maxHp=e.maxHp;old.r=e.r;old.kind=e.kind;old.shape=e.shape||old.shape;old.speed=e.speed;old.damage=e.damage;
+              old.lastTargetX=old.targetX;old.lastTargetY=old.targetY;old.targetX=e.x;old.targetY=e.y;old.vx=Number.isFinite(e.vx)?e.vx:(e.x-old.lastTargetX)/0.05;old.vy=Number.isFinite(e.vy)?e.vy:(e.y-old.lastTargetY)/0.05;old.hp=e.hp;old.maxHp=e.maxHp;old.r=e.r;old.kind=e.kind;old.shape=e.shape||old.shape;old.speed=e.speed;old.damage=e.damage;
               old.dead=false;next.push(old);
             }else{
-              e.targetX=e.x;e.targetY=e.y;e.lastTargetX=e.x;e.lastTargetY=e.y;e.vx=0;e.vy=0;e.shape=e.shape||"triangle";next.push(e);
+              e.targetX=e.x;e.targetY=e.y;e.lastTargetX=e.x;e.lastTargetY=e.y;e.vx=Number(e.vx)||0;e.vy=Number(e.vy)||0;e.shape=e.shape||"triangle";next.push(e);
             }
           }
           enemies.length=0;
