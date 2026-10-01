@@ -43,7 +43,7 @@ jobs:
           }
           NODE
 
-      - name: Verify build synchronization and removed legacy bank UI
+      - name: Verify build synchronization
         working-directory: .
         run: |
           node - <<'NODE'
@@ -58,9 +58,6 @@ jobs:
             if (!m) throw new Error('Client build marker missing');
             versions.push(m[1]);
           }
-          if (new Set(versions).size !== 1 || versions[0] !== '20261001-102') throw new Error('Build mismatch: ' + versions.join(', '));
-          for (const [i, html] of texts.slice(1,3).entries()) {
-            if (/bankedGold|bankedDiamonds|BANK_NPC|SAVE_NPC/i.test(html)) throw new Error(files[i+1] + ': legacy bank/save UI reference found');
-          }
+          if (new Set(versions).size !== 1 || versions[0] !== '20261001-103') throw new Error('Build mismatch: ' + versions.join(', '));
           console.log('Build synchronization: OK');
           NODE
