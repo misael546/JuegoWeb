@@ -5,6 +5,7 @@ const PORT = process.env.PORT || 10000;
 const WORLD = {w:3000,h:2200};
 const MAX_PLAYERS = 16;
 const clients = new Map();
+const savedPlayers = new Map();
 const rooms = new Map();
 const roomEnemies = new Map();
 rooms.set("OPEN",new Set());
@@ -208,9 +209,9 @@ const wss=new WebSocketServer({server:httpServer,path:"/ws"});
 wss.on("connection",(ws)=>{
   const id=Math.random().toString(36).slice(2,10);
   const player={
-    id,name:"Jugador",x:1500,y:1100,angle:0,hp:100,level:1,
+    id,name:"Jugador",saveKey:"",x:1500,y:1100,angle:0,hp:100,level:1,
     damage:25,fireRate:280,score:0,kills:0,xp:0,
-    color:"#39e7ff",room:"",alive:true,lastShot:0
+    color:"#39e7ff",room:"",alive:true,frozen:false,lastShot:0
   };
   clients.set(ws,player);
   send(ws,{type:"connected",id});
@@ -223,6 +224,12 @@ wss.on("connection",(ws)=>{
 
       if(msg.type==="join"){
         p.name=String(msg.name||"Jugador").slice(0,20);
+        p.saveKey=String(msg.saveKey||"").replace(/[^a-zA-Z0-9_-]/g,"").slice(0,80);
+        const saved=p.saveKey?savedPlayers.get(p.saveKey):null;
+        if(saved){
+          p.level=saved.level;p.hp=saved.hp;p.damage=saved.damage;p.fireRate=saved.fireRate;
+          p.score=saved.score;p.kills=saved.kills;p.xp=saved.xp;
+        }
         p.color=String(msg.color||"#39e7ff");
         if(msg.room) joinRoom(ws,msg.room,false);
         else if(msg.createRoom) joinRoom(ws,"",true);
@@ -233,7 +240,7 @@ wss.on("connection",(ws)=>{
       if(msg.type==="create_room") joinRoom(ws,"",true);
       if(msg.type==="join_room") joinRoom(ws,msg.code,false);
 
-      if(msg.type==="state" && p.room){
+      if(msg.type==="state" && p.room && !p.frozen){
         p.x=clamp(Number.isFinite(msg.x)?msg.x:p.x,35,WORLD.w-35);
         p.y=clamp(Number.isFinite(msg.y)?msg.y:p.y,35,WORLD.h-35);
         p.angle=Number.isFinite(msg.angle)?msg.angle:p.angle;
@@ -245,7 +252,26 @@ wss.on("connection",(ws)=>{
         sendPlayerList(p.room);
       }
 
-      if(msg.type==="fire") handleShot(ws);
+      if(msg.type==="fire" && !p.frozen) handleShot(ws);
+
+      if(msg.type==="save" && p.room){
+        p.frozen=true;
+        p.angle=Number.isFinite(msg.angle)?msg.angle:p.angle;
+        p.hp=clamp(Number.isFinite(msg.hp)?msg.hp:p.hp,0,100);
+        const data={
+          name:p.name,level:p.level,hp:p.hp,damage:p.damage,fireRate:p.fireRate,
+          score:p.score,kills:p.kills,xp:p.xp
+        };
+        if(p.saveKey)savedPlayers.set(p.saveKey,data);
+        send(ws,{type:"save_ok",savedAt:Date.now(),data});
+        broadcastRoom(p.room,{type:"player_update",player:p});
+        sendPlayerList(p.room);
+      }
+
+      if(msg.type==="resume" && p.room){
+        p.frozen=false;
+        send(ws,{type:"resume_ok"});
+      }
 
       if(msg.type==="respawn" && p.room){
         const spawn=spawnPosition(p.room);
@@ -269,7 +295,7 @@ setInterval(()=>{
   for(const [code,room] of rooms){
     if(!room.size)continue;
     const enemies=ensureRoomEnemies(code);
-    const players=roomPlayers(room).filter(p=>p.alive);
+    const players=roomPlayers(room).filter(p=>p.alive&&!p.frozen);
     for(const enemy of enemies){
       let target=null,best=Infinity;
       for(const pl of players){
@@ -283,7 +309,7 @@ setInterval(()=>{
         if(best<enemy.r+24){
           target.hp=clamp(target.hp-enemy.damage*dt,0,100);
           send(findPlayer(target.id,room)?.ws||null,{type:"pve_damage",amount:enemy.damage*dt,hp:target.hp});
-          if(target.hp<=0 && target.alive){
+          if(target.hp<=0 && target.alive && !target.frozen){
             target.alive=false;
             const lostScore=target.score||0;
             target.level=1;target.hp=0;target.damage=25;target.fireRate=280;target.xp=0;target.score=0;target.kills=0;
