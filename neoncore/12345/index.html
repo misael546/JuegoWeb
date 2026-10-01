@@ -752,7 +752,7 @@ function draw(){
     }
     ctx.globalAlpha=1;
   }
-  drawTank(p.x,p.y,p.angle,"#39e7ff",p.r);
+  drawTank(p.x,p.y,p.angle,"#39e7ff",p.r,p.weapon||"blaster");
   drawNameTag(playerName,p.x,p.y,p.r,"#39e7ff");
   drawMinimap();updateAmmoShop();updateBank();updateResourceHud();
 
