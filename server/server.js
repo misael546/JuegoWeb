@@ -818,7 +818,7 @@ function shopBuy(ws, requestedWeapon) {
   sendPlayerList(p.room);
 }
 
-function depositBank(ws) {
+async function depositBank(ws) {
   const p = clients.get(ws);
   if (!p) return;
   if (!p.room || !p.alive) {
