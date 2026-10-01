@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>MMORPG Web V1</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#111;color:white;font-family:Arial;overflow:hidden}
+#game{width:100vw;height:100vh;display:block;background:#c99b55}
+#ui{position:fixed;top:10px;left:10px;right:10px;pointer-events:none}
+.panel{display:inline-block;background:#111c;padding:10px;border-radius:10px}
+#controls{position:fixed;bottom:20px;left:20px;right:20px;display:flex;justify-content:space-between;pointer-events:none}
+button{pointer-events:auto;border:0;border-radius:50%;width:58px;height:58px;font-size:24px;background:#222d;color:white}
+#attack{background:#8b2222}
+</style>
+</head>
+<body>
+<canvas id="game"></canvas>
+
+<div id="ui">
+  <div class="panel">
+    ❤️ <span id="hp">100</span>
+    &nbsp; XP: <span id="xp">0</span>/100
+    &nbsp; Nivel: <span id="level">1</span>
+    &nbsp; 💰 <span id="gold">0</span>
+  </div>
+</div>
+
+<div id="controls">
+  <div>
+    <button data-key="up">▲</button><br>
+    <button data-key="left">◀</button>
+    <button data-key="down">▼</button>
+    <button data-key="right">▶</button>
+  </div>
+  <button id="attack">⚔️</button>
+</div>
+
+<script>
+const canvas=document.getElementById("game");
+const ctx=canvas.getContext("2d");
+
+let W,H;
+function resize(){
+  W=canvas.width=innerWidth*devicePixelRatio;
+  H=canvas.height=innerHeight*devicePixelRatio;
+  ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
+  W=innerWidth;H=innerHeight;
+}
+addEventListener("resize",resize);resize();
+
+const player={
+ x:innerWidth/2,y:innerHeight/2,
+ hp:100,xp:0,level:1,gold:0
+};
+
+const enemy={
+ x:innerWidth/2+130,
+ y:innerHeight/2,
+ hp:50,maxHp:50
+};
+
+const keys={up:false,down:false,left:false,right:false};
+
+document.querySelectorAll("[data-key]").forEach(b=>{
+ const k=b.dataset.key;
+ const on=e=>{e.preventDefault();keys[k]=true};
+ const off=e=>{e.preventDefault();keys[k]=false};
+ b.addEventListener("pointerdown",on);
+ b.addEventListener("pointerup",off);
+ b.addEventListener("pointercancel",off);
+ b.addEventListener("pointerleave",off);
+});
+
+function attack(){
+ const d=Math.hypot(player.x-enemy.x,player.y-enemy.y);
+ if(d<100 && enemy.hp>0){
+   enemy.hp-=25;
+   if(enemy.hp<=0){
+     player.xp+=50;
+     player.gold+=10;
+     enemy.hp=enemy.maxHp;
+     enemy.x=80+Math.random()*(W-160);
+     enemy.y=100+Math.random()*(H-180);
+
+     if(player.xp>=100){
+       player.xp-=100;
+       player.level++;
+       player.hp=100;
+     }
+     save();
+   }
+ }
+}
+document.getElementById("attack").addEventListener("pointerdown",attack);
+
+function save(){
+ localStorage.setItem("mmorpg_save",JSON.stringify(player));
+}
+function load(){
+ try{
+   const s=JSON.parse(localStorage.getItem("mmorpg_save"));
+   if(s)Object.assign(player,s);
+ }catch(e){}
+}
+load();
+
+function update(){
+ const speed=3;
+ if(keys.up)player.y-=speed;
+ if(keys.down)player.y+=speed;
+ if(keys.left)player.x-=speed;
+ if(keys.right)player.x+=speed;
+
+ player.x=Math.max(25,Math.min(W-25,player.x));
+ player.y=Math.max(70,Math.min(H-25,player.y));
+}
+
+function draw(){
+ ctx.clearRect(0,0,W,H);
+
+ ctx.fillStyle="#d4a45c";
+ ctx.fillRect(0,0,W,H);
+
+ ctx.strokeStyle="#c08d48";
+ for(let x=0;x<W;x+=64){
+   ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();
+ }
+ for(let y=0;y<H;y+=64){
+   ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();
+ }
+
+ if(enemy.hp>0){
+   ctx.fillStyle="#8b2222";
+   ctx.beginPath();
+   ctx.arc(enemy.x,enemy.y,25,0,Math.PI*2);
+   ctx.fill();
+
+   ctx.fillStyle="#111";
+   ctx.fillRect(enemy.x-25,enemy.y-40,50,6);
+   ctx.fillStyle="#e33";
+   ctx.fillRect(enemy.x-25,enemy.y-40,50*(enemy.hp/enemy.maxHp),6);
+ }
+
+ ctx.fillStyle="#2878d0";
+ ctx.beginPath();
+ ctx.arc(player.x,player.y,22,0,Math.PI*2);
+ ctx.fill();
+
+ document.getElementById("hp").textContent=player.hp;
+ document.getElementById("xp").textContent=player.xp;
+ document.getElementById("level").textContent=player.level;
+ document.getElementById("gold").textContent=player.gold;
+}
+
+function loop(){
+ update();
+ draw();
+ requestAnimationFrame(loop);
+}
+loop();
+</script>
+</body>
+</html>
