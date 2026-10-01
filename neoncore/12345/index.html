@@ -881,6 +881,23 @@ roomCodeInput.addEventListener("input",()=>{
 
 restartBtn.addEventListener("click",()=>returnToMenu());
 
+// Cierra la conexión al salir de esta página para que al volver no quede el tanque anterior conectado.
+function closeMultiplayerBeforeLeave(){
+  try{
+    if(multiplayerSocket){
+      if(multiplayerSocket.readyState===WebSocket.OPEN){
+        multiplayerSocket.close(1000,"page_leave");
+      }else if(multiplayerSocket.readyState===WebSocket.CONNECTING){
+        multiplayerSocket.close();
+      }
+    }
+  }catch{}
+  multiplayerSocket=null;
+  if(multiplayerConnectTimer){clearTimeout(multiplayerConnectTimer);multiplayerConnectTimer=null;}
+}
+addEventListener("pagehide",closeMultiplayerBeforeLeave);
+addEventListener("beforeunload",closeMultiplayerBeforeLeave);
+
 
 username.value=loadName();
 startRenderMonitor();
