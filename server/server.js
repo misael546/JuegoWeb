@@ -10,7 +10,7 @@ const WORLD = { w: 6000, h: 4400 };
 const MAX_PLAYERS = 16;
 const SAFE_ZONE = { x: 3000, y: 2200, r: 300 };
 
-const SERVER_VERSION = '20261001-102';
+const SERVER_VERSION = '20261001-103';
 
 const AMMO_PACK_SIZE = 50;
 const AMMO_PACK_COST = 50;
@@ -18,8 +18,8 @@ const MAX_AMMO = 120;
 
 const SHOP_NPC = { x: 3000, y: 2380, r: 30 };
 const SHOP_INTERACTION_RADIUS = 180;
-const BANK_NPC = { x: 3000, y: 2050, r: 30 };
-const BANK_INTERACTION_RADIUS = 180;
+const BANK_NPC = { x: 3000, y: 1800, r: 24 };
+const BANK_INTERACTION_RADIUS = 95;
 
 const WEAPONS = {
   blaster: { name: 'BLASTER', cost: 0, damage: 25, fireRate: 350 },
