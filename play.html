@@ -9,7 +9,7 @@
 <script>
 (function(){
   try{
-    var v="20261001-05";
+    var v="20261001-06";
     var k="neon_core_page_version";
     var old=localStorage.getItem(k);
     if(old!==v){
@@ -425,8 +425,8 @@ function drawTank(x,y,angle,color="#39e7ff",r=24){
 function drawEnemy(e){
   const color=e.kind==="elite"?"#ff9f43":"#ff3b81";
   const r=e.r;
-  // Tres zonas visuales: izquierda = cuadrado, centro = triángulo, derecha = hexágono.
-  const zone=e.x<world.w/3?0:(e.x<world.w*2/3?1:2);
+  // La forma se decide al crear el enemigo, no por la zona del mapa.
+  const shape=e.shape||"triangle";
   ctx.save();
   ctx.translate(sx(e.x),sy(e.y));
   ctx.fillStyle="rgba(0,0,0,.35)";
