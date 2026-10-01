@@ -10,7 +10,7 @@ const WORLD = { w: 6000, h: 4400 };
 const MAX_PLAYERS = 16;
 const SAFE_ZONE = { x: 3000, y: 2200, r: 300 };
 
-const SERVER_VERSION = '20261001-108';
+const SERVER_VERSION = '20261001-118';
 
 const AMMO_PACK_SIZE = 50;
 const AMMO_PACK_COST = 50;
@@ -1450,7 +1450,7 @@ wss.on('connection', (ws) => {
         );
 
         const distance = Math.hypot(nx - p.x, ny - p.y);
-        const maxDistance = p.speed * elapsed + 45;
+        const maxDistance = Math.max(60, p.speed * elapsed + 45);
 
         // El cliente puede avanzar localmente mientras un paquete tarda en llegar.
         // En vez de congelarlo o expulsarlo por una ráfaga de latencia, limitamos
@@ -1504,12 +1504,13 @@ wss.on('connection', (ws) => {
         p.y = clamp(finalY, 35, WORLD.h - 35);
 
         const correctionDistance = Math.hypot(p.x - nx, p.y - ny);
-        if (movementClamped || blockedX || blockedY || correctionDistance > 24) {
+        if (movementClamped || blockedX || blockedY || correctionDistance > 48) {
           send(ws, {
             type: 'state_sync',
             x: p.x,
             y: p.y,
-            reason: blockedX || blockedY ? 'wall' : 'movement_clamped'
+            reason: blockedX || blockedY ? 'wall' : 'movement_clamped',
+            serverTime: now
           });
         }
 
