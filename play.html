@@ -92,6 +92,11 @@ let camera={x:p.x,y:p.y},last=performance.now(),playerName="";
 const keys={w:false,a:false,s:false,d:false};
 const pointer={x:W/2,y:H/2,down:false};
 let moveX=0,moveY=0;
+let controlMode="touch";
+function updateControlMode(){
+  controlMode=("ontouchstart" in window || navigator.maxTouchPoints>0)?"touch":"mouse";
+}
+updateControlMode();
 const remotePlayers=new Map();
 let multiplayerSocket=null,multiplayerId="",lastNetSend=0,currentRoom="";
 const MULTIPLAYER_SERVER=localStorage.getItem("neon_core_server_url")||"wss://neon-core-multiplayer.onrender.com/ws";
@@ -280,7 +285,7 @@ function update(dt){
   }
   p.x=clamp(p.x,35,world.w-35);p.y=clamp(p.y,35,world.h-35);
 
-  if(innerWidth>700 && ml<=.1)p.angle=Math.atan2(pointer.y-H/2,pointer.x-W/2);
+  if(controlMode==="mouse" && ml<=.1)p.angle=Math.atan2(pointer.y-H/2,pointer.x-W/2);
 
   if(pointer.down)fire();
 
@@ -452,92 +457,34 @@ function setupJoystick(id){
   el.addEventListener("pointerdown",e=>{
     if(e.pointerType==="mouse" && e.button!==0)return;
     e.preventDefault();
-    if(active)reset();
+    reset();
     active=true;pointerId=e.pointerId;
     try{el.setPointerCapture(pointerId)}catch{}
     set(e);
-  });
+  },{passive:false});
   el.addEventListener("pointermove",e=>{
     if(active && e.pointerId===pointerId){
-      e.preventDefault();
-      set(e);
+      e.preventDefault();set(e);
     }
-  });
-  el.addEventListener("pointerup",e=>{
-    if(e.pointerId===pointerId){e.preventDefault();reset()}
-  });
-  el.addEventListener("pointercancel",e=>{
-    if(e.pointerId===pointerId)reset();
-  });
-  el.addEventListener("lostpointercapture",e=>{
-    if(active && (pointerId===null || e.pointerId===pointerId))reset();
-  });
+  },{passive:false});
+  const finish=e=>{
+    if(pointerId===null || e.pointerId===pointerId){e.preventDefault();reset()}
+  };
+  el.addEventListener("pointerup",finish,{passive:false});
+  el.addEventListener("pointercancel",finish,{passive:false});
+  el.addEventListener("lostpointercapture",()=>reset());
   return reset;
 }
-
 const resetMoveJoystick=setupJoystick("moveJoy");
-addEventListener("resize",resetMoveJoystick);
-addEventListener("orientationchange",resetMoveJoystick);
-addEventListener("blur",resetMoveJoystick);
+
+function resetAllControls(){
+  resetMoveJoystick();
+  pointer.down=false;
+}
+addEventListener("resize",resetAllControls);
+addEventListener("orientationchange",resetAllControls);
+addEventListener("blur",resetAllControls);
 document.addEventListener("visibilitychange",()=>{
-  if(document.hidden)resetMoveJoystick();
+  if(document.hidden)resetAllControls();
 });
-
-addEventListener("keydown",e=>{const k=e.key.toLowerCase();if(k in keys){keys[k]=true;e.preventDefault()}});
-addEventListener("keyup",e=>{const k=e.key.toLowerCase();if(k in keys){keys[k]=false;e.preventDefault()}});
-canvas.addEventListener("pointermove",e=>{pointer.x=e.clientX;pointer.y=e.clientY});
-canvas.addEventListener("pointerdown",e=>{pointer.down=true;if(e.pointerType==="mouse")fire()});
-addEventListener("pointerup",()=>pointer.down=false);
-
-document.getElementById("fire").addEventListener("pointerdown",e=>{e.preventDefault();pointer.down=true;fire()});
-document.getElementById("fire").addEventListener("pointerup",()=>pointer.down=false);
-document.getElementById("fire").addEventListener("pointercancel",()=>pointer.down=false);
-
-document.getElementById("upgrade").addEventListener("click",()=>{
-  if(p.score>=50&&p.alive){p.score-=50;p.damage+=10;p.fireRate=Math.max(100,p.fireRate-25);saveStats()}
-});
-document.getElementById("restart").addEventListener("click",()=>{
-  p.x=world.w/2;p.y=world.h/2;p.hp=p.maxHp;p.alive=true;bullets=[];particles=[];
-  for(const e of enemies){e.x=rand(100,world.w-100);e.y=rand(100,world.h-100)}
-  document.getElementById("death").style.display="none";
-  if(multiplayerSocket && multiplayerSocket.readyState===1) multiplayerSocket.send(JSON.stringify({type:"respawn"}));
-});
-
-function enterGame(roomMode="quick",roomCode=""){
-  const n=document.getElementById("username").value.trim(),msg=document.getElementById("nameMsg");
-  if(n.length<2){msg.textContent="Escribe al menos 2 caracteres.";return}
-  playerName=n;saveName(n);loadStats();
-  document.getElementById("playerName").textContent=n;
-  document.getElementById("nameBox").style.display="none";
-  document.getElementById("nameTag").style.display="block";
-  connectMultiplayer(roomMode,roomCode);
-}
-document.getElementById("nameForm").addEventListener("submit",e=>{e.preventDefault();enterGame("quick")});
-document.getElementById("createRoom").addEventListener("click",()=>enterGame("create"));
-document.getElementById("joinRoom").addEventListener("click",()=>{
-  const code=document.getElementById("roomCodeInput").value.trim().toUpperCase();
-  if(code.length!==4){document.getElementById("nameMsg").textContent="Escribe un código de 4 caracteres.";return}
-  enterGame("join",code);
-});
-document.getElementById("roomCodeInput").addEventListener("input",e=>{e.target.value=e.target.value.toUpperCase().replace(/[^A-Z0-9]/g,"").slice(0,4)});
-document.getElementById("copyRoom").addEventListener("click",async()=>{
-  const code=currentRoom;if(!code)return;
-  try{await navigator.clipboard.writeText(code)}catch{}
-  const b=document.getElementById("copyRoom");b.textContent="COPIADO";setTimeout(()=>b.textContent="COPIAR",900);
-});
-const invitedRoom=(new URLSearchParams(location.search).get("room")||"").toUpperCase().replace(/[^A-Z0-9]/g,"").slice(0,4);
-const saved=loadName();
-if(saved){
-  document.getElementById("username").value=saved;
-  playerName="";
-  document.getElementById("nameBox").style.display="flex";
-  document.getElementById("nameTag").style.display="none";
-}
-
-function loop(now){
-  const dt=Math.min(.033,(now-last)/1000);last=now;update(dt);draw();requestAnimationFrame(loop)
-}
-requestAnimationFrame(loop);
-</script>
-</body>
-</html>
+>
