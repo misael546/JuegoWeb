@@ -220,7 +220,7 @@ wss.on("connection",(ws)=>{
   const id=Math.random().toString(36).slice(2,10);
   const player={
     id,name:"Jugador",saveKey:"",x:1500,y:1100,angle:0,hp:100,level:1,
-    damage:25,defense:0,fireRate:280,score:0,kills:0,xp:0,
+    damage:25,defense:0,fireRate:280,score:0,kills:0,xp:0,pvpKills:0,
     color:"#39e7ff",room:"",alive:true,frozen:false,lastShot:0
   };
   player.ws=ws;
