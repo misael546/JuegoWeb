@@ -3,6 +3,26 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<script>
+(function(){
+  try{
+    var v="20261001-01";
+    var k="neon_core_page_version";
+    var old=localStorage.getItem(k);
+    if(old!==v){
+      localStorage.setItem(k,v);
+      if(!location.search.includes("v="+v)){
+        var u=new URL(location.href);
+        u.searchParams.set("v",v);
+        location.replace(u.toString());
+      }
+    }
+  }catch(e){}
+})();
+</script>
 <title>Neon Core</title>
 <style>
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#050811;color:#fff;font-family:Arial,sans-serif;touch-action:none}
