@@ -9,7 +9,7 @@
 <script>
 (function(){
   try{
-    var v="20261001-116";
+    var v="20261001-117";
     var k="neon_core_build";
     window.NEON_CORE_BUILD=v;
     var old=localStorage.getItem(k);
@@ -26,7 +26,7 @@
   }catch(e){}
 })();
 </script>
-<title>Neon Core · Build 116</title>
+<title>Neon Core · Build 117</title>
 <style>
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#050811;color:#fff;font-family:Arial,sans-serif;touch-action:none}
 #game{display:block;width:100vw;height:100vh}
@@ -57,7 +57,7 @@
 </script>
 </head>
 <body>
-<canvas id="game"></canvas><div id="buildDisplay">NEON CORE · BUILD 116</div>
+<canvas id="game"></canvas><div id="buildDisplay">NEON CORE · BUILD 117</div>
 
 <div id="hud">
   <div class="panel" id="bars">
@@ -934,10 +934,8 @@ function setupJoystick(id){
   el.addEventListener("pointerup",finish,{passive:false});
   el.addEventListener("pointercancel",finish,{passive:false});
   el.addEventListener("lostpointercapture",()=>reset());
-  el.addEventListener("touchstart",e=>{const t=e.touches&&e.touches[0];if(!t)return;e.preventDefault();active=true;pointerId="touch";set({clientX:t.clientX,clientY:t.clientY});},{passive:false});
-  el.addEventListener("touchmove",e=>{if(!active||pointerId!=="touch")return;const t=e.touches&&e.touches[0];if(!t)return;e.preventDefault();set({clientX:t.clientX,clientY:t.clientY});},{passive:false});
-  el.addEventListener("touchend",e=>{if(pointerId==="touch"){e.preventDefault();reset();}},{passive:false});
-  el.addEventListener("touchcancel",e=>{if(pointerId==="touch"){e.preventDefault();reset();}},{passive:false});
+  // B117: Pointer Events es la única ruta de entrada táctil.
+  // Evitamos mezclar touch handlers con pointer capture en Android/iOS.
   return reset;
 }
 const resetMoveJoystick=setupJoystick("moveJoy");
