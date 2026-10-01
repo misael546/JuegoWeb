@@ -9,7 +9,7 @@
 <script>
 (function(){
   try{
-    var v="20261001-112";
+    var v="20261001-113";
     var k="neon_core_build";
     window.NEON_CORE_BUILD=v;
     var old=localStorage.getItem(k);
@@ -26,7 +26,7 @@
   }catch(e){}
 })();
 </script>
-<title>Neon Core · Build 112</title>
+<title>Neon Core · Build 113</title>
 <style>
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#050811;color:#fff;font-family:Arial,sans-serif;touch-action:none}
 #game{display:block;width:100vw;height:100vh}
@@ -61,7 +61,7 @@
 
 <div id="hud">
   <div class="panel" id="bars">
-    <b>NEON CORE</b><span class="buildBadge">B112</span> · <span id="level">Nv. 1</span> · ☠ <span id="pvpKills">0</span>
+    <b>NEON CORE</b><span class="buildBadge">B113</span> · <span id="level">Nv. 1</span> · ☠ <span id="pvpKills">0</span>
     <div class="bar"><i id="hpFill"></i><span class="barLabel">❤️ <span id="hp">100</span>/<span id="maxHp">100</span></span></div>
     <div class="bar xpbar"><i id="xpFill"></i><span class="barLabel">XP <span id="xp">0</span>/<span id="xpNeed">100</span></span></div><div class="bar masterybar"><i id="damageXpFill"></i><span class="barLabel">DAÑO <span id="damageLevel">1</span></span></div><div class="bar masterybar"><i id="defenseXpFill"></i><span class="barLabel">DEFENSA <span id="defenseLevel">1</span></span></div>
     <small>🎯 <span id="kills">0</span></small><div id="resourceHud"><span>🪙 <b id="gold">0</b></span><span>💎 <b id="diamonds">0</b></span><span>🔸 <b id="ammo">60</b>/<b id="maxAmmo">120</b></span></div>
@@ -276,6 +276,13 @@ function connectMultiplayer(roomMode="quick",roomCode=""){ const publicRoomAuto=
           }else nameBox.style.display="flex";
         }else if(m.type==="connected"){
           multiplayerId=m.id;
+        }else if(m.type==="duplicate_session"){
+          multiplayerReady=false;
+          gameActive=false;
+          nameBox.style.display="none";
+          setConnectionStatus("RECONECTANDO","Se cerró la sesión anterior. Reintentando la sala…",true);
+          try{if(multiplayerSocket)multiplayerSocket.close();}catch{}
+          if(publicRoomAuto) multiplayerConnectTimer=setTimeout(()=>connectMultiplayer("join",PUBLIC_ROOM_CODE),1200);
         }else if(m.type==="player_list"){
           const me=(m.players||[]).find(q=>q.id===multiplayerId);
           if(me){
@@ -990,7 +997,7 @@ function startGame(mode="quick",code=""){
   connectMultiplayer(mode,code);
 }
 
-const PUBLIC_ROOM_CODE=(location.pathname.match(/\/(\d{5})(?:\/|\/index\.html)?$/)||[])[1]||"";
+const PUBLIC_ROOM_CODE="67890";
 const publicRoomsBtn=document.getElementById("publicRoomsBtn");
 function enterPublicRooms(){
   const n=String(username.value||"").trim().slice(0,20);
