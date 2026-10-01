@@ -3,7 +3,7 @@ const { WebSocketServer } = require("ws");
 
 const PORT = process.env.PORT || 10000;
 const clients = new Map();
-const rooms = new Map();
+const rooms = new Map();\nrooms.set("OPEN",new Set());
 const CODE_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 
 function makeCode(){
