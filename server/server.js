@@ -307,7 +307,7 @@ setInterval(()=>{
         const d=Math.hypot(pl.x-enemy.x,pl.y-enemy.y);
         if(d<best){best=d;target=pl;}
       }
-      if(target && best<700){
+      if(target){
         const dx=(target.x-enemy.x)/Math.max(best,1),dy=(target.y-enemy.y)/Math.max(best,1);
         enemy.x=clamp(enemy.x+dx*enemy.speed*dt,35,WORLD.w-35);
         enemy.y=clamp(enemy.y+dy*enemy.speed*dt,35,WORLD.h-35);
