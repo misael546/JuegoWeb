@@ -487,4 +487,127 @@ addEventListener("blur",resetAllControls);
 document.addEventListener("visibilitychange",()=>{
   if(document.hidden)resetAllControls();
 });
->
+
+const nameBox=document.getElementById("nameBox");
+const nameForm=document.getElementById("nameForm");
+const username=document.getElementById("username");
+const nameMsg=document.getElementById("nameMsg");
+const createRoomBtn=document.getElementById("createRoom");
+const joinRoomBtn=document.getElementById("joinRoom");
+const roomCodeInput=document.getElementById("roomCodeInput");
+const restartBtn=document.getElementById("restart");
+const upgradeBtn=document.getElementById("upgrade");
+const copyRoomBtn=document.getElementById("copyRoom");
+
+function startGame(mode="quick",code=""){
+  const n=String(username.value||"").trim().slice(0,20);
+  if(!n){
+    nameMsg.textContent="Escribe un nombre para entrar.";
+    username.focus();
+    return;
+  }
+  playerName=n;
+  saveName(n);
+  nameMsg.textContent="";
+  nameBox.style.display="none";
+  const tag=document.getElementById("nameTag");
+  if(tag){tag.style.display="block";tag.textContent=n;}
+  connectMultiplayer(mode,code);
+}
+
+nameForm.addEventListener("submit",e=>{
+  e.preventDefault();
+  startGame("quick","");
+});
+
+createRoomBtn.addEventListener("click",()=>{
+  const n=String(username.value||"").trim();
+  if(!n){nameMsg.textContent="Escribe un nombre primero.";username.focus();return;}
+  startGame("create","");
+});
+
+joinRoomBtn.addEventListener("click",()=>{
+  const n=String(username.value||"").trim();
+  const code=String(roomCodeInput.value||"").trim().toUpperCase().replace(/[^A-Z0-9]/g,"").slice(0,4);
+  roomCodeInput.value=code;
+  if(!n){nameMsg.textContent="Escribe un nombre primero.";username.focus();return;}
+  if(code.length!==4){nameMsg.textContent="El código debe tener 4 caracteres.";roomCodeInput.focus();return;}
+  startGame("join",code);
+});
+
+roomCodeInput.addEventListener("input",()=>{
+  roomCodeInput.value=roomCodeInput.value.toUpperCase().replace(/[^A-Z0-9]/g,"").slice(0,4);
+});
+
+restartBtn.addEventListener("click",()=>{
+  p.x=1500;p.y=1100;p.hp=p.maxHp;p.alive=true;
+  bullets.length=0;
+  document.getElementById("death").style.display="none";
+  if(multiplayerSocket&&multiplayerSocket.readyState===1)multiplayerSocket.send(JSON.stringify({type:"respawn"}));
+});
+
+upgradeBtn.addEventListener("click",()=>{
+  if(!p.alive)return;
+  if(p.score<50)return;
+  p.score-=50;p.damage+=5;p.fireRate=Math.max(120,p.fireRate-8);
+  saveStats();
+});
+
+copyRoomBtn.addEventListener("click",async()=>{
+  const code=currentRoom;
+  if(!code)return;
+  try{await navigator.clipboard.writeText(code);copyRoomBtn.textContent="COPIADO";setTimeout(()=>copyRoomBtn.textContent="COPIAR",1200);}
+  catch{copyRoomBtn.textContent=code;setTimeout(()=>copyRoomBtn.textContent="COPIAR",1200);}
+});
+
+username.value=loadName();
+username.addEventListener("keydown",e=>{
+  if(e.key==="Enter"){e.preventDefault();startGame("quick","");}
+});
+
+addEventListener("keydown",e=>{
+  if(e.target===username||e.target===roomCodeInput)return;
+  const k=e.key.toLowerCase();
+  if(k==="w")keys.w=true;
+  if(k==="a")keys.a=true;
+  if(k==="s")keys.s=true;
+  if(k==="d")keys.d=true;
+  if(e.code==="Space"){e.preventDefault();pointer.down=true;fire();}
+});
+addEventListener("keyup",e=>{
+  const k=e.key.toLowerCase();
+  if(k==="w")keys.w=false;
+  if(k==="a")keys.a=false;
+  if(k==="s")keys.s=false;
+  if(k==="d")keys.d=false;
+  if(e.code==="Space")pointer.down=false;
+});
+
+canvas.addEventListener("pointermove",e=>{
+  if(e.pointerType==="mouse"){pointer.x=e.clientX;pointer.y=e.clientY;}
+});
+canvas.addEventListener("pointerdown",e=>{
+  if(e.pointerType==="mouse"){
+    pointer.x=e.clientX;pointer.y=e.clientY;pointer.down=true;fire();
+  }
+});
+addEventListener("pointerup",e=>{if(e.pointerType==="mouse")pointer.down=false;});
+
+const fireButton=document.getElementById("fire");
+fireButton.addEventListener("pointerdown",e=>{e.preventDefault();pointer.down=true;fire();},{passive:false});
+fireButton.addEventListener("pointerup",e=>{e.preventDefault();pointer.down=false;},{passive:false});
+fireButton.addEventListener("pointercancel",()=>{pointer.down=false;});
+fireButton.addEventListener("lostpointercapture",()=>{pointer.down=false;});
+
+loadStats();
+function frame(now){
+  const dt=Math.min(.05,(now-last)/1000);
+  last=now;
+  update(dt);
+  draw();
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>
