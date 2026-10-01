@@ -2,9 +2,9 @@ const http = require("http");
 const { WebSocketServer } = require("ws");
 
 const PORT = process.env.PORT || 10000;
-const WORLD = {w:3000,h:2200};
+const WORLD = {w:6000,h:4400};
 const MAX_PLAYERS = 16;
-const SAFE_ZONE = {x:1500,y:1100,r:300};
+const SAFE_ZONE = {x:3000,y:2200,r:300};
 function inSafeZone(x,y,pad=0){return Math.hypot(x-SAFE_ZONE.x,y-SAFE_ZONE.y)<=SAFE_ZONE.r+pad;}
 const clients = new Map();
 const savedPlayers = new Map();
@@ -116,10 +116,10 @@ function spawnPosition(code){
   const room=rooms.get(code)||new Set();
   const index=room.size;
   const spots=[
-    [1400,1000],[1600,1000],[1400,1200],[1600,1200],
-    [1250,1100],[1750,1100],[1500,900],[1500,1300],
-    [1200,900],[1800,900],[1200,1300],[1800,1300],
-    [1350,850],[1650,850],[1350,1350],[1650,1350]
+    [2900,2100],[3100,2100],[2900,2300],[3100,2300],
+    [2750,2200],[3250,2200],[3000,1900],[3000,2500],
+    [2700,1900],[3300,1900],[2700,2500],[3300,2500],
+    [2850,1850],[3150,1850],[2850,2550],[3150,2550]
   ];
   const s=spots[index%spots.length];
   return {x:s[0],y:s[1]};
@@ -224,7 +224,7 @@ const wss=new WebSocketServer({server:httpServer,path:"/ws"});
 wss.on("connection",(ws)=>{
   const id=Math.random().toString(36).slice(2,10);
   const player={
-    id,name:"Jugador",saveKey:"",x:1500,y:1100,angle:0,hp:100,level:1,
+    id,name:"Jugador",saveKey:"",x:3000,y:2200,angle:0,hp:100,level:1,
     damage:25,defense:0,fireRate:280,score:0,kills:0,xp:0,pvpKills:0,
     color:"#39e7ff",room:"",alive:true,frozen:false,lastShot:0
   };
