@@ -9,7 +9,7 @@
 <script>
 (function(){
   try{
-    var v="20261001-08";
+    var v="20261001-09";
     var k="neon_core_page_version";
     var old=localStorage.getItem(k);
     if(old!==v){
@@ -492,13 +492,13 @@ function smoothRemotePlayers(dt){
   }
 }
 function smoothEnemies(dt){
-  const t=Math.min(1,dt*20);
+  const t=Math.min(1,dt*10);
   for(const e of enemies){
     if(!Number.isFinite(e.targetX))continue;
     const vx=Number.isFinite(e.vx)?Math.max(-100,Math.min(100,e.vx)):0;
     const vy=Number.isFinite(e.vy)?Math.max(-100,Math.min(100,e.vy)):0;
-    const desiredX=e.targetX+vx*0.06;
-    const desiredY=e.targetY+vy*0.06;
+    const desiredX=e.targetX+vx*0.10;
+    const desiredY=e.targetY+vy*0.10;
     e.x+=(desiredX-e.x)*t;
     e.y+=(desiredY-e.y)*t;
   }
