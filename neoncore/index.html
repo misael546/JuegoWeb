@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>Neon Core · Salas</title>
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:#050811;color:#fff;font-family:Arial,sans-serif}
+body{display:flex;align-items:center;justify-content:center;padding:20px}
+.card{width:min(520px,100%);background:#0b1020;border:1px solid #26344e;border-radius:20px;padding:24px;box-shadow:0 15px 60px #000}
+h1{margin:0;color:#39e7ff;letter-spacing:3px;font-size:32px}
+.sub{color:#9ca9bd;margin:6px 0 20px}
+label{display:block;color:#9ca9bd;font-size:12px;margin-bottom:6px}
+input{width:100%;padding:13px;border:1px solid #33415d;background:#111a2d;color:#fff;border-radius:10px;font-size:16px;outline:none}
+h2{font-size:15px;margin:22px 0 10px}
+.rooms{display:grid;gap:10px}
+.room{display:block;text-decoration:none;color:#fff;background:#101a2c;border:1px solid #2a3a56;border-radius:14px;padding:16px;transition:.15s}
+.room:hover{border-color:#39e7ff;background:#122238}
+.room strong{display:block;font-size:20px;letter-spacing:2px;color:#39e7ff}
+.room span{display:block;color:#9ca9bd;font-size:12px;margin-top:5px}
+.back{display:block;text-align:center;margin-top:18px;color:#9ca9bd;text-decoration:none;font-size:13px}
+.msg{min-height:18px;color:#ff8b8b;font-size:12px;margin-top:7px}
+.build{margin-top:18px;color:#53627b;font-size:10px;text-align:center}
+</style>
+</head>
+<body>
+<main class="card">
+  <h1>NEON CORE</h1>
+  <div class="sub">SALAS PÚBLICAS</div>
+
+  <label for="username">NOMBRE DEL TANQUE</label>
+  <input id="username" maxlength="20" autocomplete="off" placeholder="Escribe tu nombre">
+  <div id="msg" class="msg"></div>
+
+  <h2>ELIGE UNA SALA</h2>
+  <div class="rooms">
+    <a class="room" data-room="12345" href="12345/">
+      <strong>SALA 12345</strong>
+      <span>Entrar a la arena pública</span>
+    </a>
+    <a class="room" data-room="67890" href="67890/">
+      <strong>SALA 67890</strong>
+      <span>Entrar a la arena pública</span>
+    </a>
+  </div>
+
+  <a class="back" href="../">VOLVER AL MENÚ</a>
+  <div class="build">NEON CORE · SALAS PÚBLICAS · 20261001-39</div>
+</main>
+<script>
+"use strict";
+const username=document.getElementById("username");
+const msg=document.getElementById("msg");
+function loadName(){
+  try{return localStorage.getItem("neon_core_name")||""}catch{return""}
+}
+function saveName(v){
+  try{localStorage.setItem("neon_core_name",v)}catch{}
+}
+username.value=loadName();
+document.querySelectorAll(".room").forEach(a=>{
+  a.addEventListener("click",e=>{
+    const n=String(username.value||"").trim().slice(0,20);
+    if(!n){
+      e.preventDefault();
+      msg.textContent="Escribe tu nombre para entrar.";
+      username.focus();
+      return;
+    }
+    saveName(n);
+    a.href=a.dataset.room+"/";
+  });
+});
+username.addEventListener("input",()=>{msg.textContent=""});
+username.addEventListener("keydown",e=>{
+  if(e.key==="Enter"){
+    e.preventDefault();
+    document.querySelector(".room").click();
+  }
+});
+</script>
+</body>
+</html>
