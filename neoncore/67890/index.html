@@ -753,8 +753,6 @@ function draw(){
   document.getElementById("level").textContent="Nv. "+p.level;
   document.getElementById("pvpKills").textContent=p.pvpKills;
   document.getElementById("kills").textContent=p.kills;
-  document.getElementById("damageStat").textContent=p.damage;
-  document.getElementById("defenseStat").textContent=p.defense;
   const need=Math.max(1,serverXpNeed);
   document.getElementById("xp").textContent=p.xp;document.getElementById("xpNeed").textContent=need;document.getElementById("damageLevel").textContent=serverDamageLevel;document.getElementById("defenseLevel").textContent=serverDefenseLevel;
   document.getElementById("hpFill").style.width=clamp(p.hp/p.maxHp*100,0,100)+"%";
