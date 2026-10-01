@@ -9,7 +9,7 @@
 <script>
 (function(){
   try{
-    var v="20261001-18";
+    var v="20261001-19";
     var k="neon_core_page_version";
     var old=localStorage.getItem(k);
     if(old!==v){
@@ -36,7 +36,7 @@
 #nameCard p{color:#9ca9bd;margin:0 0 16px}
 #nameCard input{width:100%;padding:13px;border:1px solid #33415d;background:#111a2d;color:white;border-radius:10px;font-size:16px;outline:none}
 #nameCard button,#upgrade,#restart{width:100%;min-height:44px;border:0;border-radius:10px;margin-top:10px;background:#183d58;color:#fff;font-weight:bold}
-#roomActions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}#roomActions button{margin-top:0}#roomCodeInput{width:100%;padding:13px;border:1px solid #33415d;background:#111a2d;color:white;border-radius:10px;font-size:16px;outline:none;margin-top:8px;text-transform:uppercase}
+#playersPanel{position:fixed;top:10px;right:10px;width:min(210px,46vw);background:rgba(5,8,17,.88);border:1px solid #26344e;border-radius:12px;padding:8px 10px;font-size:12px;backdrop-filter:blur(5px);z-index:6;display:none;pointer-events:none}#playersList{display:grid;gap:4px;margin-top:6px;max-height:150px;overflow:auto}.onlinePlayer{display:flex;justify-content:space-between;gap:8px;color:#fff}.onlinePlayer small{color:#6ff3b0;font-size:10px}#roomActions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}#roomActions button{margin-top:0}#roomCodeInput{width:100%;padding:13px;border:1px solid #33415d;background:#111a2d;color:white;border-radius:10px;font-size:16px;outline:none;margin-top:8px;text-transform:uppercase}
 #nameMsg{font-size:13px;color:#ff8b8b;min-height:18px;margin-top:8px}
 #gameActions{position:fixed;left:10px;top:74px;z-index:7;display:none;gap:7px}#gameActions button{min-height:40px;border:1px solid #33415d;background:#0b1020;color:#fff;border-radius:9px;padding:0 12px;font-weight:bold}#saveGame{background:#183d58!important}#upgrade{position:fixed;right:10px;top:74px;width:auto;padding:0 12px;z-index:4;display:none}
 #restart{display:none}
@@ -146,7 +146,7 @@ function setConnectionStatus(title,text,show=true){
   const overlay=document.getElementById("connectionOverlay"),t=document.getElementById("connectionTitle"),d=document.getElementById("connectionText");
   if(t)t.textContent=title||"CONECTANDO AL SERVIDOR";if(d)d.textContent=text||"";if(overlay)overlay.style.display=show?"flex":"none";
 }
-function connectMultiplayer(roomMode="quick",roomCode=""){
+function connectMultiplayer(roomMode="quick",roomCode=""){\n  currentRoom=roomMode==="quick"?"OPEN":(roomCode||"PRIVATE");
   setConnectionStatus("CONECTANDO AL SERVIDOR","Despertando el servidor multiplayer…");
   if(multiplayerSocket && multiplayerSocket.readyState<=1) multiplayerSocket.close();
 
