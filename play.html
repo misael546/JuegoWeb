@@ -9,7 +9,7 @@
 <script>
 (function(){
   try{
-    var v="20261001-01";
+    var v="20261001-02";
     var k="neon_core_page_version";
     var old=localStorage.getItem(k);
     if(old!==v){
@@ -370,7 +370,6 @@ function update(dt){
   for(const b of bullets){
     b.x+=b.vx*dt;b.y+=b.vy*dt;b.life-=dt;b.range+=650*dt;
     if(b.life<=0||b.range>1000||b.x<0||b.y<0||b.x>world.w||b.y>world.h||hitWall(b))b.dead=true;
-    }
   }
 
   for(const q of particles){q.x+=q.vx*dt;q.y+=q.vy*dt;q.vx*=.96;q.vy*=.96;q.life-=dt}
