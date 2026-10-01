@@ -9,7 +9,7 @@
 <script>
 (function(){
   try{
-    var v="20261001-61";
+    var v="20261001-62";
     var k="neon_core_build";
     window.NEON_CORE_BUILD=v;
     var old=localStorage.getItem(k);
@@ -345,7 +345,6 @@ function connectMultiplayer(roomMode="quick",roomCode=""){
           document.getElementById("death").style.display="none";
           updateResourceHud();
           updateHud();
-          setTimeout(()=>{try{if(multiplayerSocket&&multiplayerSocket.readyState===1)multiplayerSocket.send(JSON.stringify({type:"respawn"}));}catch{}},0);
         }else if(m.type==="pvp_damage"){
           p.hp=Number.isFinite(m.hp)?m.hp:Math.max(0,p.hp-(Number(m.amount)||0));
           if(Number.isFinite(m.maxHp))p.maxHp=m.maxHp;
@@ -386,6 +385,21 @@ function connectMultiplayer(roomMode="quick",roomCode=""){
           if(Number.isFinite(m.killsToLevel))serverKillsToLevel=m.killsToLevel;if(Number.isFinite(m.gold))p.gold=m.gold;if(Number.isFinite(m.diamonds))p.diamonds=m.diamonds;if(Number.isFinite(m.ammo))p.ammo=m.ammo;if(Number.isFinite(m.maxAmmo))p.maxAmmo=m.maxAmmo;if(m.shopNpc){shopNpc.x=Number(m.shopNpc.x)||shopNpc.x;shopNpc.y=Number(m.shopNpc.y)||shopNpc.y;shopNpc.r=Number(m.shopNpc.r)||shopNpc.r;}if(m.weapon)p.weapon=m.weapon;updateResourceHud();
         }else if(m.type==="hp_regen"){p.hp=Math.min(Number(m.maxHp)||p.maxHp,Number(m.hp)||p.hp);updateHud();
         }else if(m.type==="ammo_empty"){p.ammo=0;updateResourceHud();showShopMsg("Sin munición. Ve con el vendedor.");
+        }else if(m.type==="shot_result"){
+          if(Number.isFinite(Number(m.ammo)))p.ammo=Math.max(0,Number(m.ammo));
+          if(m.ok){
+            const angle=Number.isFinite(Number(m.angle))?Number(m.angle):p.angle;
+            bullets.push({
+              x:Number.isFinite(Number(m.x))?Number(m.x):p.x,
+              y:Number.isFinite(Number(m.y))?Number(m.y):p.y,
+              vx:Math.cos(angle)*650,
+              vy:Math.sin(angle)*650,
+              life:1.5,
+              damage:Number(m.damage)||p.damage,
+              range:0
+            });
+          }
+          updateResourceHud();
         }else if(m.type==="shop_result"){if(Number.isFinite(m.gold))p.gold=m.gold;if(Number.isFinite(m.ammo))p.ammo=m.ammo;if(Number.isFinite(m.maxAmmo))p.maxAmmo=m.maxAmmo;if(m.weapon)p.weapon=m.weapon;showShopMsg(m.message||"");updateResourceHud();
         }else if(m.type==="respawn_ok"){
           if(m.safeZone){safeZone=m.safeZone;}
@@ -457,11 +471,9 @@ function fire(){
   if((p.ammo||0)<=0){showShopMsg("Sin munición. Ve con el vendedor.");return;}
   const now=performance.now();
   if(now-p.lastShot<p.fireRate)return;
-  p.lastShot=now;p.ammo=Math.max(0,p.ammo-1);updateResourceHud();
-  if(multiplayerSocket && multiplayerSocket.readyState===1){
-    multiplayerSocket.send(JSON.stringify({type:"fire"}));
-  }
-  bullets.push({x:p.x+Math.cos(p.angle)*30,y:p.y+Math.sin(p.angle)*30,vx:Math.cos(p.angle)*650,vy:Math.sin(p.angle)*650,life:1.5,damage:p.damage,range:0});
+  if(!multiplayerSocket || multiplayerSocket.readyState!==1)return;
+  p.lastShot=now;
+  multiplayerSocket.send(JSON.stringify({type:"fire"}));
 }
 function returnToMenu(){
   gameActive=false;
@@ -484,15 +496,11 @@ function returnToMenu(){
 }
 function damagePlayer(amount){
   if(!p.alive)return;
-  p.hp-=amount;burst(p.x,p.y,"#ff5474",4);
+  p.hp=Math.max(0,p.hp-(Number(amount)||0));
+  burst(p.x,p.y,"#ff5474",4);
   if(p.hp<=0){
-    const lostScore=p.score;
-    p.hp=0;p.alive=false;
-    resetProgressOnDeath();
-    document.getElementById("deathScore").textContent=lostScore;
-    gameActive=false;
-    enemies.length=0;
-    setTimeout(returnToMenu,50);
+    p.hp=0;
+    p.alive=false;
   }
 }
 function levelCheck(){ return false; }
@@ -895,7 +903,7 @@ function enterPublicRooms(){
   saveName(n);
   username.value=n;
   nameMsg.textContent="Abriendo salas públicas…";
-  location.href=PUBLIC_ROOM_CODE?"../":"neoncore/";
+  location.href=PUBLIC_ROOM_CODE?"../":"./";
 }
 publicRoomsBtn.addEventListener("click",enterPublicRooms);
 nameForm.addEventListener("submit",e=>{
