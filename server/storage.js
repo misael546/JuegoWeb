@@ -23,6 +23,10 @@ async function initStorage() {
     connectionTimeoutMillis: 10000
   });
 
+  pool.on('error', (error) => {
+    console.error('[STORAGE POOL]', error?.message || error);
+  });
+
   await pool.query(
     'CREATE TABLE IF NOT EXISTS neoncore_players (' +
       'save_key VARCHAR(96) PRIMARY KEY,' +
@@ -44,26 +48,34 @@ async function initStorage() {
 async function loadPlayerData(saveKey) {
   if (!storageReady || !pool || !saveKey) return null;
 
-  const result = await pool.query(
-    'SELECT data FROM neoncore_players WHERE save_key = $1',
-    [saveKey]
-  );
-
-  return result.rows[0]?.data || null;
+  try {
+    const result = await pool.query(
+      'SELECT data FROM neoncore_players WHERE save_key = $1',
+      [saveKey]
+    );
+    return result.rows[0]?.data || null;
+  } catch (error) {
+    console.error('[STORAGE LOAD QUERY]', error?.message || error);
+    return null;
+  }
 }
 
 async function savePlayerData(saveKey, data) {
   if (!storageReady || !pool || !saveKey) return false;
 
-  await pool.query(
+  try {
+    await pool.query(
     'INSERT INTO neoncore_players (save_key, data, updated_at) ' +
       'VALUES ($1, $2::jsonb, NOW()) ' +
       'ON CONFLICT (save_key) ' +
       'DO UPDATE SET data = EXCLUDED.data, updated_at = NOW()',
     [saveKey, JSON.stringify(data)]
-  );
-
-  return true;
+    );
+    return true;
+  } catch (error) {
+    console.error('[STORAGE SAVE QUERY]', error?.message || error);
+    return false;
+  }
 }
 
 async function closeStorage() {
