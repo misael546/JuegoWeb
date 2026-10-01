@@ -568,6 +568,7 @@ function draw(){
     ctx.globalAlpha=1;
   }
   drawTank(p.x,p.y,p.angle);
+  drawNameTag(playerName,p.x,p.y,p.r,"#39e7ff");
 
   document.getElementById("hp").textContent=Math.ceil(p.hp);
   document.getElementById("maxHp").textContent=p.maxHp;
