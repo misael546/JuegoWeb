@@ -761,42 +761,76 @@ function draw(){
 
 function setupJoystick(id){
   const el=document.getElementById(id),stick=el.querySelector(".stick");
-  let active=false,pointerId=null;
+  let active=false,pointerId=null,touchId=null;
   function reset(){
-    active=false;pointerId=null;
+    active=false;pointerId=null;touchId=null;
     stick.style.transform="translate(0,0)";
     moveX=0;moveY=0;
   }
-  function set(e){
+  function setPosition(clientX,clientY){
     const r=el.getBoundingClientRect();
     const cx=r.left+r.width/2,cy=r.top+r.height/2;
     const max=Math.max(1,(r.width-stick.offsetWidth)/2);
-    let x=e.clientX-cx,y=e.clientY-cy;
+    let x=clientX-cx,y=clientY-cy;
     const len=Math.hypot(x,y);
     if(len>max){x=x/len*max;y=y/len*max}
     stick.style.transform="translate("+x+"px,"+y+"px)";
     moveX=clamp(x/max,-1,1);
     moveY=clamp(y/max,-1,1);
   }
-  el.addEventListener("pointerdown",e=>{
+  function pointerStart(e){
     if(e.pointerType==="mouse" && e.button!==0)return;
     e.preventDefault();
     reset();
     active=true;pointerId=e.pointerId;
     try{el.setPointerCapture(pointerId)}catch{}
-    set(e);
+    setPosition(e.clientX,e.clientY);
+  }
+  function pointerMove(e){
+    if(active && touchId===null && e.pointerId===pointerId){
+      e.preventDefault();
+      setPosition(e.clientX,e.clientY);
+    }
+  }
+  function pointerFinish(e){
+    if(pointerId!==null && e.pointerId===pointerId)reset();
+  }
+  el.addEventListener("pointerdown",pointerStart,{passive:false});
+  el.addEventListener("pointermove",pointerMove,{passive:false});
+  el.addEventListener("pointerup",pointerFinish,{passive:false});
+  el.addEventListener("pointercancel",pointerFinish,{passive:false});
+  el.addEventListener("lostpointercapture",()=>{if(touchId===null)reset()});
+
+  el.addEventListener("touchstart",e=>{
+    if(active)return;
+    const t=e.changedTouches[0];
+    if(!t)return;
+    e.preventDefault();
+    active=true;touchId=t.identifier;
+    setPosition(t.clientX,t.clientY);
   },{passive:false});
-  el.addEventListener("pointermove",e=>{
-    if(active && e.pointerId===pointerId){
-      e.preventDefault();set(e);
+  el.addEventListener("touchmove",e=>{
+    if(!active || touchId===null)return;
+    for(const t of e.changedTouches){
+      if(t.identifier===touchId){
+        e.preventDefault();
+        setPosition(t.clientX,t.clientY);
+        break;
+      }
     }
   },{passive:false});
-  const finish=e=>{
-    if(pointerId===null || e.pointerId===pointerId){e.preventDefault();reset()}
+  const touchEnd=e=>{
+    if(touchId===null)return;
+    for(const t of e.changedTouches){
+      if(t.identifier===touchId){
+        e.preventDefault();
+        reset();
+        break;
+      }
+    }
   };
-  el.addEventListener("pointerup",finish,{passive:false});
-  el.addEventListener("pointercancel",finish,{passive:false});
-  el.addEventListener("lostpointercapture",()=>reset());
+  el.addEventListener("touchend",touchEnd,{passive:false});
+  el.addEventListener("touchcancel",touchEnd,{passive:false});
   return reset;
 }
 const resetMoveJoystick=setupJoystick("moveJoy");
