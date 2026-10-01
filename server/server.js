@@ -295,7 +295,7 @@ wss.on("connection",(ws)=>{
 });
 
 setInterval(()=>{
-  const dt=.1;
+  const dt=.05;
   for(const [code,room] of rooms){
     if(!room.size)continue;
     const enemies=ensureRoomEnemies(code);
@@ -327,6 +327,6 @@ setInterval(()=>{
     while(enemies.length<18)enemies.push(makeEnemy());
     broadcastRoom(code,{type:"enemy_state",enemies});
   }
-},100);
+},50);
 
 httpServer.listen(PORT,()=>console.log("Neon Core multiplayer server listening on "+PORT));
