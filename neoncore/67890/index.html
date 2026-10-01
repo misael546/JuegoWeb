@@ -615,6 +615,7 @@ function update(dt){
     p.x+=nx*p.speed*Math.min(1,ml)*dt;
     p.y+=ny*p.speed*Math.min(1,ml)*dt;
   }
+  if(ml<=.1)movementTelemetry.inputSince=0;
   p.x=clamp(p.x,35,world.w-35);p.y=clamp(p.y,35,world.h-35);
 
   if(controlMode==="mouse" && ml<=.1)p.angle=Math.atan2(pointer.y-H/2,pointer.x-W/2);
