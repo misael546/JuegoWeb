@@ -3,35 +3,164 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
-<title>JuegoWeb</title>
+<title>JuegoWeb V3</title>
 <style>
-*{box-sizing:border-box}body{margin:0;background:#111;color:white;font-family:Arial;overflow:hidden}#game{width:100vw;height:100vh;display:block;background:#c99b55}#ui{position:fixed;top:10px;left:10px;right:10px;pointer-events:none}.panel{display:inline-block;background:#111c;padding:10px;border-radius:10px}#nameTag{position:fixed;top:52px;left:10px;background:#111c;padding:6px 10px;border-radius:8px;font-size:14px}#nameBox{position:fixed;inset:0;background:#0009;display:flex;align-items:center;justify-content:center;padding:20px;z-index:10}#nameCard{width:min(360px,100%);background:#181818;padding:20px;border-radius:14px}#nameCard input{width:100%;padding:12px;margin:8px 0;border:0;border-radius:8px;font-size:16px}#nameCard button{width:100%;height:46px;border:0;border-radius:8px;margin-top:8px;background:#333;color:white;font-size:16px}#nameMsg{font-size:13px;margin-top:10px;min-height:18px}#logout{position:fixed;top:10px;right:10px;z-index:5;border:0;border-radius:8px;padding:9px;background:#222d;color:white}#controls{position:fixed;bottom:20px;left:20px;right:20px;display:flex;justify-content:space-between;pointer-events:none}#controls button{pointer-events:auto;border:0;border-radius:50%;width:58px;height:58px;font-size:24px;background:#222d;color:white}#attack{background:#8b2222!important}
+*{box-sizing:border-box}
+body{margin:0;background:#111;color:white;font-family:Arial;overflow:hidden}
+#game{width:100vw;height:100vh;display:block;background:#c99b55}
+#ui{position:fixed;top:10px;left:10px;right:10px;pointer-events:none}
+.panel{display:inline-block;background:#111c;padding:10px;border-radius:10px}
+#nameTag{position:fixed;top:52px;left:10px;background:#111c;padding:6px 10px;border-radius:8px;font-size:14px}
+#nameBox{position:fixed;inset:0;background:#0009;display:flex;align-items:center;justify-content:center;padding:20px;z-index:10}
+#nameCard{width:min(360px,100%);background:#181818;padding:20px;border-radius:14px}
+#nameCard input{width:100%;padding:12px;margin:8px 0;border:0;border-radius:8px;font-size:16px}
+#nameCard button{width:100%;height:46px;border:0;border-radius:8px;margin-top:8px;background:#333;color:white;font-size:16px}
+#nameMsg{font-size:13px;margin-top:10px;min-height:18px}
+#logout{position:fixed;top:10px;right:10px;z-index:5;border:0;border-radius:8px;padding:9px;background:#222d;color:white}
+#controls{position:fixed;bottom:20px;left:20px;right:20px;display:flex;justify-content:space-between;pointer-events:none}
+#controls button{pointer-events:auto;border:0;border-radius:50%;width:58px;height:58px;font-size:24px;background:#222d;color:white}
+#attack{background:#8b2222!important}
 </style>
 </head>
 <body>
 <canvas id="game"></canvas>
 <div id="ui"><div class="panel">❤️ <span id="hp">100</span> &nbsp; XP: <span id="xp">0</span>/100 &nbsp; Nivel: <span id="level">1</span> &nbsp; 💰 <span id="gold">0</span></div></div>
-<div id="nameTag" hidden>Jugador: <span id="playerName"></span></div>
-<button id="logout" hidden>Cambiar nombre</button>
-<div id="nameBox"><div id="nameCard"><h2>JuegoWeb</h2><p>Escribe el nombre de tu personaje</p><input id="username" maxlength="20" autocomplete="off" placeholder="Nombre"><button id="enterGame">Entrar al juego</button><div id="nameMsg"></div></div></div>
-<div id="controls"><div><button data-key="up">▲</button><br><button data-key="left">◀</button><button data-key="down">▼</button><button data-key="right">▶</button></div><button id="attack">⚔️</button></div>
+<div id="nameTag" style="display:none">Jugador: <span id="playerName"></span></div>
+<button id="logout" style="display:none">Cambiar nombre</button>
+<div id="nameBox">
+  <div id="nameCard">
+    <h2>JuegoWeb</h2>
+    <p>Escribe el nombre de tu personaje</p>
+    <input id="username" maxlength="20" autocomplete="off" placeholder="Nombre">
+    <button id="enterGame" type="button">ENTRAR AL JUEGO</button>
+    <div id="nameMsg"></div>
+  </div>
+</div>
+<div id="controls">
+  <div><button data-key="up">▲</button><br><button data-key="left">◀</button><button data-key="down">▼</button><button data-key="right">▶</button></div>
+  <button id="attack">⚔️</button>
+</div>
 <script>
-const canvas=document.getElementById("game"),ctx=canvas.getContext("2d");let W,H;
-function resize(){W=innerWidth;H=innerHeight;canvas.width=W*devicePixelRatio;canvas.height=H*devicePixelRatio;ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0)}addEventListener("resize",resize);resize();
-const player={x:innerWidth/2,y:innerHeight/2,hp:100,xp:0,level:1,gold:0};const enemy={x:innerWidth/2+130,y:innerHeight/2,hp:50,maxHp:50};const keys={up:false,down:false,left:false,right:false};
+const canvas=document.getElementById("game"),ctx=canvas.getContext("2d");
+let W=innerWidth,H=innerHeight;
+function resize(){
+  W=innerWidth;H=innerHeight;
+  canvas.width=W*devicePixelRatio;canvas.height=H*devicePixelRatio;
+  ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
+}
+addEventListener("resize",resize);resize();
+
+const player={x:W/2,y:H/2,hp:100,xp:0,level:1,gold:0};
+const enemy={x:W/2+130,y:H/2,hp:50,maxHp:50};
+const keys={up:false,down:false,left:false,right:false};
 let playerName="";
-function getSavedName(){try{return localStorage.getItem("juegoweb_name")||""}catch(e){return""}}
-function setSavedName(n){try{localStorage.setItem("juegoweb_name",n)}catch(e){}}
-function enterGame(){const input=document.getElementById("username"),n=input.value.trim();if(n.length<2){document.getElementById("nameMsg").textContent="Escribe al menos 2 caracteres.";return}playerName=n;setSavedName(n);document.getElementById("playerName").textContent=n;document.getElementById("nameBox").hidden=true;document.getElementById("nameTag").hidden=false;document.getElementById("logout").hidden=false}
-function changeName(){document.getElementById("username").value=playerName;document.getElementById("nameBox").hidden=false}
-document.querySelectorAll("[data-key]").forEach(b=>{const k=b.dataset.key;const on=e=>{e.preventDefault();keys[k]=true};const off=e=>{e.preventDefault();keys[k]=false};b.addEventListener("pointerdown",on);b.addEventListener("pointerup",off);b.addEventListener("pointercancel",off);b.addEventListener("pointerleave",off)});
-document.getElementById("enterGame").onclick=enterGame;document.getElementById("logout").onclick=changeName;document.getElementById("username").addEventListener("keydown",e=>{if(e.key==="Enter")enterGame()});
-async function attack(){const d=Math.hypot(player.x-enemy.x,player.y-enemy.y);if(d<100&&enemy.hp>0){enemy.hp-=25;if(enemy.hp<=0){player.xp+=50;player.gold+=10;enemy.hp=enemy.maxHp;enemy.x=80+Math.random()*(W-160);enemy.y=100+Math.random()*(H-180);if(player.xp>=100){player.xp-=100;player.level++;player.hp=100}}}}
+
+function getSavedName(){
+  try{return localStorage.getItem("juegoweb_name")||""}catch(e){return""}
+}
+function setSavedName(n){
+  try{localStorage.setItem("juegoweb_name",n)}catch(e){}
+}
+
+function startGame(){
+  const input=document.getElementById("username");
+  const msg=document.getElementById("nameMsg");
+  const n=input.value.trim();
+
+  if(n.length<2){
+    msg.textContent="Escribe al menos 2 caracteres.";
+    input.focus();
+    return;
+  }
+
+  playerName=n;
+  setSavedName(n);
+  document.getElementById("playerName").textContent=n;
+
+  document.getElementById("nameBox").style.display="none";
+  document.getElementById("nameTag").style.display="block";
+  document.getElementById("logout").style.display="block";
+}
+
+function changeName(){
+  document.getElementById("username").value=playerName;
+  document.getElementById("nameBox").style.display="flex";
+  document.getElementById("username").focus();
+}
+
+document.getElementById("enterGame").addEventListener("click",startGame);
+document.getElementById("username").addEventListener("keydown",e=>{
+  if(e.key==="Enter"){e.preventDefault();startGame();}
+});
+document.getElementById("logout").addEventListener("click",changeName);
+
+document.querySelectorAll("[data-key]").forEach(b=>{
+  const k=b.dataset.key;
+  const on=e=>{e.preventDefault();keys[k]=true};
+  const off=e=>{e.preventDefault();keys[k]=false};
+  b.addEventListener("pointerdown",on);
+  b.addEventListener("pointerup",off);
+  b.addEventListener("pointercancel",off);
+  b.addEventListener("pointerleave",off);
+});
+
+function attack(){
+  const d=Math.hypot(player.x-enemy.x,player.y-enemy.y);
+  if(d<100&&enemy.hp>0){
+    enemy.hp-=25;
+    if(enemy.hp<=0){
+      player.xp+=50;player.gold+=10;enemy.hp=enemy.maxHp;
+      enemy.x=80+Math.random()*Math.max(1,W-160);
+      enemy.y=100+Math.random()*Math.max(1,H-180);
+      if(player.xp>=100){
+        player.xp-=100;player.level++;player.hp=100;
+      }
+    }
+  }
+}
 document.getElementById("attack").addEventListener("pointerdown",attack);
-function update(){const speed=3;if(keys.up)player.y-=speed;if(keys.down)player.y+=speed;if(keys.left)player.x-=speed;if(keys.right)player.x+=speed;player.x=Math.max(25,Math.min(W-25,player.x));player.y=Math.max(70,Math.min(H-25,player.y))}
-function draw(){ctx.clearRect(0,0,W,H);ctx.fillStyle="#d4a45c";ctx.fillRect(0,0,W,H);ctx.strokeStyle="#c08d48";for(let x=0;x<W;x+=64){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke()}for(let y=0;y<H;y+=64){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke()}ctx.fillStyle="#8b2222";ctx.beginPath();ctx.arc(enemy.x,enemy.y,25,0,Math.PI*2);ctx.fill();ctx.fillStyle="#111";ctx.fillRect(enemy.x-25,enemy.y-40,50,6);ctx.fillStyle="#e33";ctx.fillRect(enemy.x-25,enemy.y-40,50*(enemy.hp/enemy.maxHp),6);ctx.fillStyle="#2878d0";ctx.beginPath();ctx.arc(player.x,player.y,22,0,Math.PI*2);ctx.fill();document.getElementById("hp").textContent=player.hp;document.getElementById("xp").textContent=player.xp;document.getElementById("level").textContent=player.level;document.getElementById("gold").textContent=player.gold}
-const saved=getSavedName();if(saved){playerName=saved;document.getElementById("username").value=saved;document.getElementById("playerName").textContent=saved;document.getElementById("nameBox").hidden=true;document.getElementById("nameTag").hidden=false;document.getElementById("logout").hidden=false}
-function loop(){update();draw();requestAnimationFrame(loop)}loop();
+
+function update(){
+  const speed=3;
+  if(keys.up)player.y-=speed;
+  if(keys.down)player.y+=speed;
+  if(keys.left)player.x-=speed;
+  if(keys.right)player.x+=speed;
+  player.x=Math.max(25,Math.min(W-25,player.x));
+  player.y=Math.max(70,Math.min(H-25,player.y));
+}
+
+function draw(){
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle="#d4a45c";ctx.fillRect(0,0,W,H);
+  ctx.strokeStyle="#c08d48";
+  for(let x=0;x<W;x+=64){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke()}
+  for(let y=0;y<H;y+=64){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke()}
+
+  ctx.fillStyle="#8b2222";ctx.beginPath();ctx.arc(enemy.x,enemy.y,25,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle="#111";ctx.fillRect(enemy.x-25,enemy.y-40,50,6);
+  ctx.fillStyle="#e33";ctx.fillRect(enemy.x-25,enemy.y-40,50*(enemy.hp/enemy.maxHp),6);
+
+  ctx.fillStyle="#2878d0";ctx.beginPath();ctx.arc(player.x,player.y,22,0,Math.PI*2);ctx.fill();
+
+  document.getElementById("hp").textContent=player.hp;
+  document.getElementById("xp").textContent=player.xp;
+  document.getElementById("level").textContent=player.level;
+  document.getElementById("gold").textContent=player.gold;
+}
+
+const saved=getSavedName();
+if(saved){
+  playerName=saved;
+  document.getElementById("username").value=saved;
+  document.getElementById("playerName").textContent=saved;
+  document.getElementById("nameBox").style.display="none";
+  document.getElementById("nameTag").style.display="block";
+  document.getElementById("logout").style.display="block";
+}
+
+function loop(){update();draw();requestAnimationFrame(loop)}
+loop();
 </script>
 </body>
 </html>
