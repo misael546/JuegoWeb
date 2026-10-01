@@ -913,6 +913,10 @@ function setupJoystick(id){
   el.addEventListener("pointerup",finish,{passive:false});
   el.addEventListener("pointercancel",finish,{passive:false});
   el.addEventListener("lostpointercapture",()=>reset());
+  el.addEventListener("touchstart",e=>{const t=e.touches&&e.touches[0];if(!t)return;e.preventDefault();active=true;pointerId="touch";set({clientX:t.clientX,clientY:t.clientY});},{passive:false});
+  el.addEventListener("touchmove",e=>{if(!active||pointerId!=="touch")return;const t=e.touches&&e.touches[0];if(!t)return;e.preventDefault();set({clientX:t.clientX,clientY:t.clientY});},{passive:false});
+  el.addEventListener("touchend",e=>{if(pointerId==="touch"){e.preventDefault();reset();}},{passive:false});
+  el.addEventListener("touchcancel",e=>{if(pointerId==="touch"){e.preventDefault();reset();}},{passive:false});
   return reset;
 }
 const resetMoveJoystick=setupJoystick("moveJoy");
