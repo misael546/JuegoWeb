@@ -32,6 +32,10 @@ function publicPlayers(room){
 function sendPlayerList(code){
   broadcastRoom(code,{type:"player_list",players:publicPlayers(rooms.get(code)||new Set())});
 }
+function sendStats(p){
+  if(!p || !p.ws)return;
+  send(p.ws,{type:"server_stats",kills:p.kills,score:p.score,xp:p.xp,level:p.level,damage:p.damage,defense:p.defense,fireRate:p.fireRate,maxHp:100+(p.level-1)*15,xpNeed:100,killsToLevel:5-(p.kills%5||5)});
+}
 function makeEnemy(){
   const elite=Math.random()<.2;
   const r=elite?27:21;
@@ -92,12 +96,14 @@ function joinRoom(ws,requestedCode,create=false){
   room.add(ws);
   ensureRoomEnemies(code);
   p.room=code;
+  p.ws=ws;
   const spawn=spawnPosition(code);
   if(!p.hasSaved){p.x=spawn.x;p.y=spawn.y;p.hp=100;}
   p.angle=0;
   p.alive=true;
   p.hasSaved=false;
   send(ws,{type:"room_joined",code,players:publicPlayers(room),enemies:ensureRoomEnemies(code)});
+  sendStats(p);
   broadcastRoom(code,{type:"player_join",player:p},ws);
   sendPlayerList(code);
 }
@@ -173,7 +179,7 @@ function handleShot(ws){
       if(shooter.kills%5===0){shooter.level++;shooter.xp=0;shooter.damage+=5;shooter.defense+=2;shooter.fireRate=Math.max(140,shooter.fireRate-8);}
       send(targetPlayer.ws,{type:"pvp_dead",killer:shooter.name,lostScore});
       broadcastRoom(shooter.room,{type:"pvp_kill",killer:shooter.id,target:targetPlayer.p.id});
-      send(shooter.ws,{type:"server_stats",kills:shooter.kills,score:shooter.score,xp:shooter.xp,level:shooter.level,damage:shooter.damage,defense:shooter.defense,fireRate:shooter.fireRate,maxHp:100+(shooter.level-1)*15,xpNeed:100,killsToLevel:5-(shooter.kills%5||5)});
+      sendStats(shooter);
     }
     return;
   }
@@ -217,6 +223,7 @@ wss.on("connection",(ws)=>{
     damage:25,defense:0,fireRate:280,score:0,kills:0,xp:0,
     color:"#39e7ff",room:"",alive:true,frozen:false,lastShot:0
   };
+  player.ws=ws;
   clients.set(ws,player);
   send(ws,{type:"connected",id});
 
@@ -284,6 +291,7 @@ wss.on("connection",(ws)=>{
         p.x=spawn.x;p.y=spawn.y;p.angle=0;p.hp=100;p.alive=true;
         p.level=1;p.damage=25;p.defense=0;p.fireRate=280;p.xp=0;p.score=0;p.kills=0;p.lastShot=0;
         send(ws,{type:"respawn_ok",x:p.x,y:p.y,hp:p.hp,enemies:ensureRoomEnemies(p.room)});
+        sendStats(p);
         broadcastRoom(p.room,{type:"player_update",player:p},ws);
         sendPlayerList(p.room);
       }
