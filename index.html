@@ -29,7 +29,7 @@
 #deathCard{background:#0b1020;border:1px solid #26344e;border-radius:16px;padding:22px;width:min(330px,90%)}
 #deathCard h2{color:#ff5474;margin:0 0 8px}
 @media(min-width:800px){#controls{opacity:.3}#controls:hover{opacity:1}}
-</style>
+#roomActions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}#roomActions button{width:100%;min-height:44px;border:0;border-radius:10px;background:#183d58;color:#fff;font-weight:bold}#roomCodeInput{width:100%;padding:13px;border:1px solid #33415d;background:#111a2d;color:white;border-radius:10px;font-size:16px;outline:none;margin-top:8px;text-transform:uppercase}#roomPanel{position:fixed;top:10px;left:50%;transform:translateX(-50%);z-index:6;display:none;align-items:center;gap:8px;background:rgba(5,8,17,.9);border:1px solid #26344e;border-radius:12px;padding:7px 9px;font-size:13px;backdrop-filter:blur(5px)}#roomCode{font-weight:900;letter-spacing:2px;color:#39e7ff}#copyRoom{border:1px solid #33415d;background:#111a2d;color:#fff;border-radius:8px;padding:7px 9px}</style>
 </head>
 <body>
 <canvas id="game"></canvas>
@@ -45,7 +45,8 @@
 </div>
 
 <div id="nameTag" style="display:none">🛡️ <span id="playerName"></span></div>
-<button id="logout" style="display:none">Nombre</button>\n<div id="roomPanel"><span>SALA</span><span id="roomCode">----</span><button id="copyRoom" type="button">COPIAR</button></div>
+<button id="logout" style="display:none">Nombre</button>
+<div id="roomPanel"><span>SALA</span><span id="roomCode">----</span><button id="copyRoom" type="button">COPIAR</button></div>\n<div id="roomPanel"><span>SALA</span><span id="roomCode">----</span><button id="copyRoom" type="button">COPIAR</button></div>
 <button id="upgrade">MEJORAR · 50 ⚔</button>
 
 <div id="nameBox">
@@ -54,7 +55,9 @@
       <h1>NEON CORE</h1>
       <p>Elige tu nombre y entra a la arena.</p>
       <input id="username" maxlength="20" autocomplete="off" placeholder="Nombre del tanque" required>
-      <button type="submit">ENTRAR A LA ARENA</button>
+      <button type="submit">ENTRAR RÁPIDO</button>
+      <div id="roomActions"><button type="button" id="createRoom">CREAR SALA</button><button type="button" id="joinRoom">UNIRME</button></div>
+      <input id="roomCodeInput" maxlength="4" autocomplete="off" placeholder="CÓDIGO DE SALA · EJ. N7K4">
       <div id="nameMsg"></div>
     </div>
   </form>
@@ -376,7 +379,7 @@ document.getElementById("restart").addEventListener("click",()=>{
   document.getElementById("death").style.display="none";
 });
 
-function enterGame(){
+function enterGame(roomMode="quick",roomCode=""){
   const n=document.getElementById("username").value.trim(),msg=document.getElementById("nameMsg");
   if(n.length<2){msg.textContent="Escribe al menos 2 caracteres.";return}
   playerName=n;saveName(n);loadStats();
@@ -384,7 +387,7 @@ function enterGame(){
   document.getElementById("nameBox").style.display="none";
   document.getElementById("nameTag").style.display="block";
   document.getElementById("logout").style.display="block";
-  connectMultiplayer();
+  connectMultiplayer(roomMode,roomCode);
 }
 document.getElementById("nameForm").addEventListener("submit",e=>{e.preventDefault();enterGame("quick")});
 document.getElementById("createRoom").addEventListener("click",()=>enterGame("create"));
@@ -395,18 +398,10 @@ document.getElementById("joinRoom").addEventListener("click",()=>{
 });
 document.getElementById("roomCodeInput").addEventListener("input",e=>{e.target.value=e.target.value.toUpperCase().replace(/[^A-Z0-9]/g,"").slice(0,4)});
 document.getElementById("copyRoom").addEventListener("click",async()=>{
-  const code=currentRoom;
-  if(!code)return;
-  const text="NEON CORE · SALA "+code;
-  try{await navigator.clipboard.writeText(text)}catch{}
+  const code=currentRoom;if(!code)return;
+  try{await navigator.clipboard.writeText(code)}catch{}
   const b=document.getElementById("copyRoom");b.textContent="COPIADO";setTimeout(()=>b.textContent="COPIAR",900);
 });
-document.getElementById("logout").addEventListener("click",()=>{
-  document.getElementById("username").value=playerName;
-  document.getElementById("nameBox").style.display="flex";
-  document.getElementById("username").focus();
-});
-
 const saved=loadName();
 if(saved){document.getElementById("username").value=saved;playerName=saved;document.getElementById("playerName").textContent=saved;document.getElementById("nameBox").style.display="none";document.getElementById("nameTag").style.display="block";document.getElementById("logout").style.display="block";loadStats();connectMultiplayer(invitedRoom&&invitedRoom.length===4?"join":"quick",invitedRoom&&invitedRoom.length===4?invitedRoom.toUpperCase():"")}
 
