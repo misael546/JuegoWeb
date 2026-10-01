@@ -610,9 +610,6 @@ function update(dt){
   const ml=Math.hypot(mx,my);
   if(ml>.1){
     if(!movementTelemetry.inputSince)movementTelemetry.inputSince=performance.now();
-  }else{
-    movementTelemetry.inputSince=0;
-  }
     const nx=mx/ml,ny=my/ml;
     p.angle=Math.atan2(ny,nx);
     p.x+=nx*p.speed*Math.min(1,ml)*dt;
