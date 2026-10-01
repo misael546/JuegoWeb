@@ -17,7 +17,7 @@
 #nameCard p{color:#9ca9bd;margin:0 0 16px}
 #nameCard input{width:100%;padding:13px;border:1px solid #33415d;background:#111a2d;color:white;border-radius:10px;font-size:16px;outline:none}
 #nameCard button,#upgrade,#restart{width:100%;min-height:44px;border:0;border-radius:10px;margin-top:10px;background:#183d58;color:#fff;font-weight:bold}
-#roomActions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}#roomActions button{margin-top:0}#roomCodeInput{width:100%;padding:13px;border:1px solid #33415d;background:#111a2d;color:white;border-radius:10px;font-size:16px;outline:none;margin-top:8px;text-transform:uppercase}#roomPanel{position:fixed;top:10px;left:50%;transform:translateX(-50%);z-index:6;display:none;align-items:center;gap:8px;background:rgba(5,8,17,.9);border:1px solid #26344e;border-radius:12px;padding:7px 9px;font-size:13px;backdrop-filter:blur(5px)}#roomCode{font-weight:900;letter-spacing:2px;color:#39e7ff}#copyRoom{border:1px solid #33415d;background:#111a2d;color:#fff;border-radius:8px;padding:7px 9px}
+#roomActions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}#roomActions button{margin-top:0}#roomCodeInput{width:100%;padding:13px;border:1px solid #33415d;background:#111a2d;color:white;border-radius:10px;font-size:16px;outline:none;margin-top:8px;text-transform:uppercase}#roomPanel{position:fixed;top:10px;left:50%;transform:translateX(-50%);z-index:6;display:none;align-items:center;gap:8px;background:rgba(5,8,17,.9);border:1px solid #26344e;border-radius:12px;padding:7px 9px;font-size:13px;backdrop-filter:blur(5px)}#playersPanel{position:fixed;top:52px;right:10px;z-index:6;display:none;width:min(220px,calc(100vw - 20px));background:rgba(5,8,17,.9);border:1px solid #26344e;border-radius:12px;padding:9px 10px;font-size:12px;backdrop-filter:blur(5px)}#playersPanel b{color:#39e7ff}#playersList{margin-top:6px;display:grid;gap:4px;max-height:180px;overflow:auto}.onlinePlayer{display:flex;justify-content:space-between;gap:8px;color:#dce6f5}.onlinePlayer small{color:#7cff72}#roomCode{font-weight:900;letter-spacing:2px;color:#39e7ff}#copyRoom{border:1px solid #33415d;background:#111a2d;color:#fff;border-radius:8px;padding:7px 9px}
 #nameMsg{font-size:13px;color:#ff8b8b;min-height:18px;margin-top:8px}
 #logout{position:fixed;top:10px;right:10px;z-index:4;border:1px solid #26344e;border-radius:9px;padding:8px 10px;background:#050811dd;color:white}
 #upgrade{position:fixed;right:10px;top:92px;width:auto;padding:0 12px;z-index:4;display:none}
@@ -48,6 +48,7 @@
 <div id="nameTag" style="display:none">🛡️ <span id="playerName"></span></div>
 <button id="logout" style="display:none">Nombre</button>
 <div id="roomPanel"><span>SALA</span><span id="roomCode">----</span><button id="copyRoom" type="button">COPIAR</button></div>
+<div id="playersPanel"><b>JUGADORES CONECTADOS · <span id="playersCount">0</span></b><div id="playersList"></div></div>
 
 <button id="upgrade">MEJORAR · 50 ⚔</button>
 
@@ -95,6 +96,27 @@ let moveX=0,moveY=0;
 const remotePlayers=new Map();
 let multiplayerSocket=null,multiplayerId="",lastNetSend=0,currentRoom="";
 const MULTIPLAYER_SERVER=localStorage.getItem("neon_core_server_url")||"wss://neon-core-multiplayer.onrender.com/ws";
+function renderPlayers(list){
+  const panel=document.getElementById("playersPanel"),count=document.getElementById("playersCount"),box=document.getElementById("playersList");
+  const players=Array.isArray(list)?list:[];
+  count.textContent=players.length;
+  box.innerHTML="";
+  for(const q of players){
+    const row=document.createElement("div");
+    row.className="onlinePlayer";
+    const name=document.createElement("span");
+    name.textContent=q.id===multiplayerId?(q.name||"Jugador")+" (TÚ)":(q.name||"Jugador");
+    const state=document.createElement("small");
+    state.textContent=q.alive===false?"DESTRUIDO":"ONLINE";
+    row.append(name,state);box.appendChild(row);
+  }
+  panel.style.display=currentRoom?"block":"none";
+}
+function updatePlayersFromList(list){
+  remotePlayers.clear();
+  for(const q of (list||[])) if(q.id!==multiplayerId) remotePlayers.set(q.id,q);
+  renderPlayers(list||[]);
+}
 function setRoomPanel(code){
   currentRoom=code||"";
   const panel=document.getElementById("roomPanel"),label=document.getElementById("roomCode");
@@ -117,16 +139,18 @@ function connectMultiplayer(roomMode="quick",roomCode=""){
         const m=JSON.parse(e.data);
         if(m.type==="room_joined"){
           setRoomPanel(m.code);
-          remotePlayers.clear();
-          for(const q of (m.players||[])) if(q.id!==multiplayerId) remotePlayers.set(q.id,q);
+          updatePlayersFromList(m.players||[]);
         }else if(m.type==="room_error"){
           const msg=document.getElementById("nameMsg"); if(msg)msg.textContent=m.message||"No se pudo entrar a la sala.";
         }else if(m.type==="connected"){
           multiplayerId=m.id;
+        }else if(m.type==="player_list"){
+          updatePlayersFromList(m.players||[]);
         }else if(m.type==="welcome"){
           multiplayerId=m.id;
           remotePlayers.clear();
           for(const q of (m.players||[])) if(q.id!==multiplayerId) remotePlayers.set(q.id,q);
+          renderPlayers(m.players||[]);
         }else if(m.type==="player_join"||m.type==="player_update"){
           if(m.player && m.player.id!==multiplayerId) remotePlayers.set(m.player.id,m.player);
         }else if(m.type==="pvp_damage"){
