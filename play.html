@@ -26,7 +26,7 @@
 .joy{width:112px;height:112px;border:1px solid #41516d;background:#07101dcc;border-radius:50%;position:relative;pointer-events:auto}
 .stick{position:absolute;width:48px;height:48px;border-radius:50%;left:32px;top:32px;background:#39e7ff99;border:1px solid #8ff5ff}
 #fire{width:86px;height:86px;border-radius:50%;border:1px solid #ff6680;background:#701a30cc;color:white;font-size:25px;font-weight:bold;pointer-events:auto}
-#death{position:fixed;inset:0;background:#000b;display:none;align-items:center;justify-content:center;z-index:10;text-align:center}
+#connectionOverlay{position:fixed;inset:0;background:#050811e8;display:none;align-items:center;justify-content:center;z-index:30;text-align:center;padding:20px}#connectionCard{width:min(340px,100%);background:#0b1020;border:1px solid #26344e;border-radius:16px;padding:24px;display:grid;gap:9px;box-shadow:0 15px 60px #000}#connectionTitle{color:#39e7ff;letter-spacing:1px}#connectionText{color:#9ca9bd;font-size:13px;line-height:1.4}#connectionSpinner{width:28px;height:28px;border:3px solid #26344e;border-top-color:#39e7ff;border-radius:50%;margin:0 auto 5px;animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}#death{position:fixed;inset:0;background:#000b;display:none;align-items:center;justify-content:center;z-index:10;text-align:center}
 #deathCard{background:#0b1020;border:1px solid #26344e;border-radius:16px;padding:22px;width:min(330px,90%)}
 #deathCard h2{color:#ff5474;margin:0 0 8px}
 @media(min-width:800px){#controls{opacity:.3}#controls:hover{opacity:1}}
@@ -45,7 +45,8 @@
   <div class="panel">🎯 <span id="kills">0</span> eliminaciones</div>
 </div>
 
-<div id="nameTag" style="display:none">🛡️ <span id="playerName"></span></div>
+<div id="nameTag" style="display:none">🛡️ <span id="playerName"></span></div>\n<div id="connectionOverlay" aria-live="polite"><div id="connectionCard"><div id="connectionSpinner"></div><b id="connectionTitle">CONECTANDO AL SERVIDOR</b><span id="connectionText">Despertando el servidor multiplayer…</span></div></div>
+
 <button id="logout" style="display:none">Nombre</button>
 <div id="roomPanel"><span>SALA</span><span id="roomCode">----</span><button id="copyRoom" type="button">COPIAR</button></div>
 <div id="playersPanel"><b>JUGADORES CONECTADOS · <span id="playersCount">0</span></b><div id="playersList"></div></div>
@@ -123,13 +124,19 @@ function setRoomPanel(code){
   if(label)label.textContent=currentRoom||"----";
   if(panel)panel.style.display=currentRoom?"flex":"none";
 }
+function setConnectionStatus(title,text,show=true){
+  const overlay=document.getElementById("connectionOverlay"),t=document.getElementById("connectionTitle"),d=document.getElementById("connectionText");
+  if(t)t.textContent=title||"CONECTANDO AL SERVIDOR";if(d)d.textContent=text||"";if(overlay)overlay.style.display=show?"flex":"none";
+}
 function connectMultiplayer(roomMode="quick",roomCode=""){
+  setConnectionStatus("CONECTANDO AL SERVIDOR","Despertando el servidor multiplayer…");
   if(multiplayerSocket && multiplayerSocket.readyState<=1) multiplayerSocket.close();
 
-  if(!MULTIPLAYER_SERVER || !("WebSocket" in window)) return;
+  if(!MULTIPLAYER_SERVER || !("WebSocket" in window)){setConnectionStatus("SERVIDOR NO DISPONIBLE","Tu navegador no permite conexión multiplayer.",true);return;}
   try{
     multiplayerSocket=new WebSocket(MULTIPLAYER_SERVER);
     multiplayerSocket.addEventListener("open",()=>{
+      setConnectionStatus("CONECTADO","Entrando a la sala…");
       multiplayerSocket.send(JSON.stringify({type:"join",name:playerName||"Jugador",color:"#39e7ff",room:roomMode==="join"?roomCode:"",createRoom:roomMode==="create"}));
       const tag=document.getElementById("nameTag");
       if(tag)tag.textContent=(playerName||"Jugador")+" · ONLINE";
@@ -138,6 +145,7 @@ function connectMultiplayer(roomMode="quick",roomCode=""){
       try{
         const m=JSON.parse(e.data);
         if(m.type==="room_joined"){
+          setConnectionStatus("CONECTADO","Listo. Entrando a la arena…",false);
           setRoomPanel(m.code);
           updatePlayersFromList(m.players||[]);
         }else if(m.type==="room_error"){
@@ -173,10 +181,14 @@ function connectMultiplayer(roomMode="quick",roomCode=""){
         }
       }catch{}
     });
+    multiplayerSocket.addEventListener("error",()=>{
+      setConnectionStatus("ESPERANDO AL SERVIDOR","El servidor gratuito puede estar despertando. Reintentando…");
+    });
     multiplayerSocket.addEventListener("close",()=>{
       multiplayerSocket=null;
       const tag=document.getElementById("nameTag");
       if(tag)tag.textContent=playerName||"";
+      if(currentRoom){setConnectionStatus("SERVIDOR EN ESPERA","El servidor se desconectó. Recarga para volver a conectar.");}
     });
   }catch{}
 }
