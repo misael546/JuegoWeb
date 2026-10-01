@@ -9,7 +9,7 @@
 <script>
 (function(){
   try{
-    var v="20261001-03";
+    var v="20261001-04";
     var k="neon_core_page_version";
     var old=localStorage.getItem(k);
     if(old!==v){
@@ -161,7 +161,7 @@ function connectMultiplayer(roomMode="quick",roomCode=""){
     multiplayerSocket=new WebSocket(MULTIPLAYER_SERVER);
     multiplayerSocket.addEventListener("open",()=>{
       setConnectionStatus("CONECTADO","Entrando a la sala…");
-      multiplayerSocket.send(JSON.stringify({type:"join",name:playerName||"Jugador",color:"#39e7ff",room:roomMode==="join"?roomCode:"",createRoom:roomMode==="create"}));
+      multiplayerSocket.send(JSON.stringify({type:"join",name:playerName||"Jugador",saveKey:saveKey,color:"#39e7ff",room:roomMode==="join"?roomCode:"",createRoom:roomMode==="create"}));
       const tag=document.getElementById("nameTag");
       if(tag)tag.textContent=(playerName||"Jugador")+" · ONLINE";
     });
@@ -577,6 +577,11 @@ const nameMsg=document.getElementById("nameMsg");
 const createRoomBtn=document.getElementById("createRoom");
 const joinRoomBtn=document.getElementById("joinRoom");
 const roomCodeInput=document.getElementById("roomCodeInput");
+
+const restartBtn=document.getElementById("restart");
+const upgradeBtn=document.getElementById("upgrade");
+const saveGameBtn=document.getElementById("saveGame");
+const resumeGameBtn=document.getElementById("resumeGame");
 saveGameBtn.addEventListener("click",()=>{
   if(!multiplayerSocket||multiplayerSocket.readyState!==1||!currentRoom||!p.alive)return;
   resetAllControls();
@@ -588,10 +593,6 @@ resumeGameBtn.addEventListener("click",()=>{
   if(!multiplayerSocket||multiplayerSocket.readyState!==1||!currentRoom)return;
   multiplayerSocket.send(JSON.stringify({type:"resume"}));
 });
-const restartBtn=document.getElementById("restart");
-const upgradeBtn=document.getElementById("upgrade");
-const saveGameBtn=document.getElementById("saveGame");
-const resumeGameBtn=document.getElementById("resumeGame");
 let savedFrozen=false;
 let saveKey="";
 try{saveKey=localStorage.getItem("neon_core_save_key")||"";if(!saveKey){saveKey="p_"+Math.random().toString(36).slice(2)+Date.now().toString(36);localStorage.setItem("neon_core_save_key",saveKey);}}catch(e){saveKey="guest_"+Math.random().toString(36).slice(2)}
