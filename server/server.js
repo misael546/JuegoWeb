@@ -10,15 +10,13 @@ const WORLD = { w: 6000, h: 4400 };
 const MAX_PLAYERS = 16;
 const SAFE_ZONE = { x: 3000, y: 2200, r: 300 };
 
-const SERVER_VERSION = '20261001-59';
+const SERVER_VERSION = '20261001-60';
 
 const AMMO_PACK_SIZE = 50;
 const AMMO_PACK_COST = 50;
 const MAX_AMMO = 120;
 
 const SHOP_NPC = { x: 3000, y: 2380, r: 30 };
-const BANK_NPC = { x: 3000, y: 2050, r: 30 };
-const SAVE_NPC = { x: 3000, y: 1750, r: 34 };
 
 const WEAPONS = {
   blaster: { name: 'BLASTER', cost: 0, damage: 25, fireRate: 350 },
@@ -30,6 +28,10 @@ const HP_REGEN_PER_SEC = 3;
 const WORLD_WALL_COUNT = 55;
 const WORLD_WALL_SEED = 739281;
 const AUTOSAVE_MS = 5000;
+const DEATH_HP_LOSS = 0.10;
+const DEATH_DAMAGE_LOSS = 0.05;
+const DEATH_DEFENSE_LOSS = 0.05;
+const DEATH_GOLD_LOSS = 0.10;
 const TICK_MS = 100;
 const ENEMY_SYNC_MS = 100;
 
@@ -156,14 +158,10 @@ function sendStats(p) {
     killsToLevel: nextKills,
     gold: p.gold || 0,
     diamonds: p.diamonds || 0,
-    bankedGold: p.bankedGold || 0,
-    bankedDiamonds: p.bankedDiamonds || 0,
     ammo: p.ammo ?? 0,
     maxAmmo: MAX_AMMO,
     weapon: p.weapon,
-    shopNpc: SHOP_NPC,
-    bankNpc: BANK_NPC,
-    saveNpc: SAVE_NPC
+    shopNpc: SHOP_NPC
   });
 }
 
@@ -187,7 +185,9 @@ function capturePlayerData(p) {
     diamonds: p.diamonds || 0,
     bankedDiamonds: p.bankedDiamonds || 0,
     ammo: clamp(Number(p.ammo) || 0, 0, MAX_AMMO),
-    weapon: WEAPONS[p.weapon] ? p.weapon : 'blaster'
+    weapon: WEAPONS[p.weapon] ? p.weapon : 'blaster',
+    damagePenalty: Math.max(0, Number(p.damagePenalty) || 0),
+    defensePenalty: Math.max(0, Number(p.defensePenalty) || 0)
   };
 }
 
@@ -206,21 +206,6 @@ async function persistPlayer(p) {
 
   p.lastPersistAt = Date.now();
   return data;
-}
-
-async function persistSavedCheckpoint(p) {
-  if (!p?.saveKey || !p.lastSavedData) return;
-
-  savedPlayers.set(p.saveKey, { ...p.lastSavedData });
-
-  try {
-    await storage.ready;
-    await storage.savePlayerData(p.saveKey, p.lastSavedData);
-  } catch (error) {
-    console.error('[STORAGE CHECKPOINT]', error?.message || error);
-  }
-
-  p.lastPersistAt = Date.now();
 }
 
 async function loadSavedPlayer(saveKey) {
@@ -245,19 +230,22 @@ async function loadSavedPlayer(saveKey) {
 function applyCombatStats(p) {
   const item = WEAPONS[p.weapon] || WEAPONS.blaster;
   p.weapon = WEAPONS[p.weapon] ? p.weapon : 'blaster';
-  p.damage = item.damage + Math.max(0, p.level - 1) * 5;
+  const baseDamage = item.damage + Math.max(0, p.level - 1) * 5;
+  const baseDefense = Math.max(0, p.level - 1) * 2;
+  p.damage = Math.max(5, Math.round(baseDamage - (Number(p.damagePenalty) || 0)));
   p.fireRate = Math.max(100, item.fireRate - Math.max(0, p.level - 1) * 4);
-  p.defense = Math.max(0, p.level - 1) * 2;
+  p.defense = Math.max(0, Math.round(baseDefense - (Number(p.defensePenalty) || 0)));
   p.speed = speedForLevel(p.level);
 }
 
-function resetProgressAfterDeath(p) {
-  p.level = 1;
-  p.hp = 0;
-  p.xp = 0;
-  p.score = 0;
-  p.kills = 0;
-  p.pvpKills = 0;
+function applyDeathPenalty(p) {
+  const maxHp = maxHpForLevel(p.level);
+  const damageBefore = Math.max(5, Number(p.damage) || 5);
+  const defenseBefore = Math.max(0, Number(p.defense) || 0);
+  p.hp = Math.max(1, Math.floor(maxHp * (1 - DEATH_HP_LOSS)));
+  p.damagePenalty = Math.max(0, (Number(p.damagePenalty) || 0) + damageBefore * DEATH_DAMAGE_LOSS);
+  p.defensePenalty = Math.max(0, (Number(p.defensePenalty) || 0) + defenseBefore * DEATH_DEFENSE_LOSS);
+  p.gold = Math.max(0, Math.floor((Number(p.gold) || 0) * (1 - DEATH_GOLD_LOSS)));
   applyCombatStats(p);
 }
 
@@ -462,7 +450,7 @@ async function leaveRoom(ws) {
   const code = p.room;
 
   if (p.saveKey) {
-    await persistSavedCheckpoint(p);
+    await persistPlayer(p);
   }
 
   const room = rooms.get(code);
@@ -668,78 +656,6 @@ function shopBuy(ws, requestedWeapon) {
 
   sendStats(p);
   sendPlayerList(p.room);
-}
-
-function depositGold(ws) {
-  const p = clients.get(ws);
-
-  if (!p) return;
-
-  if (!p.room) {
-    send(ws, { type: 'deposit_result', ok: false, message: 'No estás dentro de una sala.' });
-    return;
-  }
-
-  if (!p.alive) {
-    send(ws, { type: 'deposit_result', ok: false, message: 'No puedes usar el banco estando destruido.' });
-    return;
-  }
-
-  if (Math.hypot(p.x - BANK_NPC.x, p.y - BANK_NPC.y) > BANK_NPC.r) {
-    send(ws, { type: 'deposit_result', ok: false, message: 'Acércate al BANCO.' });
-    return;
-  }
-
-  const gold = Math.max(0, Number(p.gold) || 0);
-  const diamonds = Math.max(0, Number(p.diamonds) || 0);
-
-  if (gold <= 0 && diamonds <= 0) {
-    send(ws, {
-      type: 'deposit_result',
-      ok: false,
-      message: 'No tienes oro ni diamantes para guardar.'
-    });
-    return;
-  }
-
-  p.gold = 0;
-  p.diamonds = 0;
-  p.bankedGold = (Number(p.bankedGold) || 0) + gold;
-  p.bankedDiamonds = (Number(p.bankedDiamonds) || 0) + diamonds;
-
-  void persistPlayer(p);
-
-  send(ws, {
-    type: 'deposit_result',
-    ok: true,
-    message: 'Recursos asegurados en el banco.',
-    gold: p.gold,
-    diamonds: p.diamonds,
-    bankedGold: p.bankedGold,
-    bankedDiamonds: p.bankedDiamonds
-  });
-
-  sendStats(p);
-  sendPlayerList(p.room);
-}
-
-async function saveProgressAtNpc(ws) {
-  const p = clients.get(ws);
-  if (!p) return;
-  if (!p.room) { send(ws, { type: 'save_result', ok: false, message: 'No estás dentro de una sala.' }); return; }
-  if (!p.alive) { send(ws, { type: 'save_result', ok: false, message: 'No puedes guardar estando destruido.' }); return; }
-  if (Math.hypot(p.x - SAVE_NPC.x, p.y - SAVE_NPC.y) > SAVE_NPC.r) { send(ws, { type: 'save_result', ok: false, message: 'Acércate al NPC SAVE.' }); return; }
-
-  p.hp = clamp(p.hp, 1, maxHpForLevel(p.level));
-  const data = await persistPlayer(p);
-
-  send(ws, {
-    type: 'save_result',
-    ok: true,
-    message: 'Progreso guardado correctamente.',
-    savedAt: Date.now(),
-    data
-  });
 }
 
 function buyAmmo(ws) {
@@ -959,7 +875,7 @@ function handleShot(ws) {
 
       const lostScore = target.score || 0;
 
-      resetProgressAfterDeath(target);
+      applyDeathPenalty(target);
 
       shooter.kills = (shooter.kills || 0) + 1;
       shooter.pvpKills = (shooter.pvpKills || 0) + 1;
@@ -968,7 +884,7 @@ function handleShot(ws) {
 
       levelUpIfNeeded(shooter);
 
-      void persistSavedCheckpoint(target);
+      void persistPlayer(target);
       void persistPlayer(shooter);
 
       send(targetPlayer.ws, {
@@ -1043,6 +959,8 @@ function createPlayer(ws) {
     level: 1,
     damage: 25,
     defense: 0,
+    damagePenalty: 0,
+    defensePenalty: 0,
     fireRate: 350,
     score: 0,
     kills: 0,
@@ -1050,8 +968,6 @@ function createPlayer(ws) {
     pvpKills: 0,
     gold: 0,
     diamonds: 0,
-    bankedGold: 0,
-    bankedDiamonds: 0,
     ammo: 60,
     weapon: 'blaster',
     color: '#39e7ff',
@@ -1066,7 +982,6 @@ function createPlayer(ws) {
     lastPersistAt: 0,
     lastEnemySyncAt: 0,
     hasSaved: false,
-    lastSavedData: null,
     joined: false,
     ws
   };
@@ -1180,7 +1095,6 @@ wss.on('connection', (ws) => {
         }
 
         applyCombatStats(p);
-        p.lastSavedData = { ...capturePlayerData(p) };
         p.joined = true;
 
         if (msg.room) {
@@ -1323,48 +1237,11 @@ wss.on('connection', (ws) => {
         return;
       }
 
-      if (msg.type === 'deposit_gold') {
-        if (!p.frozen) depositGold(ws);
-        return;
-      }
-
-      if (msg.type === 'save_progress') {
-        if (!p.frozen) await saveProgressAtNpc(ws);
-        return;
-      }
-
-      if (msg.type === 'save') {
-        if (!p.room || !p.alive) return;
-
-        p.frozen = true;
-        if (Number.isFinite(Number(msg.angle))) {
-          p.angle = Number(msg.angle);
-        }
-
-        p.hp = clamp(p.hp, 0, maxHpForLevel(p.level));
-
+      if (msg.type === 'save_on_exit') {
+        if (!p.room || !p.saveKey) return;
+        p.exitSaveRequested = true;
         await persistPlayer(p);
-
-        send(ws, {
-          type: 'save_ok',
-          savedAt: Date.now(),
-          data: capturePlayerData(p)
-        });
-
-        broadcastRoom(p.room, {
-          type: 'player_update',
-          player: publicPlayer(p)
-        });
-
-        sendPlayerList(p.room);
-        return;
-      }
-
-      if (msg.type === 'resume') {
-        if (!p.room || !p.alive) return;
-
-        p.frozen = false;
-        send(ws, { type: 'resume_ok' });
+        send(ws, { type: 'save_complete', savedAt: Date.now() });
         return;
       }
 
@@ -1378,7 +1255,7 @@ wss.on('connection', (ws) => {
         p.angle = 0;
         p.alive = true;
         p.frozen = false;
-        const checkpoint = p.lastSavedData ? { ...p.lastSavedData } : null;
+        const checkpoint = null;
 
         if (checkpoint) {
           p.x = Number.isFinite(Number(checkpoint.x)) ? Number(checkpoint.x) : p.x;
@@ -1403,7 +1280,7 @@ wss.on('connection', (ws) => {
         p.lastShot = 0;
         applyCombatStats(p);
 
-        await persistSavedCheckpoint(p);
+        await persistPlayer(p);
 
         send(ws, {
           type: 'respawn_ok',
@@ -1441,7 +1318,7 @@ wss.on('connection', (ws) => {
     void (async () => {
       try {
         const current = clients.get(ws);
-        if (current?.saveKey) await persistSavedCheckpoint(current);
+        if (current?.saveKey) await persistPlayer(current);
         await leaveRoom(ws);
       } catch (error) {
         console.error('[WS CLOSE]', error?.message || error);
@@ -1483,7 +1360,7 @@ setInterval(() => {
     }
 
     if (p.saveKey && now - p.lastPersistAt >= AUTOSAVE_MS) {
-      void persistSavedCheckpoint(p);
+      void persistPlayer(p);
     }
   }
 }, TICK_MS);
@@ -1561,8 +1438,8 @@ setInterval(() => {
 
             const lostScore = target.score || 0;
 
-            resetProgressAfterDeath(target);
-            void persistSavedCheckpoint(target);
+            applyDeathPenalty(target);
+            void persistPlayer(target);
 
             const foundTarget = findPlayer(target.id, room);
 
@@ -1591,7 +1468,7 @@ setInterval(() => {
 
 process.on('SIGTERM', async () => {
   for (const p of clients.values()) {
-    await persistSavedCheckpoint(p);
+    await persistPlayer(p);
   }
   try {
     await storage.closeStorage();
@@ -1601,7 +1478,7 @@ process.on('SIGTERM', async () => {
 
 process.on('SIGINT', async () => {
   for (const p of clients.values()) {
-    await persistSavedCheckpoint(p);
+    await persistPlayer(p);
   }
   try {
     await storage.closeStorage();
