@@ -9,7 +9,7 @@
 <script>
 (function(){
   try{
-    var v="20261001-28";
+    var v="20261001-29";
     var k="neon_core_build";
     window.NEON_CORE_BUILD=v;
     var old=localStorage.getItem(k);
@@ -108,13 +108,13 @@ let W=innerWidth,H=innerHeight,DPR=Math.min(devicePixelRatio||1,2);
 function resize(){W=innerWidth;H=innerHeight;DPR=Math.min(devicePixelRatio||1,2);canvas.width=W*DPR;canvas.height=H*DPR;canvas.style.width=W+"px";canvas.style.height=H+"px";ctx.setTransform(DPR,0,0,DPR,0,0)}
 addEventListener("resize",resize);resize();
 
-const world={w:3000,h:2200};
-const p={x:1500,y:1100,r:24,angle:0,hp:100,maxHp:100,xp:0,level:1,score:0,kills:0,pvpKills:0,damage:25,defense:0,speed:205,fireRate:280,lastShot:0,alive:true};
+const world={w:6000,h:4400};
+const p={x:3000,y:2200,r:24,angle:0,hp:100,maxHp:100,xp:0,level:1,score:0,kills:0,pvpKills:0,damage:25,defense:0,speed:205,fireRate:280,lastShot:0,alive:true};
 let bullets=[],enemies=[],drops=[],particles=[],walls=[];
 let serverXpNeed=100,serverKillsToLevel=5;
 let gameActive=false;
 let camera={x:p.x,y:p.y},last=performance.now(),playerName="";
-let safeZone={x:1500,y:1100,r:300};
+let safeZone={x:3000,y:2200,r:300};
 let spawnProtectionUntil=0;
 const keys={w:false,a:false,s:false,d:false};
 const pointer={x:W/2,y:H/2,down:false};
@@ -389,7 +389,7 @@ function returnToMenu(){
     try{multiplayerSocket.close()}catch{}
     multiplayerSocket=null;
   }
-  p.x=1500;p.y=1100;p.hp=p.maxHp;p.alive=true;
+  p.x=3000;p.y=2200;p.hp=p.maxHp;p.alive=true;
   bullets.length=0;
   resetAllControls();
   username.value=loadName();
