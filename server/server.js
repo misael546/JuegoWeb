@@ -10,7 +10,7 @@ const WORLD = { w: 6000, h: 4400 };
 const MAX_PLAYERS = 16;
 const SAFE_ZONE = { x: 3000, y: 2200, r: 300 };
 
-const SERVER_VERSION = '20261001-107';
+const SERVER_VERSION = '20261001-108';
 
 const AMMO_PACK_SIZE = 50;
 const AMMO_PACK_COST = 50;
@@ -1467,27 +1467,49 @@ wss.on('connection', (ws) => {
         }
 
         const walls = ensureRoomWalls(p.room);
-        if (collidesWithWall(acceptedX, acceptedY, 16, walls)) {
-          send(ws, {
-            type: 'state_rejected',
-            x: p.x,
-            y: p.y,
-            reason: 'wall'
-          });
-          return;
+
+        // Resolver el movimiento por ejes. Si el destino completo choca con una
+        // pared, conservamos el eje libre para evitar que una colisión diagonal
+        // deje al jugador completamente inmóvil.
+        let finalX = acceptedX;
+        let finalY = acceptedY;
+        let blockedX = false;
+        let blockedY = false;
+
+        if (collidesWithWall(finalX, finalY, 16, walls)) {
+          if (collidesWithWall(finalX, p.y, 16, walls)) {
+            finalX = p.x;
+            blockedX = true;
+          }
+          if (collidesWithWall(finalX, finalY, 16, walls)) {
+            if (collidesWithWall(p.x, finalY, 16, walls)) {
+              finalY = p.y;
+              blockedY = true;
+            }
+          }
+        }
+
+        // Si por alguna geometría el destino sigue dentro de una pared, no
+        // aceptamos ese paquete, pero tampoco teletransportamos al jugador.
+        if (collidesWithWall(finalX, finalY, 16, walls)) {
+          finalX = p.x;
+          finalY = p.y;
+          blockedX = true;
+          blockedY = true;
         }
 
         p.stateViolations = Math.max(0, p.stateViolations - 1);
         p.lastStateAt = now;
-        p.x = clamp(acceptedX, 35, WORLD.w - 35);
-        p.y = clamp(acceptedY, 35, WORLD.h - 35);
+        p.x = clamp(finalX, 35, WORLD.w - 35);
+        p.y = clamp(finalY, 35, WORLD.h - 35);
 
-        if (movementClamped) {
+        const correctionDistance = Math.hypot(p.x - nx, p.y - ny);
+        if (movementClamped || blockedX || blockedY || correctionDistance > 24) {
           send(ws, {
             type: 'state_sync',
             x: p.x,
             y: p.y,
-            reason: 'movement_clamped'
+            reason: blockedX || blockedY ? 'wall' : 'movement_clamped'
           });
         }
 
