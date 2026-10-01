@@ -243,14 +243,19 @@ function applyCombatStats(p) {
 }
 
 function applyDeathPenalty(p) {
-  const maxHp = maxHpForLevel(p.level);
-  const damageBefore = Math.max(5, Number(p.damage) || 5);
-  const defenseBefore = Math.max(0, Number(p.defense) || 0);
+  // La muerte NO baja el nivel ni elimina ataque/defensa.
+  // Solo aplica la pérdida de progreso prevista: vida, XP y oro.
+  const levelBefore = clamp(Number(p.level) || 1, 1, 1000);
+  const maxHp = maxHpForLevel(levelBefore);
+
+  p.level = levelBefore;
   p.hp = Math.max(1, Math.floor(maxHp * (1 - DEATH_HP_LOSS)));
-  p.damagePenalty = Math.max(0, (Number(p.damagePenalty) || 0) + damageBefore * DEATH_DAMAGE_LOSS);
-  p.defensePenalty = Math.max(0, (Number(p.defensePenalty) || 0) + defenseBefore * DEATH_DEFENSE_LOSS);
   p.gold = Math.max(0, Math.floor((Number(p.gold) || 0) * (1 - DEATH_GOLD_LOSS)));
   p.xp = Math.max(0, Math.floor((Number(p.xp) || 0) * (1 - DEATH_XP_LOSS)));
+
+  // Nunca acumular penalizaciones de ataque/defensa por morir.
+  p.damagePenalty = 0;
+  p.defensePenalty = 0;
   applyCombatStats(p);
 }
 
