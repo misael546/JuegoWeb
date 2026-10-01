@@ -9,7 +9,7 @@
 <script>
 (function(){
   try{
-    var v="20261001-55";
+    var v="20261001-57";
     var k="neon_core_build";
     window.NEON_CORE_BUILD=v;
     var old=localStorage.getItem(k);
@@ -96,7 +96,7 @@
 <div id="death">
   <div id="deathCard">
     <h2>TANQUE DESTRUIDO</h2>
-    
+    <div style="color:#9ca9bd;font-size:13px;margin:8px 0 2px">Puntuación perdida: <b id="deathScore">0</b></div>
     <button id="restart">VOLVER AL MENÚ</button>
   </div>
 </div>
@@ -117,7 +117,8 @@ addEventListener("resize",resize);resize();
 
 const world={w:6000,h:4400};
 const p={x:3000,y:2200,r:16,angle:0,hp:100,maxHp:100,xp:0,level:1,score:0,kills:0,pvpKills:0,damage:25,defense:0,speed:205,fireRate:350,lastShot:0,alive:true,gold:0,diamonds:0,bankedGold:0,bankedDiamonds:0,ammo:60,maxAmmo:120,weapon:"blaster"};
-const shopNpc={x:3000,y:2380,r:30};const bankNpc={x:3000,y:2050,r:30};const weaponNames={blaster:"BLASTER",pulse:"PULSE",cannon:"CANNON"};let shopOpen=false,bankOpen=false;
+const shopNpc={x:3000,y:2380,r:30};const bankNpc={x:3000,y:2050,r:30};const weaponNames={blaster:"BLASTER",pulse:"PULSE",cannon:"CANNON"};
+const weaponStats={blaster:{damage:25,fireRate:350},pulse:{damage:18,fireRate:170},cannon:{damage:65,fireRate:700}};let shopOpen=false,bankOpen=false;
 let bullets=[],enemies=[],drops=[],particles=[],walls=[];
 let serverXpNeed=100,serverKillsToLevel=5;
 let gameActive=false;
@@ -242,11 +243,13 @@ function connectMultiplayer(roomMode="quick",roomCode=""){
             if(Number.isFinite(me.damage))p.damage=me.damage;
             if(Number.isFinite(me.fireRate))p.fireRate=me.fireRate;
             if(Number.isFinite(me.defense))p.defense=me.defense;
-            p.maxHp=100+(p.level-1)*15;
-            p.speed=205+(p.level-1)*4;
+            if(Number.isFinite(me.maxHp))p.maxHp=me.maxHp;else p.maxHp=100+(p.level-1)*15;
+            if(Number.isFinite(me.speed))p.speed=me.speed;else p.speed=205+(p.level-1)*4;
+            if(me.weapon)p.weapon=me.weapon;
           }
           enemies.length=0;
           for(const e of (m.enemies||[])){e.targetX=e.x;e.targetY=e.y;e.shape=e.shape||"triangle";enemies.push(e);}
+          if(Array.isArray(m.walls)){walls.length=0;for(const w of m.walls)walls.push({...w});}
           gameActive=true;
           nameBox.style.display="none";
           updatePlayersFromList(m.players||[]);
@@ -276,8 +279,9 @@ function connectMultiplayer(roomMode="quick",roomCode=""){
             if(Number.isFinite(me.damage))p.damage=me.damage;
             if(Number.isFinite(me.defense))p.defense=me.defense;
             if(Number.isFinite(me.fireRate))p.fireRate=me.fireRate;
-            p.maxHp=100+(p.level-1)*15;
-            p.speed=205+(p.level-1)*4;
+            if(Number.isFinite(me.maxHp))p.maxHp=me.maxHp;else p.maxHp=100+(p.level-1)*15;
+            if(Number.isFinite(me.speed))p.speed=me.speed;else p.speed=205+(p.level-1)*4;
+            if(me.weapon)p.weapon=me.weapon;
           }
           updatePlayersFromList(m.players||[]);
         }else if(m.type==="welcome"){
@@ -291,10 +295,11 @@ function connectMultiplayer(roomMode="quick",roomCode=""){
             if(old){
               old.targetX=m.player.x;old.targetY=m.player.y;old.targetAngle=m.player.angle;
               old.targetHp=m.player.hp;old.targetAlive=m.player.alive;
-              old.name=m.player.name;old.level=m.player.level;old.score=m.player.score;old.kills=m.player.kills;old.color=m.player.color;
+              old.name=m.player.name;old.level=m.player.level;old.score=m.player.score;old.kills=m.player.kills;old.color=m.player.color;old.weapon=m.player.weapon;old.maxHp=m.player.maxHp;old.speed=m.player.speed;
             }else{
               m.player.targetX=m.player.x;m.player.targetY=m.player.y;m.player.targetAngle=m.player.angle;
               m.player.targetHp=m.player.hp;m.player.targetAlive=m.player.alive;
+              m.player.weapon=m.player.weapon||"blaster";m.player.maxHp=m.player.maxHp||100;m.player.speed=m.player.speed||205;
               remotePlayers.set(m.player.id,m.player);
             }
           }
@@ -305,7 +310,7 @@ function connectMultiplayer(roomMode="quick",roomCode=""){
           for(const e of incoming){
             const old=byId.get(e.id);
             if(old){
-              old.lastTargetX=old.targetX;old.lastTargetY=old.targetY;old.targetX=e.x;old.targetY=e.y;old.vx=Number.isFinite(e.vx)?e.vx:(e.x-old.lastTargetX)/0.05;old.vy=Number.isFinite(e.vy)?e.vy:(e.y-old.lastTargetY)/0.05;old.hp=e.hp;old.maxHp=e.maxHp;old.r=e.r;old.kind=e.kind;old.shape=e.shape||old.shape;old.speed=e.speed;old.damage=e.damage;
+              old.lastTargetX=old.targetX;old.lastTargetY=old.targetY;old.targetX=e.x;old.targetY=e.y;old.vx=Number.isFinite(e.vx)?e.vx:(e.x-old.lastTargetX)/0.1;old.vy=Number.isFinite(e.vy)?e.vy:(e.y-old.lastTargetY)/0.1;old.hp=e.hp;old.maxHp=e.maxHp;old.r=e.r;old.kind=e.kind;old.shape=e.shape||old.shape;old.speed=e.speed;old.damage=e.damage;
               old.dead=false;next.push(old);
             }else{
               e.targetX=e.x;e.targetY=e.y;e.lastTargetX=e.x;e.lastTargetY=e.y;e.vx=Number(e.vx)||0;e.vy=Number(e.vy)||0;e.shape=e.shape||"triangle";next.push(e);
@@ -313,6 +318,16 @@ function connectMultiplayer(roomMode="quick",roomCode=""){
           }
           enemies.length=0;
           for(const e of next) enemies.push(e);
+        }else if(m.type==="wall_state"){
+          walls.length=0;for(const w of (m.walls||[]))walls.push({...w});
+        }else if(m.type==="wall_hit"){
+          const w=walls.find(x=>x.id===m.id);if(w)w.hp=Number(m.hp)||0;
+          burst(Number(m.x)||0,Number(m.y)||0,"#7d8ba3",3);
+        }else if(m.type==="wall_dead"){
+          const w=walls.find(x=>x.id===m.id);if(w){burst(w.x,w.y,"#39e7ff",15);w.dead=true;}
+        }else if(m.type==="state_rejected"){
+          if(Number.isFinite(m.x))p.x=m.x;
+          if(Number.isFinite(m.y))p.y=m.y;
         }else if(m.type==="enemy_hit"){
           const e=enemies.find(x=>x.id===m.id);
           if(e){
@@ -323,14 +338,16 @@ function connectMultiplayer(roomMode="quick",roomCode=""){
           const e=enemies.find(x=>x.id===m.id);
           if(e)enemyExplosion(e);
         }else if(m.type==="pve_damage"){
-          p.hp=Math.max(0,p.hp-(Number(m.amount)||0));
+          p.hp=Number.isFinite(m.hp)?m.hp:Math.max(0,p.hp-(Number(m.amount)||0));
+          if(Number.isFinite(m.maxHp))p.maxHp=m.maxHp;
           burst(p.x,p.y,"#ff5474",4);
         }else if(m.type==="pve_dead"){
           const lostScore=p.score;p.hp=0;p.alive=false;resetProgressOnDeath();
           
           gameActive=false;enemies.length=0;setTimeout(returnToMenu,50);
         }else if(m.type==="pvp_damage"){
-          p.hp=Math.max(0,p.hp-(Number(m.amount)||0));
+          p.hp=Number.isFinite(m.hp)?m.hp:Math.max(0,p.hp-(Number(m.amount)||0));
+          if(Number.isFinite(m.maxHp))p.maxHp=m.maxHp;
           burst(p.x,p.y,"#ff5474",8);
         }else if(m.type==="pvp_dead"){
           const lostScore=p.score;p.hp=0;p.alive=false;resetProgressOnDeath();
@@ -347,7 +364,9 @@ function connectMultiplayer(roomMode="quick",roomCode=""){
           if(Number.isFinite(m.damage))p.damage=m.damage;
           if(Number.isFinite(m.defense))p.defense=m.defense;
           if(Number.isFinite(m.fireRate))p.fireRate=m.fireRate;
+          if(Number.isFinite(m.speed))p.speed=m.speed;
           if(Number.isFinite(m.maxHp))p.maxHp=m.maxHp;
+          if(m.weapon&&weaponStats[m.weapon])p.weapon=m.weapon;
           if(Number.isFinite(m.xpNeed))serverXpNeed=m.xpNeed;
           if(Number.isFinite(m.killsToLevel))serverKillsToLevel=m.killsToLevel;if(Number.isFinite(m.gold))p.gold=m.gold;if(Number.isFinite(m.diamonds))p.diamonds=m.diamonds;if(Number.isFinite(m.bankedGold))p.bankedGold=m.bankedGold;if(Number.isFinite(m.bankedDiamonds))p.bankedDiamonds=m.bankedDiamonds;if(Number.isFinite(m.ammo))p.ammo=m.ammo;if(Number.isFinite(m.maxAmmo))p.maxAmmo=m.maxAmmo;if(m.shopNpc){shopNpc.x=Number(m.shopNpc.x)||shopNpc.x;shopNpc.y=Number(m.shopNpc.y)||shopNpc.y;shopNpc.r=Number(m.shopNpc.r)||shopNpc.r;}if(m.bankNpc){bankNpc.x=Number(m.bankNpc.x)||bankNpc.x;bankNpc.y=Number(m.bankNpc.y)||bankNpc.y;bankNpc.r=Number(m.bankNpc.r)||bankNpc.r;}if(Number.isFinite(m.bankedGold))p.bankedGold=m.bankedGold;if(m.weapon)p.weapon=m.weapon;updateResourceHud();
         }else if(m.type==="hp_regen"){p.hp=Math.min(Number(m.maxHp)||p.maxHp,Number(m.hp)||p.hp);updateHud();
@@ -356,7 +375,10 @@ function connectMultiplayer(roomMode="quick",roomCode=""){
         }else if(m.type==="respawn_ok"){
           if(m.safeZone){safeZone=m.safeZone;}
           spawnProtectionUntil=performance.now()+(Number(m.spawnProtectionMs)||5000);
-          p.x=m.x;p.y=m.y;p.hp=p.maxHp;p.alive=true;
+          p.x=m.x;p.y=m.y;p.hp=Number.isFinite(m.hp)?m.hp:p.maxHp;p.alive=true;
+          if(Number.isFinite(m.maxHp))p.maxHp=m.maxHp;
+          if(Number.isFinite(m.speed))p.speed=m.speed;
+          if(m.weapon&&weaponStats[m.weapon])p.weapon=m.weapon;
           document.getElementById("death").style.display="none";
         }else if(m.type==="player_leave"){
           remotePlayers.delete(m.id);
@@ -399,9 +421,7 @@ function loadStats(){}
 
 function spawnEnemy(){return null;}
 
-for(let i=0;i<55;i++){
-  walls.push({x:rand(120,world.w-120),y:rand(120,world.h-120),w:rand(45,130),h:rand(45,130),hp:100,maxHp:100});
-}
+walls.length=0;
 
 function burst(x,y,color,n=10){
   for(let i=0;i<n;i++){
@@ -432,14 +452,16 @@ function resetProgressOnDeath(){
   p.level=1;
   p.maxHp=100;
   p.hp=0;
-  p.damage=25;
   p.speed=205;
-  p.fireRate=280;
   p.xp=0;
   p.score=0;
   p.kills=0;
   p.pvpKills=0;
+  const stats=weaponStats[p.weapon]||weaponStats.blaster;
+  p.damage=stats.damage;
+  p.fireRate=stats.fireRate;
   saveStats();
+  updateResourceHud();
 }
 function returnToMenu(){
   gameActive=false;
@@ -476,9 +498,9 @@ function damagePlayer(amount){
 function levelCheck(){ return false; }
 function hitWall(b){
   for(const w of walls){
+    if(w.dead)continue;
     if(b.x>w.x-w.w/2&&b.x<w.x+w.w/2&&b.y>w.y-w.h/2&&b.y<w.y+w.h/2){
-      w.hp-=b.damage*.8;burst(b.x,b.y,"#7d8ba3",3);
-      if(w.hp<=0){w.dead=true;burst(w.x,w.y,"#39e7ff",15)}
+      burst(b.x,b.y,"#7d8ba3",3);
       return true;
     }
   }
@@ -621,6 +643,11 @@ function smoothEnemies(dt){
 }
 function showShopMsg(msg){const e=document.getElementById("shopMsg");if(e)e.textContent=msg;}
 function updateWeaponHud(){const el=document.getElementById("weaponName");if(el)el.textContent=weaponNames[p.weapon]||"BLASTER";}
+function updateHud(){
+  const hpEl=document.getElementById("hp"),maxHpEl=document.getElementById("maxHp"),levelEl=document.getElementById("level"),pvpEl=document.getElementById("pvpKills"),killsEl=document.getElementById("kills"),damageEl=document.getElementById("damageStat"),defenseEl=document.getElementById("defenseStat");
+  if(hpEl)hpEl.textContent=Math.ceil(p.hp);if(maxHpEl)maxHpEl.textContent=p.maxHp;if(levelEl)levelEl.textContent="Nv. "+p.level;if(pvpEl)pvpEl.textContent=p.pvpKills;if(killsEl)killsEl.textContent=p.kills;if(damageEl)damageEl.textContent=p.damage;if(defenseEl)defenseEl.textContent=p.defense;
+  updateResourceHud();
+}
 function updateResourceHud(){updateWeaponHud();const g=document.getElementById("gold"),d=document.getElementById("diamonds"),a=document.getElementById("ammo"),m=document.getElementById("maxAmmo"),f=document.getElementById("fire");if(g)g.textContent=p.gold||0;if(d)d.textContent=p.diamonds||0;if(a)a.textContent=p.ammo||0;if(m)m.textContent=p.maxAmmo||120;if(f)f.disabled=(p.ammo||0)<=0;}
 function updateAmmoShop(){const near=Math.hypot(p.x-shopNpc.x,p.y-shopNpc.y)<=shopNpc.r;const box=document.getElementById("ammoShop");if(!box)return;shopOpen=near&&p.alive;box.style.display=shopOpen?"block":"none";if(near){const b=document.getElementById("buyAmmoBtn");if(b)b.disabled=!multiplayerSocket||multiplayerSocket.readyState!==1||(p.ammo||0)>=p.maxAmmo;showShopMsg((p.ammo||0)>=p.maxAmmo?"Munición al máximo.":(p.gold||0)<50?"Necesitas 50 de oro.":"50 balas por 50 de oro.");}}
 function updateBank(){
@@ -700,11 +727,11 @@ function draw(){
 
   for(const b of bullets){ctx.fillStyle="#dffbff";ctx.beginPath();ctx.arc(sx(b.x),sy(b.y),4,0,Math.PI*2);ctx.fill()}
   for(const other of remotePlayers.values()){
-    drawTank(other.x,other.y,other.angle,"#7cff72",24);
+    drawTank(other.x,other.y,other.angle,other.color||"#7cff72",24,other.weapon||"blaster");
     drawNameTag(other.name||"Jugador",other.x,other.y,24,"#7cff72");
     const ox=sx(other.x),oy=sy(other.y)-31;
     ctx.fillStyle="#101827";ctx.fillRect(ox-24,oy,48,4);
-    ctx.fillStyle="#7cff72";ctx.fillRect(ox-24,oy,48*clamp((other.hp||100)/100,0,1),4);
+    ctx.fillStyle=other.color||"#7cff72";ctx.fillRect(ox-24,oy,48*clamp((other.hp||100)/(other.maxHp||100),0,1),4);
   }
   for(const e of enemies){
     const enemyAngle=Math.atan2(p.y-e.y,p.x-e.x);
@@ -922,8 +949,11 @@ restartBtn.addEventListener("click",()=>returnToMenu());
 function closeMultiplayerBeforeLeave(){
   try{
     if(multiplayerSocket){
-      if(multiplayerSocket.readyState===WebSocket.OPEN){ multiplayerSocket.close(1000,"page_leave"); }
-      else if(multiplayerSocket.readyState===WebSocket.CONNECTING){ multiplayerSocket.close(); }
+      if(multiplayerSocket.readyState===WebSocket.OPEN){
+        multiplayerSocket.close(1000,"page_leave");
+      }else if(multiplayerSocket.readyState===WebSocket.CONNECTING){
+        multiplayerSocket.close();
+      }
     }
   }catch{}
   multiplayerSocket=null;
