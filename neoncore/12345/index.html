@@ -9,7 +9,7 @@
 <script>
 (function(){
   try{
-    var v="20261001-106";
+    var v="20261001-107";
     var k="neon_core_build";
     window.NEON_CORE_BUILD=v;
     var old=localStorage.getItem(k);
@@ -188,11 +188,13 @@ function setConnectionStatus(title,text,show=true){
 function connectMultiplayer(roomMode="quick",roomCode=""){ const publicRoomAuto=!!PUBLIC_ROOM_CODE && roomMode==="join" && roomCode===PUBLIC_ROOM_CODE;
   if(multiplayerConnectTimer)clearTimeout(multiplayerConnectTimer);
   currentRoom=roomMode==="quick"?"OPEN":(roomCode||"PRIVATE");
+  multiplayerReady=false;
   const keepName=playerName||String(username.value||"").trim();
   if(keepName){playerName=keepName;username.value=keepName;saveName(keepName);}
 
   document.getElementById("nameBox").style.display="none";
   setConnectionStatus("CONECTANDO AL SERVIDOR","Despertando el servidor multiplayer…");
+  multiplayerReady=false;
   if(multiplayerSocket && multiplayerSocket.readyState<=1) multiplayerSocket.close();
 
   if(!MULTIPLAYER_SERVER || !("WebSocket" in window)){setConnectionStatus("SERVIDOR NO DISPONIBLE","Tu navegador no permite conexión multiplayer.",true);return;}
@@ -218,7 +220,8 @@ function connectMultiplayer(roomMode="quick",roomCode=""){ const publicRoomAuto=
         if(m.type==="room_joined"){
           if(m.safeZone){safeZone=m.safeZone;}
           spawnProtectionUntil=performance.now()+(Number(m.spawnProtectionMs)||5000);
-          setConnectionStatus("CONECTADO","Listo. Entrando a la arena…",false);
+          setConnectionStatus("CONECTADO","Listo. Entrando a la arena…");
+          multiplayerReady=true;
           const me=(m.players||[]).find(q=>q.id===multiplayerId);
           if(me){
             p.x=me.x;p.y=me.y;p.hp=Number.isFinite(me.hp)?me.hp:p.maxHp;p.alive=me.alive!==false;
@@ -400,7 +403,9 @@ function connectMultiplayer(roomMode="quick",roomCode=""){ const publicRoomAuto=
       }catch{}
     });
     multiplayerSocket.addEventListener("error",()=>{
+      multiplayerReady=false;
       setConnectionStatus("ESPERANDO AL SERVIDOR","El servidor gratuito puede estar despertando. Reintentando…");
+      multiplayerReady=false;
       if(!publicRoomAuto){ nameBox.style.display="flex"; username.value=playerName||username.value; }
     });
     multiplayerSocket.addEventListener("close",()=>{
@@ -558,6 +563,11 @@ function hitWall(b){
 
 function update(dt){
   if(!gameActive)return;
+  if(multiplayerReady && multiplayerSocket && multiplayerSocket.readyState===1){
+    multiplayerReady=false;
+    setConnectionStatus("","",false);
+    document.getElementById("nameBox").style.display="none";
+  }
   if(!p.alive){sendMultiplayerState(dt);return;}
   let mx=(keys.d?1:0)-(keys.a?1:0),my=(keys.s?1:0)-(keys.w?1:0);
   if(Math.hypot(moveX,moveY)>.1){mx=moveX;my=moveY}
