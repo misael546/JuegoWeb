@@ -9,7 +9,7 @@
 <script>
 (function(){
   try{
-    var v="20261001-48";
+    var v="20261001-49";
     var k="neon_core_build";
     window.NEON_CORE_BUILD=v;
     var old=localStorage.getItem(k);
@@ -67,7 +67,7 @@
 
 <div id="minimapWrap"><canvas id="minimap" width="360" height="270"></canvas><span id="minimapTitle">MINIMAPA</span></div><div id="ammoShop" aria-live="polite"><b>🛠 ARSENAL NEON</b><span>Compra armas y munición. El oro se conserva al volver.</span><div class="shopGrid"><button class="shopItem" data-weapon="blaster" type="button"><strong>BLASTER</strong><small>25 daño · 350ms · GRATIS</small></button><button class="shopItem" data-weapon="pulse" type="button"><strong>PULSE</strong><small>18 daño · 170ms · 🪙 150</small></button><button class="shopItem" data-weapon="cannon" type="button"><strong>CANNON</strong><small>65 daño · 700ms · 🪙 300</small></button></div><button id="buyAmmoBtn" type="button">🔸 COMPRAR 50 BALAS · 🪙 50</button><small id="shopMsg">Elige un arma o compra munición.</small></div>
 
-<button id="chatToggle" type="button" aria-expanded="false" aria-controls="chatBox">💬 CHAT</button><div id="chatBox" aria-label="Chat del servidor" style="display:none"><div id="chatMessages" aria-live="polite"></div><form id="chatForm"><input id="chatInput" maxlength="120" autocomplete="off" placeholder="Escribe un mensaje…"><button id="chatSend" type="submit">ENVIAR</button></form><div id="chatHint">Enter para enviar · máximo 120 caracteres</div></div>
+<button id="chatToggle" type="button" aria-expanded="false" aria-controls="chatBox">💬 CHAT</button><div id="chatBox" aria-label="Chat del servidor" style="display:none"><button id="chatCloseStatic" type="button" aria-label="Cerrar chat">×</button><div id="chatMessages" aria-live="polite"></div><form id="chatForm"><input id="chatInput" maxlength="120" autocomplete="off" placeholder="Escribe un mensaje…"><button id="chatSend" type="submit">ENVIAR</button></form><div id="chatHint">Enter para enviar · máximo 120 caracteres</div></div>
 
 <div id="connectionOverlay" aria-live="polite"><div id="connectionCard"><div id="connectionSpinner"></div><b id="connectionTitle">CONECTANDO AL SERVIDOR</b><span id="connectionText">Despertando el servidor multiplayer…</span></div></div>
 
@@ -812,7 +812,7 @@ const chatToggle=document.getElementById("chatToggle"),chatBox=document.getEleme
 let chatOpen=false;
 function setChatOpen(open){chatOpen=!!open;chatBox.style.display=chatOpen?"block":"none";chatToggle.style.display=chatOpen?"none":"block";chatToggle.setAttribute("aria-expanded",String(chatOpen));if(chatOpen)chatInput.focus();}
 chatToggle.addEventListener("click",()=>setChatOpen(true));
-const chatCloseBtn=document.createElement("button");chatCloseBtn.type="button";chatCloseBtn.textContent="×";chatCloseBtn.setAttribute("aria-label","Cerrar chat");chatCloseBtn.style.cssText="position:absolute;right:8px;top:6px;width:28px;height:28px;border:1px solid #33415d;border-radius:7px;background:#111a2d;color:#fff;font-weight:bold";chatBox.insertBefore(chatCloseBtn,chatBox.firstChild);chatCloseBtn.addEventListener("click",()=>setChatOpen(false));
+const chatCloseBtn=document.createElement("button");chatCloseBtn.type="button";chatCloseBtn.textContent="×";chatCloseBtn.setAttribute("aria-label","Cerrar chat");chatCloseBtn.style.cssText="position:absolute;right:8px;top:6px;width:28px;height:28px;border:1px solid #33415d;border-radius:7px;background:#111a2d;color:#fff;font-weight:bold";chatBox.insertBefore(chatCloseBtn,chatBox.firstChild);const chatCloseStatic=document.getElementById("chatCloseStatic");if(chatCloseStatic)chatCloseStatic.addEventListener("click",()=>setChatOpen(false));chatCloseBtn.addEventListener("click",()=>setChatOpen(false));
 const chatForm=document.getElementById("chatForm"),chatInput=document.getElementById("chatInput");
 chatForm.addEventListener("submit",e=>{
   e.preventDefault();
