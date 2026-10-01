@@ -23,6 +23,12 @@ function send(ws,msg){
 function roomPlayers(room){
   return [...room].map(ws=>clients.get(ws)).filter(Boolean);
 }
+function publicPlayers(room){
+  return roomPlayers(room).map(p=>({id:p.id,name:p.name,alive:p.alive,level:p.level,score:p.score,kills:p.kills}));
+}
+function sendPlayerList(code){
+  broadcastRoom(code,{type:"player_list",players:publicPlayers(rooms.get(code)||new Set())});
+}
 function broadcastRoom(code,msg,except=null){
   const room=rooms.get(code);
   if(!room)return;
@@ -39,7 +45,7 @@ function leaveRoom(ws){
   if(room){
     room.delete(ws);
     if(room.size===0 && code!=="OPEN") rooms.delete(code);
-    else broadcastRoom(code,{type:"player_leave",id:p.id});
+    else { broadcastRoom(code,{type:"player_leave",id:p.id}); sendPlayerList(code); }
   }
   p.room="";
 }
@@ -67,6 +73,7 @@ function joinRoom(ws,requestedCode,create=false){
   p.alive=true;
   send(ws,{type:"room_joined",code,players:roomPlayers(room)});
   broadcastRoom(code,{type:"player_join",player:p},ws);
+  sendPlayerList(code);
 }
 function clamp(v,a,b){return Math.max(a,Math.min(b,v))}
 function findPlayer(id,room){
@@ -178,7 +185,7 @@ wss.on("connection",(ws)=>{
         if(msg.room) joinRoom(ws,msg.room,false);
         else if(msg.createRoom) joinRoom(ws,"",true);
         else joinRoom(ws,"OPEN",false);
-        if(p.room) broadcastRoom(p.room,{type:"player_update",player:p},ws);
+        if(p.room) { broadcastRoom(p.room,{type:"player_update",player:p},ws); sendPlayerList(p.room); }
       }
 
       if(msg.type==="create_room") joinRoom(ws,"",true);
@@ -193,6 +200,7 @@ wss.on("connection",(ws)=>{
         p.fireRate=clamp(Number(msg.fireRate)||280,100,500);
         if(p.alive)p.hp=clamp(Number.isFinite(msg.hp)?msg.hp:p.hp,0,100);
         broadcastRoom(p.room,{type:"player_update",player:p},ws);
+        sendPlayerList(p.room);
       }
 
       if(msg.type==="fire") handleShot(ws);
@@ -201,6 +209,7 @@ wss.on("connection",(ws)=>{
         p.x=1500;p.y=1100;p.angle=0;p.hp=100;p.alive=true;p.lastShot=0;
         send(ws,{type:"respawn_ok",x:p.x,y:p.y,hp:p.hp});
         broadcastRoom(p.room,{type:"player_update",player:p},ws);
+        sendPlayerList(p.room);
       }
     }catch{}
   });
