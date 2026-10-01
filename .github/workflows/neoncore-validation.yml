@@ -1,0 +1,44 @@
+name: Neon Core validation
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  syntax:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: server
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: server/package.json
+      - name: Install server dependencies
+        run: npm install
+      - name: Check server syntax
+        run: node --check server.js
+      - name: Check storage syntax
+        run: node --check storage.js
+      - name: Check Neon Core client syntax
+        working-directory: .
+        run: |
+          node - <<'NODE'
+          const fs = require('fs');
+          const files = [
+            'neoncore/12345/index.html',
+            'neoncore/67890/index.html'
+          ];
+          for (const file of files) {
+            const html = fs.readFileSync(file, 'utf8');
+            const matches = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)];
+            if (!matches.length) throw new Error(file + ': no inline script found');
+            new Function(matches[matches.length - 1][1]);
+            console.log(file + ': OK');
+          }
+          NODE
