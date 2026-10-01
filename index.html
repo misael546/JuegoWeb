@@ -18,51 +18,22 @@
 <script>
 const SUPABASE_URL="https://oidzzijqgviqpasoucyo.supabase.co";
 const SUPABASE_KEY="sb_publishable_bSdTv3Mfz3qLRLpBdHqpNw_jjdjaXwj";
-const {createClient}=window.supabase;
-const db=createClient(SUPABASE_URL,SUPABASE_KEY);
+const {createClient}=window.supabase;const db=createClient(SUPABASE_URL,SUPABASE_KEY);
 const canvas=document.getElementById("game"),ctx=canvas.getContext("2d");let W,H;
 function resize(){W=innerWidth;H=innerHeight;canvas.width=W*devicePixelRatio;canvas.height=H*devicePixelRatio;ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0)}addEventListener("resize",resize);resize();
 const player={x:innerWidth/2,y:innerHeight/2,hp:100,xp:0,level:1,gold:0};const enemy={x:innerWidth/2+130,y:innerHeight/2,hp:50,maxHp:50};const keys={up:false,down:false,left:false,right:false};let user=null,saving=false;
 document.querySelectorAll("[data-key]").forEach(b=>{const k=b.dataset.key;const on=e=>{e.preventDefault();keys[k]=true};const off=e=>{e.preventDefault();keys[k]=false};b.addEventListener("pointerdown",on);b.addEventListener("pointerup",off);b.addEventListener("pointercancel",off);b.addEventListener("pointerleave",off)});
 function msg(t){document.getElementById("authMsg").textContent=t}
-async function createAccount(){
- const email=document.getElementById("email").value.trim(),password=document.getElementById("password").value,username=document.getElementById("username").value.trim();
- if(!email||password.length<6||!username){msg("Completa correo, contraseña (6+) y nombre.");return}
- msg("Creando cuenta...");
- const {data,error}=await db.auth.signUp({email,password,options:{data:{username}}});
- if(error){msg(error.message);return}
- if(!data.user){msg("No se pudo crear el usuario.");return}
- user=data.user;
- if(!data.session){msg("Cuenta creada. Si Supabase todavía pide confirmación, revisa la opción Confirm email.");return}
- await loadServerPlayer();showGame();
-}
-async function login(){
- const email=document.getElementById("email").value.trim(),password=document.getElementById("password").value;
- if(!email||!password){msg("Escribe correo y contraseña.");return}
- msg("Entrando...");
- const {data,error}=await db.auth.signInWithPassword({email,password});
- if(error){msg(error.message);return}
- user=data.user;await loadServerPlayer();showGame();
-}
-async function loadServerPlayer(){
- if(!user)return;
- const {data,error}=await db.from("players").select("level,xp,gold,hp,max_hp,pos_x,pos_y").eq("id",user.id).single();
- if(error){msg(error.message);return}
- Object.assign(player,{level:data.level,xp:data.xp,gold:data.gold,hp:data.hp,x:data.pos_x||W/2,y:data.pos_y||H/2});
-}
-async function saveServer(){
- if(!user||saving)return;saving=true;
- await db.from("players").update({level:player.level,xp:player.xp,gold:player.gold,hp:player.hp,pos_x:player.x,pos_y:player.y,updated_at:new Date().toISOString()}).eq("id",user.id);
- saving=false;
-}
+function timeout(p,ms=10000){return Promise.race([p,new Promise((_,reject)=>setTimeout(()=>reject(new Error("Tiempo de espera agotado. Supabase no respondió.")),ms))])}
+async function createAccount(){const email=document.getElementById("email").value.trim(),password=document.getElementById("password").value,username=document.getElementById("username").value.trim();if(!email||password.length<6||!username){msg("Completa correo, contraseña (6+) y nombre.");return}msg("Creando cuenta...");try{const {data,error}=await timeout(db.auth.signUp({email,password,options:{data:{username}}}));if(error)throw error;if(!data.user)throw new Error("No se pudo crear el usuario.");user=data.user;if(!data.session){msg("Cuenta creada, pero falta confirmar el correo. Revisa Confirm email en Supabase.");return}await loadServerPlayer();showGame()}catch(e){msg("Registro: "+e.message)}}
+async function login(){const email=document.getElementById("email").value.trim(),password=document.getElementById("password").value;if(!email||!password){msg("Escribe correo y contraseña.");return}msg("Entrando...");try{const {data,error}=await timeout(db.auth.signInWithPassword({email,password}));if(error)throw error;if(!data.user)throw new Error("Supabase no devolvió el usuario.");user=data.user;await loadServerPlayer();showGame()}catch(e){msg("Inicio de sesión: "+e.message)}}
+async function loadServerPlayer(){if(!user)throw new Error("Usuario no disponible.");const {data,error}=await timeout(db.from("players").select("level,xp,gold,hp,max_hp,pos_x,pos_y").eq("id",user.id).single());if(error)throw new Error("No se pudo cargar el personaje: "+error.message);Object.assign(player,{level:data.level,xp:data.xp,gold:data.gold,hp:data.hp,x:data.pos_x||W/2,y:data.pos_y||H/2})}
+async function saveServer(){if(!user||saving)return;saving=true;try{await timeout(db.from("players").update({level:player.level,xp:player.xp,gold:player.gold,hp:player.hp,pos_x:player.x,pos_y:player.y,updated_at:new Date().toISOString()}).eq("id",user.id))}finally{saving=false}}
 function showGame(){document.getElementById("auth").hidden=true;document.getElementById("logout").hidden=false}
 async function logout(){await db.auth.signOut();location.reload()}
-async function attack(){
- const d=Math.hypot(player.x-enemy.x,player.y-enemy.y);
- if(d<100&&enemy.hp>0){enemy.hp-=25;if(enemy.hp<=0){player.xp+=50;player.gold+=10;enemy.hp=enemy.maxHp;enemy.x=80+Math.random()*(W-160);enemy.y=100+Math.random()*(H-180);if(player.xp>=100){player.xp-=100;player.level++;player.hp=100}await saveServer()}}
-}
+async function attack(){const d=Math.hypot(player.x-enemy.x,player.y-enemy.y);if(d<100&&enemy.hp>0){enemy.hp-=25;if(enemy.hp<=0){player.xp+=50;player.gold+=10;enemy.hp=enemy.maxHp;enemy.x=80+Math.random()*(W-160);enemy.y=100+Math.random()*(H-180);if(player.xp>=100){player.xp-=100;player.level++;player.hp=100}await saveServer()}}}
 document.getElementById("attack").addEventListener("pointerdown",attack);document.getElementById("register").onclick=createAccount;document.getElementById("login").onclick=login;document.getElementById("logout").onclick=logout;
-async function start(){const {data}=await db.auth.getSession();if(data.session){user=data.session.user;await loadServerPlayer();showGame()}}start();
+async function start(){try{const {data}=await timeout(db.auth.getSession());if(data.session){user=data.session.user;await loadServerPlayer();showGame()}}catch(e){msg("Sesión: "+e.message)}}start();
 function update(){const speed=3;if(keys.up)player.y-=speed;if(keys.down)player.y+=speed;if(keys.left)player.x-=speed;if(keys.right)player.x+=speed;player.x=Math.max(25,Math.min(W-25,player.x));player.y=Math.max(70,Math.min(H-25,player.y))}
 function draw(){ctx.clearRect(0,0,W,H);ctx.fillStyle="#d4a45c";ctx.fillRect(0,0,W,H);ctx.strokeStyle="#c08d48";for(let x=0;x<W;x+=64){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke()}for(let y=0;y<H;y+=64){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke()}ctx.fillStyle="#8b2222";ctx.beginPath();ctx.arc(enemy.x,enemy.y,25,0,Math.PI*2);ctx.fill();ctx.fillStyle="#111";ctx.fillRect(enemy.x-25,enemy.y-40,50,6);ctx.fillStyle="#e33";ctx.fillRect(enemy.x-25,enemy.y-40,50*(enemy.hp/enemy.maxHp),6);ctx.fillStyle="#2878d0";ctx.beginPath();ctx.arc(player.x,player.y,22,0,Math.PI*2);ctx.fill();document.getElementById("hp").textContent=player.hp;document.getElementById("xp").textContent=player.xp;document.getElementById("level").textContent=player.level;document.getElementById("gold").textContent=player.gold}
 function loop(){update();draw();requestAnimationFrame(loop)}loop();
