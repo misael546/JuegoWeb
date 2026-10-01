@@ -1028,6 +1028,7 @@ function createPlayer(ws) {
     lastPersistAt: 0,
     lastEnemySyncAt: 0,
     hasSaved: false,
+    joined: false,
     ws
   };
 
@@ -1085,6 +1086,11 @@ wss.on('connection', (ws) => {
       if (!p || !msg || typeof msg.type !== 'string') return;
 
       if (msg.type === 'join') {
+        if (p.joined) {
+          send(ws, { type: 'room_error', message: 'Esta conexión ya está vinculada a una partida.' });
+          return;
+        }
+
         p.name = String(msg.name || 'Jugador').trim().slice(0, 20) || 'Jugador';
         p.saveKey = String(msg.saveKey || '')
           .replace(/[^a-zA-Z0-9_-]/g, '')
@@ -1115,7 +1121,8 @@ wss.on('connection', (ws) => {
           p.x = Number.isFinite(Number(saved.x)) ? Number(saved.x) : p.x;
           p.y = Number.isFinite(Number(saved.y)) ? Number(saved.y) : p.y;
           p.level = clamp(Number(saved.level) || 1, 1, 1000);
-          p.hp = Number(saved.hp) || maxHpForLevel(p.level);
+          const savedHp = Number(saved.hp);
+          p.hp = savedHp > 0 ? savedHp : maxHpForLevel(p.level);
           p.score = Number(saved.score) || 0;
           p.kills = Number(saved.kills) || 0;
           p.xp = Number(saved.xp) || 0;
@@ -1134,6 +1141,7 @@ wss.on('connection', (ws) => {
         }
 
         applyCombatStats(p);
+        p.joined = true;
 
         if (msg.room) {
           await joinRoom(ws, msg.room, false);
@@ -1257,7 +1265,6 @@ wss.on('connection', (ws) => {
           ws
         );
 
-        sendPlayerList(p.room);
         return;
       }
 
@@ -1282,7 +1289,7 @@ wss.on('connection', (ws) => {
       }
 
       if (msg.type === 'save') {
-        if (!p.room) return;
+        if (!p.room || !p.alive) return;
 
         p.frozen = true;
         if (Number.isFinite(Number(msg.angle))) {
@@ -1309,7 +1316,7 @@ wss.on('connection', (ws) => {
       }
 
       if (msg.type === 'resume') {
-        if (!p.room) return;
+        if (!p.room || !p.alive) return;
 
         p.frozen = false;
         send(ws, { type: 'resume_ok' });
@@ -1317,7 +1324,7 @@ wss.on('connection', (ws) => {
       }
 
       if (msg.type === 'respawn') {
-        if (!p.room) return;
+        if (!p.room || p.alive) return;
 
         const spawn = spawnPosition(p.room);
 
