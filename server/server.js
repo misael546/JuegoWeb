@@ -5,7 +5,7 @@ const PORT = process.env.PORT || 10000;
 const WORLD = {w:6000,h:4400};
 const MAX_PLAYERS = 16;
 const SAFE_ZONE = {x:3000,y:2200,r:300};
-const SERVER_VERSION = "20261001-43";
+const SERVER_VERSION = "20261001-44";
 const AMMO_PACK_SIZE=50,AMMO_PACK_COST=50,MAX_AMMO=120;
 const SHOP_NPC={x:3000,y:2380,r:95};
 const WEAPONS={blaster:{name:"BLASTER",cost:0,damage:25,fireRate:350},pulse:{name:"PULSE",cost:150,damage:18,fireRate:170},cannon:{name:"CANNON",cost:300,damage:65,fireRate:700}};
@@ -269,14 +269,14 @@ wss.on("connection",(ws)=>{
         // con la misma saveKey (por Atrás/Adelante, caché o reconexión), expulsamos
         // la conexión anterior antes de crear la nueva.
         if(p.saveKey){
+          // Una sola sesión activa por dispositivo/origen.
+          // La primera conexión conserva el control; la segunda se rechaza.
           for(const [oldWs,oldP] of clients){
             if(oldWs!==ws && oldP && oldP.saveKey===p.saveKey){
-              const oldRoom=oldP.room;
-              try{ send(oldWs,{type:"duplicate_session",message:"Esta partida se abrió en otra pestaña o reconexión."}); }catch{}
-              try{ oldWs.close(4001,"duplicate_session"); }catch{}
-              leaveRoom(oldWs);
-              clients.delete(oldWs);
-              if(oldRoom) sendPlayerList(oldRoom);
+              send(ws,{type:"duplicate_session",message:"Ya tienes una sesión activa de Neon Core en este dispositivo."});
+              try{ws.close(4001,"duplicate_session");}catch{}
+              clients.delete(ws);
+              return;
             }
           }
         }
