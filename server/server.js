@@ -4,6 +4,8 @@ const { WebSocketServer } = require("ws");
 const PORT = process.env.PORT || 10000;
 const WORLD = {w:3000,h:2200};
 const MAX_PLAYERS = 16;
+const SAFE_ZONE = {x:1500,y:1100,r:300};
+function inSafeZone(x,y,pad=0){return Math.hypot(x-SAFE_ZONE.x,y-SAFE_ZONE.y)<=SAFE_ZONE.r+pad;}
 const clients = new Map();
 const savedPlayers = new Map();
 const rooms = new Map();
@@ -40,7 +42,9 @@ function makeEnemy(){
   const elite=Math.random()<.2;
   const r=elite?27:21;
   const shapes=["square","triangle","hex"];
-  return {id:Math.random().toString(36).slice(2,10),x:Math.random()*(WORLD.w-200)+100,y:Math.random()*(WORLD.h-200)+100,r,hp:elite?85:50,maxHp:elite?85:50,speed:elite?55:75,damage:elite?14:9,kind:elite?"elite":"drone",shape:shapes[Math.floor(Math.random()*shapes.length)]};
+  let x=0,y=0;
+  do{x=Math.random()*(WORLD.w-200)+100;y=Math.random()*(WORLD.h-200)+100;}while(inSafeZone(x,y,60));
+  return {id:Math.random().toString(36).slice(2,10),x,y,r,hp:elite?85:50,maxHp:elite?85:50,speed:elite?55:75,damage:elite?14:9,kind:elite?"elite":"drone",shape:shapes[Math.floor(Math.random()*shapes.length)]};
 }
 function ensureRoomEnemies(code){
   if(!roomEnemies.has(code)){
@@ -102,7 +106,7 @@ function joinRoom(ws,requestedCode,create=false){
   p.angle=0;
   p.alive=true;
   p.hasSaved=false;
-  send(ws,{type:"room_joined",code,players:publicPlayers(room),enemies:ensureRoomEnemies(code)});
+  send(ws,{type:"room_joined",code,players:publicPlayers(room),enemies:ensureRoomEnemies(code),safeZone:SAFE_ZONE,spawnProtectionMs:5000});
   sendStats(p);
   broadcastRoom(code,{type:"player_join",player:p},ws);
   sendPlayerList(code);
@@ -143,7 +147,7 @@ function handleShot(ws){
 
   for(const otherWs of room){
     const targetPlayerData=clients.get(otherWs);
-    if(!targetPlayerData || targetPlayerData===shooter || !targetPlayerData.alive)continue;
+    if(!targetPlayerData || targetPlayerData===shooter || !targetPlayerData.alive || inSafeZone(targetPlayerData.x,targetPlayerData.y,24))continue;
     const dx=targetPlayerData.x-shooter.x,dy=targetPlayerData.y-shooter.y;
     const d=Math.hypot(dx,dy);
     if(d>maxRange)continue;
@@ -154,6 +158,7 @@ function handleShot(ws){
   }
 
   const enemies=ensureRoomEnemies(shooter.room);
+  if(inSafeZone(shooter.x,shooter.y,24)) return;
   for(const enemy of enemies){
     const dx=enemy.x-shooter.x,dy=enemy.y-shooter.y;
     const d=Math.hypot(dx,dy);
@@ -290,7 +295,7 @@ wss.on("connection",(ws)=>{
         const spawn=spawnPosition(p.room);
         p.x=spawn.x;p.y=spawn.y;p.angle=0;p.hp=100;p.alive=true;
         p.level=1;p.damage=25;p.defense=0;p.fireRate=280;p.xp=0;p.score=0;p.kills=0;p.pvpKills=0;p.lastShot=0;
-        send(ws,{type:"respawn_ok",x:p.x,y:p.y,hp:p.hp,enemies:ensureRoomEnemies(p.room)});
+        send(ws,{type:"respawn_ok",x:p.x,y:p.y,hp:p.hp,enemies:ensureRoomEnemies(p.room),safeZone:SAFE_ZONE,spawnProtectionMs:5000});
         sendStats(p);
         broadcastRoom(p.room,{type:"player_update",player:p},ws);
         sendPlayerList(p.room);
@@ -316,12 +321,18 @@ setInterval(()=>{
         const d=Math.hypot(pl.x-enemy.x,pl.y-enemy.y);
         if(d<best){best=d;target=pl;}
       }
+      if(target && inSafeZone(target.x,target.y,24)) target=null;
       if(target){
         const dx=(target.x-enemy.x)/Math.max(best,1),dy=(target.y-enemy.y)/Math.max(best,1);
         enemy.vx=dx*enemy.speed;
         enemy.vy=dy*enemy.speed;
         enemy.x=clamp(enemy.x+enemy.vx*dt,35,WORLD.w-35);
         enemy.y=clamp(enemy.y+enemy.vy*dt,35,WORLD.h-35);
+        if(inSafeZone(enemy.x,enemy.y,enemy.r)){
+          const dx=enemy.x-SAFE_ZONE.x,dy=enemy.y-SAFE_ZONE.y,d=Math.max(1,Math.hypot(dx,dy));
+          enemy.x=SAFE_ZONE.x+(dx/d)*(SAFE_ZONE.r+enemy.r+4);
+          enemy.y=SAFE_ZONE.y+(dy/d)*(SAFE_ZONE.r+enemy.r+4);
+        }
         if(best<enemy.r+24){
           target.hp=clamp(target.hp-Math.max(.5,enemy.damage-(target.defense||0))*dt,0,100);
           send(findPlayer(target.id,room)?.ws||null,{type:"pve_damage",amount:enemy.damage*dt,hp:target.hp});
