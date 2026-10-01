@@ -186,10 +186,21 @@ function connectMultiplayer(roomMode="quick",roomCode=""){
         }else if(m.type==="welcome"){
           multiplayerId=m.id;
           remotePlayers.clear();
-          for(const q of (m.players||[])) if(q.id!==multiplayerId) remotePlayers.set(q.id,q);
+          for(const q of (m.players||[])) if(q.id!==multiplayerId){q.targetX=q.x;q.targetY=q.y;q.targetAngle=q.angle;q.targetHp=q.hp;q.targetAlive=q.alive;remotePlayers.set(q.id,q);}
           renderPlayers(m.players||[]);
         }else if(m.type==="player_join"||m.type==="player_update"){
-          if(m.player && m.player.id!==multiplayerId) remotePlayers.set(m.player.id,m.player);
+          if(m.player && m.player.id!==multiplayerId){
+            const old=remotePlayers.get(m.player.id);
+            if(old){
+              old.targetX=m.player.x;old.targetY=m.player.y;old.targetAngle=m.player.angle;
+              old.targetHp=m.player.hp;old.targetAlive=m.player.alive;
+              old.name=m.player.name;old.level=m.player.level;old.score=m.player.score;old.kills=m.player.kills;old.color=m.player.color;
+            }else{
+              m.player.targetX=m.player.x;m.player.targetY=m.player.y;m.player.targetAngle=m.player.angle;
+              m.player.targetHp=m.player.hp;m.player.targetAlive=m.player.alive;
+              remotePlayers.set(m.player.id,m.player);
+            }
+          }
         }else if(m.type==="pvp_damage"){
           p.hp=Math.max(0,p.hp-(Number(m.amount)||0));
           burst(p.x,p.y,"#ff5474",8);
@@ -446,6 +457,19 @@ function drawNameTag(name,x,y,r,color="#ffffff"){
   ctx.restore();
 }
 
+function smoothRemotePlayers(dt){
+  const t=Math.min(1,dt*14);
+  for(const other of remotePlayers.values()){
+    if(!Number.isFinite(other.targetX))continue;
+    other.x+=(other.targetX-other.x)*t;
+    other.y+=(other.targetY-other.y)*t;
+    let da=other.targetAngle-other.angle;
+    da=Math.atan2(Math.sin(da),Math.cos(da));
+    other.angle+=da*t;
+    other.hp=Number.isFinite(other.targetHp)?other.targetHp:other.hp;
+    other.alive=other.targetAlive!==false;
+  }
+}
 function draw(){
   ctx.clearRect(0,0,W,H);
   ctx.fillStyle="#070b13";ctx.fillRect(0,0,W,H);
@@ -660,6 +684,7 @@ function frame(now){
   const dt=Math.min(.05,(now-last)/1000);
   last=now;
   update(dt);
+  smoothRemotePlayers(dt);
   draw();
   requestAnimationFrame(frame);
 }
