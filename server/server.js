@@ -1086,6 +1086,8 @@ wss.on('connection', (ws) => {
           p.bankedDiamonds = Math.max(0, Number(saved.bankedDiamonds) || 0);
           p.ammo = clamp(Number(saved.ammo) || 0, 0, MAX_AMMO);
           p.weapon = WEAPONS[saved.weapon] ? saved.weapon : 'blaster';
+          p.damagePenalty = Math.max(0, Number(saved.damagePenalty) || 0);
+          p.defensePenalty = Math.max(0, Number(saved.defensePenalty) || 0);
         }
 
         if (msg.color) {
