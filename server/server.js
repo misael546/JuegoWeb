@@ -92,8 +92,8 @@ function joinRoom(ws,requestedCode,create=false){
   ensureRoomEnemies(code);
   p.room=code;
   const spawn=spawnPosition(code);
-  p.x=spawn.x;p.y=spawn.y;p.angle=0;
-  p.hp=100;
+  if(!saved){p.x=spawn.x;p.y=spawn.y;p.hp=100;}
+  p.angle=0;
   p.alive=true;
   send(ws,{type:"room_joined",code,players:publicPlayers(room),enemies:ensureRoomEnemies(code)});
   broadcastRoom(code,{type:"player_join",player:p},ws);
@@ -227,6 +227,8 @@ wss.on("connection",(ws)=>{
         p.saveKey=String(msg.saveKey||"").replace(/[^a-zA-Z0-9_-]/g,"").slice(0,80);
         const saved=p.saveKey?savedPlayers.get(p.saveKey):null;
         if(saved){
+          p.x=Number.isFinite(saved.x)?saved.x:p.x;
+          p.y=Number.isFinite(saved.y)?saved.y:p.y;
           p.level=saved.level;p.hp=saved.hp;p.damage=saved.damage;p.fireRate=saved.fireRate;
           p.score=saved.score;p.kills=saved.kills;p.xp=saved.xp;
         }
@@ -259,7 +261,7 @@ wss.on("connection",(ws)=>{
         p.angle=Number.isFinite(msg.angle)?msg.angle:p.angle;
         p.hp=clamp(Number.isFinite(msg.hp)?msg.hp:p.hp,0,100);
         const data={
-          name:p.name,level:p.level,hp:p.hp,damage:p.damage,fireRate:p.fireRate,
+          name:p.name,x:p.x,y:p.y,level:p.level,hp:p.hp,damage:p.damage,fireRate:p.fireRate,
           score:p.score,kills:p.kills,xp:p.xp
         };
         if(p.saveKey)savedPlayers.set(p.saveKey,data);
