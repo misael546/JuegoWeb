@@ -87,6 +87,46 @@ let camera={x:p.x,y:p.y},last=performance.now(),playerName="";
 const keys={w:false,a:false,s:false,d:false};
 const pointer={x:W/2,y:H/2,down:false};
 let moveX=0,moveY=0;
+const remotePlayers=new Map();
+let multiplayerSocket=null,multiplayerId="",lastNetSend=0;
+const MULTIPLAYER_SERVER=localStorage.getItem("neon_core_server_url")||"";
+function connectMultiplayer(){
+  if(!MULTIPLAYER_SERVER || !("WebSocket" in window)) return;
+  try{
+    multiplayerSocket=new WebSocket(MULTIPLAYER_SERVER);
+    multiplayerSocket.addEventListener("open",()=>{
+      multiplayerSocket.send(JSON.stringify({type:"join",name:playerName||"Jugador",color:"#39e7ff"}));
+      const tag=document.getElementById("nameTag");
+      if(tag)tag.textContent=(playerName||"Jugador")+" · ONLINE";
+    });
+    multiplayerSocket.addEventListener("message",e=>{
+      try{
+        const m=JSON.parse(e.data);
+        if(m.type==="welcome"){
+          multiplayerId=m.id;
+          remotePlayers.clear();
+          for(const q of (m.players||[])) if(q.id!==multiplayerId) remotePlayers.set(q.id,q);
+        }else if(m.type==="player_join"||m.type==="player_update"){
+          if(m.player && m.player.id!==multiplayerId) remotePlayers.set(m.player.id,m.player);
+        }else if(m.type==="player_leave"){
+          remotePlayers.delete(m.id);
+        }
+      }catch{}
+    });
+    multiplayerSocket.addEventListener("close",()=>{
+      multiplayerSocket=null;
+      const tag=document.getElementById("nameTag");
+      if(tag)tag.textContent=playerName||"";
+    });
+  }catch{}
+}
+function sendMultiplayerState(dt){
+  if(!multiplayerSocket || multiplayerSocket.readyState!==1)return;
+  lastNetSend+=dt;
+  if(lastNetSend<.05)return;
+  lastNetSend=0;
+  multiplayerSocket.send(JSON.stringify({type:"state",x:p.x,y:p.y,angle:p.angle,hp:p.hp,level:p.level}));
+}
 
 function rand(a,b){return a+Math.random()*(b-a)}
 function dist(a,b){return Math.hypot(a.x-b.x,a.y-b.y)}
@@ -155,7 +195,7 @@ function hitWall(b){
 }
 
 function update(dt){
-  if(!p.alive)return;
+  if(!p.alive){sendMultiplayerState(dt);return;}
   let mx=(keys.d?1:0)-(keys.a?1:0),my=(keys.s?1:0)-(keys.w?1:0);
   if(Math.hypot(moveX,moveY)>.1){mx=moveX;my=moveY}
   const ml=Math.hypot(mx,my);
@@ -206,6 +246,7 @@ function update(dt){
   while(enemies.length<18)spawnEnemy();
 
   camera.x+=(p.x-camera.x)*Math.min(1,dt*7);camera.y+=(p.y-camera.y)*Math.min(1,dt*7);
+  sendMultiplayerState(dt);
 }
 
 function sx(x){return x-camera.x+W/2}
@@ -262,6 +303,13 @@ function draw(){
   }
 
   for(const b of bullets){ctx.fillStyle="#dffbff";ctx.beginPath();ctx.arc(sx(b.x),sy(b.y),4,0,Math.PI*2);ctx.fill()}
+  for(const other of remotePlayers.values()){
+    drawTank(other.x,other.y,other.angle,"#7cff72",24);
+    drawNameTag(other.name||"Jugador",other.x,other.y,24,"#7cff72");
+    const ox=sx(other.x),oy=sy(other.y)-31;
+    ctx.fillStyle="#101827";ctx.fillRect(ox-24,oy,48,4);
+    ctx.fillStyle="#7cff72";ctx.fillRect(ox-24,oy,48*clamp((other.hp||100)/100,0,1),4);
+  }
   for(const e of enemies){
     const enemyAngle=Math.atan2(p.y-e.y,p.x-e.x);
     drawTank(e.x,e.y,enemyAngle,e.kind==="elite"?"#ff9f43":"#ff3b81",e.r);
@@ -328,6 +376,7 @@ function enterGame(){
   document.getElementById("nameBox").style.display="none";
   document.getElementById("nameTag").style.display="block";
   document.getElementById("logout").style.display="block";
+  connectMultiplayer();
 }
 document.getElementById("nameForm").addEventListener("submit",e=>{e.preventDefault();enterGame()});
 document.getElementById("logout").addEventListener("click",()=>{
@@ -337,7 +386,7 @@ document.getElementById("logout").addEventListener("click",()=>{
 });
 
 const saved=loadName();
-if(saved){document.getElementById("username").value=saved;playerName=saved;document.getElementById("playerName").textContent=saved;document.getElementById("nameBox").style.display="none";document.getElementById("nameTag").style.display="block";document.getElementById("logout").style.display="block";loadStats()}
+if(saved){document.getElementById("username").value=saved;playerName=saved;document.getElementById("playerName").textContent=saved;document.getElementById("nameBox").style.display="none";document.getElementById("nameTag").style.display="block";document.getElementById("logout").style.display="block";loadStats();connectMultiplayer()}
 
 function loop(now){
   const dt=Math.min(.033,(now-last)/1000);last=now;update(dt);draw();requestAnimationFrame(loop)
