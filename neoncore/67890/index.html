@@ -368,7 +368,6 @@ function connectMultiplayer(roomMode="quick",roomCode=""){
           document.getElementById("death").style.display="none";
           updateResourceHud();
           updateHud();
-          setTimeout(()=>{try{if(multiplayerSocket&&multiplayerSocket.readyState===1)multiplayerSocket.send(JSON.stringify({type:"respawn"}));}catch{}},0);
         }else if(m.type==="server_stats"){
           if(Number.isFinite(m.kills))p.kills=m.kills;
           if(Number.isFinite(m.pvpKills))p.pvpKills=m.pvpKills;
