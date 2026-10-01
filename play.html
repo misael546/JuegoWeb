@@ -194,7 +194,7 @@ function connectMultiplayer(roomMode="quick",roomCode=""){
             p.speed=205+(p.level-1)*4;
           }
           enemies.length=0;
-          for(const e of (m.enemies||[])){e.targetX=e.x;e.targetY=e.y;enemies.push(e);}
+          for(const e of (m.enemies||[])){e.targetX=e.x;e.targetY=e.y;e.shape=e.shape||"triangle";enemies.push(e);}
           gameActive=true;
           updatePlayersFromList(m.players||[]);
         }else if(m.type==="room_error"){
@@ -228,10 +228,10 @@ function connectMultiplayer(roomMode="quick",roomCode=""){
           for(const e of incoming){
             const old=byId.get(e.id);
             if(old){
-              old.targetX=e.x;old.targetY=e.y;old.hp=e.hp;old.maxHp=e.maxHp;old.r=e.r;old.kind=e.kind;old.speed=e.speed;old.damage=e.damage;
+              old.targetX=e.x;old.targetY=e.y;old.hp=e.hp;old.maxHp=e.maxHp;old.r=e.r;old.kind=e.kind;old.shape=e.shape||old.shape;old.speed=e.speed;old.damage=e.damage;
               old.dead=false;next.push(old);
             }else{
-              e.targetX=e.x;e.targetY=e.y;next.push(e);
+              e.targetX=e.x;e.targetY=e.y;e.shape=e.shape||"triangle";next.push(e);
             }
           }
           enemies.length=0;
@@ -492,7 +492,7 @@ function smoothRemotePlayers(dt){
   }
 }
 function smoothEnemies(dt){
-  const t=Math.min(1,dt*10);
+  const t=Math.min(1,dt*18);
   for(const e of enemies){
     if(!Number.isFinite(e.targetX))continue;
     e.x+=(e.targetX-e.x)*t;
