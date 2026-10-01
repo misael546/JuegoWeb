@@ -182,7 +182,17 @@ function connectMultiplayer(roomMode="quick",roomCode=""){
           setConnectionStatus("CONECTADO","Listo. Entrando a la arena…",false);
           setRoomPanel(m.code);
           const me=(m.players||[]).find(q=>q.id===multiplayerId);
-          if(me){p.x=me.x;p.y=me.y;p.hp=me.hp||p.maxHp;p.alive=me.alive!==false;}
+          if(me){
+            p.x=me.x;p.y=me.y;p.hp=me.hp||p.maxHp;p.alive=me.alive!==false;
+            if(Number.isFinite(me.level))p.level=me.level;
+            if(Number.isFinite(me.score))p.score=me.score;
+            if(Number.isFinite(me.kills))p.kills=me.kills;
+            if(Number.isFinite(me.xp))p.xp=me.xp;
+            if(Number.isFinite(me.damage))p.damage=me.damage;
+            if(Number.isFinite(me.fireRate))p.fireRate=me.fireRate;
+            p.maxHp=100+(p.level-1)*15;
+            p.speed=205+(p.level-1)*4;
+          }
           enemies.length=0;
           for(const e of (m.enemies||[])) enemies.push(e);
           gameActive=true;
