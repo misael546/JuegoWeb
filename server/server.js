@@ -5,7 +5,7 @@ const PORT = process.env.PORT || 10000;
 const WORLD = {w:6000,h:4400};
 const MAX_PLAYERS = 16;
 const SAFE_ZONE = {x:3000,y:2200,r:300};
-const SERVER_VERSION = "20261001-45";
+const SERVER_VERSION = "20261001-46";
 const AMMO_PACK_SIZE=50,AMMO_PACK_COST=50,MAX_AMMO=120;
 const SHOP_NPC={x:3000,y:2380,r:95};
 const WEAPONS={blaster:{name:"BLASTER",cost:0,damage:25,fireRate:350},pulse:{name:"PULSE",cost:150,damage:18,fireRate:170},cannon:{name:"CANNON",cost:300,damage:65,fireRate:700}};
@@ -241,7 +241,7 @@ wss.on("connection",(ws)=>{
   const player={
     id,name:"Jugador",saveKey:"",x:3000,y:2200,angle:0,hp:100,level:1,
     damage:25,defense:0,fireRate:280,score:0,kills:0,xp:0,pvpKills:0,gold:0,ammo:60,bankedGold:0,weapon:"blaster",
-    color:"#39e7ff",room:"",alive:true,frozen:false,lastShot:0,speed:205,lastStateAt:Date.now(),stateViolations:0
+    color:"#39e7ff",room:"",alive:true,frozen:false,lastShot:0,speed:205,lastStateAt:Date.now(),stateViolations:0,lastChatAt:0
   };
   player.ws=ws;
   clients.set(ws,player);
@@ -286,6 +286,16 @@ wss.on("connection",(ws)=>{
         else if(msg.createRoom) joinRoom(ws,"",true);
         else joinRoom(ws,"OPEN",false);
         if(p.room) { broadcastRoom(p.room,{type:"player_update",player:p},ws); sendPlayerList(p.room); }
+      }
+
+      if(msg.type==="chat"){
+        if(!p.room || p.frozen)return;
+        const now=Date.now();
+        if(now-(p.lastChatAt||0)<700)return;
+        const text=String(msg.text||"").replace(/[\\u0000-\\u001F\\u007F]/g," ").trim().slice(0,120);
+        if(!text)return;
+        p.lastChatAt=now;
+        broadcastRoom(p.room,{type:"chat",id:p.id,name:p.name,text,at:now});
       }
 
       if(msg.type==="create_room") joinRoom(ws,"",true);
