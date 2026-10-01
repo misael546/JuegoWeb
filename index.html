@@ -46,7 +46,7 @@
 
 <div id="nameTag" style="display:none">🛡️ <span id="playerName"></span></div>
 <button id="logout" style="display:none">Nombre</button>
-<div id="roomPanel"><span>SALA</span><span id="roomCode">----</span><button id="copyRoom" type="button">COPIAR</button></div>\n<div id="roomPanel"><span>SALA</span><span id="roomCode">----</span><button id="copyRoom" type="button">COPIAR</button></div>
+<div id="roomPanel"><span>SALA</span><span id="roomCode">----</span><button id="copyRoom" type="button">COPIAR</button></div>\n
 <button id="upgrade">MEJORAR · 50 ⚔</button>
 
 <div id="nameBox">
@@ -402,7 +402,7 @@ document.getElementById("copyRoom").addEventListener("click",async()=>{
   try{await navigator.clipboard.writeText(code)}catch{}
   const b=document.getElementById("copyRoom");b.textContent="COPIADO";setTimeout(()=>b.textContent="COPIAR",900);
 });
-const saved=loadName();
+const invitedRoom=(new URLSearchParams(location.search).get("room")||"").toUpperCase().replace(/[^A-Z0-9]/g,"").slice(0,4);\nconst saved=loadName();
 if(saved){document.getElementById("username").value=saved;playerName=saved;document.getElementById("playerName").textContent=saved;document.getElementById("nameBox").style.display="none";document.getElementById("nameTag").style.display="block";document.getElementById("logout").style.display="block";loadStats();connectMultiplayer(invitedRoom&&invitedRoom.length===4?"join":"quick",invitedRoom&&invitedRoom.length===4?invitedRoom.toUpperCase():"")}
 
 function loop(now){
