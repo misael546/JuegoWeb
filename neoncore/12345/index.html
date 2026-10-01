@@ -9,7 +9,7 @@
 <script>
 (function(){
   try{
-    var v="20261001-67";
+    var v="20261001-100";
     var k="neon_core_build";
     window.NEON_CORE_BUILD=v;
     var old=localStorage.getItem(k);
@@ -26,7 +26,7 @@
   }catch(e){}
 })();
 </script>
-<title>Neon Core</title>
+<title>Neon Core · Build 100</title>
 <style>
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#050811;color:#fff;font-family:Arial,sans-serif;touch-action:none}
 #game{display:block;width:100vw;height:100vh}
@@ -48,7 +48,7 @@
 #fire{width:86px;height:86px;border-radius:50%;border:2px solid #ff8aa0;background:radial-gradient(circle at 35% 30%,#ff607f,#8e1737 62%,#3b0b1a);color:white;font-size:28px;font-weight:bold;pointer-events:auto;box-shadow:0 0 18px #ff365966,inset 0 0 12px #fff2;display:grid;place-items:center;position:relative;overflow:hidden}#fire:active{transform:scale(.94)}#fire .fireIcon{width:36px;height:36px;border:3px solid #fff;border-radius:50%;position:relative;display:block;box-shadow:0 0 8px #fff8}#fire .fireIcon:after{content:"";position:absolute;width:12px;height:12px;right:-7px;top:-7px;border-radius:50%;background:#fff}
 #chatToggle{position:fixed;left:10px;bottom:145px;z-index:13;min-width:96px;height:42px;border:1px solid #39e7ff;background:rgba(5,8,17,.94);color:#fff;border-radius:11px;font-weight:bold;pointer-events:auto;box-shadow:0 5px 20px #000}#chatBox{position:fixed;left:10px;bottom:145px;width:min(330px,calc(100vw - 20px));z-index:12;background:rgba(5,8,17,.9);border:1px solid #26344e;border-radius:12px;padding:8px;backdrop-filter:blur(6px);pointer-events:auto}#chatMessages{height:120px;overflow-y:auto;display:flex;flex-direction:column;gap:4px;font-size:12px;margin-bottom:7px;scrollbar-width:thin}#chatMessages div{word-break:break-word}#chatMessages .chatName{color:#39e7ff;font-weight:bold}#chatForm{display:flex;gap:6px}#chatInput{min-width:0;flex:1;padding:9px 10px;border:1px solid #33415d;background:#111a2d;color:#fff;border-radius:9px;outline:none;font-size:14px}#chatSend{min-width:58px;border:0;border-radius:9px;background:#183d58;color:#fff;font-weight:bold}#chatHint{font-size:10px;color:#74839a;margin-top:4px}@media(max-width:600px){#chatToggle{bottom:138px;min-width:90px}#chatBox{bottom:138px;width:min(300px,calc(100vw - 20px))}#chatMessages{height:90px}}#connectionOverlay{position:fixed;inset:0;background:#050811e8;display:none;align-items:center;justify-content:center;z-index:30;text-align:center;padding:20px}#connectionCard{width:min(340px,100%);background:#0b1020;border:1px solid #26344e;border-radius:16px;padding:24px;display:grid;gap:9px;box-shadow:0 15px 60px #000}#connectionTitle{color:#39e7ff;letter-spacing:1px}#connectionText{color:#9ca9bd;font-size:13px;line-height:1.4}#connectionSpinner{width:28px;height:28px;border:3px solid #26344e;border-top-color:#39e7ff;border-radius:50%;margin:0 auto 5px;animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}#death{position:fixed;inset:0;background:#000b;display:none;align-items:center;justify-content:center;z-index:10;text-align:center}
 #deathCard{background:#0b1020;border:1px solid #26344e;border-radius:16px;padding:22px;width:min(330px,90%)}
-#deathCard h2{color:#ff5474;margin:0 0 8px}
+#deathCard h2{color:#ff5474;margin:0 0 8px}.buildBadge{display:inline-block;margin-left:6px;padding:2px 5px;border:1px solid #26344e;border-radius:5px;color:#74839a;font-size:9px;vertical-align:middle}.hitText{position:fixed;pointer-events:none;z-index:9;font-weight:900;font-size:14px;text-shadow:0 2px 4px #000;transform:translate(-50%,-50%);animation:hitFloat .65s ease-out forwards}@keyframes hitFloat{0%{opacity:1;transform:translate(-50%,-20% ) scale(1.05)}100%{opacity:0;transform:translate(-50%,-110%) scale(.9)}}
 @media(min-width:800px){#controls{opacity:.3}#controls:hover{opacity:1}}
 #roomActions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}#roomActions button{width:100%;min-height:44px;border:0;border-radius:10px;background:#183d58;color:#fff;font-weight:bold}#roomCodeInput{width:100%;padding:13px;border:1px solid #33415d;background:#111a2d;color:white;border-radius:10px;font-size:16px;outline:none;margin-top:8px;text-transform:uppercase}@media(max-width:799px){#playersPanel{top:8px;right:calc(min(42vw,150px) + 14px);width:min(160px,42vw)}#controlConfigBtn{display:block}#hud{top:8px;left:8px;right:8px}.panel{padding:7px 8px;font-size:12px}#bars{min-width:0;width:min(190px,58vw)}#hud>.panel:last-child{white-space:nowrap}#gameActions{top:74px;left:8px}#gameActions button{min-height:38px;padding:0 9px;font-size:11px}#minimapWrap{top:8px;right:8px;width:min(150px,42vw);height:min(112px,32vw);padding:5px}#playersPanel{top:126px;right:8px;width:min(180px,48vw);padding:7px 8px;font-size:11px}#playersList{max-height:130px;gap:3px}#controls{padding:12px}.joy{width:100px;height:100px}.stick{width:44px;height:44px;left:28px;top:28px}#fire{width:78px;height:78px}}@media(max-width:430px){#hud>.panel:last-child{max-width:105px;overflow:hidden;text-overflow:ellipsis}#playersPanel{max-width:45vw}.onlinePlayer{font-size:10px}} .shopGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:8px 0}.shopItem{min-height:58px;border:1px solid #263b55;border-radius:9px;background:#0d1827;color:#fff;padding:6px}.shopItem strong{display:block;color:#39e7ff;font-size:11px}.shopItem small{display:block;color:#9ca9bd;font-size:9px;margin-top:3px}.shopItem:active{transform:scale(.97)}#weaponHud{margin-top:5px;color:#9ca9bd;font-size:11px;letter-spacing:1px}#weaponName{color:#39e7ff}#resourceHud{display:flex;gap:10px;margin-top:5px;color:#dffbff;font-size:12px}#resourceHud span{background:#0b1424;border:1px solid #26344e;border-radius:7px;padding:3px 6px}#ammoShop,.shopItem,#buyAmmoBtn{touch-action:manipulation;pointer-events:auto}#ammoShop{position:fixed;left:50%;bottom:112px;transform:translateX(-50%);z-index:8;display:none;min-width:min(310px,88vw);background:rgba(5,8,17,.94);border:1px solid #39e7ff;border-radius:14px;padding:12px;text-align:center;backdrop-filter:blur(6px);box-shadow:0 8px 30px #000}#ammoShop b{display:block;color:#39e7ff;font-size:13px}#ammoShop span{display:block;color:#c8d3e5;font-size:12px;margin:4px 0 8px}#buyAmmoBtn{width:100%;min-height:42px;border:0;border-radius:9px;background:#183d58;color:#fff;font-weight:bold}#shopMsg{display:block;color:#9ca9bd;margin-top:7px;font-size:11px}#fire:disabled{filter:grayscale(1);opacity:.45}</style>
 </head>
@@ -57,7 +57,7 @@
 
 <div id="hud">
   <div class="panel" id="bars">
-    <b>NEON CORE</b> · <span id="level">Nv. 1</span> · ☠ <span id="pvpKills">0</span>
+    <b>NEON CORE</b><span class="buildBadge">B100</span> · <span id="level">Nv. 1</span> · ☠ <span id="pvpKills">0</span>
     <div class="bar"><i id="hpFill"></i><span class="barLabel">❤️ <span id="hp">100</span>/<span id="maxHp">100</span></span></div>
     <div class="bar xpbar"><i id="xpFill"></i><span class="barLabel">XP <span id="xp">0</span>/<span id="xpNeed">100</span></span></div><div class="bar masterybar"><i id="damageXpFill"></i><span class="barLabel">DAÑO <span id="damageLevel">1</span></span></div><div class="bar masterybar"><i id="defenseXpFill"></i><span class="barLabel">DEFENSA <span id="defenseLevel">1</span></span></div>
     <small>🎯 <span id="kills">0</span></small><div id="resourceHud"><span>🪙 <b id="gold">0</b></span><span>💎 <b id="diamonds">0</b></span><span>🔸 <b id="ammo">60</b>/<b id="maxAmmo">120</b></span></div>
@@ -114,7 +114,7 @@ const world={w:6000,h:4400};
 const p={x:3000,y:2200,r:16,angle:0,hp:100,maxHp:100,xp:0,level:1,score:0,kills:0,pvpKills:0,damage:25,defense:0,speed:205,fireRate:350,lastShot:0,alive:true,gold:0,diamonds:0,ammo:60,maxAmmo:120,weapon:"blaster"};
 const shopNpc={x:3000,y:2380,r:30};const weaponNames={blaster:"BLASTER",pulse:"PULSE",cannon:"CANNON"};
 const weaponStats={blaster:{damage:25,fireRate:350},pulse:{damage:18,fireRate:170},cannon:{damage:65,fireRate:700}};let shopOpen=false;
-let bullets=[],enemies=[],drops=[],particles=[],walls=[];
+let bullets=[],enemies=[],drops=[],particles=[],walls=[],hitTexts=[];
 let serverXpNeed=100,serverKillsToLevel=5,serverDamageXp=0,serverDamageXpNeed=100,serverDamageLevel=1,serverDefenseXp=0,serverDefenseXpNeed=100,serverDefenseLevel=1;
 let gameActive=false;
 let camera={x:p.x,y:p.y},last=performance.now(),playerName="";
@@ -309,7 +309,7 @@ function connectMultiplayer(roomMode="quick",roomCode=""){
           const w=walls.find(x=>x.id===m.id);if(w)w.hp=Number(m.hp)||0;
           burst(Number(m.x)||0,Number(m.y)||0,"#7d8ba3",3);
         }else if(m.type==="wall_dead"){
-          const w=walls.find(x=>x.id===m.id);if(w){burst(w.x,w.y,"#39e7ff",15);w.dead=true;}
+          const w=walls.find(x=>x.id===m.id);if(w){burst(w.x,w.y,"#39e7ff",15);w.dead=true;walls=walls.filter(x=>x.id!==m.id);}
         }else if(m.type==="state_rejected"){
           if(Number.isFinite(m.x))p.x=m.x;
           if(Number.isFinite(m.y))p.y=m.y;
@@ -320,8 +320,13 @@ function connectMultiplayer(roomMode="quick",roomCode=""){
           const e=enemies.find(x=>x.id===m.id);
           if(e){
             e.hp=m.hp;
+            if(Number.isFinite(Number(m.x)))e.x=Number(m.x);
+            if(Number.isFinite(Number(m.y)))e.y=Number(m.y);
             if(Number(m.hp)<=0)enemyExplosion(e);
           }
+        }else if(m.type==="hit_confirm"){
+          showFloatingHit(Number(m.x)||p.x,Number(m.y)||p.y,Number(m.amount)||0,m.kind==="player"?"#ff6f8f":"#ffe27a");
+          burst(Number(m.x)||p.x,Number(m.y)||p.y,m.kind==="player"?"#ff5474":"#ffcf5a",5);
         }else if(m.type==="enemy_dead"){
           const e=enemies.find(x=>x.id===m.id);
           if(e)enemyExplosion(e);
@@ -424,6 +429,28 @@ function spawnEnemy(){return null;}
 
 walls.length=0;
 
+function showFloatingHit(x,y,amount,color="#ffffff"){
+  const el=document.createElement("div");
+  el.className="hitText";
+  el.textContent="−"+Math.max(1,Math.round(Number(amount)||0));
+  el.style.color=color;
+  document.body.appendChild(el);
+  hitTexts.push({el,x,y,life:.65,maxLife:.65});
+}
+function updateHitTexts(dt){
+  for(const h of hitTexts){
+    h.life-=dt;
+    const px=sx(h.x),py=sy(h.y)-18;
+    h.el.style.left=px+"px";
+    h.el.style.top=py+"px";
+    h.el.style.opacity=String(Math.max(0,h.life/h.maxLife));
+  }
+  hitTexts=hitTexts.filter(h=>{
+    if(h.life>0)return true;
+    h.el.remove();
+    return false;
+  });
+}
 function burst(x,y,color,n=10){
   for(let i=0;i<n;i++){
     const a=Math.random()*Math.PI*2,sp=rand(90,260);
@@ -536,7 +563,7 @@ function update(dt){
   for(const q of particles){
     q.x+=q.vx*dt;q.y+=q.vy*dt;q.vx*=.96;q.vy*=.96;q.life-=dt;
   }
-  bullets=bullets.filter(x=>!x.dead);enemies=enemies.filter(x=>!x.dead);particles=particles.filter(x=>x.life>0);walls=walls.filter(x=>!x.dead);
+  bullets=bullets.filter(x=>!x.dead);enemies=enemies.filter(x=>!x.dead);particles=particles.filter(x=>x.life>0);walls=walls.filter(x=>!x.dead);if(particles.length>500)particles.splice(0,particles.length-500);
 
   camera.x+=(p.x-camera.x)*Math.min(1,dt*7);camera.y+=(p.y-camera.y)*Math.min(1,dt*7);
   sendMultiplayerState(dt);
@@ -648,8 +675,8 @@ function smoothEnemies(dt){
 function showShopMsg(msg){const e=document.getElementById("shopMsg");if(e)e.textContent=msg;}
 function updateWeaponHud(){const el=document.getElementById("weaponName");if(el)el.textContent=weaponNames[p.weapon]||"BLASTER";}
 function updateHud(){
-  const hpEl=document.getElementById("hp"),maxHpEl=document.getElementById("maxHp"),levelEl=document.getElementById("level"),pvpEl=document.getElementById("pvpKills"),killsEl=document.getElementById("kills"),damageEl=document.getElementById("damageStat"),defenseEl=document.getElementById("defenseStat");
-  if(hpEl)hpEl.textContent=Math.ceil(p.hp);if(maxHpEl)maxHpEl.textContent=p.maxHp;if(levelEl)levelEl.textContent="Nv. "+p.level;if(pvpEl)pvpEl.textContent=p.pvpKills;if(killsEl)killsEl.textContent=p.kills;if(damageEl)damageEl.textContent=p.damage;if(defenseEl)defenseEl.textContent=p.defense;
+  const hpEl=document.getElementById("hp"),maxHpEl=document.getElementById("maxHp"),levelEl=document.getElementById("level"),pvpEl=document.getElementById("pvpKills"),killsEl=document.getElementById("kills");
+  if(hpEl)hpEl.textContent=Math.ceil(p.hp);if(maxHpEl)maxHpEl.textContent=p.maxHp;if(levelEl)levelEl.textContent="Nv. "+p.level;if(pvpEl)pvpEl.textContent=p.pvpKills;if(killsEl)killsEl.textContent=p.kills;
   updateResourceHud();
 }
 function updateResourceHud(){updateWeaponHud();const g=document.getElementById("gold"),d=document.getElementById("diamonds"),a=document.getElementById("ammo"),m=document.getElementById("maxAmmo"),f=document.getElementById("fire");if(g)g.textContent=p.gold||0;if(d)d.textContent=p.diamonds||0;if(a)a.textContent=p.ammo||0;if(m)m.textContent=p.maxAmmo||120;if(f)f.disabled=(p.ammo||0)<=0;}
@@ -682,6 +709,8 @@ function drawMinimap(){
     if(other.alive===false)continue;
     mctx.fillStyle="#7cff72";mctx.beginPath();mctx.arc(ox+other.x*scale,oy+other.y*scale,3,0,Math.PI*2);mctx.fill();
   }
+  const shopX=ox+shopNpc.x*scale,shopY=oy+shopNpc.y*scale;
+  mctx.fillStyle="#39e7ff";mctx.beginPath();mctx.arc(shopX,shopY,4,0,Math.PI*2);mctx.fill();
   const px=ox+p.x*scale,py=oy+p.y*scale;
   mctx.fillStyle="#39e7ff";mctx.beginPath();mctx.arc(px,py,5,0,Math.PI*2);mctx.fill();
   mctx.strokeStyle="#ffffff";mctx.lineWidth=1.5;mctx.beginPath();mctx.moveTo(px,py);mctx.lineTo(px+Math.cos(p.angle)*10,py+Math.sin(p.angle)*10);mctx.stroke();
