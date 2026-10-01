@@ -131,6 +131,35 @@ updateControlMode();
 const remotePlayers=new Map();
 let multiplayerSocket=null,multiplayerId="",lastNetSend=0,currentRoom="";
 const MULTIPLAYER_SERVER=localStorage.getItem("neon_core_server_url")||"wss://neon-core-multiplayer.onrender.com/ws";
+const RENDER_HEALTH_URL=MULTIPLAYER_SERVER.replace(/^wss:/,"https:").replace(/^ws:/,"http:").replace(/\/ws$/,"/health");
+let renderStatusTimer=null,renderServerVersion="",renderServerStartedAt=0;
+async function checkRenderStatus(){
+  try{
+    const res=await fetch(RENDER_HEALTH_URL,{cache:"no-store"});
+    if(!res.ok)throw new Error("health");
+    const data=await res.json();
+    const version=String(data.version||"");
+    const startedAt=Number(data.startedAt)||0;
+    if(renderServerVersion && (version!==renderServerVersion || startedAt!==renderServerStartedAt)){
+      setConnectionStatus("SERVIDOR ACTUALIZADO","Render terminó una actualización. Puedes entrar de nuevo.",false);
+      if(!gameActive)nameBox.style.display="flex";
+    }else if(!gameActive && currentRoom){
+      setConnectionStatus("SERVIDOR DISPONIBLE","Render está listo. Conectando…",false);
+    }
+    renderServerVersion=version;
+    renderServerStartedAt=startedAt;
+  }catch{
+    if(!gameActive){
+      setConnectionStatus("RENDER ACTUALIZANDO","El servidor de Render no responde. Neon Core está esperando a que vuelva.",false);
+    }
+  }
+}
+function startRenderMonitor(){
+  if(renderStatusTimer)clearInterval(renderStatusTimer);
+  checkRenderStatus();
+  renderStatusTimer=setInterval(checkRenderStatus,8000);
+}
+startRenderMonitor();
 function renderPlayers(list){
   const panel=document.getElementById("playersPanel"),count=document.getElementById("playersCount"),box=document.getElementById("playersList");
   const players=Array.isArray(list)?list:[];
@@ -312,11 +341,11 @@ function connectMultiplayer(roomMode="quick",roomCode=""){
     multiplayerSocket.addEventListener("close",()=>{
       multiplayerSocket=null;
       if(!gameActive && currentRoom){
-        setConnectionStatus("SERVIDOR EN ESPERA","No se pudo completar la conexión. Pulsa ENTRAR RÁPIDO otra vez.");
+        setConnectionStatus("RENDER ACTUALIZANDO","Render está reiniciando o desplegando una actualización. Espera unos segundos y vuelve a entrar.",false);
         nameBox.style.display="flex";
         username.value=playerName||username.value;
       }else if(currentRoom){
-        setConnectionStatus("SERVIDOR EN ESPERA","El servidor se desconectó. Recarga para volver a conectar.");
+        setConnectionStatus("RENDER ACTUALIZANDO","La conexión se perdió. Render puede estar reiniciando o desplegando una actualización.",false);
       }
     });
   }catch{}
