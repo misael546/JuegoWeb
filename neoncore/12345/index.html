@@ -9,7 +9,7 @@
 <script>
 (function(){
   try{
-    var v="20261001-63";
+    var v="20261001-65";
     var k="neon_core_build";
     window.NEON_CORE_BUILD=v;
     var old=localStorage.getItem(k);
@@ -59,7 +59,7 @@
   <div class="panel" id="bars">
     <b>NEON CORE</b> · <span id="level">Nv. 1</span> · ☠ <span id="pvpKills">0</span>
     <div class="bar"><i id="hpFill"></i><span class="barLabel">❤️ <span id="hp">100</span>/<span id="maxHp">100</span></span></div>
-    <div class="bar xpbar"><i id="xpFill"></i><span class="barLabel">XP <span id="xp">0</span>/<span id="xpNeed">100</span></span></div>
+    <div class="bar xpbar"><i id="xpFill"></i><span class="barLabel">XP <span id="xp">0</span>/<span id="xpNeed">100</span></span></div><div class="bar xpbar"><i id="damageXpFill"></i><span class="barLabel">DAÑO M<span id="damageLevel">1</span> · <span id="damageXp">0</span>/<span id="damageXpNeed">100</span></span></div><div class="bar xpbar"><i id="defenseXpFill"></i><span class="barLabel">DEF M<span id="defenseLevel">1</span> · <span id="defenseXp">0</span>/<span id="defenseXpNeed">100</span></span></div>
     <small>⚔ <span id="damageStat">25</span> · 🛡 <span id="defenseStat">0</span> · 🎯 <span id="kills">0</span></small><div id="resourceHud"><span>🪙 <b id="gold">0</b></span><span>💎 <b id="diamonds">0</b></span><span>🔸 <b id="ammo">60</b>/<b id="maxAmmo">120</b></span></div>
   <div id="weaponHud">ARMA: <b id="weaponName">BLASTER</b></div>
 </div>
@@ -115,7 +115,7 @@ const p={x:3000,y:2200,r:16,angle:0,hp:100,maxHp:100,xp:0,level:1,score:0,kills:
 const shopNpc={x:3000,y:2380,r:30};const weaponNames={blaster:"BLASTER",pulse:"PULSE",cannon:"CANNON"};
 const weaponStats={blaster:{damage:25,fireRate:350},pulse:{damage:18,fireRate:170},cannon:{damage:65,fireRate:700}};let shopOpen=false;
 let bullets=[],enemies=[],drops=[],particles=[],walls=[];
-let serverXpNeed=100,serverKillsToLevel=5;
+let serverXpNeed=100,serverKillsToLevel=5,serverDamageXp=0,serverDamageXpNeed=100,serverDamageLevel=1,serverDefenseXp=0,serverDefenseXpNeed=100,serverDefenseLevel=1;
 let gameActive=false;
 let camera={x:p.x,y:p.y},last=performance.now(),playerName="";
 let safeZone={x:3000,y:2200,r:300};
@@ -350,7 +350,7 @@ function connectMultiplayer(roomMode="quick",roomCode=""){
           if(Number.isFinite(m.speed))p.speed=m.speed;
           if(Number.isFinite(m.maxHp))p.maxHp=m.maxHp;
           if(m.weapon&&weaponStats[m.weapon])p.weapon=m.weapon;
-          if(Number.isFinite(m.xpNeed))serverXpNeed=m.xpNeed;
+          if(Number.isFinite(m.xpNeed))serverXpNeed=m.xpNeed;if(Number.isFinite(m.damageXp))serverDamageXp=m.damageXp;if(Number.isFinite(m.damageXpNeed))serverDamageXpNeed=m.damageXpNeed;if(Number.isFinite(m.damageLevel))serverDamageLevel=m.damageLevel;if(Number.isFinite(m.defenseXp))serverDefenseXp=m.defenseXp;if(Number.isFinite(m.defenseXpNeed))serverDefenseXpNeed=m.defenseXpNeed;if(Number.isFinite(m.defenseLevel))serverDefenseLevel=m.defenseLevel;
           if(Number.isFinite(m.killsToLevel))serverKillsToLevel=m.killsToLevel;if(Number.isFinite(m.gold))p.gold=m.gold;if(Number.isFinite(m.diamonds))p.diamonds=m.diamonds;if(Number.isFinite(m.ammo))p.ammo=m.ammo;if(Number.isFinite(m.maxAmmo))p.maxAmmo=m.maxAmmo;if(m.shopNpc){shopNpc.x=Number(m.shopNpc.x)||shopNpc.x;shopNpc.y=Number(m.shopNpc.y)||shopNpc.y;shopNpc.r=Number(m.shopNpc.r)||shopNpc.r;}if(m.weapon)p.weapon=m.weapon;updateResourceHud();
         }else if(m.type==="hp_regen"){p.hp=Math.min(Number(m.maxHp)||p.maxHp,Number(m.hp)||p.hp);updateHud();
         }else if(m.type==="ammo_empty"){p.ammo=0;updateResourceHud();showShopMsg("Sin munición. Ve con el vendedor.");
@@ -756,9 +756,9 @@ function draw(){
   document.getElementById("damageStat").textContent=p.damage;
   document.getElementById("defenseStat").textContent=p.defense;
   const need=Math.max(1,serverXpNeed);
-  document.getElementById("xp").textContent=p.xp;document.getElementById("xpNeed").textContent=need;
+  document.getElementById("xp").textContent=p.xp;document.getElementById("xpNeed").textContent=need;document.getElementById("damageXp").textContent=Math.floor(serverDamageXp);document.getElementById("damageXpNeed").textContent=serverDamageXpNeed;document.getElementById("damageLevel").textContent=serverDamageLevel;document.getElementById("defenseXp").textContent=Math.floor(serverDefenseXp);document.getElementById("defenseXpNeed").textContent=serverDefenseXpNeed;document.getElementById("defenseLevel").textContent=serverDefenseLevel;
   document.getElementById("hpFill").style.width=clamp(p.hp/p.maxHp*100,0,100)+"%";
-  document.getElementById("xpFill").style.width=clamp(p.xp/need*100,0,100)+"%";
+  document.getElementById("xpFill").style.width=clamp(p.xp/need*100,0,100)+"%";document.getElementById("damageXpFill").style.width=clamp(serverDamageXp/serverDamageXpNeed*100,0,100)+"%";document.getElementById("defenseXpFill").style.width=clamp(serverDefenseXp/serverDefenseXpNeed*100,0,100)+"%";
 }
 
 function setupJoystick(id){
