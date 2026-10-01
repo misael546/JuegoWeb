@@ -89,7 +89,7 @@ const pointer={x:W/2,y:H/2,down:false};
 let moveX=0,moveY=0;
 const remotePlayers=new Map();
 let multiplayerSocket=null,multiplayerId="",lastNetSend=0;
-const MULTIPLAYER_SERVER=localStorage.getItem("neon_core_server_url")||"";
+const MULTIPLAYER_SERVER=localStorage.getItem("neon_core_server_url")||"wss://neon-core-multiplayer.onrender.com/ws";
 function connectMultiplayer(){
   if(!MULTIPLAYER_SERVER || !("WebSocket" in window)) return;
   try{
