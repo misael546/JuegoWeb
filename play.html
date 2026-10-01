@@ -69,7 +69,7 @@
   <div id="deathCard">
     <h2>TANQUE DESTRUIDO</h2>
     <p>Tu puntuación: <b id="deathScore">0</b></p>
-    <button id="restart">VOLVER A LA ARENA</button>
+    <button id="restart">VOLVER AL MENÚ</button>
   </div>
 </div>
 
@@ -170,7 +170,7 @@ function connectMultiplayer(roomMode="quick",roomCode=""){
         }else if(m.type==="pvp_dead"){
           const lostScore=p.score;p.hp=0;p.alive=false;resetProgressOnDeath();
           document.getElementById("deathScore").textContent=lostScore;
-          document.getElementById("death").style.display="flex";
+          setTimeout(returnToMenu,350);
         }else if(m.type==="server_stats"){
           p.kills=Number(m.kills)||p.kills;
           p.score=Number(m.score)||p.score;
@@ -249,10 +249,36 @@ function resetProgressOnDeath(){
   p.kills=0;
   saveStats();
 }
+function returnToMenu(){
+  document.getElementById("death").style.display="none";
+  document.getElementById("nameBox").style.display="flex";
+  document.getElementById("nameMsg").textContent="";
+  document.getElementById("nameTag").style.display="none";
+  document.getElementById("roomPanel").style.display="none";
+  document.getElementById("playersPanel").style.display="none";
+  document.getElementById("upgrade").style.display="none";
+  currentRoom="";
+  remotePlayers.clear();
+  if(multiplayerSocket){
+    try{multiplayerSocket.close()}catch{}
+    multiplayerSocket=null;
+  }
+  p.x=1500;p.y=1100;p.hp=p.maxHp;p.alive=true;
+  bullets.length=0;
+  resetAllControls();
+  username.value=loadName();
+  username.focus();
+}
 function damagePlayer(amount){
   if(!p.alive)return;
   p.hp-=amount;burst(p.x,p.y,"#ff5474",4);
-  if(p.hp<=0){const lostScore=p.score;p.hp=0;p.alive=false;resetProgressOnDeath();document.getElementById("deathScore").textContent=lostScore;document.getElementById("death").style.display="flex"}
+  if(p.hp<=0){
+    const lostScore=p.score;
+    p.hp=0;p.alive=false;
+    resetProgressOnDeath();
+    document.getElementById("deathScore").textContent=lostScore;
+    setTimeout(returnToMenu,350);
+  }
 }
 function levelCheck(){
   const need=100+(p.level-1)*45;
@@ -539,12 +565,7 @@ roomCodeInput.addEventListener("input",()=>{
   roomCodeInput.value=roomCodeInput.value.toUpperCase().replace(/[^A-Z0-9]/g,"").slice(0,4);
 });
 
-restartBtn.addEventListener("click",()=>{
-  p.x=1500;p.y=1100;p.hp=p.maxHp;p.alive=true;
-  bullets.length=0;
-  document.getElementById("death").style.display="none";
-  if(multiplayerSocket&&multiplayerSocket.readyState===1)multiplayerSocket.send(JSON.stringify({type:"respawn"}));
-});
+restartBtn.addEventListener("click",()=>returnToMenu());
 
 upgradeBtn.addEventListener("click",()=>{
   if(!p.alive)return;
