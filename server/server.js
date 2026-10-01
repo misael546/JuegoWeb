@@ -5,6 +5,8 @@ const PORT = process.env.PORT || 10000;
 const WORLD = {w:6000,h:4400};
 const MAX_PLAYERS = 16;
 const SAFE_ZONE = {x:3000,y:2200,r:300};
+const SERVER_VERSION = "20261001-34";
+const SERVER_STARTED_AT = Date.now();
 function inSafeZone(x,y,pad=0){return Math.hypot(x-SAFE_ZONE.x,y-SAFE_ZONE.y)<=SAFE_ZONE.r+pad;}
 const clients = new Map();
 const savedPlayers = new Map();
@@ -207,13 +209,16 @@ function handleShot(ws){
 
 const httpServer=http.createServer((req,res)=>{
   if(req.url==="/health" || req.url==="/"){
-    res.writeHead(200,{"Content-Type":"application/json"});
+    res.writeHead(200,{"Content-Type":"application/json","Access-Control-Allow-Origin":"*","Cache-Control":"no-store"});
     return res.end(JSON.stringify({
       ok:true,
       game:"Neon Core",
       players:clients.size,
       rooms:rooms.size,
-      pvp:true
+      pvp:true,
+      version:SERVER_VERSION,
+      startedAt:SERVER_STARTED_AT,
+      status:"online"
     }));
   }
   res.writeHead(404);res.end();
