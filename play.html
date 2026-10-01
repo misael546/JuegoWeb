@@ -9,7 +9,7 @@
 <script>
 (function(){
   try{
-    var v="20261001-36";
+    var v="20261001-37";
     var k="neon_core_build";
     window.NEON_CORE_BUILD=v;
     var old=localStorage.getItem(k);
@@ -80,7 +80,7 @@
       <h1>NEON CORE</h1>
       <p>Escribe tu nombre y entra a las salas públicas.</p>
       <input id="username" maxlength="20" autocomplete="off" placeholder="Nombre del tanque" required>
-      <button id="publicRoomsBtn" type="button">SALAS PÚBLICAS</button>
+      <button id="publicRoomsBtn" type="button" onclick="enterPublicRooms();return false;">SALAS PÚBLICAS</button>
       <div id="privateRoomTools" style="display:none" aria-hidden="true">
         <div id="roomActions"><button type="button" id="createRoom">CREAR SALA PRIVADA</button><button type="button" id="joinRoom">UNIRME A PRIVADA</button></div>
         <input id="roomCodeInput" maxlength="4" autocomplete="off" placeholder="CÓDIGO DE SALA · EJ. N7K4">
