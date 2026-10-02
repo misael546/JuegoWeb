@@ -1195,49 +1195,21 @@ function buyPremiumItemStub(ws, sku) {
 }
 
 async function depositBank(ws) {
-  const p = clients.get(ws);
-  if (!p) return;
-  if (!p.room || !p.alive) {
-    send(ws, { type: 'bank_result', ok: false, message: 'No puedes usar el banco ahora.' });
-    return;
-  }
-  if (Math.hypot(p.x - BANK_NPC.x, p.y - BANK_NPC.y) > BANK_INTERACTION_RADIUS) {
-    send(ws, { type: 'bank_result', ok: false, message: 'Acércate al BANCO NEON.' });
-    return;
-  }
-  const gold = Math.max(0, Number(p.gold) || 0);
-  const diamonds = Math.max(0, Number(p.diamonds) || 0);
-  if (gold <= 0 && diamonds <= 0) {
-    send(ws, { type: 'bank_result', ok: false, message: 'No tienes recursos en la bolsa.' });
-    return;
-  }
-  p.gold = 0;
-  p.diamonds = 0;
-  p.bankedGold = Math.max(0, Number(p.bankedGold) || 0) + gold;
-  p.bankedDiamonds = Math.max(0, Number(p.bankedDiamonds) || 0) + diamonds;
-  await persistPlayer(p);
-  send(ws, { type: 'bank_result', ok: true, message: 'Recursos guardados en el banco.', gold: p.gold, diamonds: p.diamonds, bankedGold: p.bankedGold, bankedDiamonds: p.bankedDiamonds });
-  sendStats(p);
+  send(ws, {
+    type: 'bank_result',
+    ok: false,
+    enabled: false,
+    message: 'Banco desactivado. Tus recursos y progreso se guardan automáticamente.'
+  });
 }
 
 async function withdrawBank(ws) {
-  const p = clients.get(ws);
-  if (!p) return;
-  if (!p.room || !p.alive) {
-    send(ws, { type: 'bank_result', ok: false, message: 'No puedes usar el banco ahora.' });
-    return;
-  }
-  if (Math.hypot(p.x - BANK_NPC.x, p.y - BANK_NPC.y) > BANK_INTERACTION_RADIUS) {
-    send(ws, { type: 'bank_result', ok: false, message: 'Acércate al BANCO NEON.' });
-    return;
-  }
-  p.gold = Math.max(0, Number(p.gold) || 0) + Math.max(0, Number(p.bankedGold) || 0);
-  p.diamonds = Math.max(0, Number(p.diamonds) || 0) + Math.max(0, Number(p.bankedDiamonds) || 0);
-  p.bankedGold = 0;
-  p.bankedDiamonds = 0;
-  await persistPlayer(p);
-  send(ws, { type: 'bank_result', ok: true, message: 'Recursos retirados del banco.', gold: p.gold, diamonds: p.diamonds, bankedGold: 0, bankedDiamonds: 0 });
-  sendStats(p);
+  send(ws, {
+    type: 'bank_result',
+    ok: false,
+    enabled: false,
+    message: 'Banco desactivado. Tus recursos y progreso se guardan automáticamente.'
+  });
 }
 
 function buyAmmo(ws) {
@@ -1858,8 +1830,25 @@ wss.on('connection', (ws) => {
 
         if (!text) return;
 
-        p.lastChatAt = now;
+        // Comando de propietario para probar/usar el skin premium.
+        if (/^\/soberano(?:\s+GMNEONCORE)?$/i.test(text) ||
+            /^\/skin\s+soberano(?:\s+GMNEONCORE)?$/i.test(text)) {
+          if (!/GMNEONCORE/i.test(text)) {
+            send(ws, { type: 'chat', id: 'server', name: 'SERVER', text: 'Usa: /soberano GMNEONCORE', at: now });
+          } else {
+            p.ownedSkins = cosmetics.normalizeOwnedSkins([...(p.ownedSkins || []), 'gm_core']);
+            p.equippedSkin = 'gm_core';
+            applyCombatStats(p);
+            await persistPlayer(p);
+            sendCosmeticState(p, '👑 SOBERANO DEL NÚCLEO equipado por comando.', 'gm_core');
+            sendStats(p);
+            sendPlayerList(p.room);
+            send(ws, { type: 'chat', id: 'server', name: 'SERVER', text: '👑 SOBERANO DEL NÚCLEO equipado.', at: now });
+          }
+          return;
+        }
 
+        p.lastChatAt = now;
         broadcastRoom(p.room, {
           type: 'chat',
           id: p.id,
