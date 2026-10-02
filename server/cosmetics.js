@@ -16,13 +16,7 @@ const SKINS = Object.freeze({
   gm_core: { id:'gm_core', name:'SOBERANO DEL NÚCLEO', rarity:'Supremo', type:'skin', priceGold:0, priceDiamonds:0, priceUsd:1, style:'gm', defenseBonus:0, realMoney:true }
 });
 
-const WEAPON_SKINS = Object.freeze({
-  blaster_neonstorm: { id:'blaster_neonstorm', name:'BLASTER · NEONSTORM', weaponId:'blaster', rarity:'Raro', priceGold:2500, priceDiamonds:0, attackBonus:8, style:'neonstorm' },
-  pulse_prism: { id:'pulse_prism', name:'PULSE · PRISMA', weaponId:'pulse', rarity:'Épico', priceGold:10000, priceDiamonds:0, attackBonus:15, style:'prism' },
-  cannon_solaris: { id:'cannon_solaris', name:'CANNON · SOLARIS', weaponId:'cannon', rarity:'Legendario', priceGold:0, priceDiamonds:1200, attackBonus:25, style:'solaris' },
-  railgun_eclipse: { id:'railgun_eclipse', name:'RAILGUN · ECLIPSE', weaponId:'railgun', rarity:'Supremo', priceGold:0, priceDiamonds:7000, attackBonus:40, style:'eclipse' },
-  nova_supernova: { id:'nova_supernova', name:'NOVA · SUPERNOVA', weaponId:'nova', rarity:'Supremo', priceGold:0, priceDiamonds:18000, attackBonus:65, style:'supernova' }
-});
+const WEAPON_SKINS = Object.freeze({});
 
 const REAL_MONEY_OFFERS = Object.freeze([
   { sku:'gm_core_usd', name:'SOBERANO DEL NÚCLEO', description:'Skin premium individual.', priceUsd:1, skinId:'gm_core', enabled:false }
@@ -31,7 +25,7 @@ const REAL_MONEY_OFFERS = Object.freeze([
 const REDEEM_CODES = Object.freeze({
   NEONSTART: { skinId:'pixel_cyan', message:'Código válido: desbloqueaste PIXEL CYAN.' },
   STARFORGE: { weaponId:'pulse', message:'Código válido: desbloqueaste PULSE y quedó equipado.' },
-  NEONARMORY: { weaponSkinId:'blaster_neonstorm', message:'Código válido: desbloqueaste BLASTER · NEONSTORM y quedó equipado.' },
+  NEONARMORY: { weaponId:'plasma', message:'Código válido: desbloqueaste PLASMA · INFERNO y quedó equipado.' },
   SOBERANO2026: { skinId:'gm_core', message:'Código de regalo válido: desbloqueaste SOBERANO DEL NÚCLEO para pruebas.' }
 });
 
@@ -88,12 +82,7 @@ function publicCatalog() {
 }
 
 function publicWeaponCatalog() {
-  return Object.values(WEAPON_SKINS).map(skin => ({
-    id:skin.id, name:skin.name, weaponId:skin.weaponId, rarity:skin.rarity,
-    priceGold:skin.priceGold, priceDiamonds:skin.priceDiamonds,
-    attackBonus:skin.attackBonus, style:skin.style,
-    redeemable:Object.values(REDEEM_CODES).some(x=>x.weaponSkinId===skin.id)
-  }));
+  return [];
 }
 
 function publicRealMoneyOffers() { return REAL_MONEY_OFFERS.map(offer => ({...offer})); }
