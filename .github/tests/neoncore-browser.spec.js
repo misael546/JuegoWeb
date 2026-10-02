@@ -204,7 +204,7 @@ test('menu principal: nombre y entrada a sala', async ({ browser }) => {
 });
 
 
-test('tienda de skins: NPC, pestañas y código de regalo', async ({ page }) => {
+test('SHOP: arsenal, skins, selección y canje', async ({ page }) => {
   const errors = [];
   page.on('pageerror', e => errors.push('PAGEERROR: ' + e.message));
   page.on('console', msg => {
@@ -215,43 +215,56 @@ test('tienda de skins: NPC, pestañas y código de regalo', async ({ page }) => 
 
   const startPos = parsePos(await page.locator('#neonDiag').innerText());
   const moveKeys = [];
-  if (2940 - startPos.x > 10) moveKeys.push('d');
-  else if (2940 - startPos.x < -10) moveKeys.push('a');
+  if (3000 - startPos.x > 10) moveKeys.push('d');
+  else if (3000 - startPos.x < -10) moveKeys.push('a');
   if (2200 - startPos.y > 10) moveKeys.push('s');
   else if (2200 - startPos.y < -10) moveKeys.push('w');
+
   for (const key of moveKeys) await page.keyboard.down(key);
   try {
     await expect(page.locator('#cosmeticShop')).toHaveCSS('display', 'flex', {timeout:5000});
   } finally {
     for (const key of moveKeys) await page.keyboard.up(key);
   }
-  await expect(page.locator('.shopTab[data-shop-tab="gold"]')).toBeVisible();
-  await expect(page.locator('.shopTab[data-shop-tab="diamonds"]')).toBeVisible();
-  await expect(page.locator('.shopTab[data-shop-tab="real"]')).toBeVisible();
+
+  await expect(page.locator('.shopTab[data-shop-section="arsenal"]')).toBeVisible();
+  await expect(page.locator('.shopTab[data-shop-section="skins"]')).toBeVisible();
+  await expect(page.locator('.shopTab[data-shop-section="redeem"]')).toBeVisible();
   await expect(page.locator('#cosmeticShopClose')).toHaveCount(0);
+  await expect(page.locator('#arsenalGrid')).toContainText('NOVA');
+  await expect(page.locator('#arsenalGrid')).toContainText('450');
+
+  await page.locator('.shopTab[data-shop-section="skins"]').click();
   await expect(page.locator('#skinShopGrid')).toContainText('NÚCLEO OXIDADO');
-
-  await page.locator('.shopTab[data-shop-tab="diamonds"]').click();
   await expect(page.locator('#skinShopGrid')).toContainText('AURORA');
+  await expect(page.locator('#skinShopGrid')).toContainText('SOBERANO DEL NÚCLEO');
 
-  await page.locator('.shopTab[data-shop-tab="real"]').click();
-  await expect(page.locator('#premiumGrid')).toContainText('PRÓXIMAMENTE');
+  const defaultCard = page.locator('.cosmeticCard[data-skin-id="core_default"]');
+  await expect(defaultCard).toContainText('SELECCIONADO');
 
+  await page.locator('.shopTab[data-shop-section="redeem"]').click();
   await page.locator('#redeemCode').fill('NEONSTART');
   await page.locator('#redeemCodeBtn').click();
   await expect(page.locator('#cosmeticShopMsg')).toContainText('PIXEL CYAN', {timeout:10000});
 
-  await page.locator('.shopTab[data-shop-tab="gold"]').click();
+  await page.locator('.shopTab[data-shop-section="skins"]').click();
   const pixelCard = page.locator('.cosmeticCard[data-skin-id="pixel_cyan"]');
-  await expect(pixelCard).toContainText('DESBLOQUEADO');
+  await expect(pixelCard).toContainText('SELECCIONADO');
 
-  await page.locator('#redeemCode').fill('GMNEONCORE');
-  await page.locator('#redeemCodeBtn').click();
-  await expect(page.locator('#cosmeticShopMsg')).toContainText('SOBERANO DEL NÚCLEO', {timeout:10000});
-  await expect(page.locator('.cosmeticCard[data-skin-id="gm_core"]')).toHaveCount(0);
+  const selectedCount = await page.locator('.cosmeticCard.selected').count();
+  expect(selectedCount).toBe(1);
+
+  await page.locator('#chatToggle').click();
+  await page.locator('#chatInput').fill('/soberano GMNEONCORE');
+  await page.locator('#chatForm').evaluate(form => form.requestSubmit());
+  await expect(page.locator('#chatMessages')).toContainText('SOBERANO DEL NÚCLEO', {timeout:10000});
+
+  await page.locator('.shopTab[data-shop-section="skins"]').click();
+  const gmCard = page.locator('.cosmeticCard[data-skin-id="gm_core"]');
+  await expect(gmCard).toContainText('SELECCIONADO');
 
   if (errors.length) {
-    throw new Error('Errores tienda: ' + errors.join(' | '));
+    throw new Error('Errores SHOP: ' + errors.join(' | '));
   }
 });
 
