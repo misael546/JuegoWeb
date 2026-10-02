@@ -158,6 +158,7 @@ test('menu público táctil: abrir sala desde el selector', async ({ browser }) 
 
   await expect(page.locator('.room[data-room="12345"]')).toBeVisible({timeout:15000});
   await expect(page.locator('#quickPlay')).toHaveCount(0);
+  await page.locator('#username').fill('PruebaMenu');
   await expect.poll(async () => page.locator('.room[data-room="12345"] .roomCount').innerText(), {timeout:20000, intervals:[500,1000]}).toMatch(/^\d+\/16 JUGADORES$/);
   await page.locator('.room[data-room="12345"]').dispatchEvent('pointerup', {
     pointerType: 'touch'
@@ -213,7 +214,7 @@ test('tienda de skins: NPC, pestañas y código de regalo', async ({ page }) => 
   await waitForLiveGame(page, '12345', {errors,wsEvents:[]});
 
   await page.keyboard.down('a');
-  await page.waitForTimeout(700);
+  await page.waitForTimeout(250);
   await page.keyboard.up('a');
 
   await expect(page.locator('#cosmeticShop')).toHaveCSS('display', 'flex', {timeout:10000});
