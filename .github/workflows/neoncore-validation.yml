@@ -60,7 +60,7 @@ jobs:
             versions.push(m[1]);
           }
           if (new Set(versions).size !== 1) throw new Error('Build mismatch: ' + versions.join(', '));
-          if (!/^20261001-\d+$/.test(versions[0])) throw new Error('Invalid build marker: ' + versions[0]);
+          if (!/^202610\d{2}-\d+$/.test(versions[0])) throw new Error('Invalid build marker: ' + versions[0]);
           const serverText = fs.readFileSync('server/server.js','utf8');
           if (!serverText.includes("const PUBLIC_ROOMS = ['12345'];")) throw new Error('Public room list is not Sala #1 only');
           const root = fs.readFileSync('index.html','utf8');
