@@ -60,20 +60,44 @@
 .shopUnifiedCard{width:min(820px,96vw)}.shopSection{margin-top:8px}.shopUnifiedGrid{grid-template-columns:repeat(3,minmax(0,1fr));}.shopWeaponCard{min-height:150px;border:1px solid #26344e;border-radius:13px;background:linear-gradient(180deg,#0d192b,#09111d);color:#fff;padding:10px;text-align:left;display:flex;flex-direction:column;gap:6px;box-shadow:0 8px 22px #0008}.shopWeaponCard.equipped{border-color:#39e7ff;box-shadow:0 0 22px #39e7ff22}.shopWeaponCard strong{color:#39e7ff;letter-spacing:1px}.shopWeaponCard small{color:#9ca9bd;font-size:10px;line-height:1.35}.shopWeaponCard .weaponStats{color:#dffbff;font-size:11px}.shopWeaponCard button{margin-top:auto;min-height:32px;border:0;border-radius:8px;background:#183d58;color:#fff;font-weight:bold}.shopWeaponCard.equipped button{background:#1d5f4e}.shopUnifiedMsg{display:block;color:#9ca9bd;margin-top:7px;font-size:11px;text-align:center}@media(max-width:700px){.shopUnifiedGrid{grid-template-columns:1fr}.shopUnifiedCard{padding:13px}}#weaponSkinGrid .weaponSkinCard{min-height:150px}
 .shopSubTitle{margin:10px 0 6px;color:#bfefff;font-size:11px;font-weight:800;letter-spacing:.08em}
 .shopUnequipBtn{width:100%;margin:0 0 8px;padding:9px 10px;border:1px solid #ff6b6b;background:#35131a;color:#fff;border-radius:8px;font-weight:800;cursor:pointer}
-.weaponPreview{border-radius:8px;box-shadow:inset 0 0 18px #39e7ff55}
+.weaponPreview{border-radius:8px;box-shadow:inset 0 0 18px #39e7ff55}.arsenalCompleteTitle{margin-top:4px}.shopUnifiedGrid{grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.shopWeaponCard{min-height:202px;padding:9px;justify-content:flex-start}
+.shopWeaponCard .weaponCardHead,.weaponSkinHead{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.shopWeaponCard .weaponCardHead span,.weaponSkinHead span{font-size:9px;color:#6ff3b0;border:1px solid #285a4a;border-radius:999px;padding:2px 6px;letter-spacing:.08em}
+.weaponCardVisual{height:58px;border:1px solid #26344e;border-radius:11px;position:relative;overflow:hidden;background:#0a1220;box-shadow:inset 0 0 24px #000,0 0 14px #39e7ff18}
+.weaponCardVisual:before{content:"";position:absolute;left:23%;right:15%;top:42%;height:16%;border-radius:999px;background:#39e7ff;box-shadow:0 0 15px #39e7ff}
+.weaponCardVisual:after{content:"";position:absolute;right:10%;top:39%;width:11px;height:22%;border-radius:4px;background:#fff;box-shadow:0 0 10px #fff}
+.weapon-base-blaster{background:radial-gradient(circle at 72% 50%,#143b4b,#091420 58%,#050a12)}
+.weapon-base-blaster:before{background:#39e7ff;box-shadow:0 0 18px #39e7ff}.weapon-base-blaster:after{background:#bafcff;box-shadow:0 0 12px #39e7ff}
+.weapon-base-pulse{background:radial-gradient(circle at 72% 50%,#362154,#0e1224 58%,#050a12)}.weapon-base-pulse:before{height:9%;top:34%;box-shadow:0 16px 0 #b56cff,0 0 16px #b56cff}.weapon-base-pulse:after{background:#f0d7ff;box-shadow:0 0 12px #c46dff}
+.weapon-base-cannon{background:radial-gradient(circle at 72% 50%,#4a2814,#14131a 58%,#050a12)}.weapon-base-cannon:before{height:31%;top:35%;background:#ff9f43;box-shadow:0 0 18px #ff8c32}.weapon-base-cannon:after{width:15px;height:34%;top:33%;background:#ffe0b8}
+.weapon-base-railgun{background:radial-gradient(circle at 72% 50%,#1b2448,#0e1323 58%,#050a12)}.weapon-base-railgun:before{height:8%;top:46%;background:#8fa8ff;box-shadow:0 0 18px #7d93ff}.weapon-base-railgun:after{width:5px;height:44%;top:28%;background:#ffe18a}
+.weapon-base-nova{background:radial-gradient(circle at 72% 50%,#5a3712,#15141b 58%,#050a12)}.weapon-base-nova:before{height:36%;top:32%;background:#fff1b8;box-shadow:0 0 20px #ff9b3f}.weapon-base-nova:after{width:18px;height:39%;top:30%;border-radius:50%;background:#fff;box-shadow:0 0 16px #ff9b3f}
+.weaponPreview{width:100%;height:58px;margin:0;border-radius:11px;overflow:hidden;background:#0a1220}
+.weaponPreview:before,.weaponPreview:after{content:"";position:absolute;display:block}
+.weapon-skin-blaster-neonstorm{background:radial-gradient(circle at 70% 50%,#124957,#0a1420 62%,#050a12);border-color:#39e7ff}
+.weapon-skin-blaster-neonstorm:before{left:22%;right:12%;top:42%;height:13%;border-radius:999px;background:#39e7ff;box-shadow:0 0 17px #39e7ff}.weapon-skin-blaster-neonstorm:after{right:10%;top:35%;width:12px;height:30%;border-radius:5px;background:#bafcff;box-shadow:0 0 15px #39e7ff}
+.weapon-skin-pulse-prism{background:radial-gradient(circle at 70% 50%,#392267,#0d1223 62%,#050a12);border-color:#c58cff}.weapon-skin-pulse-prism:before{left:22%;right:12%;top:31%;height:8%;background:#c58cff;box-shadow:0 15px 0 #8d62ff,0 0 17px #c58cff}.weapon-skin-pulse-prism:after{right:10%;top:28%;width:10px;height:44%;border-radius:5px;background:#f7eaff}
+.weapon-skin-cannon-solaris{background:radial-gradient(circle at 70% 50%,#493218,#15131a 62%,#050a12);border-color:#ffd76a}.weapon-skin-cannon-solaris:before{left:20%;right:10%;top:34%;height:32%;border-radius:7px;background:#ffd76a;box-shadow:0 0 18px #ff9f43}.weapon-skin-cannon-solaris:after{right:7%;top:29%;width:16px;height:42%;border-radius:7px;background:#fff4c7;box-shadow:0 0 14px #ffd76a}
+.weapon-skin-railgun-eclipse{background:radial-gradient(circle at 70% 50%,#23284a,#0d1221 62%,#050a12);border-color:#a4b6ff}.weapon-skin-railgun-eclipse:before{left:20%;right:8%;top:45%;height:9%;background:#a4b6ff;box-shadow:0 0 18px #7d8fff}.weapon-skin-railgun-eclipse:after{right:8%;top:25%;width:6px;height:50%;background:#ffe18a;box-shadow:0 0 12px #ffe18a}
+.weapon-skin-nova-supernova{background:radial-gradient(circle at 70% 50%,#523517,#15131a 62%,#050a12);border-color:#fff1b8}.weapon-skin-nova-supernova:before{left:18%;right:8%;top:31%;height:38%;border-radius:9px;background:#fff6d4;box-shadow:0 0 20px #ff713d}.weapon-skin-nova-supernova:after{right:6%;top:25%;width:19px;height:50%;border-radius:50%;background:#fff;box-shadow:0 0 17px #ff9b3f}
+.weaponPreview:global(i){display:none}
+@media(max-width:1000px){.shopUnifiedGrid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:700px){.shopUnifiedGrid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.shopWeaponCard{min-height:188px}}
+
 </style>
 <script>
 (function(){try{if(/\/(?:12345|67890)(?:\/|\/index\.html)?(?:$|[?#])/.test(location.pathname+location.search)){document.documentElement.classList.add("public-room");}}catch(e){}})();
 </script>
 </head>
 <body>
-<canvas id="game"></canvas><div id="buildDisplay">NEON CORE · Build 146</div>
+<canvas id="game"></canvas><div id="buildDisplay">NEON CORE · Build 150</div>
 
 <div id="hud">
   <div class="panel" id="bars">
     <b>NEON CORE</b>· <span id="level">Nv. 1</span> · ☠ <span id="pvpKills">0</span>
     <div class="bar"><i id="hpFill"></i><span class="barLabel">❤️ <span id="hp">100</span>/<span id="maxHp">100</span></span></div>
-    <div class="bar xpbar"><i id="xpFill"></i><span class="barLabel">XP <span id="xp">0</span>/<span id="xpNeed">100</span></span></div><div class="bar masterybar"><i id="attackFill"></i><span class="barLabel">⚔ ATAQUE T<span id="attackLevel">1</span> · <span id="attackPower">35</span></span></div><div class="bar masterybar"><i id="defenseFill"></i><span class="barLabel">🛡 DEFENSA <span id="defenseValue">0</span></span></div>
+    <div class="bar xpbar"><i id="xpFill"></i><span class="barLabel">XP <span id="xp">0</span>/<span id="xpNeed">100</span></span></div><div class="bar masterybar"><i id="attackFill"></i><span class="barLabel">⚔ ATAQUE · <span id="attackPower">35</span></span></div><div class="bar masterybar"><i id="defenseFill"></i><span class="barLabel">🛡 DEFENSA <span id="defenseValue">0</span></span></div>
     <small>🎯 <span id="kills">0</span></small><div id="resourceHud"><span>🪙 <b id="gold">0</b></span><span>💎 <b id="diamonds">0</b></span><span>🔸 <b id="ammo">60</b>/<b id="maxAmmo">220</b></span></div>
   <div id="weaponHud">ARMA: <b id="weaponName">BLASTER</b></div>
 </div>
@@ -95,9 +119,8 @@
     </div>
 
     <section id="shopArsenalSection" class="shopSection">
+      <div class="shopSubTitle arsenalCompleteTitle">⚔ ARSENAL COMPLETO · ARMAS + SKINS</div>
       <div id="arsenalGrid" class="shopGrid shopUnifiedGrid"></div>
-      <div class="shopSubTitle">🎨 SKINS DEL ARSENAL</div>
-      <div id="weaponSkinGrid" class="shopGrid shopUnifiedGrid"></div>
       <button id="buyAmmoBtn" type="button">🔸 COMPRAR 100 BALAS · 🪙 75</button>
       <small id="shopMsg" class="shopUnifiedMsg">Equipa un arsenal. Puedes desequiparlo y retirar sus buffs.</small>
     </section>
@@ -166,11 +189,11 @@ const p={x:3000,y:2200,r:16,angle:0,hp:100,maxHp:100,xp:0,level:1,score:0,kills:
 const shopNpc={x:3000,y:2200,r:24};
 const weaponNames={blaster:"BLASTER",pulse:"PULSE",cannon:"CANNON",railgun:"RAILGUN",nova:"NOVA"};
 const weaponStats={
-  blaster:{name:"BLASTER",damage:35,fireRate:320,tier:1,maxAmmo:220,cost:0,range:760},
-  pulse:{name:"PULSE",damage:70,fireRate:230,tier:2,maxAmmo:260,cost:500,range:820},
-  cannon:{name:"CANNON",damage:140,fireRate:620,tier:3,maxAmmo:320,cost:1500,range:880},
-  railgun:{name:"RAILGUN",damage:260,fireRate:900,tier:4,maxAmmo:380,cost:6500,range:960},
-  nova:{name:"NOVA",damage:520,fireRate:1350,tier:5,maxAmmo:450,cost:22000,range:1040}
+  blaster:{name:"BLASTER",damage:35,fireRate:320,maxAmmo:220,cost:0,range:760},
+  pulse:{name:"PULSE",damage:70,fireRate:230,maxAmmo:260,cost:500,range:820},
+  cannon:{name:"CANNON",damage:140,fireRate:620,maxAmmo:320,cost:1500,range:880},
+  railgun:{name:"RAILGUN",damage:260,fireRate:900,maxAmmo:380,cost:6500,range:960},
+  nova:{name:"NOVA",damage:520,fireRate:1350,maxAmmo:450,cost:22000,range:1040}
 };
 let shopOpen=false,shopSection="arsenal";
 const SHOP_INTERACTION_RADIUS_CLIENT=48;
@@ -193,15 +216,15 @@ let cosmeticShopNpc={...shopNpc};
 let ownedSkins=["core_default"],equippedSkin="core_default";
 let ownedWeapons=["blaster"],equippedWeaponSkin="",ownedWeaponSkins=[];
 let weaponSkinCatalog=[
-{id:"blaster_neonstorm",name:"BLASTER · NEONSTORM",weaponId:"blaster",rarity:"Raro",priceGold:2500,priceDiamonds:0,attackBonus:8,defenseBonus:0,style:"neonstorm",redeemable:false},
-{id:"pulse_prism",name:"PULSE · PRISMA",weaponId:"pulse",rarity:"Épico",priceGold:10000,priceDiamonds:0,attackBonus:15,defenseBonus:0,style:"prism",redeemable:false},
-{id:"cannon_solaris",name:"CANNON · SOLARIS",weaponId:"cannon",rarity:"Legendario",priceGold:0,priceDiamonds:1200,attackBonus:25,defenseBonus:0,style:"solaris",redeemable:false},
-{id:"railgun_eclipse",name:"RAILGUN · ECLIPSE",weaponId:"railgun",rarity:"Supremo",priceGold:0,priceDiamonds:7000,attackBonus:40,defenseBonus:0,style:"eclipse",redeemable:false},
-{id:"nova_supernova",name:"NOVA · SUPERNOVA",weaponId:"nova",rarity:"Supremo",priceGold:0,priceDiamonds:18000,attackBonus:65,defenseBonus:0,style:"supernova",redeemable:false}
+{id:"blaster_neonstorm",name:"BLASTER · NEONSTORM",weaponId:"blaster",rarity:"Raro",priceGold:2500,priceDiamonds:0,attackBonus:8,style:"neonstorm",redeemable:false},
+{id:"pulse_prism",name:"PULSE · PRISMA",weaponId:"pulse",rarity:"Épico",priceGold:10000,priceDiamonds:0,attackBonus:15,style:"prism",redeemable:false},
+{id:"cannon_solaris",name:"CANNON · SOLARIS",weaponId:"cannon",rarity:"Legendario",priceGold:0,priceDiamonds:1200,attackBonus:25,style:"solaris",redeemable:false},
+{id:"railgun_eclipse",name:"RAILGUN · ECLIPSE",weaponId:"railgun",rarity:"Supremo",priceGold:0,priceDiamonds:7000,attackBonus:40,style:"eclipse",redeemable:false},
+{id:"nova_supernova",name:"NOVA · SUPERNOVA",weaponId:"nova",rarity:"Supremo",priceGold:0,priceDiamonds:18000,attackBonus:65,style:"supernova",redeemable:false}
 ];
 let cosmeticShopWasNear=false,cosmeticShopDismissedUntil=0;
 let bullets=[],enemies=[],drops=[],particles=[],walls=[],hitTexts=[],bossProjectiles=[],bossWarnings=[];
-let serverXpNeed=100,serverKillsToLevel=5,serverAttackLevel=1,serverAttackPower=35,serverAttackFill=20,serverDefense=0,serverDefenseMax=125;
+let serverXpNeed=100,serverKillsToLevel=5,serverAttackPower=35,serverAttackFill=6,serverDefense=0,serverDefenseMax=125;
 let gameActive=false;
 let camera={x:p.x,y:p.y},last=performance.now(),playerName="";
 let safeZone={x:3000,y:2200,r:300};
@@ -491,7 +514,6 @@ function connectMultiplayer(roomMode="quick",roomCode=""){ const publicRoomAuto=
             if(Number(m.hp)<=0)enemyExplosion(e);
           }
         }else if(m.type==="hit_confirm"){
-          if(Number.isFinite(m.attackLevel))serverAttackLevel=m.attackLevel;
           if(Number.isFinite(m.attackPower))serverAttackPower=m.attackPower;
           showFloatingHit(Number(m.x)||p.x,Number(m.y)||p.y,Number(m.amount)||0,m.kind==="player"?"#ff6f8f":"#ffe27a");
           burst(Number(m.x)||p.x,Number(m.y)||p.y,m.kind==="player"?"#ff5474":"#ffcf5a",6);
@@ -524,7 +546,7 @@ function connectMultiplayer(roomMode="quick",roomCode=""){ const publicRoomAuto=
           applyServerRespawn(r);
           enemies.length=0;
         }else if(m.type==="boss_explosion"){
-          const ex=Number(m.x)||p.x,ey=Number(m.y)||p.y,er=Math.max(80,Number(m.r)||190);
+          const ex=Number(m.x)||p.x,ey=Number(m.y)||p.y,er=Math.max(80,Number(m.r)||125);
           burst(ex,ey,m.blocked?"#ff8b4a":"#ff3b32",m.blocked?22:42);
           particles.push({x:ex,y:ey,vx:0,vy:0,life:.55,maxLife:.55,color:"#ffd76a",size:er,ring:true});
           if(Math.hypot(p.x-ex,p.y-ey)<=er+p.r)showToast("⚠ IMPACTO DEL DESTRUCTOR ESTELAR");
@@ -563,7 +585,6 @@ function connectMultiplayer(roomMode="quick",roomCode=""){ const publicRoomAuto=
            if(Array.isArray(m.ownedWeaponSkins))ownedWeaponSkins=m.ownedWeaponSkins;
            if(Array.isArray(m.weaponSkinCatalog))weaponSkinCatalog=m.weaponSkinCatalog;
           if(Number.isFinite(m.xpNeed))serverXpNeed=m.xpNeed;
-          if(Number.isFinite(m.attackLevel))serverAttackLevel=m.attackLevel;
           if(Number.isFinite(m.attackPower))serverAttackPower=m.attackPower;
           if(Number.isFinite(m.attackFill))serverAttackFill=m.attackFill;
           if(Number.isFinite(m.defense))serverDefense=m.defense;
@@ -962,21 +983,77 @@ function drawTank(x,y,angle,color="#39e7ff",r=24,weapon="",skinId="",weaponSkinI
   if(skin==="eternal_void"){ctx.strokeStyle="#e879ff";ctx.lineWidth=2;ctx.beginPath();ctx.arc(0,0,r*.8,-2.7,.2);ctx.stroke();ctx.strokeStyle="#39e7ff";ctx.beginPath();ctx.arc(0,0,r*.72,.55,2.9);ctx.stroke();}
   drawSkinEffects(skin,r);
   if(!weapon)return ctx.restore();
-  ctx.fillStyle="#142238";ctx.fillRect(-r*.15,-7,r+10,14);
-  if(weaponSkinId==="blaster_neonstorm"){ctx.fillStyle="#39e7ff";ctx.shadowBlur=12;ctx.shadowColor="#39e7ff";ctx.fillRect(r+4,-4,24,8);ctx.shadowBlur=0;}
-  else if(weaponSkinId==="pulse_prism"){ctx.fillStyle="#dca8ff";ctx.fillRect(r-2,-10,r+14,6);ctx.fillRect(r-2,4,r+14,6);}
-  else if(weaponSkinId==="cannon_solaris"){ctx.fillStyle="#ffd76a";ctx.fillRect(r-2,-11,r+24,22);}
-  else if(weaponSkinId==="railgun_eclipse"){ctx.fillStyle="#a4b6ff";ctx.fillRect(r-2,-6,r+28,12);ctx.strokeStyle="#ffd76a";ctx.strokeRect(r+7,-7,r+14,14);}
-  else if(weaponSkinId==="nova_supernova"){ctx.fillStyle="#fff1b8";ctx.shadowBlur=14;ctx.shadowColor="#ff9b3f";ctx.fillRect(r-2,-11,r+28,22);ctx.shadowBlur=0;}
-  else if(weapon==="pulse"){
-    ctx.fillStyle="#b56cff";ctx.fillRect(r-2,-10,r+10,6);ctx.fillRect(r-2,4,r+10,6);
-    ctx.fillStyle="#f0d7ff";ctx.fillRect(r+8,-9,10,4);ctx.fillRect(r+8,5,10,4);
-  }else if(weapon==="cannon"){
-    ctx.fillStyle="#ff9f43";ctx.fillRect(r-2,-10,r+20,20);
-    ctx.fillStyle="#ffe0b8";ctx.fillRect(r+14,-7,13,14);
+
+  const wt=performance.now()/1000;
+  const weaponId=String(weapon||"blaster");
+  const weaponSkin=String(weaponSkinId||"");
+  const visualByWeapon={
+    blaster:{base:"#39e7ff",accent:"#bafcff",glow:"#39e7ff",core:"#0b6f83",len:23,thick:7},
+    pulse:{base:"#b56cff",accent:"#f0d7ff",glow:"#c46dff",core:"#5e2f97",len:28,thick:6},
+    cannon:{base:"#ff9f43",accent:"#ffe0b8",glow:"#ff8c32",core:"#8a4217",len:27,thick:13},
+    railgun:{base:"#8fa8ff",accent:"#dce4ff",glow:"#7d93ff",core:"#27345f",len:34,thick:6},
+    nova:{base:"#fff1b8",accent:"#ffffff",glow:"#ff9b3f",core:"#8f5b18",len:35,thick:15}
+  };
+  const skinVisuals={
+    blaster_neonstorm:{base:"#39e7ff",accent:"#a8ffff",glow:"#39e7ff"},
+    pulse_prism:{base:"#c58cff",accent:"#f7eaff",glow:"#9c5dff"},
+    cannon_solaris:{base:"#ffd76a",accent:"#fff4c7",glow:"#ff9f43"},
+    railgun_eclipse:{base:"#a4b6ff",accent:"#ffe18a",glow:"#7d8fff"},
+    nova_supernova:{base:"#fff6d4",accent:"#ffbc62",glow:"#ff713d"}
+  };
+  const v=visualByWeapon[weaponId]||visualByWeapon.blaster;
+  const sv=skinVisuals[weaponSkin]||null;
+  const base=sv?.base||v.base,accent=sv?.accent||v.accent,glow=sv?.glow||v.glow;
+
+  ctx.save();
+  ctx.globalCompositeOperation="lighter";
+  ctx.shadowBlur=12;
+  ctx.shadowColor=glow;
+
+  if(weaponId==="pulse"){
+    ctx.fillStyle="#131f35";ctx.fillRect(r-1,-11,v.len,5);ctx.fillRect(r-1,6,v.len,5);
+    ctx.fillStyle=base;ctx.fillRect(r+2,-9,v.len-4,3);ctx.fillRect(r+2,6,v.len-4,3);
+    ctx.fillStyle=accent;ctx.fillRect(r+v.len-2,-8,6,2);ctx.fillRect(r+v.len-2,6,6,2);
+  }else if(weaponId==="cannon"){
+    ctx.fillStyle="#172238";ctx.fillRect(r-2,-v.thick/2,v.len,v.thick);
+    ctx.fillStyle=base;ctx.fillRect(r+1,-v.thick/2+2,v.len-7,v.thick-4);
+    ctx.fillStyle=accent;ctx.fillRect(r+v.len-7,-v.thick/2-2,8,v.thick+4);
+    ctx.fillStyle="#11192a";ctx.fillRect(r+7,-v.thick/2-3,4,v.thick+6);
+  }else if(weaponId==="railgun"){
+    ctx.fillStyle="#121c31";ctx.fillRect(r-1,-4,v.len+8,8);
+    ctx.fillStyle=base;ctx.fillRect(r,v.thick/-2,v.len+2,v.thick);
+    ctx.fillStyle=accent;ctx.fillRect(r+7,-7,5,14);ctx.fillRect(r+v.len-4,-6,4,12);
+  }else if(weaponId==="nova"){
+    ctx.fillStyle="#171f30";ctx.fillRect(r-2,-v.thick/2,v.len+4,v.thick);
+    ctx.fillStyle=base;ctx.fillRect(r+1,-v.thick/2+2,v.len-2,v.thick-4);
+    ctx.fillStyle=accent;ctx.beginPath();ctx.arc(r+v.len+1,0,7,0,Math.PI*2);ctx.fill();
   }else{
-    ctx.fillStyle="#dffbff";ctx.fillRect(r+7,-3,12,6);
+    ctx.fillStyle="#142238";ctx.fillRect(r-1,-4,v.len,8);
+    ctx.fillStyle=base;ctx.fillRect(r+2,-3,v.len-5,6);
+    ctx.fillStyle=accent;ctx.fillRect(r+v.len-3,-2,7,4);
   }
+
+  // Partículas visibles de la propia arma: ligeras y deterministas, sin llenar el
+  // sistema global de partículas en cada frame.
+  for(let i=0;i<5;i++){
+    const phase=wt*(1.4+i*.17)+i*1.7+(weaponSkin?0.55:0);
+    const forward=r+v.len-2+Math.sin(phase)*4;
+    const side=Math.cos(phase*1.23+i)*Math.min(8,r*.34);
+    const rr=1.2+(i%3)*.45;
+    ctx.fillStyle=i%2?accent:base;
+    ctx.globalAlpha=.34+.2*(i%3);
+    ctx.beginPath();ctx.arc(forward-side*.14,side,rr,0,Math.PI*2);ctx.fill();
+  }
+  ctx.globalAlpha=1;
+  ctx.shadowBlur=0;
+
+  // Anillo/contorno de skin para distinguir visualmente la decoración equipada.
+  if(sv){
+    ctx.strokeStyle=accent;ctx.lineWidth=1.5;ctx.globalAlpha=.72;
+    ctx.beginPath();ctx.arc(r+v.len*.45,0,Math.max(7,v.thick*.72),-Math.PI*.62,Math.PI*.62);ctx.stroke();
+    ctx.globalAlpha=1;
+  }
+  ctx.restore();
   ctx.restore();
 }
 function drawEnemy(e){
@@ -1113,32 +1190,54 @@ function weaponCostText(item){
   return "GRATIS";
 }
 function renderArsenal(){
-  const grid=document.getElementById("arsenalGrid"),skinGrid=document.getElementById("weaponSkinGrid");
+  const grid=document.getElementById("arsenalGrid");
   if(!grid)return;
-  grid.innerHTML=Object.entries(weaponStats).map(([id,item])=>{
+
+  const weaponCards=Object.entries(weaponStats).map(([id,item])=>{
     const selected=p.weapon===id,owned=ownedWeapons.includes(id);
     const action=selected?"✓ EQUIPADA · CLIC PARA DESEQUIPAR":owned?"EQUIPAR":"COMPRAR";
-    return '<div class="shopWeaponCard '+(selected?"equipped":"")+'"><strong>'+item.name+'</strong><div class="weaponStats">⚔ ATAQUE T'+item.tier+' · '+item.damage+' base</div><small>⏱ '+item.fireRate+'ms · 🔸 '+item.maxAmmo+' · 🎯 '+item.range+' rango</small><small>'+((item.cost||0)===0?"Gratis":"🪙 "+item.cost.toLocaleString("es-MX"))+'</small><button type="button" data-weapon-buy="'+id+'">'+action+'</button></div>';
+    return '<div class="shopWeaponCard '+(selected?"equipped":"")+'">'+
+      '<div class="weaponCardVisual weapon-base-'+id+'"></div>'+
+      '<div class="weaponCardHead"><strong>'+item.name+'</strong><span>ARMA</span></div>'+
+      '<div class="weaponStats">⚔ ATAQUE · '+item.damage+' base</div>'+
+      '<small>⏱ '+item.fireRate+'ms · 🔸 '+item.maxAmmo+' · 🎯 '+item.range+' rango</small>'+
+      '<small>'+((item.cost||0)===0?"Gratis":"🪙 "+item.cost.toLocaleString("es-MX"))+'</small>'+
+      '<button type="button" data-weapon-buy="'+id+'">'+action+'</button>'+
+    '</div>';
   }).join("");
-  grid.querySelectorAll("[data-weapon-buy]").forEach(btn=>btn.addEventListener("click",e=>{e.preventDefault();e.stopPropagation();sendShopCommand("buy_weapon",btn.dataset.weaponBuy);}));
-  if(skinGrid){
-    skinGrid.innerHTML=weaponSkinCatalog.map(item=>{
-      const owned=ownedWeaponSkins.includes(item.id),selected=equippedWeaponSkin===item.id,compatible=p.weapon===item.weaponId;
-      const action=selected?"✓ EQUIPADA · DESEQUIPAR":owned?"EQUIPAR":item.redeemable?"🎁 CANJEAR":compatible?"COMPRAR":"EQUIPA "+(weaponNames[item.weaponId]||item.weaponId);
-      const cost=item.redeemable?"🎁 Código de regalo":weaponCostText(item);
-      return '<button type="button" class="cosmeticCard weaponSkinCard '+(owned?"owned ":"")+(selected?"selected ":"")+'" data-weapon-skin-id="'+item.id+'"><div class="skinPreview weaponPreview weapon-skin-'+String(item.id).replace(/_/g,"-")+'"></div><strong>'+item.name+'</strong><small>'+item.rarity+' · ⚔ +'+Number(item.attackBonus||0)+' ATAQUE · 🛡 +'+Number(item.defenseBonus||0)+' DEF<br>Compatible: '+(weaponNames[item.weaponId]||item.weaponId)+'</small><span class="cosmeticCost">'+cost+'</span><span class="cosmeticAction">'+action+'</span></button>';
-    }).join("");
-    skinGrid.querySelectorAll("[data-weapon-skin-id]").forEach(btn=>btn.addEventListener("click",e=>{
-      e.preventDefault();e.stopPropagation();
-      const item=weaponSkinCatalog.find(x=>x.id===btn.dataset.weaponSkinId);if(!item)return;
-      if(item.redeemable&&!ownedWeaponSkins.includes(item.id)){setShopSection("redeem");showCosmeticMsg("Usa CENTRO DE CÓDIGOS para esta recompensa.");return;}
-      if(equippedWeaponSkin===item.id){sendCosmeticCommand("equip_weapon_skin","");return;}
-      if(ownedWeaponSkins.includes(item.id)){sendCosmeticCommand("equip_weapon_skin",item.id);return;}
-      if(p.weapon!==item.weaponId){showShopMsg("Equipa primero "+(weaponNames[item.weaponId]||item.weaponId)+".");return;}
-      sendCosmeticCommand("buy_weapon_skin",item.id);
-    }));
-  }
-  const msg=document.getElementById("shopMsg");if(msg)msg.textContent=p.weapon?"El arsenal equipado define tu ATAQUE; las skins de arsenal solo pueden sumar ATAQUE.":"Arsenal desequipado · ATAQUE base 10 y sin munición.";
+
+  const skinCards=weaponSkinCatalog.map(item=>{
+    const owned=ownedWeaponSkins.includes(item.id),selected=equippedWeaponSkin===item.id,compatible=p.weapon===item.weaponId;
+    const action=selected?"✓ EQUIPADA · DESEQUIPAR":owned?"EQUIPAR":item.redeemable?"🎁 CANJEAR":compatible?"COMPRAR":"EQUIPA "+(weaponNames[item.weaponId]||item.weaponId);
+    const cost=item.redeemable?"🎁 Código de regalo":weaponCostText(item);
+    return '<button type="button" class="cosmeticCard weaponSkinCard '+(owned?"owned ":"")+(selected?"selected ":"")+'" data-weapon-skin-id="'+item.id+'">'+
+      '<div class="skinPreview weaponPreview weapon-skin-'+String(item.id).replace(/_/g,"-")+'"></div>'+
+      '<div class="weaponSkinHead"><strong>'+item.name+'</strong><span>SKIN</span></div>'+
+      '<small>'+item.rarity+' · ⚔ +'+Number(item.attackBonus||0)+' ATAQUE<br>Compatible: '+(weaponNames[item.weaponId]||item.weaponId)+'</small>'+
+      '<span class="cosmeticCost">'+cost+'</span><span class="cosmeticAction">'+action+'</span>'+
+    '</button>';
+  }).join("");
+
+  grid.innerHTML=weaponCards+skinCards;
+
+  grid.querySelectorAll("[data-weapon-buy]").forEach(btn=>btn.addEventListener("click",e=>{
+    e.preventDefault();e.stopPropagation();sendShopCommand("buy_weapon",btn.dataset.weaponBuy);
+  }));
+
+  grid.querySelectorAll("[data-weapon-skin-id]").forEach(btn=>btn.addEventListener("click",e=>{
+    e.preventDefault();e.stopPropagation();
+    const item=weaponSkinCatalog.find(x=>x.id===btn.dataset.weaponSkinId);if(!item)return;
+    if(item.redeemable&&!ownedWeaponSkins.includes(item.id)){setShopSection("redeem");showCosmeticMsg("Usa CENTRO DE CÓDIGOS para esta recompensa.");return;}
+    if(equippedWeaponSkin===item.id){sendCosmeticCommand("equip_weapon_skin","");return;}
+    if(ownedWeaponSkins.includes(item.id)){sendCosmeticCommand("equip_weapon_skin",item.id);return;}
+    if(p.weapon!==item.weaponId){showShopMsg("Equipa primero "+(weaponNames[item.weaponId]||item.weaponId)+".");return;}
+    sendCosmeticCommand("buy_weapon_skin",item.id);
+  }));
+
+  const msg=document.getElementById("shopMsg");
+  if(msg)msg.textContent=p.weapon
+    ? "Cada arma tiene ATAQUE propio. Las skins del arsenal solo suman ATAQUE y nunca DEFENSA."
+    : "Arsenal desequipado · ATAQUE base 10 y sin munición.";
 }
 function renderSkinShop(){
   const grid=document.getElementById("skinShopGrid");if(!grid)return;
@@ -1146,7 +1245,7 @@ function renderSkinShop(){
     const owned=ownedSkins.includes(item.id),selected=equippedSkin===item.id;
     const action=selected?"✓ SELECCIONADO":owned?"EQUIPAR":item.currency==="code"?"🎁 CANJEAR":"COMPRAR";
     const cost=item.currency==="code"?"🎁 Código de regalo":skinCostText(item);
-    return '<button type="button" class="cosmeticCard '+(owned?"owned ":"")+(selected?"selected ":"")+'" data-skin-id="'+item.id+'"><div class="skinPreview '+skinClass(item.id)+'"></div><strong>'+item.name+'</strong><small>'+item.rarity+' · 🛡 +'+Number(item.defenseBonus||0)+' DEF<br>'+item.desc+'</small><span class="cosmeticCost">'+cost+'</span><span class="cosmeticAction">'+action+'</span></button>';
+    return '<button type="button" class="cosmeticCard '+(owned?"owned ":"")+(selected?"selected ":"")+'" data-skin-id="'+item.id+'"><div class="skinPreview '+skinClass(item.id)+'"></div><strong>'+item.name+'</strong><small>'+item.rarity+'<br>'+item.desc+'</small><span class="cosmeticCost">'+cost+'</span><span class="cosmeticAction">'+action+'</span></button>';
   }).join("");
   document.getElementById("unequipTankSkin")?.addEventListener("click",e=>{e.preventDefault();e.stopPropagation();sendCosmeticCommand("equip_skin","");});
   grid.querySelectorAll(".cosmeticCard").forEach(btn=>btn.addEventListener("click",e=>{
@@ -1320,7 +1419,7 @@ function draw(){
 
   for(const warning of bossWarnings){
     const remain=Math.max(0,(Number(warning.hitAt)||0)-Date.now());
-    const progress=clamp(1-remain/1400,0,1);
+    const progress=clamp(1-remain/1200,0,1);
     const x=sx(warning.x),y=sy(warning.y),r=warning.r*(.72+.28*Math.sin(progress*Math.PI));
     ctx.save();
     ctx.globalAlpha=.18+.32*progress;ctx.fillStyle="#ff3b32";ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill();
@@ -1380,7 +1479,6 @@ function draw(){
   const need=Math.max(1,serverXpNeed);
   document.getElementById("xp").textContent=p.xp;
   document.getElementById("xpNeed").textContent=need;
-  document.getElementById("attackLevel").textContent=serverAttackLevel;
   document.getElementById("attackPower").textContent=Math.round(serverAttackPower);
   document.getElementById("defenseValue").textContent=Math.round(serverDefense);
   document.getElementById("hpFill").style.width=clamp(p.hp/p.maxHp*100,0,100)+"%";
