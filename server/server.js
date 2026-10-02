@@ -11,7 +11,7 @@ const WORLD = { w: 6000, h: 4400 };
 const MAX_PLAYERS = 16;
 const SAFE_ZONE = { x: 3000, y: 2200, r: 300 };
 
-const SERVER_VERSION = '20261002-146';
+const SERVER_VERSION = '20261002-147';
 
 const AMMO_PACK_SIZE = 100;
 const AMMO_PACK_COST = 75;
@@ -42,8 +42,8 @@ const BOSS_GOLD_REWARD = 15000;
 const BOSS_XP_REWARD = 5000;
 const BOSS_HP = 60000;
 const BOSS_NAME = 'DESTRUCTOR ESTELAR';
-const BOSS_AGGRO_RANGE = 1150;
-const BOSS_ATTACK_RANGE = 900;
+const BOSS_AGGRO_RANGE = 1250;
+const BOSS_ATTACK_RANGE = 980;
 const BOSS_PROJECTILE_DAMAGE = 260;
 const BOSS_PROJECTILE_SPEED = 230;
 const BOSS_PROJECTILE_COOLDOWN_MS = 2800;
@@ -663,6 +663,26 @@ function distancePointToSegment(px, py, x1, y1, x2, y2) {
   const cx = x1 + dx * t;
   const cy = y1 + dy * t;
   return Math.hypot(px - cx, py - cy);
+}
+
+function rayCircleDistance(originX, originY, dirX, dirY, targetX, targetY, radius) {
+  // Devuelve la primera distancia positiva donde un rayo normalizado
+  // atraviesa el círculo de colisión del objetivo.
+  const dx = targetX - originX;
+  const dy = targetY - originY;
+  const projection = dx * dirX + dy * dirY;
+  if (projection < 0) return Infinity;
+
+  const perpendicularSq = Math.max(
+    0,
+    dx * dx + dy * dy - projection * projection
+  );
+  const radiusSq = radius * radius;
+  if (perpendicularSq > radiusSq) return Infinity;
+
+  const offset = Math.sqrt(Math.max(0, radiusSq - perpendicularSq));
+  const hit = projection - offset;
+  return hit >= 0 ? hit : projection + offset;
 }
 
 function randomEnemySpawnPoint(radius = 24) {
@@ -1478,6 +1498,10 @@ function handleShot(ws) {
   const dirX = Math.cos(shooter.angle);
   const dirY = Math.sin(shooter.angle);
 
+  const enemies = ensureRoomEnemies(shooter.room);
+
+  // La bala tiene una trayectoria física server-authoritative:
+  // el primer jugador/enemigo que toque detiene el disparo.
   for (const otherWs of room) {
     const targetPlayerData = clients.get(otherWs);
 
@@ -1490,40 +1514,36 @@ function handleShot(ws) {
       continue;
     }
 
-    const dx = targetPlayerData.x - shooter.x;
-    const dy = targetPlayerData.y - shooter.y;
-    const d = Math.hypot(dx, dy);
+    const hitDistance = rayCircleDistance(
+      shooter.x,
+      shooter.y,
+      dirX,
+      dirY,
+      targetPlayerData.x,
+      targetPlayerData.y,
+      28
+    );
 
-    if (d > maxRange) continue;
-
-    let diff = Math.atan2(dy, dx) - shooter.angle;
-    diff = Math.atan2(Math.sin(diff), Math.cos(diff));
-
-    const hitWidth = 0.16 + 24 / Math.max(d, 60);
-
-    if (Math.abs(diff) <= hitWidth && d < best) {
-      best = d;
+    if (hitDistance <= maxRange && hitDistance < best) {
+      best = hitDistance;
       targetPlayer = { ws: otherWs, p: targetPlayerData };
       targetEnemy = null;
     }
   }
 
-  const enemies = ensureRoomEnemies(shooter.room);
-
   for (const enemy of enemies) {
-    const dx = enemy.x - shooter.x;
-    const dy = enemy.y - shooter.y;
-    const d = Math.hypot(dx, dy);
+    const hitDistance = rayCircleDistance(
+      shooter.x,
+      shooter.y,
+      dirX,
+      dirY,
+      enemy.x,
+      enemy.y,
+      Math.max(18, Number(enemy.r) || 22) + 4
+    );
 
-    if (d > maxRange) continue;
-
-    let diff = Math.atan2(dy, dx) - shooter.angle;
-    diff = Math.atan2(Math.sin(diff), Math.cos(diff));
-
-    const hitWidth = 0.16 + enemy.r / Math.max(d, 60);
-
-    if (Math.abs(diff) <= hitWidth && d < best) {
-      best = d;
+    if (hitDistance <= maxRange && hitDistance < best) {
+      best = hitDistance;
       targetEnemy = enemy;
       targetPlayer = null;
     }
@@ -2370,7 +2390,10 @@ setInterval(() => {
       }
 
       if (target) {
-        if (best > 220) moveEnemyToward(boss, target.x, target.y, dt, walls);
+        if (best > 220) {
+          moveEnemyToward(boss, target.x, target.y, dt, walls);
+          best = Math.hypot(target.x - boss.x, target.y - boss.y);
+        }
 
         if (
           best <= BOSS_ATTACK_RANGE &&
@@ -2382,6 +2405,7 @@ setInterval(() => {
 
           bossProjectiles.push({
             id: 'bp_' + Math.random().toString(36).slice(2, 10),
+            targetId: target.id,
             x: boss.x,
             y: boss.y,
             vx: ((target.x - boss.x) / distance) * BOSS_PROJECTILE_SPEED,
@@ -2491,34 +2515,56 @@ setInterval(() => {
       projectile.life -= dt;
       projectile.range = Math.max(0, Number(projectile.range) || BOSS_ATTACK_RANGE) - travel;
 
-      const wallCollision = walls.some((wall) => {
-        const hit = rayAabbDistance(previousX, previousY, dirX, dirY, wall);
-        return hit >= 0 && hit <= travel + projectile.r;
-      });
-
-      if (
-        projectile.life <= 0 ||
-        projectile.range <= 0 ||
-        projectile.x < 20 || projectile.y < 20 ||
-        projectile.x > WORLD.w - 20 || projectile.y > WORLD.h - 20 ||
-        wallCollision
-      ) {
-        bossProjectiles.splice(i, 1);
-        continue;
+      let nearestWallDistance = Infinity;
+      for (const wall of walls) {
+        const wallHit = rayAabbDistance(previousX, previousY, dirX, dirY, wall);
+        if (wallHit >= 0 && wallHit <= travel + projectile.r) {
+          nearestWallDistance = Math.min(nearestWallDistance, wallHit);
+        }
       }
 
       let hitPlayer = null;
       let hitDistance = Infinity;
       for (const pl of players) {
         if (inSafeZone(pl.x, pl.y, 24)) continue;
-        const d = distancePointToSegment(pl.x, pl.y, previousX, previousY, projectile.x, projectile.y);
-        if (d <= projectile.r + pl.r && d < hitDistance) {
-          hitDistance = d;
+
+        const playerHit = rayCircleDistance(
+          previousX,
+          previousY,
+          dirX,
+          dirY,
+          pl.x,
+          pl.y,
+          projectile.r + pl.r
+        );
+
+        if (playerHit <= travel && playerHit < hitDistance) {
+          hitDistance = playerHit;
           hitPlayer = pl;
         }
       }
 
-      if (!hitPlayer) continue;
+      // Primero cuenta el objeto que realmente está enfrente:
+      // una pared puede bloquear al proyectil, pero no puede "comerse"
+      // el impacto si el jugador está antes de esa pared.
+      if (nearestWallDistance <= travel + projectile.r && nearestWallDistance <= hitDistance) {
+        projectile.x = previousX + dirX * Math.max(0, nearestWallDistance);
+        projectile.y = previousY + dirY * Math.max(0, nearestWallDistance);
+        bossProjectiles.splice(i, 1);
+        continue;
+      }
+
+      if (!hitPlayer) {
+        if (
+          projectile.life <= 0 ||
+          projectile.range <= 0 ||
+          projectile.x < 20 || projectile.y < 20 ||
+          projectile.x > WORLD.w - 20 || projectile.y > WORLD.h - 20
+        ) {
+          bossProjectiles.splice(i, 1);
+        }
+        continue;
+      }
 
       const actualDamage = Math.max(
         25,
@@ -2723,7 +2769,15 @@ function runServerDiagnostics() {
   if (Object.keys(WEAPONS).length < 3) problems.push('Arsenal incompleto');
   if (!cosmetics.getSkin('core_default')) problems.push('Skin base ausente');
   if (Object.keys(cosmetics.SKINS).length < 8) problems.push('Catálogo de skins incompleto');
+  if (Object.keys(cosmetics.WEAPON_SKINS).length < 5) problems.push('Skins de arsenal incompletas');
   if (!cosmetics.REDEEM_CODES.NEONSTART) problems.push('Código NEONSTART ausente');
+  if (!cosmetics.REDEEM_CODES.NEONARMORY) problems.push('Código NEONARMORY ausente');
+  if (!cosmetics.REDEEM_CODES.STARFORGE) problems.push('Código STARFORGE ausente');
+  if (!cosmetics.REDEEM_CODES.SOBERANO2026) problems.push('Código SOBERANO2026 ausente');
+
+  const testHit = rayCircleDistance(0, 0, 1, 0, 100, 0, 10);
+  if (Math.abs(testHit - 90) > 0.001) problems.push('Colisión ray-circle inválida');
+  if (!(BOSS_ATTACK_RANGE > 0 && BOSS_ATTACK_RANGE < 1200)) problems.push('Rango del destructor inválido');
 
   if (problems.length) {
     console.error('[DIAGNOSTIC] FAIL ' + problems.join(' | '));
