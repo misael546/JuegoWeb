@@ -233,7 +233,7 @@ function sendStats(p) {
     attackLevel,
     attackPower: Number(p.damage) || 10,
     attackFill: Math.round((attackLevel / 5) * 100),
-    defense: skinDefenseBonus(p),
+    defense: p.defense,
     defenseMax: 125,
     killsToLevel: nextKills,
     gold: p.gold || 0,
