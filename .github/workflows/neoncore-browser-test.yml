@@ -26,12 +26,24 @@ jobs:
         run: |
           for i in $(seq 1 30); do
             if curl -fsSL "https://misael546.github.io/JuegoWeb/neoncore/12345/?ci=$i" | grep -q '20261002-136'; then
-              echo "Pages build 130 is public"
+              echo "Pages build 136 is public"
               exit 0
             fi
             sleep 5
           done
           echo "Pages build 136 was not detected"
+          exit 1
+
+      - name: Wait for Render server current build
+        run: |
+          for i in $(seq 1 36); do
+            if curl -fsSL "https://neon-core-multiplayer.onrender.com/health?ci=$i" | grep -q '"version":"20261002-136"'; then
+              echo "Render build 136 is live"
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "Render build 136 was not detected"
           exit 1
 
       - name: Run live browser tests
