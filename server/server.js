@@ -249,7 +249,6 @@ function sendStats(p) {
     ownedSkins: cosmetics.normalizeOwnedSkins(p.ownedSkins),
     redeemedCodes: cosmetics.normalizeRedeemedCodes(p.redeemedCodes),
     skinDefense: skinDefenseBonus(p),
-    weaponSkinAttack: weaponSkinAttackBonus(p),
   });
 }
 
@@ -2770,7 +2769,6 @@ function runServerDiagnostics() {
   if (Object.keys(WEAPONS).length < 10) problems.push('Arsenal incompleto');
   if (!cosmetics.getSkin('core_default')) problems.push('Skin base ausente');
   if (Object.keys(cosmetics.SKINS).length < 8) problems.push('Catálogo de skins incompleto');
-  if (Object.keys(cosmetics.WEAPON_SKINS).length < 5) problems.push('Skins de arsenal incompletas');
   if (!cosmetics.REDEEM_CODES.NEONSTART) problems.push('Código NEONSTART ausente');
   if (!cosmetics.REDEEM_CODES.NEONARMORY) problems.push('Código NEONARMORY ausente');
   if (!cosmetics.REDEEM_CODES.STARFORGE) problems.push('Código STARFORGE ausente');
