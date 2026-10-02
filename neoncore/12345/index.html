@@ -9,7 +9,7 @@
 <script>
 (function(){
   try{
-    var v="20261001-132";
+    var v="20261001-133";
     var k="neon_core_build";
     window.NEON_CORE_BUILD=v;
     var old=localStorage.getItem(k);
@@ -990,7 +990,7 @@ function draw(){
     ctx.globalAlpha=.45;ctx.font="bold 11px Arial";ctx.fillText("PROTECCIÓN DE SPAWN",zsx,zsy+zrad+18);
   }
   ctx.restore();
-  drawBankNpc();drawShopNpc();
+  drawBankNpc();drawShopNpc();drawCosmeticShopNpc();
 
   for(const w of walls){
     const x=sx(w.x-w.w/2),y=sy(w.y-w.h/2);
@@ -1029,7 +1029,7 @@ function draw(){
   drawTank(p.x,p.y,p.angle,"#39e7ff",p.r,p.weapon||"blaster",p.equippedSkin||"core_default");
   drawNameTag(playerName,p.x,p.y,p.r,"#39e7ff");
   if(controlMode==="mouse"&&gameActive){ctx.save();ctx.strokeStyle="rgba(57,231,255,.95)";ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(pointer.x,pointer.y,10,0,Math.PI*2);ctx.moveTo(pointer.x-16,pointer.y);ctx.lineTo(pointer.x+16,pointer.y);ctx.moveTo(pointer.x,pointer.y-16);ctx.lineTo(pointer.x,pointer.y+16);ctx.stroke();ctx.restore();}
-  drawMinimap();updateAmmoShop();updateBank();updateResourceHud();
+  drawMinimap();updateAmmoShop();updateBank();updateCosmeticShop();updateResourceHud();
 
   document.getElementById("hp").textContent=Math.ceil(p.hp);
   document.getElementById("maxHp").textContent=p.maxHp;
