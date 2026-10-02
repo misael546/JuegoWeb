@@ -9,7 +9,7 @@
 <script>
 (function(){
   try{
-    var v="20261001-120";
+    var v="20261001-121";
     var k="neon_core_build";
     window.NEON_CORE_BUILD=v;
     var old=localStorage.getItem(k);
@@ -26,7 +26,7 @@
   }catch(e){}
 })();
 </script>
-<title>Neon Core · Build 120</title>
+<title>Neon Core · Build 121</title>
 <style>
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#050811;color:#fff;font-family:Arial,sans-serif;touch-action:none}
 #game{display:block;width:100vw;height:100vh}
@@ -898,9 +898,9 @@ function draw(){
 
 function setupJoystick(id){
   const el=document.getElementById(id),stick=el.querySelector(".stick");
-  let active=false,pointerId=null;
+  let active=false,pointerId=null,touchId=null;
   function reset(){
-    active=false;pointerId=null;
+    active=false;pointerId=null;touchId=null;
     stick.style.transform="translate(0,0)";
     moveX=0;moveY=0;
   }
@@ -915,82 +915,56 @@ function setupJoystick(id){
     moveY=clamp(y/max,-1,1);
     stick.style.transform="translate("+x+"px,"+y+"px)";
   }
+
+  // B121: mouse usa Pointer Events; Android usa Touch Events directamente.
+  // No mezclamos ambos modelos para el mismo dedo.
   el.addEventListener("pointerdown",e=>{
-    if(e.pointerType==="mouse"&&e.button!==0)return;
+    if(e.pointerType!=="mouse" || e.button!==0)return;
     e.preventDefault();
     active=true;pointerId=e.pointerId;
     apply(e.clientX,e.clientY);
     try{el.setPointerCapture(e.pointerId);}catch{}
   },{passive:false});
-  window.addEventListener("pointermove",e=>{
-    if(!active||e.pointerId!==pointerId)return;
+  el.addEventListener("pointermove",e=>{
+    if(!active || pointerId!==e.pointerId)return;
     e.preventDefault();
     apply(e.clientX,e.clientY);
   },{passive:false});
-  window.addEventListener("pointerup",e=>{
-    if(!active||e.pointerId!==pointerId)return;
+  el.addEventListener("pointerup",e=>{
+    if(pointerId!==e.pointerId)return;
     e.preventDefault();reset();
   },{passive:false});
-  window.addEventListener("pointercancel",e=>{
-    if(!active||e.pointerId!==pointerId)return;
+  el.addEventListener("pointercancel",e=>{
+    if(pointerId!==e.pointerId)return;
     reset();
   },{passive:false});
+
   el.addEventListener("touchstart",e=>{
     if(active)return;
     const t=e.changedTouches&&e.changedTouches[0];
     if(!t)return;
     e.preventDefault();
-    active=true;pointerId="touch:"+t.identifier;
+    active=true;touchId=t.identifier;
     apply(t.clientX,t.clientY);
   },{passive:false});
   el.addEventListener("touchmove",e=>{
-    if(!active||typeof pointerId!=="string")return;
-    const t=[...e.changedTouches].find(x=>"touch:"+x.identifier===pointerId);
+    if(!active || touchId===null)return;
+    const t=[...e.changedTouches].find(x=>x.identifier===touchId);
     if(!t)return;
     e.preventDefault();
     apply(t.clientX,t.clientY);
   },{passive:false});
   const touchEnd=e=>{
-    if(!active||typeof pointerId!=="string")return;
-    const hit=[...e.changedTouches].some(x=>"touch:"+x.identifier===pointerId);
-    if(hit){e.preventDefault();reset();}
+    if(!active || touchId===null)return;
+    if([...e.changedTouches].some(x=>x.identifier===touchId)){
+      e.preventDefault();reset();
+    }
   };
   el.addEventListener("touchend",touchEnd,{passive:false});
   el.addEventListener("touchcancel",touchEnd,{passive:false});
   return reset;
 }
 const resetMoveJoystick=setupJoystick("moveJoy");
-function setupTouchDragFallback(){
-  let activeId=null,startX=0,startY=0;
-  const validTarget=(target)=>{
-    if(!target)return false;
-    if(target.closest && (target.closest("#moveJoy")||target.closest("#fire")||target.closest("button")||target.closest("input")||target.closest("form")||target.closest("#controlEditor"))) return false;
-    return target===canvas || target===document.body || target===document.documentElement;
-  };
-  document.addEventListener("touchstart",e=>{
-    if(activeId!==null || !gameActive || !validTarget(e.target))return;
-    const t=e.changedTouches&&e.changedTouches[0]; if(!t || t.clientX>innerWidth*.58)return;
-    activeId=t.identifier;startX=t.clientX;startY=t.clientY;
-    e.preventDefault();
-  },{passive:false});
-  document.addEventListener("touchmove",e=>{
-    if(activeId===null)return;
-    const t=[...e.changedTouches].find(x=>x.identifier===activeId); if(!t)return;
-    const dx=t.clientX-startX,dy=t.clientY-startY,max=Math.max(36,Math.min(innerWidth,innerHeight)*.16);
-    const len=Math.hypot(dx,dy),scale=len>max?max/len:1;
-    moveX=clamp(dx*scale/max,-1,1);moveY=clamp(dy*scale/max,-1,1);
-    e.preventDefault();
-  },{passive:false});
-  const end=e=>{
-    if(activeId===null)return;
-    if([...e.changedTouches].some(x=>x.identifier===activeId)){
-      activeId=null;moveX=0;moveY=0;
-    }
-  };
-  document.addEventListener("touchend",end,{passive:false});
-  document.addEventListener("touchcancel",end,{passive:false});
-}
-setupTouchDragFallback();
 const controlDefaults={joySize:112,fireSize:86,joyX:8,joyY:8,fireX:8,fireY:8};
 let controlConfig={...controlDefaults};
 try{const saved=JSON.parse(localStorage.getItem("neon_core_controls")||"null");if(saved)controlConfig={...controlDefaults,...saved};}catch{}
