@@ -22,16 +22,16 @@ jobs:
           npm install --no-save @playwright/test
           npx playwright install --with-deps chromium
 
-      - name: Wait for GitHub Pages build 123
+      - name: Wait for GitHub Pages current build
         run: |
           for i in $(seq 1 30); do
-            if curl -fsSL "https://misael546.github.io/JuegoWeb/neoncore/12345/?ci=$i" | grep -q '20261001-123'; then
-              echo "Pages build 123 is public"
+            if curl -fsSL "https://misael546.github.io/JuegoWeb/neoncore/12345/?ci=$i" | grep -q '20261001-125'; then
+              echo "Pages build 125 is public"
               exit 0
             fi
             sleep 5
           done
-          echo "Pages build 123 was not detected"
+          echo "Pages build 125 was not detected"
           exit 1
 
       - name: Run live browser tests
