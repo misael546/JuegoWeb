@@ -267,9 +267,20 @@ test('SHOP: arsenal, skins, selección y canje', async ({ page }) => {
   await page.locator('#chatForm').evaluate(form => form.requestSubmit());
   await expect(page.locator('#chatMessages')).toContainText('SOBERANO DEL NÚCLEO', {timeout:10000});
 
-  await page.keyboard.down('s');
-  await page.waitForTimeout(900);
-  await page.keyboard.up('s');
+  const afterChatPos = parsePos(await page.locator('#neonDiag').innerText());
+  const returnKeys = [];
+  if (3000 - afterChatPos.x > 10) returnKeys.push('d');
+  else if (3000 - afterChatPos.x < -10) returnKeys.push('a');
+  if (2200 - afterChatPos.y > 10) returnKeys.push('s');
+  else if (2200 - afterChatPos.y < -10) returnKeys.push('w');
+  const returnDistance = Math.hypot(3000 - afterChatPos.x, 2200 - afterChatPos.y);
+  const returnMs = Math.max(150, Math.min(900, Math.round(returnDistance / 205 * 1000 * 0.82)));
+  for (const key of returnKeys) await page.keyboard.down(key);
+  try {
+    await page.waitForTimeout(returnMs);
+  } finally {
+    for (const key of returnKeys) await page.keyboard.up(key);
+  }
   await expect(page.locator('#cosmeticShop')).toHaveCSS('display', 'flex', {timeout:5000});
   await page.locator('.shopTab[data-shop-section="skins"]').click();
   const gmCard = page.locator('.cosmeticCard[data-skin-id="gm_core"]');
