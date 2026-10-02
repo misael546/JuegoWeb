@@ -9,7 +9,7 @@
 <script>
 (function(){
   try{
-    var v="20261002-141";
+    var v="20261002-143";
     var k="neon_core_build";
     window.NEON_CORE_BUILD=v;
     var old=localStorage.getItem(k);
@@ -26,7 +26,7 @@
   }catch(e){}
 })();
 </script>
-<title>Neon Core · Build 135</title>
+<title>Neon Core · Build 143</title>
 <style>
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#050811;color:#fff;font-family:Arial,sans-serif;touch-action:none}
 #game{display:block;width:100vw;height:100vh}
@@ -57,13 +57,13 @@
 .skin-angel-seraph{background:radial-gradient(circle at 50% 38%,#fff,#fff5c2 34%,#ffe08a 55%,#b9964b 78%);border-color:#fff5bd;box-shadow:0 0 30px #fff2ad99,0 0 52px #ffffff33,inset 0 0 20px #fff8}
 .skin-demon-infernal{background:radial-gradient(circle at 50% 45%,#ffcf9e,#ff553f 28%,#8c1820 58%,#18050a 82%);border-color:#ff6d4c;box-shadow:0 0 28px #ff452f99,0 0 55px #7b0e2b55,inset 0 0 18px #ffd2a044}
 @keyframes skinSpin{to{transform:rotate(360deg)}}.cosmeticCard strong{font-size:12px;letter-spacing:.5px}.cosmeticCard small{color:#9ca9bd;font-size:10px;line-height:1.3}.cosmeticCost{margin-top:auto;color:#dffbff;font-weight:900;font-size:11px}.cosmeticAction{min-height:31px;border:0;border-radius:8px;background:#183d58;color:#fff;font-weight:bold;font-size:10px}.cosmeticCard.owned .cosmeticAction{background:#1d5f4e}.codeBox{margin-top:13px;padding:11px;border:1px solid #26344e;border-radius:12px;background:#091321}.codeBox b{display:block;color:#39e7ff;font-size:12px}.codeRow{display:flex;gap:7px;margin-top:7px}.codeRow input{min-width:0;flex:1;padding:10px;border:1px solid #33415d;border-radius:9px;background:#111a2d;color:#fff;outline:none;text-transform:uppercase}.codeRow button{min-width:110px;border:0;border-radius:9px;background:#39e7ff;color:#041019;font-weight:900}.cosmeticMsg{display:block;min-height:18px;margin-top:7px;color:#9ca9bd;font-size:11px}.premiumGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.premiumCard{border:1px dashed #7f8da366;border-radius:13px;padding:12px;background:#09111c}.premiumCard strong{display:block;color:#dffbff}.premiumCard small{display:block;color:#8ea0b8;min-height:32px;margin:5px 0}.premiumCard button{width:100%;min-height:35px;border:0;border-radius:8px;background:#26344e;color:#74839a;font-weight:bold}.shopNpcHint{position:fixed;left:50%;bottom:64px;transform:translateX(-50%);z-index:79;background:rgba(5,8,17,.9);border:1px solid #39e7ff66;border-radius:10px;padding:7px 11px;color:#dffbff;font-size:11px;pointer-events:none}@media(max-width:700px){.cosmeticShopCard{padding:13px;border-radius:16px;max-height:90vh}.cosmeticGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.premiumGrid{grid-template-columns:1fr}.skinPreview{width:58px;height:58px}.cosmeticCard{min-height:138px}.shopTabs{gap:5px}.shopTab{font-size:11px}.codeRow{flex-direction:column}.codeRow button{min-height:40px}.shopNpcHint{bottom:108px}}
-</style>
+.shopUnifiedCard{width:min(820px,96vw)}.shopSection{margin-top:8px}.shopUnifiedGrid{grid-template-columns:repeat(3,minmax(0,1fr));}.shopWeaponCard{min-height:150px;border:1px solid #26344e;border-radius:13px;background:linear-gradient(180deg,#0d192b,#09111d);color:#fff;padding:10px;text-align:left;display:flex;flex-direction:column;gap:6px;box-shadow:0 8px 22px #0008}.shopWeaponCard.equipped{border-color:#39e7ff;box-shadow:0 0 22px #39e7ff22}.shopWeaponCard strong{color:#39e7ff;letter-spacing:1px}.shopWeaponCard small{color:#9ca9bd;font-size:10px;line-height:1.35}.shopWeaponCard .weaponStats{color:#dffbff;font-size:11px}.shopWeaponCard button{margin-top:auto;min-height:32px;border:0;border-radius:8px;background:#183d58;color:#fff;font-weight:bold}.shopWeaponCard.equipped button{background:#1d5f4e}.shopUnifiedMsg{display:block;color:#9ca9bd;margin-top:7px;font-size:11px;text-align:center}@media(max-width:700px){.shopUnifiedGrid{grid-template-columns:1fr}.shopUnifiedCard{padding:13px}}</style>
 <script>
 (function(){try{if(/\/(?:12345|67890)(?:\/|\/index\.html)?(?:$|[?#])/.test(location.pathname+location.search)){document.documentElement.classList.add("public-room");}}catch(e){}})();
 </script>
 </head>
 <body>
-<canvas id="game"></canvas><div id="buildDisplay">NEON CORE · Build 141</div>
+<canvas id="game"></canvas><div id="buildDisplay">NEON CORE · Build 143</div>
 
 <div id="hud">
   <div class="panel" id="bars">
@@ -74,8 +74,43 @@
   <div id="weaponHud">ARMA: <b id="weaponName">BLASTER</b></div>
 </div>
 
-<div id="minimapWrap"><canvas id="minimap" width="360" height="270"></canvas><span id="minimapTitle">MINIMAPA</span></div><div id="ammoShop" aria-live="polite"><b>🛠 ARSENAL NEON</b><span>Compra armas y munición. El oro se conserva al volver.</span><div class="shopGrid"><button class="shopItem" data-weapon="blaster" type="button"><strong>BLASTER</strong><small>25 daño · 350ms · GRATIS</small></button><button class="shopItem" data-weapon="pulse" type="button"><strong>PULSE</strong><small>18 daño · 170ms · 🪙 150</small></button><button class="shopItem" data-weapon="cannon" type="button"><strong>CANNON</strong><small>65 daño · 700ms · 🪙 300</small></button></div><button id="buyAmmoBtn" type="button">🔸 COMPRAR 50 BALAS · 🪙 50</button><small id="shopMsg">Elige un arma o compra munición.</small></div>
-<div id="cosmeticShop" aria-hidden="true"><div class="cosmeticShopCard"><div class="cosmeticShopHead"><div class="cosmeticShopTitle"><strong>🧩 TIENDA NEON</strong><small>Skins circulares y cosméticos. No cambian las estadísticas de combate.</small></div></div><div class="cosmeticBalance"><span>🪙 <b id="cosmeticGold">0</b></span><span>💎 <b id="cosmeticDiamonds">0</b></span><span>🎨 <b id="cosmeticOwned">1</b> skins</span></div><div class="shopTabs"><button class="shopTab active" data-shop-tab="gold" type="button">🪙 ORO</button><button class="shopTab" data-shop-tab="diamonds" type="button">💎 DIAMANTES</button><button class="shopTab" data-shop-tab="real" type="button">💳 DINERO REAL</button></div><div id="skinShopGrid" class="cosmeticGrid"></div><div id="premiumGrid" class="premiumGrid" style="display:none"></div><div class="codeBox"><b>🎁 CÓDIGO DE REGALO</b><div class="codeRow"><input id="redeemCode" maxlength="32" placeholder="ESCRIBE TU CÓDIGO" autocomplete="off"><button id="redeemCodeBtn" type="button">CANJEAR</button></div><small id="cosmeticShopMsg" class="cosmeticMsg">Acércate al NPC para comprar o canjear.</small></div></div></div><div id="toastFeed" aria-live="polite"></div><div class="pcHint">PC: WASD / flechas para moverte · mouse para apuntar · clic izquierdo para disparar · ESPACIO también dispara</div><button id="chatToggle" type="button" aria-expanded="false" aria-controls="chatBox">💬 CHAT</button><div id="chatBox" aria-label="Chat del servidor" style="display:none"><button id="chatCloseStatic" type="button" aria-label="Cerrar chat">×</button><div id="chatMessages" aria-live="polite"></div><form id="chatForm"><input id="chatInput" maxlength="120" autocomplete="off" placeholder="Escribe un mensaje…"><button id="chatSend" type="submit">ENVIAR</button></form><div id="chatHint">Enter para enviar · máximo 120 caracteres</div></div>
+<div id="minimapWrap"><canvas id="minimap" width="360" height="270"></canvas><span id="minimapTitle">MINIMAPA</span></div>
+<div id="cosmeticShop" aria-hidden="true">
+  <div class="cosmeticShopCard shopUnifiedCard">
+    <div class="cosmeticShopHead"><div class="cosmeticShopTitle"><strong>⚡ SHOP</strong><small>Arsenal, skins y códigos en un solo lugar. Párate sobre el SHOP para interactuar.</small></div></div>
+    <div class="cosmeticBalance">
+      <span>🪙 <b id="cosmeticGold">0</b></span>
+      <span>💎 <b id="cosmeticDiamonds">0</b></span>
+      <span>🎨 <b id="cosmeticOwned">1</b> skins</span>
+      <span>🛡 <b id="shopDefense">0</b> DEF</span>
+    </div>
+    <div class="shopTabs">
+      <button class="shopTab active" data-shop-section="arsenal" type="button">⚔ ARSENAL</button>
+      <button class="shopTab" data-shop-section="skins" type="button">🎨 SKINS</button>
+      <button class="shopTab" data-shop-section="redeem" type="button">🎁 CANJEAR</button>
+    </div>
+
+    <section id="shopArsenalSection" class="shopSection">
+      <div id="arsenalGrid" class="shopGrid shopUnifiedGrid"></div>
+      <button id="buyAmmoBtn" type="button">🔸 COMPRAR 100 BALAS · 🪙 75</button>
+      <small id="shopMsg" class="shopUnifiedMsg">Elige un arsenal. Cada uno cambia tu ataque y tu límite de munición.</small>
+    </section>
+
+    <section id="shopSkinsSection" class="shopSection" style="display:none">
+      <div id="skinShopGrid" class="cosmeticGrid"></div>
+    </section>
+
+    <section id="shopRedeemSection" class="shopSection" style="display:none">
+      <div class="codeBox">
+        <b>🎁 CANJEAR SKINS</b>
+        <small>Los skins de código no se compran con oro ni diamantes.</small>
+        <div class="codeRow"><input id="redeemCode" maxlength="32" placeholder="ESCRIBE TU CÓDIGO" autocomplete="off"><button id="redeemCodeBtn" type="button">CANJEAR</button></div>
+        <small id="cosmeticShopMsg" class="cosmeticMsg">Introduce un código para desbloquear un skin.</small>
+      </div>
+    </section>
+  </div>
+</div>
+<div id="toastFeed"<div id="toastFeed" aria-live="polite"></div><div class="pcHint">PC: WASD / flechas para moverte · mouse para apuntar · clic izquierdo para disparar · ESPACIO también dispara</div><button id="chatToggle" type="button" aria-expanded="false" aria-controls="chatBox">💬 CHAT</button><div id="chatBox" aria-label="Chat del servidor" style="display:none"><button id="chatCloseStatic" type="button" aria-label="Cerrar chat">×</button><div id="chatMessages" aria-live="polite"></div><form id="chatForm"><input id="chatInput" maxlength="120" autocomplete="off" placeholder="Escribe un mensaje…"><button id="chatSend" type="submit">ENVIAR</button></form><div id="chatHint">Enter para enviar · máximo 120 caracteres</div></div>
 
 <div id="connectionOverlay" aria-live="polite"><div id="connectionCard"><div id="connectionSpinner"></div><b id="connectionTitle">CONECTANDO AL SERVIDOR</b><span id="connectionText">Despertando el servidor multiplayer…</span></div></div>
 
@@ -121,36 +156,48 @@ function resize(){W=innerWidth;H=innerHeight;DPR=Math.min(devicePixelRatio||1,2)
 addEventListener("resize",resize);resize();
 
 const world={w:6000,h:4400};
-const p={x:3000,y:2200,r:16,angle:0,hp:100,maxHp:100,xp:0,level:1,score:0,kills:0,pvpKills:0,damage:25,defense:0,speed:205,fireRate:350,lastShot:0,alive:true,gold:0,diamonds:0,ammo:60,maxAmmo:120,weapon:"blaster",equippedSkin:"core_default"};
-const shopNpc={x:3060,y:2200,r:22};const weaponNames={blaster:"BLASTER",pulse:"PULSE",cannon:"CANNON"};
-const weaponStats={blaster:{damage:25,fireRate:350},pulse:{damage:18,fireRate:170},cannon:{damage:65,fireRate:700}};let shopOpen=false;
+const p={x:3000,y:2200,r:16,angle:0,hp:100,maxHp:100,xp:0,level:1,score:0,kills:0,pvpKills:0,damage:35,defense:0,speed:205,fireRate:320,lastShot:0,alive:true,gold:0,diamonds:0,ammo:60,maxAmmo:220,weapon:"blaster",equippedSkin:"core_default"};
+const shopNpc={x:3000,y:2200,r:24};
+const weaponNames={blaster:"BLASTER",pulse:"PULSE",cannon:"CANNON",railgun:"RAILGUN",nova:"NOVA"};
+const weaponStats={
+  blaster:{name:"BLASTER",damage:35,fireRate:320,tier:1,maxAmmo:220,cost:0},
+  pulse:{name:"PULSE",damage:70,fireRate:230,tier:2,maxAmmo:260,cost:500},
+  cannon:{name:"CANNON",damage:140,fireRate:620,tier:3,maxAmmo:320,cost:1500},
+  railgun:{name:"RAILGUN",damage:260,fireRate:900,tier:4,maxAmmo:380,cost:6500},
+  nova:{name:"NOVA",damage:520,fireRate:1350,tier:5,maxAmmo:450,cost:22000}
+};
+let shopOpen=false,shopSection="arsenal";
 const COSMETIC_SKINS=[
-{id:"core_default",name:"NÚCLEO ORIGINAL",rarity:"Común",currency:"free",price:0,desc:"El núcleo base de Neon Core."},
-{id:"pixel_cyan",name:"PIXEL CYAN",rarity:"Código",currency:"code",price:0,desc:"Recompensa secreta de veteranos."},
-{id:"rust_core",name:"NÚCLEO OXIDADO",rarity:"Raro",currency:"gold",price:1500,desc:"Metal viejo con chispas de energía."},
-{id:"toxic_orb",name:"ORBE TÓXICO",rarity:"Épico",currency:"gold",price:12000,desc:"Aura verde con residuos radiactivos."},
-{id:"plasma_violet",name:"PLASMA VIOLETA",rarity:"Mítico",currency:"gold",price:60000,desc:"Plasma inestable que vibra alrededor del núcleo."},
-{id:"nebula_prism",name:"NEBULOSA PRISMA",rarity:"Mítico",currency:"diamonds",price:4500,desc:"Partículas de color orbitan como una galaxia."},
-{id:"aurora",name:"AURORA",rarity:"Épico",currency:"diamonds",price:250,desc:"Un flujo polar de energía alrededor del tanque."},
-{id:"eclipse_gold",name:"ECLIPSE DORADO",rarity:"Legendario",currency:"diamonds",price:2000,desc:"Anillo solar dorado y núcleo oscuro."},
-{id:"celestial",name:"CIELO CELESTE",rarity:"Legendario",currency:"diamonds",price:7500,desc:"Estrellas y energía celeste en órbita."},
-{id:"angel_seraph",name:"ÁNGEL SERAFÍN",rarity:"Legendario",currency:"diamonds",price:12000,desc:"Halo, alas de luz y plumas de energía."},
-{id:"demon_infernal",name:"DEMONIO INFERNAL",rarity:"Supremo",currency:"diamonds",price:25000,desc:"Cuernos, alas oscuras y brasas demoníacas."},
-{id:"eternal_void",name:"VACÍO ETERNO",rarity:"Supremo",currency:"diamonds",price:30000,desc:"Vórtice oscuro con energía púrpura."}
+{id:"core_default",name:"NÚCLEO ORIGINAL",rarity:"Común",currency:"free",price:0,priceUsd:0,defenseBonus:0,desc:"El núcleo base de Neon Core."},
+{id:"pixel_cyan",name:"PIXEL CYAN",rarity:"Código",currency:"code",price:0,priceUsd:0,defenseBonus:2,desc:"Recompensa secreta de veteranos."},
+{id:"rust_core",name:"NÚCLEO OXIDADO",rarity:"Raro",currency:"gold",price:1500,priceUsd:0,defenseBonus:6,desc:"Metal viejo con chispas de energía."},
+{id:"toxic_orb",name:"ORBE TÓXICO",rarity:"Épico",currency:"gold",price:12000,priceUsd:0,defenseBonus:12,desc:"Aura verde con residuos radiactivos."},
+{id:"plasma_violet",name:"PLASMA VIOLETA",rarity:"Mítico",currency:"gold",price:60000,priceUsd:0,defenseBonus:20,desc:"Plasma inestable alrededor del núcleo."},
+{id:"aurora",name:"AURORA",rarity:"Épico",currency:"diamonds",price:250,priceUsd:0,defenseBonus:28,desc:"Flujo polar de energía."},
+{id:"nebula_prism",name:"NEBULOSA PRISMA",rarity:"Mítico",currency:"diamonds",price:4500,priceUsd:0,defenseBonus:36,desc:"Partículas como una galaxia."},
+{id:"eclipse_gold",name:"ECLIPSE DORADO",rarity:"Legendario",currency:"diamonds",price:2000,priceUsd:0,defenseBonus:45,desc:"Anillo solar y núcleo oscuro."},
+{id:"celestial",name:"CIELO CELESTE",rarity:"Legendario",currency:"diamonds",price:7500,priceUsd:0,defenseBonus:58,desc:"Estrellas y energía celeste."},
+{id:"angel_seraph",name:"ÁNGEL SERAFÍN",rarity:"Legendario",currency:"diamonds",price:12000,priceUsd:0,defenseBonus:72,desc:"Halo, alas de luz y plumas."},
+{id:"demon_infernal",name:"DEMONIO INFERNAL",rarity:"Supremo",currency:"diamonds",price:25000,priceUsd:0,defenseBonus:88,desc:"Cuernos, alas y brasas demoníacas."},
+{id:"eternal_void",name:"VACÍO ETERNO",rarity:"Supremo",currency:"diamonds",price:30000,priceUsd:0,defenseBonus:105,desc:"Vórtice oscuro de energía."},
+{id:"gm_core",name:"SOBERANO DEL NÚCLEO",rarity:"Supremo",currency:"real",price:0,priceUsd:1,defenseBonus:125,desc:"Skin premium individual · $1 USD.",realMoney:true}
 ];
-const PREMIUM_OFFERS=[
-{sku:"skin_pack_01",name:"PAQUETE NEON I",description:"Cosméticos exclusivos futuros.",priceUsd:2.99},
-{sku:"skin_pack_02",name:"PAQUETE NEON II",description:"Cosméticos premium futuros.",priceUsd:7.99},
-{sku:"skin_pack_03",name:"COLECCIÓN ETERNA",description:"Cosméticos de máxima rareza.",priceUsd:19.99}
-];
-let cosmeticShopNpc={x:2940,y:2200,r:22};
-let ownedSkins=["core_default"],equippedSkin="core_default",cosmeticShopTab="gold",cosmeticShopWasNear=false,cosmeticShopDismissedUntil=0;
-let bullets=[],enemies=[],drops=[],particles=[],walls=[],hitTexts=[];
-let serverXpNeed=100,serverKillsToLevel=5,serverDamageXp=0,serverDamageXpNeed=100,serverDamageLevel=1,serverDefenseXp=0,serverDefenseXpNeed=100,serverDefenseLevel=1;
+let cosmeticShopNpc={...shopNpc};
+let ownedSkins=["core_default"],equippedSkin="core_default",cosmeticShopWasNear=false,cosmeticShopDismissedUntil=0;
+let bullets=[],enemies=[],drops=[],particles=[],walls=[],hitTexts=[],bossProjectiles=[],bossWarnings=[];
+let serverXpNeed=100,serverKillsToLevel=5,serverAttackLevel=1,serverAttackPower=35,serverAttackFill=20,serverDefense=0,serverDefenseMax=125;
 let gameActive=false;
 let camera={x:p.x,y:p.y},last=performance.now(),playerName="";
 let safeZone={x:3000,y:2200,r:300};
 let spawnProtectionUntil=0;
+const worldStars=Array.from({length:220},()=>({
+  x:40+Math.random()*(world.w-80),
+  y:40+Math.random()*(world.h-80),
+  size:.7+Math.random()*1.9,
+  phase:Math.random()*Math.PI*2,
+  speed:.4+Math.random()*1.2
+}));
+
 const keys={w:false,a:false,s:false,d:false};
 const pointer={x:W/2,y:H/2,down:false};
 let moveX=0,moveY=0;
