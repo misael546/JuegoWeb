@@ -52,7 +52,7 @@ const AUTOSAVE_MS = 5000;
 const DEATH_HP_LOSS = 0.10;
 const DEATH_DAMAGE_LOSS = 0.05;
 const DEATH_DEFENSE_LOSS = 0.05;
-const DEATH_GOLD_LOSS = 0.10;
+const DEATH_GOLD_LOSS = 0;
 const DEATH_XP_LOSS = 0.10;
 const TICK_MS = 100;
 const ENEMY_SYNC_MS = 120;
@@ -315,37 +315,41 @@ async function loadSavedPlayer(saveKey) {
   return null;
 }
 
+function maxAmmoForWeapon(weaponId) {
+  return Number(WEAPONS[weaponId]?.maxAmmo) || WEAPONS.blaster.maxAmmo;
+}
+
+function skinDefenseBonus(p) {
+  const skin = cosmetics.getSkin(p?.equippedSkin);
+  return Math.max(0, Number(skin?.defenseBonus) || 0);
+}
+
 function applyCombatStats(p) {
   const item = WEAPONS[p.weapon] || WEAPONS.blaster;
   p.weapon = WEAPONS[p.weapon] ? p.weapon : 'blaster';
+  const levelDamage = Math.max(0, Number(p.level || 1) - 1) * 2;
 
-  const damageMasteryLevel = masteryLevelFromXp(p.damageXp);
-  const defenseMasteryLevel = masteryLevelFromXp(p.defenseXp);
+  p.damage = Math.max(5, Math.round(item.damage + levelDamage - (Number(p.damagePenalty) || 0)));
+  p.fireRate = Math.max(100, item.fireRate - Math.max(0, p.level - 1) * 3);
 
-  const baseDamage = item.damage + Math.max(0, p.level - 1) * 5;
-  const masteryDamage = Math.max(0, damageMasteryLevel - 1) * 3;
-  const baseDefense = Math.max(0, p.level - 1) * 2;
-  const masteryDefense = Math.max(0, defenseMasteryLevel - 1);
-
-  p.damage = Math.max(
-    5,
-    Math.round(baseDamage + masteryDamage - (Number(p.damagePenalty) || 0))
-  );
-  p.fireRate = Math.max(100, item.fireRate - Math.max(0, p.level - 1) * 4);
-  p.defense = Math.max(
-    0,
-    Math.round(baseDefense + masteryDefense - (Number(p.defensePenalty) || 0))
-  );
+  // Defensa única: depende del skin equipado y no progresa al recibir golpes.
+  p.defense = Math.max(0, Math.round(skinDefenseBonus(p) - (Number(p.defensePenalty) || 0)));
   p.speed = speedForLevel(p.level);
+
+  const maxAmmo = maxAmmoForWeapon(p.weapon);
+  p.ammo = clamp(Number(p.ammo) || 0, 0, maxAmmo);
+  if (p.ammo <= 0) p.ammo = Math.min(60, maxAmmo);
 }
 
 function addDamageXp(p, amount) {
-  p.damageXp = Math.max(0, Number(p.damageXp) || 0) + Math.max(0, Number(amount) || 0);
+  // Compatibilidad con saves antiguos: el ataque ahora depende del arsenal.
+  void amount;
   applyCombatStats(p);
 }
 
 function addDefenseXp(p, amount) {
-  p.defenseXp = Math.max(0, Number(p.defenseXp) || 0) + Math.max(0, Number(amount) || 0);
+  // Compatibilidad con saves antiguos: defensa no sube al recibir golpes.
+  void amount;
   applyCombatStats(p);
 }
 
@@ -358,10 +362,7 @@ function applyMasteryDeathLoss(p) {
   const defenseIntoLevel = masteryXpIntoLevel(p.defenseXp);
 
   const damageLoss = Math.max(1, Math.floor(masteryXpToNextLevel(damageLevel) * DEATH_DAMAGE_LOSS));
-  const defenseLoss = Math.max(1, Math.floor(masteryXpToNextLevel(defenseLevel) * DEATH_DEFENSE_LOSS));
-
   p.damageXp = Math.max(0, Number(p.damageXp || 0) - damageLoss);
-  p.defenseXp = Math.max(0, Number(p.defenseXp || 0) - defenseLoss);
 
   // Si estaba en el nivel 1 de maestría, nunca baja por debajo de 1.
   // Si pierde el progreso que tenía dentro de su nivel, vuelve al nivel anterior
@@ -369,10 +370,7 @@ function applyMasteryDeathLoss(p) {
   if (damageLevel > 1 && damageIntoLevel < damageLoss) {
     p.damageXp = Math.max(0, p.damageXp);
   }
-  if (defenseLevel > 1 && defenseIntoLevel < defenseLoss) {
-    p.defenseXp = Math.max(0, p.defenseXp);
-  }
-
+  // Defensa no pierde experiencia ni nivel al morir; viene del skin.
   applyCombatStats(p);
 }
 
