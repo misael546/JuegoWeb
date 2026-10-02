@@ -65,6 +65,6 @@ jobs:
           const root = fs.readFileSync('index.html','utf8');
           if (!root.includes('id="username"') || !root.includes('id="quickPlay"')) throw new Error('Main menu name flow is not synchronized');
           const roomsPage = fs.readFileSync('neoncore/index.html','utf8');
-          if (!roomsPage.includes('20261001-129')) throw new Error('Rooms page build marker missing');
+          if (!roomsPage.includes('20261001-130')) throw new Error('Rooms page build marker missing');
           console.log('Build synchronization: OK');
           NODE
