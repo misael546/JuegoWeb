@@ -2168,8 +2168,208 @@ setInterval(() => {
     const enemies = ensureRoomEnemies(code);
     const walls = ensureRoomWalls(code);
     const players = roomPlayers(room).filter((p) => p.alive && !p.frozen);
+    const bossProjectiles = roomBossProjectiles.get(code) || [];
+    const boss = enemies.find((enemy) => enemy.kind === 'boss');
+
+    if (boss) {
+      let target = null;
+      let best = boss.aggroRadius;
+
+      for (const pl of players) {
+        if (inSafeZone(pl.x, pl.y, 24)) continue;
+        const d = Math.hypot(pl.x - boss.x, pl.y - boss.y);
+        if (d < best) {
+          best = d;
+          target = pl;
+        }
+      }
+
+      if (target) {
+        if (best > 220) moveEnemyToward(boss, target.x, target.y, dt, walls);
+
+        if (
+          best <= boss.aggroRadius &&
+          now - boss.lastBossShotAt >= BOSS_PROJECTILE_COOLDOWN_MS &&
+          hasLineOfSight(boss.x, boss.y, target.x, target.y, walls)
+        ) {
+          boss.lastBossShotAt = now;
+          const distance = Math.max(1, Math.hypot(target.x - boss.x, target.y - boss.y));
+
+          bossProjectiles.push({
+            id: 'bp_' + Math.random().toString(36).slice(2, 10),
+            x: boss.x,
+            y: boss.y,
+            vx: ((target.x - boss.x) / distance) * BOSS_PROJECTILE_SPEED,
+            vy: ((target.y - boss.y) / distance) * BOSS_PROJECTILE_SPEED,
+            r: 14,
+            damage: BOSS_PROJECTILE_DAMAGE,
+            life: 8
+          });
+        }
+
+        if (!boss.bossArea && now - boss.lastBossAreaAt >= BOSS_AOE_COOLDOWN_MS) {
+          boss.lastBossAreaAt = now;
+          boss.bossArea = {
+            id: 'ba_' + Math.random().toString(36).slice(2, 10),
+            x: target.x,
+            y: target.y,
+            r: BOSS_AOE_RADIUS,
+            damage: BOSS_AOE_DAMAGE,
+            telegraphAt: now,
+            hitAt: now + BOSS_AOE_WARNING_MS
+          };
+        }
+      } else if (
+        !boss.patrolUntil ||
+        now >= boss.patrolUntil ||
+        Math.hypot(boss.patrolTargetX - boss.x, boss.patrolTargetY - boss.y) < 20
+      ) {
+        choosePatrolTarget(boss, walls);
+      }
+
+      if (!target) moveEnemyToward(boss, boss.patrolTargetX, boss.patrolTargetY, dt, walls);
+
+      if (boss.bossArea && now >= boss.bossArea.hitAt) {
+        const warning = boss.bossArea;
+
+        for (const pl of players) {
+          if (inSafeZone(pl.x, pl.y, 24)) continue;
+          const d = Math.hypot(pl.x - warning.x, pl.y - warning.y);
+
+          if (d <= warning.r + pl.r) {
+            const actualDamage = Math.max(
+              20,
+              Math.round((Number(warning.damage) || BOSS_AOE_DAMAGE) - Math.max(0, Number(pl.defense) || 0) * 0.5)
+            );
+
+            pl.hp = clamp(pl.hp - actualDamage, 0, maxHpForLevel(pl.level));
+
+            const found = findPlayer(pl.id, room);
+            if (found) {
+              send(found.ws, {
+                type: 'boss_aoe_hit',
+                amount: actualDamage,
+                hp: pl.hp,
+                maxHp: maxHpForLevel(pl.level),
+                x: warning.x,
+                y: warning.y
+              });
+            }
+
+            if (pl.hp <= 0 && pl.alive && !pl.frozen) {
+              pl.alive = false;
+              const lostScore = pl.score || 0;
+              applyDeathPenalty(pl);
+              respawnAfterDeath(pl);
+              void persistPlayer(pl);
+              const foundTarget = findPlayer(pl.id, room);
+
+              if (foundTarget) {
+                send(foundTarget.ws, {
+                  type: 'pve_dead',
+                  lostScore,
+                  respawn: {
+                    x: pl.x,
+                    y: pl.y,
+                    hp: pl.hp,
+                    maxHp: maxHpForLevel(pl.level),
+                    xp: pl.xp,
+                    gold: pl.gold,
+                    damage: pl.damage,
+                    defense: pl.defense,
+                    level: pl.level
+                  }
+                });
+                sendStats(pl);
+              }
+            }
+          }
+        }
+
+        boss.bossArea = null;
+      }
+    }
+
+    for (let i = bossProjectiles.length - 1; i >= 0; i--) {
+      const projectile = bossProjectiles[i];
+      projectile.x += projectile.vx * dt;
+      projectile.y += projectile.vy * dt;
+      projectile.life -= dt;
+
+      if (
+        projectile.life <= 0 ||
+        projectile.x < 20 || projectile.y < 20 ||
+        projectile.x > WORLD.w - 20 || projectile.y > WORLD.h - 20 ||
+        collidesWithWall(projectile.x, projectile.y, projectile.r, walls)
+      ) {
+        bossProjectiles.splice(i, 1);
+        continue;
+      }
+
+      let hitPlayer = null;
+      for (const pl of players) {
+        if (inSafeZone(pl.x, pl.y, 24)) continue;
+        if (Math.hypot(pl.x - projectile.x, pl.y - projectile.y) <= projectile.r + pl.r) {
+          hitPlayer = pl;
+          break;
+        }
+      }
+
+      if (!hitPlayer) continue;
+
+      const actualDamage = Math.max(
+        25,
+        Math.round((Number(projectile.damage) || BOSS_PROJECTILE_DAMAGE) - Math.max(0, Number(hitPlayer.defense) || 0) * 0.5)
+      );
+
+      hitPlayer.hp = clamp(hitPlayer.hp - actualDamage, 0, maxHpForLevel(hitPlayer.level));
+      const found = findPlayer(hitPlayer.id, room);
+
+      if (found) {
+        send(found.ws, {
+          type: 'boss_projectile_hit',
+          amount: actualDamage,
+          hp: hitPlayer.hp,
+          maxHp: maxHpForLevel(hitPlayer.level),
+          x: projectile.x,
+          y: projectile.y
+        });
+      }
+
+      if (hitPlayer.hp <= 0 && hitPlayer.alive && !hitPlayer.frozen) {
+        hitPlayer.alive = false;
+        const lostScore = hitPlayer.score || 0;
+        applyDeathPenalty(hitPlayer);
+        respawnAfterDeath(hitPlayer);
+        void persistPlayer(hitPlayer);
+
+        const foundTarget = findPlayer(hitPlayer.id, room);
+        if (foundTarget) {
+          send(foundTarget.ws, {
+            type: 'pve_dead',
+            lostScore,
+            respawn: {
+              x: hitPlayer.x,
+              y: hitPlayer.y,
+              hp: hitPlayer.hp,
+              maxHp: maxHpForLevel(hitPlayer.level),
+              xp: hitPlayer.xp,
+              gold: hitPlayer.gold,
+              damage: hitPlayer.damage,
+              defense: hitPlayer.defense,
+              level: hitPlayer.level
+            }
+          });
+          sendStats(hitPlayer);
+        }
+      }
+
+      bossProjectiles.splice(i, 1);
+    }
 
     for (const enemy of [...enemies]) {
+      if (enemy.kind === 'boss') continue;
+
       const fromHome = Math.hypot(enemy.x - enemy.homeX, enemy.y - enemy.homeY);
       if (fromHome > enemy.leashRadius) {
         despawnEnemy(code, enemy, 'leash');
@@ -2197,11 +2397,15 @@ setInterval(() => {
           hasLineOfSight(enemy.x, enemy.y, target.x, target.y, walls)
         ) {
           enemy.lastAttackAt = now;
-          const rawDamage = Math.max(0.5, enemy.damage - (target.defense || 0));
-          const actualDamage = rawDamage * dt;
+          const actualDamage = Math.max(
+            1,
+            Math.round(Math.max(
+              2,
+              Number(enemy.damage) - Math.max(0, Number(target.defense) || 0) * 0.55
+            ) * dt)
+          );
 
           target.hp = clamp(target.hp - actualDamage, 0, maxHpForLevel(target.level));
-          addDefenseXp(target, Math.max(1, Math.round(rawDamage * 5)));
 
           const found = findPlayer(target.id, room);
           if (found) {
@@ -2210,10 +2414,7 @@ setInterval(() => {
               amount: actualDamage,
               hp: target.hp,
               maxHp: maxHpForLevel(target.level),
-              defenseXp: masteryXpIntoLevel(target.defenseXp),
-              defenseXpNeed: masteryXpToNextLevel(masteryLevelFromXp(target.defenseXp)),
-              defenseLevel: masteryLevelFromXp(target.defenseXp),
-              boss: enemy.kind === 'boss'
+              defense: target.defense
             });
           }
 
@@ -2243,14 +2444,17 @@ setInterval(() => {
               });
               sendStats(target);
             }
-            sendPlayerList(code);
           }
         }
+
         continue;
       }
 
-      if (!enemy.patrolUntil || now >= enemy.patrolUntil ||
-          Math.hypot(enemy.patrolTargetX - enemy.x, enemy.patrolTargetY - enemy.y) < 18) {
+      if (
+        !enemy.patrolUntil ||
+        now >= enemy.patrolUntil ||
+        Math.hypot(enemy.patrolTargetX - enemy.x, enemy.patrolTargetY - enemy.y) < 18
+      ) {
         choosePatrolTarget(enemy, walls);
       }
 
@@ -2261,18 +2465,29 @@ setInterval(() => {
       }
     }
 
-    const regularCount = enemies.filter((enemy) => enemy.kind !== 'boss').length;
-    const pendingRegular = pendingEnemyKindCount(code, 'drone') + pendingEnemyKindCount(code, 'elite');
-    for (let i = regularCount + pendingRegular; i < MOB_TARGET_COUNT; i++) {
-      const elites = enemies.filter((enemy) => enemy.kind === 'elite').length + pendingEnemyKindCount(code, 'elite');
-      enemies.push(createEnemy(elites < 2 ? 'elite' : 'drone'));
-    }
+    const droneCount = enemies.filter((enemy) => enemy.kind === 'drone').length;
+    const eliteCount = enemies.filter((enemy) => enemy.kind === 'elite').length;
+    const pendingDrones = pendingEnemyKindCount(code, 'drone');
+    const pendingElites = pendingEnemyKindCount(code, 'elite');
 
+    for (let i = droneCount + pendingDrones; i < MOB_TARGET_COUNT; i++) {
+      enemies.push(createEnemy('drone'));
+    }
+    for (let i = eliteCount + pendingElites; i < ELITE_TARGET_COUNT; i++) {
+      enemies.push(createEnemy('elite'));
+    }
     if (!enemies.some((enemy) => enemy.kind === 'boss') && pendingEnemyKindCount(code, 'boss') === 0) {
       enemies.push(createEnemy('boss'));
     }
 
-    broadcastRoom(code, { type: 'enemy_state', enemies });
+    roomBossProjectiles.set(code, bossProjectiles);
+
+    broadcastRoom(code, {
+      type: 'enemy_state',
+      enemies,
+      bossProjectiles,
+      bossWarnings: enemies.filter((enemy) => enemy.kind === 'boss' && enemy.bossArea).map((enemy) => enemy.bossArea)
+    });
   }
 }, ENEMY_SYNC_MS);
 
