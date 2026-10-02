@@ -46,6 +46,33 @@ const SKINS = Object.freeze({
     priceDiamonds: 0,
     style: 'plasma'
   },
+  angel_seraph: {
+    id: 'angel_seraph',
+    name: 'ÁNGEL SERAFÍN',
+    rarity: 'Legendario',
+    type: 'skin',
+    priceGold: 0,
+    priceDiamonds: 12000,
+    style: 'angel'
+  },
+  demon_infernal: {
+    id: 'demon_infernal',
+    name: 'DEMONIO INFERNAL',
+    rarity: 'Supremo',
+    type: 'skin',
+    priceGold: 0,
+    priceDiamonds: 25000,
+    style: 'demon'
+  },
+  nebula_prism: {
+    id: 'nebula_prism',
+    name: 'NEBULOSA PRISMA',
+    rarity: 'Mítico',
+    type: 'skin',
+    priceGold: 0,
+    priceDiamonds: 4500,
+    style: 'nebula'
+  },
   aurora: {
     id: 'aurora',
     name: 'AURORA',
