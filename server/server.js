@@ -1573,12 +1573,10 @@ function handleShot(ws) {
 
     if (targetEnemy.hp <= 0) {
       const isBoss = targetEnemy.kind === 'boss';
-      const reward = isBoss ? 2500 : targetEnemy.kind === 'elite' ? 120 : 25;
-      const xp = isBoss ? 1500 : targetEnemy.kind === 'elite' ? 120 : 45;
-      const diamonds = isBoss ? BOSS_DIAMOND_REWARD : 0;
+      const reward = isBoss ? BOSS_GOLD_REWARD : targetEnemy.kind === 'elite' ? 500 : 40;
+      const xp = isBoss ? BOSS_XP_REWARD : targetEnemy.kind === 'elite' ? 250 : 70;
 
       shooter.gold = (shooter.gold || 0) + reward;
-      shooter.diamonds = (shooter.diamonds || 0) + diamonds;
 
       const index = enemies.findIndex((enemy) => enemy.id === targetEnemy.id);
       if (index >= 0) enemies.splice(index, 1);
@@ -1587,19 +1585,19 @@ function handleShot(ws) {
       shooter.kills = (shooter.kills || 0) + 1;
       shooter.score = (shooter.score || 0) + reward;
       shooter.xp = (shooter.xp || 0) + xp;
-      addDamageXp(shooter, isBoss ? 250 : xp);
 
       levelUpIfNeeded(shooter);
       void persistPlayer(shooter);
       sendStats(shooter);
 
       if (isBoss) {
+        roomBossProjectiles.set(shooter.room, []);
         send(shooter.ws, {
           type: 'boss_reward',
           gold: reward,
-          diamonds,
+          diamonds: 0,
           xp,
-          message: '👑 PRIMER BOSS DERROTADO · +25 💎'
+          message: '👑 JEFE PRINCIPAL DERROTADO · +15,000 🪙'
         });
       }
 
