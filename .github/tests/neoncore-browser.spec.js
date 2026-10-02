@@ -131,6 +131,33 @@ for (const room of ROOMS) {
   });
 }
 
+
+test('menu público táctil: abrir sala desde el selector', async ({ browser }) => {
+  const context = await browser.newContext({
+    viewport: { width: 390, height: 844 },
+    isMobile: true,
+    hasTouch: true
+  });
+  const page = await context.newPage();
+
+  await page.goto('https://misael546.github.io/JuegoWeb/neoncore/?menuCI=' + Date.now(), {
+    waitUntil: 'domcontentloaded',
+    timeout: 45000
+  });
+
+  await expect(page.locator('.room[data-room="12345"]')).toBeVisible({timeout:15000});
+  await page.locator('.room[data-room="12345"]').dispatchEvent('pointerup', {
+    pointerType: 'touch'
+  });
+
+  await expect.poll(async () => page.url(), {
+    timeout: 15000,
+    intervals: [250, 500]
+  }).toContain('/neoncore/12345/');
+
+  await context.close();
+});
+
 test('mobile emulation: interfaz táctil y controles visibles', async ({ browser }) => {
   const context = await browser.newContext({
     viewport: { width: 390, height: 844 },
