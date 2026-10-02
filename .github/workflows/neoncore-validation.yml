@@ -25,6 +25,8 @@ jobs:
         run: node --check server.js
       - name: Check storage syntax
         run: node --check storage.js
+      - name: Check cosmetics syntax
+        run: node --check cosmetics.js
       - name: Check Neon Core client syntax
         working-directory: .
         run: |
