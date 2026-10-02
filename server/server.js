@@ -249,7 +249,6 @@ function sendStats(p) {
     redeemedCodes: cosmetics.normalizeRedeemedCodes(p.redeemedCodes),
     skinDefense: skinDefenseBonus(p),
     weaponSkinAttack: weaponSkinAttackBonus(p),
-    weaponSkinDefense: weaponSkinDefenseBonus(p)
   });
 }
 
@@ -350,10 +349,6 @@ function weaponSkinAttackBonus(p) {
   return skin && skin.weaponId === p?.weapon ? Math.max(0, Number(skin.attackBonus) || 0) : 0;
 }
 
-function weaponSkinDefenseBonus(p) {
-  // Las skins de armas solo modifican ATAQUE. La DEFENSA pertenece al tanque/skin de tanque.
-  return 0;
-}
 
 function skinDefenseBonus(p) {
   const skin = cosmetics.getSkin(p?.equippedSkin);
