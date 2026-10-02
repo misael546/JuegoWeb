@@ -9,7 +9,7 @@
 <script>
 (function(){
   try{
-    var v="20261002-148";
+    var v="20261002-149";
     var k="neon_core_build";
     window.NEON_CORE_BUILD=v;
     var old=localStorage.getItem(k);
@@ -26,7 +26,7 @@
   }catch(e){}
 })();
 </script>
-<title>Neon Core · Build 148</title>
+<title>Neon Core · Build 149</title>
 <style>
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#050811;color:#fff;font-family:Arial,sans-serif;touch-action:none}
 #game{display:block;width:100vw;height:100vh}
@@ -176,28 +176,28 @@ let shopOpen=false,shopSection="arsenal";
 const SHOP_INTERACTION_RADIUS_CLIENT=48;
 const COSMETIC_SKINS=[
 {id:"core_default",name:"NÚCLEO ORIGINAL",rarity:"Común",currency:"free",price:0,priceUsd:0,defenseBonus:0,desc:"El núcleo base de Neon Core."},
-{id:"pixel_cyan",name:"PIXEL CYAN",rarity:"Código",currency:"code",price:0,priceUsd:0,defenseBonus:2,desc:"Recompensa secreta de veteranos."},
-{id:"rust_core",name:"NÚCLEO OXIDADO",rarity:"Raro",currency:"gold",price:1500,priceUsd:0,defenseBonus:6,desc:"Metal viejo con chispas de energía."},
-{id:"toxic_orb",name:"ORBE TÓXICO",rarity:"Épico",currency:"gold",price:12000,priceUsd:0,defenseBonus:12,desc:"Aura verde con residuos radiactivos."},
-{id:"plasma_violet",name:"PLASMA VIOLETA",rarity:"Mítico",currency:"gold",price:60000,priceUsd:0,defenseBonus:20,desc:"Plasma inestable alrededor del núcleo."},
-{id:"aurora",name:"AURORA",rarity:"Épico",currency:"diamonds",price:250,priceUsd:0,defenseBonus:28,desc:"Flujo polar de energía."},
-{id:"nebula_prism",name:"NEBULOSA PRISMA",rarity:"Mítico",currency:"diamonds",price:4500,priceUsd:0,defenseBonus:36,desc:"Partículas como una galaxia."},
-{id:"eclipse_gold",name:"ECLIPSE DORADO",rarity:"Legendario",currency:"diamonds",price:2000,priceUsd:0,defenseBonus:45,desc:"Anillo solar y núcleo oscuro."},
-{id:"celestial",name:"CIELO CELESTE",rarity:"Legendario",currency:"diamonds",price:7500,priceUsd:0,defenseBonus:58,desc:"Estrellas y energía celeste."},
-{id:"angel_seraph",name:"ÁNGEL SERAFÍN",rarity:"Legendario",currency:"diamonds",price:12000,priceUsd:0,defenseBonus:72,desc:"Halo, alas de luz y plumas."},
-{id:"demon_infernal",name:"DEMONIO INFERNAL",rarity:"Supremo",currency:"diamonds",price:25000,priceUsd:0,defenseBonus:88,desc:"Cuernos, alas y brasas demoníacas."},
-{id:"eternal_void",name:"VACÍO ETERNO",rarity:"Supremo",currency:"diamonds",price:30000,priceUsd:0,defenseBonus:105,desc:"Vórtice oscuro de energía."},
-{id:"gm_core",name:"SOBERANO DEL NÚCLEO",rarity:"Supremo",currency:"code",price:0,priceUsd:1,defenseBonus:125,desc:"Skin premium de prueba · $1 USD · código de regalo.",realMoney:true}
+{id:"pixel_cyan",name:"PIXEL CYAN",rarity:"Código",currency:"code",price:0,priceUsd:0,defenseBonus:0,desc:"Recompensa secreta de veteranos."},
+{id:"rust_core",name:"NÚCLEO OXIDADO",rarity:"Raro",currency:"gold",price:1500,priceUsd:0,defenseBonus:0,desc:"Metal viejo con chispas de energía."},
+{id:"toxic_orb",name:"ORBE TÓXICO",rarity:"Épico",currency:"gold",price:12000,priceUsd:0,defenseBonus:0,desc:"Aura verde con residuos radiactivos."},
+{id:"plasma_violet",name:"PLASMA VIOLETA",rarity:"Mítico",currency:"gold",price:60000,priceUsd:0,defenseBonus:0,desc:"Plasma inestable alrededor del núcleo."},
+{id:"aurora",name:"AURORA",rarity:"Épico",currency:"diamonds",price:250,priceUsd:0,defenseBonus:0,desc:"Flujo polar de energía."},
+{id:"nebula_prism",name:"NEBULOSA PRISMA",rarity:"Mítico",currency:"diamonds",price:4500,priceUsd:0,defenseBonus:0,desc:"Partículas como una galaxia."},
+{id:"eclipse_gold",name:"ECLIPSE DORADO",rarity:"Legendario",currency:"diamonds",price:2000,priceUsd:0,defenseBonus:0,desc:"Anillo solar y núcleo oscuro."},
+{id:"celestial",name:"CIELO CELESTE",rarity:"Legendario",currency:"diamonds",price:7500,priceUsd:0,defenseBonus:0,desc:"Estrellas y energía celeste."},
+{id:"angel_seraph",name:"ÁNGEL SERAFÍN",rarity:"Legendario",currency:"diamonds",price:12000,priceUsd:0,defenseBonus:0,desc:"Halo, alas de luz y plumas."},
+{id:"demon_infernal",name:"DEMONIO INFERNAL",rarity:"Supremo",currency:"diamonds",price:25000,priceUsd:0,defenseBonus:0,desc:"Cuernos, alas y brasas demoníacas."},
+{id:"eternal_void",name:"VACÍO ETERNO",rarity:"Supremo",currency:"diamonds",price:30000,priceUsd:0,defenseBonus:0,desc:"Vórtice oscuro de energía."},
+{id:"gm_core",name:"SOBERANO DEL NÚCLEO",rarity:"Supremo",currency:"code",price:0,priceUsd:1,defenseBonus:0,desc:"Skin premium de prueba · $1 USD · código de regalo.",realMoney:true}
 ];
 let cosmeticShopNpc={...shopNpc};
 let ownedSkins=["core_default"],equippedSkin="core_default";
 let ownedWeapons=["blaster"],equippedWeaponSkin="",ownedWeaponSkins=[];
 let weaponSkinCatalog=[
-{id:"blaster_neonstorm",name:"BLASTER · NEONSTORM",weaponId:"blaster",rarity:"Raro",priceGold:2500,priceDiamonds:0,attackBonus:8,defenseBonus:2,style:"neonstorm",redeemable:false},
-{id:"pulse_prism",name:"PULSE · PRISMA",weaponId:"pulse",rarity:"Épico",priceGold:10000,priceDiamonds:0,attackBonus:15,defenseBonus:4,style:"prism",redeemable:false},
-{id:"cannon_solaris",name:"CANNON · SOLARIS",weaponId:"cannon",rarity:"Legendario",priceGold:0,priceDiamonds:1200,attackBonus:25,defenseBonus:6,style:"solaris",redeemable:false},
-{id:"railgun_eclipse",name:"RAILGUN · ECLIPSE",weaponId:"railgun",rarity:"Supremo",priceGold:0,priceDiamonds:7000,attackBonus:40,defenseBonus:8,style:"eclipse",redeemable:false},
-{id:"nova_supernova",name:"NOVA · SUPERNOVA",weaponId:"nova",rarity:"Supremo",priceGold:0,priceDiamonds:18000,attackBonus:65,defenseBonus:12,style:"supernova",redeemable:false}
+{id:"blaster_neonstorm",name:"BLASTER · NEONSTORM",weaponId:"blaster",rarity:"Raro",priceGold:2500,priceDiamonds:0,attackBonus:8,defenseBonus:0,style:"neonstorm",redeemable:false},
+{id:"pulse_prism",name:"PULSE · PRISMA",weaponId:"pulse",rarity:"Épico",priceGold:10000,priceDiamonds:0,attackBonus:15,defenseBonus:0,style:"prism",redeemable:false},
+{id:"cannon_solaris",name:"CANNON · SOLARIS",weaponId:"cannon",rarity:"Legendario",priceGold:0,priceDiamonds:1200,attackBonus:25,defenseBonus:0,style:"solaris",redeemable:false},
+{id:"railgun_eclipse",name:"RAILGUN · ECLIPSE",weaponId:"railgun",rarity:"Supremo",priceGold:0,priceDiamonds:7000,attackBonus:40,defenseBonus:0,style:"eclipse",redeemable:false},
+{id:"nova_supernova",name:"NOVA · SUPERNOVA",weaponId:"nova",rarity:"Supremo",priceGold:0,priceDiamonds:18000,attackBonus:65,defenseBonus:0,style:"supernova",redeemable:false}
 ];
 let cosmeticShopWasNear=false,cosmeticShopDismissedUntil=0;
 let bullets=[],enemies=[],drops=[],particles=[],walls=[],hitTexts=[],bossProjectiles=[],bossWarnings=[];
@@ -242,7 +242,7 @@ const neonDiag={inputEvents:0,lastInput:0,lastSync:"none",frames:0,started:perfo
   window.neonDiag=neonDiag;
   window.updateNeonDiag=()=>{
     const ws=multiplayerSocket?multiplayerSocket.readyState:-1;
-    box.textContent="B128 DIAG\\n"+
+    box.textContent="B149 DIAG\\n"+
       "game:"+!!gameActive+" alive:"+!!p.alive+"\\n"+
       "input:"+moveX.toFixed(2)+","+moveY.toFixed(2)+" ev:"+neonDiag.inputEvents+"\\n"+
       "pos:"+Math.round(p.x)+","+Math.round(p.y)+" sp:"+Math.round(p.speed)+"\\n"+
@@ -523,9 +523,15 @@ function connectMultiplayer(roomMode="quick",roomCode=""){ const publicRoomAuto=
           const r=m.respawn||{};
           applyServerRespawn(r);
           enemies.length=0;
+        }else if(m.type==="boss_explosion"){
+          const ex=Number(m.x)||p.x,ey=Number(m.y)||p.y,er=Math.max(80,Number(m.r)||190);
+          burst(ex,ey,m.blocked?"#ff8b4a":"#ff3b32",m.blocked?22:42);
+          particles.push({x:ex,y:ey,vx:0,vy:0,life:.55,maxLife:.55,color:"#ffd76a",size:er,ring:true});
+          if(Math.hypot(p.x-ex,p.y-ey)<=er+p.r)showToast("⚠ IMPACTO DEL DESTRUCTOR ESTELAR");
         }else if(m.type==="boss_projectile_hit"){
           p.hp=Number.isFinite(m.hp)?m.hp:Math.max(0,p.hp-(Number(m.amount)||0));if(Number.isFinite(m.maxHp))p.maxHp=m.maxHp;
-          burst(Number(m.x)||p.x,Number(m.y)||p.y,"#ff6a45",12);showFloatingHit(Number(m.x)||p.x,Number(m.y)||p.y,Number(m.amount)||0,"#ff5b3e");updateHud();
+          const hx=Number(m.x)||p.x,hy=Number(m.y)||p.y;
+          burst(hx,hy,"#ff6a45",16);showFloatingHit(hx,hy,Number(m.amount)||0,"#ff5b3e");updateHud();
         }else if(m.type==="boss_aoe_hit"){
           p.hp=Number.isFinite(m.hp)?m.hp:Math.max(0,p.hp-(Number(m.amount)||0));if(Number.isFinite(m.maxHp))p.maxHp=m.maxHp;
           burst(Number(m.x)||p.x,Number(m.y)||p.y,"#ff3b32",18);showFloatingHit(Number(m.x)||p.x,Number(m.y)||p.y,Number(m.amount)||0,"#ff3b3e");updateHud();
@@ -1132,7 +1138,7 @@ function renderArsenal(){
       sendCosmeticCommand("buy_weapon_skin",item.id);
     }));
   }
-  const msg=document.getElementById("shopMsg");if(msg)msg.textContent=p.weapon?"El arsenal equipado define tu ATAQUE; su skin puede sumar ATAQUE y DEFENSA.":"Arsenal desequipado · ATAQUE base 10 y sin munición.";
+  const msg=document.getElementById("shopMsg");if(msg)msg.textContent=p.weapon?"El arsenal equipado define tu ATAQUE; las skins de arsenal solo pueden sumar ATAQUE.":"Arsenal desequipado · ATAQUE base 10 y sin munición.";
 }
 function renderSkinShop(){
   const grid=document.getElementById("skinShopGrid");if(!grid)return;
