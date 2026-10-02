@@ -9,7 +9,7 @@
 <script>
 (function(){
   try{
-    var v="20261002-135";
+    var v="20261002-136";
     var k="neon_core_build";
     window.NEON_CORE_BUILD=v;
     var old=localStorage.getItem(k);
@@ -63,7 +63,7 @@
 </script>
 </head>
 <body>
-<canvas id="game"></canvas><div id="buildDisplay">NEON CORE · Build 135</div>
+<canvas id="game"></canvas><div id="buildDisplay">NEON CORE · Build 136</div>
 
 <div id="hud">
   <div class="panel" id="bars">
@@ -1015,6 +1015,12 @@ function sendCosmeticCommand(type,skinId,code){
   if(!multiplayerSocket||multiplayerSocket.readyState!==1){showCosmeticMsg("Servidor no conectado.");return;}
   const msg={type};if(skinId)msg.skinId=skinId;if(code)msg.code=code;multiplayerSocket.send(JSON.stringify(msg));
 }
+document.querySelectorAll(".shopTab").forEach(btn=>btn.addEventListener("click",e=>{
+  e.preventDefault();e.stopPropagation();
+  const tab=String(btn.dataset.shopTab||"gold");
+  cosmeticShopTab=["gold","diamonds","real"].includes(tab)?tab:"gold";
+  renderCosmeticShop();
+}));
 
 function drawMinimap(){
   const mm=document.getElementById("minimap");
