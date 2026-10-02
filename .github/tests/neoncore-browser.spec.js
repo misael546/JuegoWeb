@@ -241,6 +241,7 @@ test('tienda de skins: NPC, pestañas y código de regalo', async ({ page }) => 
   await page.locator('#redeemCodeBtn').click();
   await expect(page.locator('#cosmeticShopMsg')).toContainText('PIXEL CYAN', {timeout:10000});
 
+  await page.locator('.shopTab[data-shop-tab="gold"]').click();
   const pixelCard = page.locator('.cosmeticCard[data-skin-id="pixel_cyan"]');
   await expect(pixelCard).toContainText('DESBLOQUEADO');
 
