@@ -9,7 +9,7 @@
 <script>
 (function(){
   try{
-    var v="20261001-134";
+    var v="20261002-135";
     var k="neon_core_build";
     window.NEON_CORE_BUILD=v;
     var old=localStorage.getItem(k);
@@ -26,7 +26,7 @@
   }catch(e){}
 })();
 </script>
-<title>Neon Core · Build 129</title>
+<title>Neon Core · Build 135</title>
 <style>
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#050811;color:#fff;font-family:Arial,sans-serif;touch-action:none}
 #game{display:block;width:100vw;height:100vh}
@@ -52,14 +52,18 @@
 @media(min-width:800px){#controls{display:none!important}}
 .pcHint{display:none;position:fixed;left:50%;bottom:12px;transform:translateX(-50%);z-index:7;padding:7px 11px;border:1px solid #26344e;border-radius:9px;background:rgba(5,8,17,.82);color:#9ca9bd;font:11px Arial,sans-serif;pointer-events:none}html.pc-controls #controls{display:none!important}html.pc-controls #controlConfigBtn{display:none!important}html.pc-controls .pcHint{display:block!important}html.touch-controls .pcHint{display:none!important}
 #roomActions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}#roomActions button{width:100%;min-height:44px;border:0;border-radius:10px;background:#183d58;color:#fff;font-weight:bold}#roomCodeInput{width:100%;padding:13px;border:1px solid #33415d;background:#111a2d;color:white;border-radius:10px;font-size:16px;outline:none;margin-top:8px;text-transform:uppercase}@media(max-width:799px){#playersPanel{top:8px;right:calc(min(42vw,150px) + 14px);width:min(160px,42vw)}#controlConfigBtn{display:block}#hud{top:8px;left:8px;right:8px}.panel{padding:7px 8px;font-size:12px}#bars{min-width:0;width:min(190px,58vw)}#hud>.panel:last-child{white-space:nowrap}#gameActions{top:74px;left:8px}#gameActions button{min-height:38px;padding:0 9px;font-size:11px}#minimapWrap{top:8px;right:8px;width:min(150px,42vw);height:min(112px,32vw);padding:5px}#playersPanel{top:126px;right:8px;width:min(180px,48vw);padding:7px 8px;font-size:11px}#playersList{max-height:130px;gap:3px}#controls{padding:12px}.joy{width:100px;height:100px}.stick{width:44px;height:44px;left:28px;top:28px}#fire{width:78px;height:78px}}@media(max-width:430px){#hud>.panel:last-child{max-width:105px;overflow:hidden;text-overflow:ellipsis}#playersPanel{max-width:45vw}.onlinePlayer{font-size:10px}} .shopGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:8px 0}.shopItem{min-height:58px;border:1px solid #263b55;border-radius:9px;background:#0d1827;color:#fff;padding:6px}.shopItem strong{display:block;color:#39e7ff;font-size:11px}.shopItem small{display:block;color:#9ca9bd;font-size:9px;margin-top:3px}.shopItem:active{transform:scale(.97)}#weaponHud{margin-top:5px;color:#9ca9bd;font-size:11px;letter-spacing:1px}#weaponName{color:#39e7ff}#resourceHud{display:flex;gap:10px;margin-top:5px;color:#dffbff;font-size:12px}#resourceHud span{background:#0b1424;border:1px solid #26344e;border-radius:7px;padding:3px 6px}#ammoShop,.shopItem,#buyAmmoBtn{touch-action:manipulation;pointer-events:auto}#ammoShop{position:fixed;left:50%;bottom:112px;transform:translateX(-50%);z-index:8;display:none;min-width:min(310px,88vw);background:rgba(5,8,17,.94);border:1px solid #39e7ff;border-radius:14px;padding:12px;text-align:center;backdrop-filter:blur(6px);box-shadow:0 8px 30px #000}#ammoShop b{display:block;color:#39e7ff;font-size:13px}#ammoShop span{display:block;color:#c8d3e5;font-size:12px;margin:4px 0 8px}#buyAmmoBtn{width:100%;min-height:42px;border:0;border-radius:9px;background:#183d58;color:#fff;font-weight:bold}#shopMsg{display:block;color:#9ca9bd;margin-top:7px;font-size:11px}#fire:disabled{filter:grayscale(1);opacity:.45}html.public-room #nameBox{display:none!important}
-#cosmeticShop{position:fixed;inset:0;display:none;align-items:center;justify-content:center;padding:14px;z-index:80;background:rgba(1,4,10,.66);backdrop-filter:blur(6px);pointer-events:auto;touch-action:auto}.cosmeticShopCard{position:relative;width:min(760px,96vw);max-height:min(86vh,760px);overflow:auto;background:linear-gradient(180deg,#0b1425,#070d18);border:1px solid #39e7ff66;border-radius:20px;padding:18px;box-shadow:0 20px 80px #000}.cosmeticShopHead{display:flex;align-items:center;gap:12px}.cosmeticShopTitle{flex:1}.cosmeticShopTitle strong{display:block;color:#39e7ff;letter-spacing:2px;font-size:20px}.cosmeticShopTitle small{display:block;color:#8ea0b8;margin-top:3px}.cosmeticShopClose{width:38px;height:38px;border:1px solid #33415d;border-radius:10px;background:#111a2d;color:#fff;font-size:22px}.cosmeticBalance{display:flex;flex-wrap:wrap;gap:7px;margin:12px 0}.cosmeticBalance span{background:#0a1220;border:1px solid #26344e;border-radius:9px;padding:7px 10px;color:#dffbff;font-size:12px}.shopTabs{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;margin:10px 0}.shopTab{min-height:42px;border:1px solid #26344e;border-radius:10px;background:#111a2d;color:#9ca9bd;font-weight:900}.shopTab.active{background:#183d58;border-color:#39e7ff;color:#fff}.cosmeticGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}.cosmeticCard{border:1px solid #26344e;border-radius:13px;background:#0c1625;color:#fff;padding:9px;text-align:left;min-height:145px;display:flex;flex-direction:column;gap:6px}.cosmeticCard:hover{border-color:#39e7ff}.cosmeticCard.owned{border-color:#5bcb93aa}.cosmeticCard.locked{opacity:.76}.cosmeticCard:disabled{cursor:not-allowed}.skinPreview{width:58px;height:58px;border-radius:50%;margin:1px auto 2px;border:2px solid #fff4;box-shadow:0 0 15px #000,inset 0 0 14px #fff2;position:relative}.skinPreview:after{content:"";position:absolute;inset:12px;border-radius:50%;border:2px solid #fff7;opacity:.7}.skin-core-default{background:radial-gradient(circle at 35% 28%,#dfffff,#39e7ff 42%,#12627b 78%,#09111f)}.skin-pixel-cyan{background:radial-gradient(circle at 34% 28%,#fff,#70f5ff 35%,#39e7ff 65%,#07506d)}.skin-rust-core{background:radial-gradient(circle at 33% 28%,#ffe2b1,#d97835 36%,#703112 70%,#27110a)}.skin-toxic-orb{background:radial-gradient(circle at 34% 25%,#eaffc3,#8cff66 34%,#2c972a 67%,#082a12);box-shadow:0 0 22px #72ff5d55,inset 0 0 16px #fff3}.skin-plasma-violet{background:radial-gradient(circle at 35% 25%,#fff,#e3b3ff 24%,#a855f7 54%,#3d176b 82%,#10061e);box-shadow:0 0 25px #a855f766,inset 0 0 18px #fff4}.skin-aurora{background:linear-gradient(145deg,#39e7ff,#82ffd7 42%,#a855f7 72%,#261343);box-shadow:0 0 25px #39e7ff55,inset 0 0 18px #fff4}.skin-eclipse-gold{background:radial-gradient(circle at 50% 45%,#2a2d39 0 45%,#0a0b10 64%);border-color:#ffd76a;box-shadow:0 0 20px #ffd76a66,inset 0 0 14px #ffd76a44}.skin-celestial{background:radial-gradient(circle at 35% 30%,#d6efff,#4d90ff 37%,#202a8e 68%,#090a29);box-shadow:0 0 25px #5d8dff77,inset 0 0 16px #fff4}.skin-eternal-void{background:radial-gradient(circle at 45% 45%,#25122f,#08050d 52%,#020207 74%);border-color:#e879ff;box-shadow:0 0 30px #e879ff66,0 0 50px #39e7ff2e,inset 0 0 18px #e879ff44}.cosmeticCard strong{font-size:12px;letter-spacing:.5px}.cosmeticCard small{color:#9ca9bd;font-size:10px;line-height:1.3}.cosmeticCost{margin-top:auto;color:#dffbff;font-weight:900;font-size:11px}.cosmeticAction{min-height:31px;border:0;border-radius:8px;background:#183d58;color:#fff;font-weight:bold;font-size:10px}.cosmeticCard.owned .cosmeticAction{background:#1d5f4e}.codeBox{margin-top:13px;padding:11px;border:1px solid #26344e;border-radius:12px;background:#091321}.codeBox b{display:block;color:#39e7ff;font-size:12px}.codeRow{display:flex;gap:7px;margin-top:7px}.codeRow input{min-width:0;flex:1;padding:10px;border:1px solid #33415d;border-radius:9px;background:#111a2d;color:#fff;outline:none;text-transform:uppercase}.codeRow button{min-width:110px;border:0;border-radius:9px;background:#39e7ff;color:#041019;font-weight:900}.cosmeticMsg{display:block;min-height:18px;margin-top:7px;color:#9ca9bd;font-size:11px}.premiumGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.premiumCard{border:1px dashed #7f8da366;border-radius:13px;padding:12px;background:#09111c}.premiumCard strong{display:block;color:#dffbff}.premiumCard small{display:block;color:#8ea0b8;min-height:32px;margin:5px 0}.premiumCard button{width:100%;min-height:35px;border:0;border-radius:8px;background:#26344e;color:#74839a;font-weight:bold}.shopNpcHint{position:fixed;left:50%;bottom:64px;transform:translateX(-50%);z-index:79;background:rgba(5,8,17,.9);border:1px solid #39e7ff66;border-radius:10px;padding:7px 11px;color:#dffbff;font-size:11px;pointer-events:none}@media(max-width:700px){.cosmeticShopCard{padding:13px;border-radius:16px;max-height:90vh}.cosmeticGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.premiumGrid{grid-template-columns:1fr}.skinPreview{width:52px;height:52px}.cosmeticCard{min-height:138px}.shopTabs{gap:5px}.shopTab{font-size:11px}.codeRow{flex-direction:column}.codeRow button{min-height:40px}.shopNpcHint{bottom:108px}}
+#cosmeticShop{position:fixed;inset:0;display:none;align-items:center;justify-content:center;padding:14px;z-index:80;background:rgba(1,4,10,.66);backdrop-filter:blur(6px);pointer-events:auto;touch-action:auto}.cosmeticShopCard{position:relative;width:min(760px,96vw);max-height:min(86vh,760px);overflow:auto;background:linear-gradient(180deg,#0b1425,#070d18);border:1px solid #39e7ff66;border-radius:20px;padding:18px;box-shadow:0 20px 80px #000}.cosmeticShopHead{display:flex;align-items:center;gap:12px}.cosmeticShopTitle{flex:1}.cosmeticShopTitle strong{display:block;color:#39e7ff;letter-spacing:2px;font-size:20px;text-shadow:0 0 18px #39e7ff66}.cosmeticShopTitle small{display:block;color:#8ea0b8;margin-top:3px}.cosmeticShopClose{width:38px;height:38px;border:1px solid #33415d;border-radius:10px;background:#111a2d;color:#fff;font-size:22px}.cosmeticBalance{display:flex;flex-wrap:wrap;gap:7px;margin:12px 0}.cosmeticBalance span{background:#0a1220;border:1px solid #26344e;border-radius:9px;padding:7px 10px;color:#dffbff;font-size:12px}.shopTabs{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;margin:10px 0}.shopTab{min-height:42px;border:1px solid #26344e;border-radius:10px;background:#111a2d;color:#9ca9bd;font-weight:900}.shopTab.active{background:#183d58;border-color:#39e7ff;color:#fff}.cosmeticGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;align-items:stretch}.cosmeticCard{border:1px solid #26344e;border-radius:13px;background:linear-gradient(180deg,#0d192b,#09111d);color:#fff;padding:9px;text-align:left;min-height:160px;display:flex;flex-direction:column;gap:6px;box-shadow:0 8px 22px #0008;transition:transform .16s ease,box-shadow .16s ease,border-color .16s ease}.cosmeticCard:hover{border-color:#39e7ff;transform:translateY(-2px);box-shadow:0 10px 28px #000,0 0 22px #39e7ff16}.cosmeticCard.owned{border-color:#5bcb93aa}.cosmeticCard.locked{opacity:.76}.cosmeticCard:disabled{cursor:not-allowed}.skinPreview{width:66px;height:66px;border-radius:50%;margin:1px auto 2px;border:2px solid #fff4;box-shadow:0 0 15px #000,inset 0 0 14px #fff2;position:relative}.skinPreview:after{content:"";position:absolute;inset:12px;border-radius:50%;border:2px solid #fff7;opacity:.7}.skin-core-default{background:radial-gradient(circle at 35% 28%,#dfffff,#39e7ff 42%,#12627b 78%,#09111f)}.skin-pixel-cyan{background:radial-gradient(circle at 34% 28%,#fff,#70f5ff 35%,#39e7ff 65%,#07506d)}.skin-rust-core{background:radial-gradient(circle at 33% 28%,#ffe2b1,#d97835 36%,#703112 70%,#27110a)}.skin-toxic-orb{background:radial-gradient(circle at 34% 25%,#eaffc3,#8cff66 34%,#2c972a 67%,#082a12);box-shadow:0 0 22px #72ff5d55,inset 0 0 16px #fff3}.skin-plasma-violet{background:radial-gradient(circle at 35% 25%,#fff,#e3b3ff 24%,#a855f7 54%,#3d176b 82%,#10061e);box-shadow:0 0 25px #a855f766,inset 0 0 18px #fff4}.skin-aurora{background:linear-gradient(145deg,#39e7ff,#82ffd7 42%,#a855f7 72%,#261343);box-shadow:0 0 25px #39e7ff55,inset 0 0 18px #fff4}.skin-eclipse-gold{background:radial-gradient(circle at 50% 45%,#2a2d39 0 45%,#0a0b10 64%);border-color:#ffd76a;box-shadow:0 0 20px #ffd76a66,inset 0 0 14px #ffd76a44}.skin-celestial{background:radial-gradient(circle at 35% 30%,#d6efff,#4d90ff 37%,#202a8e 68%,#090a29);box-shadow:0 0 25px #5d8dff77,inset 0 0 16px #fff4}.skin-eternal-void{background:radial-gradient(circle at 45% 45%,#25122f,#08050d 52%,#020207 74%);border-color:#e879ff;box-shadow:0 0 30px #e879ff66,0 0 50px #39e7ff2e,inset 0 0 18px #e879ff44}
+.skin-nebula-prism{background:conic-gradient(from 20deg,#ff4fd8,#6f7bff,#39e7ff,#7dff9b,#ffdb5d,#ff4fd8);box-shadow:0 0 28px #7d7bff77,inset 0 0 18px #fff5;animation:skinSpin 5s linear infinite}
+.skin-angel-seraph{background:radial-gradient(circle at 50% 38%,#fff,#fff5c2 34%,#ffe08a 55%,#b9964b 78%);border-color:#fff5bd;box-shadow:0 0 30px #fff2ad99,0 0 52px #ffffff33,inset 0 0 20px #fff8}
+.skin-demon-infernal{background:radial-gradient(circle at 50% 45%,#ffcf9e,#ff553f 28%,#8c1820 58%,#18050a 82%);border-color:#ff6d4c;box-shadow:0 0 28px #ff452f99,0 0 55px #7b0e2b55,inset 0 0 18px #ffd2a044}
+@keyframes skinSpin{to{transform:rotate(360deg)}}.cosmeticCard strong{font-size:12px;letter-spacing:.5px}.cosmeticCard small{color:#9ca9bd;font-size:10px;line-height:1.3}.cosmeticCost{margin-top:auto;color:#dffbff;font-weight:900;font-size:11px}.cosmeticAction{min-height:31px;border:0;border-radius:8px;background:#183d58;color:#fff;font-weight:bold;font-size:10px}.cosmeticCard.owned .cosmeticAction{background:#1d5f4e}.codeBox{margin-top:13px;padding:11px;border:1px solid #26344e;border-radius:12px;background:#091321}.codeBox b{display:block;color:#39e7ff;font-size:12px}.codeRow{display:flex;gap:7px;margin-top:7px}.codeRow input{min-width:0;flex:1;padding:10px;border:1px solid #33415d;border-radius:9px;background:#111a2d;color:#fff;outline:none;text-transform:uppercase}.codeRow button{min-width:110px;border:0;border-radius:9px;background:#39e7ff;color:#041019;font-weight:900}.cosmeticMsg{display:block;min-height:18px;margin-top:7px;color:#9ca9bd;font-size:11px}.premiumGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.premiumCard{border:1px dashed #7f8da366;border-radius:13px;padding:12px;background:#09111c}.premiumCard strong{display:block;color:#dffbff}.premiumCard small{display:block;color:#8ea0b8;min-height:32px;margin:5px 0}.premiumCard button{width:100%;min-height:35px;border:0;border-radius:8px;background:#26344e;color:#74839a;font-weight:bold}.shopNpcHint{position:fixed;left:50%;bottom:64px;transform:translateX(-50%);z-index:79;background:rgba(5,8,17,.9);border:1px solid #39e7ff66;border-radius:10px;padding:7px 11px;color:#dffbff;font-size:11px;pointer-events:none}@media(max-width:700px){.cosmeticShopCard{padding:13px;border-radius:16px;max-height:90vh}.cosmeticGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.premiumGrid{grid-template-columns:1fr}.skinPreview{width:58px;height:58px}.cosmeticCard{min-height:138px}.shopTabs{gap:5px}.shopTab{font-size:11px}.codeRow{flex-direction:column}.codeRow button{min-height:40px}.shopNpcHint{bottom:108px}}
 </style>
 <script>
 (function(){try{if(/\/(?:12345|67890)(?:\/|\/index\.html)?(?:$|[?#])/.test(location.pathname+location.search)){document.documentElement.classList.add("public-room");}}catch(e){}})();
 </script>
 </head>
 <body>
-<canvas id="game"></canvas><div id="buildDisplay">NEON CORE · Build 134</div>
+<canvas id="game"></canvas><div id="buildDisplay">NEON CORE · Build 135</div>
 
 <div id="hud">
   <div class="panel" id="bars">
@@ -121,15 +125,18 @@ const p={x:3000,y:2200,r:16,angle:0,hp:100,maxHp:100,xp:0,level:1,score:0,kills:
 const shopNpc={x:3600,y:2200,r:30};const weaponNames={blaster:"BLASTER",pulse:"PULSE",cannon:"CANNON"};
 const weaponStats={blaster:{damage:25,fireRate:350},pulse:{damage:18,fireRate:170},cannon:{damage:65,fireRate:700}};let shopOpen=false;
 const COSMETIC_SKINS=[
-{id:"core_default",name:"NÚCLEO ORIGINAL",rarity:"Común",currency:"free",price:0},
-{id:"pixel_cyan",name:"PIXEL CYAN",rarity:"Código",currency:"code",price:0},
-{id:"rust_core",name:"NÚCLEO OXIDADO",rarity:"Raro",currency:"gold",price:1500},
-{id:"toxic_orb",name:"ORBE TÓXICO",rarity:"Épico",currency:"gold",price:12000},
-{id:"plasma_violet",name:"PLASMA VIOLETA",rarity:"Mítico",currency:"gold",price:60000},
-{id:"aurora",name:"AURORA",rarity:"Épico",currency:"diamonds",price:250},
-{id:"eclipse_gold",name:"ECLIPSE DORADO",rarity:"Legendario",currency:"diamonds",price:2000},
-{id:"celestial",name:"CIELO CELESTE",rarity:"Legendario",currency:"diamonds",price:7500},
-{id:"eternal_void",name:"VACÍO ETERNO",rarity:"Supremo",currency:"diamonds",price:30000}
+{id:"core_default",name:"NÚCLEO ORIGINAL",rarity:"Común",currency:"free",price:0,desc:"El núcleo base de Neon Core."},
+{id:"pixel_cyan",name:"PIXEL CYAN",rarity:"Código",currency:"code",price:0,desc:"Recompensa secreta de veteranos."},
+{id:"rust_core",name:"NÚCLEO OXIDADO",rarity:"Raro",currency:"gold",price:1500,desc:"Metal viejo con chispas de energía."},
+{id:"toxic_orb",name:"ORBE TÓXICO",rarity:"Épico",currency:"gold",price:12000,desc:"Aura verde con residuos radiactivos."},
+{id:"plasma_violet",name:"PLASMA VIOLETA",rarity:"Mítico",currency:"gold",price:60000,desc:"Plasma inestable que vibra alrededor del núcleo."},
+{id:"nebula_prism",name:"NEBULOSA PRISMA",rarity:"Mítico",currency:"diamonds",price:4500,desc:"Partículas de color orbitan como una galaxia."},
+{id:"aurora",name:"AURORA",rarity:"Épico",currency:"diamonds",price:250,desc:"Un flujo polar de energía alrededor del tanque."},
+{id:"eclipse_gold",name:"ECLIPSE DORADO",rarity:"Legendario",currency:"diamonds",price:2000,desc:"Anillo solar dorado y núcleo oscuro."},
+{id:"celestial",name:"CIELO CELESTE",rarity:"Legendario",currency:"diamonds",price:7500,desc:"Estrellas y energía celeste en órbita."},
+{id:"angel_seraph",name:"ÁNGEL SERAFÍN",rarity:"Legendario",currency:"diamonds",price:12000,desc:"Halo, alas de luz y plumas de energía."},
+{id:"demon_infernal",name:"DEMONIO INFERNAL",rarity:"Supremo",currency:"diamonds",price:25000,desc:"Cuernos, alas oscuras y brasas demoníacas."},
+{id:"eternal_void",name:"VACÍO ETERNO",rarity:"Supremo",currency:"diamonds",price:30000,desc:"Vórtice oscuro con energía púrpura."}
 ];
 const PREMIUM_OFFERS=[
 {sku:"skin_pack_01",name:"PAQUETE NEON I",description:"Cosméticos exclusivos futuros.",priceUsd:2.99},
@@ -717,6 +724,70 @@ function update(dt){
 function sx(x){return x-camera.x+W/2}
 function sy(y){return y-camera.y+H/2}
 
+function drawSkinEffects(skin,r){
+  const t=performance.now()/1000;
+  const s=String(skin||"core_default");
+  ctx.save();
+  ctx.globalCompositeOperation="lighter";
+  if(s==="toxic_orb"){
+    for(let i=0;i<7;i++){
+      const a=t*(0.55+i*0.04)+i*0.9,rr=r*(1.28+i*.08);
+      const px=Math.cos(a)*rr,py=Math.sin(a)*rr;
+      ctx.fillStyle=i%2?"#b7ff74":"#52ff9e";
+      ctx.globalAlpha=.55+.12*Math.sin(t*3+i);
+      ctx.beginPath();ctx.arc(px,py,2.2+(i%3),0,Math.PI*2);ctx.fill();
+    }
+  }else if(s==="plasma_violet"){
+    for(let i=0;i<8;i++){
+      const a=-t*1.8+i*Math.PI/4,rr=r*(1.16+.09*Math.sin(i+t*2));
+      ctx.fillStyle=i%2?"#e8c7ff":"#a855f7";
+      ctx.globalAlpha=.72;
+      ctx.beginPath();ctx.arc(Math.cos(a)*rr,Math.sin(a)*rr,2.3,0,Math.PI*2);ctx.fill();
+    }
+    ctx.strokeStyle="#dca4ff";ctx.lineWidth=1.5;ctx.globalAlpha=.35;
+    ctx.beginPath();ctx.arc(0,0,r*1.18,t*.8,t*.8+3.8);ctx.stroke();
+  }else if(s==="aurora"){
+    ctx.strokeStyle="#7dffd6";ctx.lineWidth=2;ctx.globalAlpha=.48;
+    ctx.beginPath();ctx.arc(0,0,r*1.18,-t*.7,t*.9);ctx.stroke();
+    ctx.strokeStyle="#b88cff";ctx.globalAlpha=.36;
+    ctx.beginPath();ctx.arc(0,0,r*1.28,t*.5,t*.5+4.4);ctx.stroke();
+  }else if(s==="eclipse_gold"){
+    ctx.strokeStyle="#ffd76a";ctx.lineWidth=2.5;ctx.globalAlpha=.6;
+    ctx.beginPath();ctx.arc(0,0,r*1.18,t*.35,t*.35+Math.PI*1.5);ctx.stroke();
+    for(let i=0;i<4;i++){const a=t*.6+i*Math.PI/2;ctx.fillStyle="#fff0a8";ctx.globalAlpha=.75;ctx.beginPath();ctx.arc(Math.cos(a)*r*1.23,Math.sin(a)*r*1.23,2,0,Math.PI*2);ctx.fill();}
+  }else if(s==="celestial"){
+    ctx.strokeStyle="#9bd4ff";ctx.lineWidth=1.6;ctx.globalAlpha=.52;
+    ctx.beginPath();ctx.arc(0,0,r*1.25,-t*.35,t*.35+Math.PI*1.6);ctx.stroke();
+    for(let i=0;i<8;i++){const a=t*.25+i*Math.PI/4;const rr=r*(1.12+.1*Math.sin(i*2+t));ctx.fillStyle="#ffffff";ctx.globalAlpha=.75;ctx.beginPath();ctx.arc(Math.cos(a)*rr,Math.sin(a)*rr,1.6,0,Math.PI*2);ctx.fill();}
+  }else if(s==="eternal_void"){
+    ctx.strokeStyle="#e879ff";ctx.lineWidth=2.2;ctx.globalAlpha=.5;
+    ctx.beginPath();ctx.arc(0,0,r*1.2,t,t+4.5);ctx.stroke();
+    ctx.strokeStyle="#39e7ff";ctx.globalAlpha=.28;
+    ctx.beginPath();ctx.arc(0,0,r*1.38,-t*.8,-t*.8+3.5);ctx.stroke();
+    for(let i=0;i<6;i++){const a=-t*1.4+i*Math.PI/3,rr=r*(1.05+.22*Math.sin(t*2+i));ctx.fillStyle=i%2?"#e879ff":"#39e7ff";ctx.globalAlpha=.7;ctx.beginPath();ctx.arc(Math.cos(a)*rr,Math.sin(a)*rr,2.2,0,Math.PI*2);ctx.fill();}
+  }else if(s==="nebula_prism"){
+    for(let i=0;i<12;i++){const a=t*(.35+i*.015)+i*Math.PI/6,rr=r*(1.1+.14*Math.sin(t*1.8+i));const colors=["#ff4fd8","#6f7bff","#39e7ff","#7dff9b","#ffdb5d"];ctx.fillStyle=colors[i%colors.length];ctx.globalAlpha=.7;ctx.beginPath();ctx.arc(Math.cos(a)*rr,Math.sin(a)*rr,1.8+(i%3),0,Math.PI*2);ctx.fill();}
+    ctx.strokeStyle="#ffffff";ctx.lineWidth=1.2;ctx.globalAlpha=.25;ctx.beginPath();ctx.arc(0,0,r*1.28,-t,t+2.4);ctx.stroke();
+  }else if(s==="angel_seraph"){
+    ctx.globalAlpha=.42;ctx.strokeStyle="#fff4bc";ctx.lineWidth=2;
+    ctx.beginPath();ctx.arc(0,-r*.05,r*1.42,-Math.PI*.15,Math.PI*1.15);ctx.stroke();
+    ctx.globalAlpha=.8;ctx.strokeStyle="#fff3c4";ctx.lineWidth=1.8;
+    for(const side of [-1,1]){
+      ctx.beginPath();ctx.moveTo(side*r*.45,-r*.2);ctx.quadraticCurveTo(side*r*1.55,-r*1.05,side*r*1.78,r*.2);ctx.quadraticCurveTo(side*r*1.15,-r*.1,side*r*.65,r*.65);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(side*r*.55,r*.2);ctx.quadraticCurveTo(side*r*1.4,r*1.0,side*r*1.65,r*.6);ctx.stroke();
+    }
+    for(let i=0;i<8;i++){const a=t*.55+i*Math.PI/4,rr=r*(1.18+.14*Math.sin(i+t));ctx.fillStyle=i%2?"#fff8db":"#ffe28a";ctx.globalAlpha=.75;ctx.beginPath();ctx.ellipse(Math.cos(a)*rr,Math.sin(a)*rr,2.3,4.2,a,0,Math.PI*2);ctx.fill();}
+  }else if(s==="demon_infernal"){
+    ctx.globalAlpha=.34;ctx.strokeStyle="#ff3b30";ctx.lineWidth=3;
+    ctx.beginPath();ctx.arc(0,0,r*1.38,-t,t+4.9);ctx.stroke();
+    ctx.globalAlpha=.7;ctx.strokeStyle="#ff6b4e";ctx.lineWidth=2;
+    ctx.beginPath();ctx.moveTo(-r*.38,-r*.55);ctx.quadraticCurveTo(-r*1.45,-r*1.35,-r*1.75,-r*.05);ctx.quadraticCurveTo(-r*1.2,-r*.15,-r*.7,r*.7);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(r*.38,-r*.55);ctx.quadraticCurveTo(r*1.45,-r*1.35,r*1.75,-r*.05);ctx.quadraticCurveTo(r*1.2,-r*.15,r*.7,r*.7);ctx.stroke();
+    ctx.fillStyle="#ffcf83";ctx.beginPath();ctx.moveTo(-r*.42,-r*.65);ctx.lineTo(-r*.15,-r*1.28);ctx.lineTo(-r*.02,-r*.62);ctx.closePath();ctx.fill();ctx.beginPath();ctx.moveTo(r*.42,-r*.65);ctx.lineTo(r*.15,-r*1.28);ctx.lineTo(r*.02,-r*.62);ctx.closePath();ctx.fill();
+    for(let i=0;i<9;i++){const a=-t*1.1+i*Math.PI/4.5,rr=r*(1.12+.15*Math.sin(i+t*2));ctx.fillStyle=i%2?"#ff3b30":"#ffab5e";ctx.globalAlpha=.72;ctx.beginPath();ctx.arc(Math.cos(a)*rr,Math.sin(a)*rr,2.2,0,Math.PI*2);ctx.fill();}
+  }
+  ctx.restore();
+}
 function drawTank(x,y,angle,color="#39e7ff",r=24,weapon="blaster",skinId="core_default"){
   ctx.save();ctx.translate(sx(x),sy(y));ctx.rotate(angle);
   ctx.fillStyle="rgba(0,0,0,.35)";ctx.beginPath();ctx.arc(3,4,r+5,0,Math.PI*2);ctx.fill();
@@ -730,7 +801,19 @@ function drawTank(x,y,angle,color="#39e7ff",r=24,weapon="blaster",skinId="core_d
   else if(skin==="eclipse_gold") bodyFill="#16171e";
   else if(skin==="celestial"){const g=ctx.createRadialGradient(-r*.35,-r*.4,r*.1,r*.2,r*.2,r*1.2);g.addColorStop(0,"#d7efff");g.addColorStop(.3,"#4e92ff");g.addColorStop(.7,"#222c8f");g.addColorStop(1,"#090a29");bodyFill=g;}
   else if(skin==="eternal_void"){const g=ctx.createRadialGradient(0,0,r*.05,0,0,r*1.15);g.addColorStop(0,"#4c1d57");g.addColorStop(.46,"#17101d");g.addColorStop(1,"#030207");bodyFill=g;}
+  else if(skin==="nebula_prism"){const g=ctx.createConicGradient(0,0,0);g.addColorStop(0,"#ff4fd8");g.addColorStop(.2,"#6f7bff");g.addColorStop(.4,"#39e7ff");g.addColorStop(.62,"#7dff9b");g.addColorStop(.82,"#ffdb5d");g.addColorStop(1,"#ff4fd8");bodyFill=g;}
+  else if(skin==="angel_seraph") bodyFill="#fff1b8";
+  else if(skin==="demon_infernal") bodyFill="#7e1720";
   ctx.fillStyle=bodyFill;ctx.beginPath();ctx.arc(0,0,r,0,Math.PI*2);ctx.fill();
+  if(skin==="angel_seraph"){
+    ctx.strokeStyle="#fff3c4";ctx.lineWidth=2;ctx.beginPath();ctx.arc(0,0,r*.78,0,Math.PI*2);ctx.stroke();
+    ctx.fillStyle="#fff8dd";ctx.globalAlpha=.85;ctx.beginPath();ctx.arc(-r*.22,-r*.15,r*.12,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1;
+  }else if(skin==="demon_infernal"){
+    ctx.strokeStyle="#ff6b4e";ctx.lineWidth=2.5;ctx.beginPath();ctx.arc(0,0,r*.8,0,Math.PI*2);ctx.stroke();
+    ctx.fillStyle="#2b050a";ctx.beginPath();ctx.arc(0,0,r*.14,0,Math.PI*2);ctx.fill();
+  }else if(skin==="nebula_prism"){
+    ctx.strokeStyle="#ffffffaa";ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(0,0,r*.82,0,Math.PI*2);ctx.stroke();
+  }
   if(skin==="pixel_cyan"){ctx.fillStyle="#a8fbff";ctx.fillRect(-r*.45,-r*.45,5,5);ctx.fillRect(r*.18,-r*.58,6,6);ctx.fillRect(-r*.6,r*.08,4,4);}
   if(skin==="rust_core"){ctx.strokeStyle="#ffad63";ctx.lineWidth=2;ctx.beginPath();ctx.arc(0,0,r*.72,-.9,.2);ctx.stroke();ctx.beginPath();ctx.arc(0,0,r*.72,1.8,2.65);ctx.stroke();}
   if(skin==="toxic_orb"){ctx.strokeStyle="#d7ffc8";ctx.lineWidth=2;ctx.beginPath();ctx.arc(0,0,r*.72,.4,2.7);ctx.stroke();}
@@ -739,6 +822,7 @@ function drawTank(x,y,angle,color="#39e7ff",r=24,weapon="blaster",skinId="core_d
   if(skin==="eclipse_gold"){ctx.strokeStyle="#ffd76a";ctx.lineWidth=3;ctx.beginPath();ctx.arc(0,0,r*.78,0,Math.PI*2);ctx.stroke();}
   if(skin==="celestial"){ctx.fillStyle="#fff";for(let i=0;i<5;i++){const a=i*1.25+.4;ctx.beginPath();ctx.arc(Math.cos(a)*r*.48,Math.sin(a)*r*.48,1.4,0,Math.PI*2);ctx.fill();}}
   if(skin==="eternal_void"){ctx.strokeStyle="#e879ff";ctx.lineWidth=2;ctx.beginPath();ctx.arc(0,0,r*.8,-2.7,.2);ctx.stroke();ctx.strokeStyle="#39e7ff";ctx.beginPath();ctx.arc(0,0,r*.72,.55,2.9);ctx.stroke();}
+  drawSkinEffects(skin,r);
   ctx.fillStyle="#142238";ctx.fillRect(-r*.15,-7,r+10,14);
   if(weapon==="pulse"){
     ctx.fillStyle="#b56cff";ctx.fillRect(r-2,-10,r+10,6);ctx.fillRect(r-2,4,r+10,6);
@@ -895,7 +979,7 @@ function renderCosmeticShop(){
   const list=COSMETIC_SKINS.filter(item=>item.currency===cosmeticShopTab||item.currency==="free"||item.currency==="code");
   grid.innerHTML=list.map(item=>{
     const isOwned=ownedSkins.includes(item.id),isLocked=item.currency==="free"||item.currency==="code";
-    return '<button type="button" class="cosmeticCard '+(isOwned?"owned ":"")+(isLocked&&!isOwned?"locked":"")+'" data-skin-id="'+item.id+'"><div class="skinPreview '+skinClass(item.id)+'"></div><strong>'+item.name+'</strong><small>'+item.rarity+'</small><span class="cosmeticCost">'+(isOwned?"✓ DESBLOQUEADO":skinCostText(item))+'</span><span class="cosmeticAction">'+(isOwned?"EQUIPAR":"COMPRAR")+'</span></button>';
+    return '<button type="button" class="cosmeticCard '+(isOwned?"owned ":"")+(isLocked&&!isOwned?"locked":"")+'" data-skin-id="'+item.id+'"><div class="skinPreview '+skinClass(item.id)+'"></div><strong>'+item.name+'</strong><small>'+item.rarity+(item.desc?" · "+item.desc:"")+'</small><span class="cosmeticCost">'+(isOwned?"✓ DESBLOQUEADO":skinCostText(item))+'</span><span class="cosmeticAction">'+(isOwned?"EQUIPAR":"COMPRAR")+'</span></button>';
   }).join("");
   grid.querySelectorAll(".cosmeticCard").forEach(btn=>btn.addEventListener("click",()=>{
     const id=btn.dataset.skinId;if(!id)return;
