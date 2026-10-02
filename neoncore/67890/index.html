@@ -847,7 +847,7 @@ function ensureBankUi(){
 function sendBankCommand(type){if(!multiplayerSocket||multiplayerSocket.readyState!==1)return;multiplayerSocket.send(JSON.stringify({type}));}
 function updateBank(){
   ensureBankUi();
-  const near=Math.hypot(p.x-bankNpc.x,p.y-bankNpc.y)<=120;
+  const near=Math.hypot(p.x-bankNpc.x,p.y-bankNpc.y)<=95;
   const box=document.getElementById("bankPanel");
   bankOpen=near&&p.alive;
   box.style.display=bankOpen?"block":"none";
@@ -908,7 +908,7 @@ function renderCosmeticShop(){
 function openCosmeticShop(){const box=document.getElementById("cosmeticShop");if(!box)return;cosmeticShopDismissedUntil=0;box.style.display="flex";box.setAttribute("aria-hidden","false");renderCosmeticShop();sendCosmeticCommand("open_cosmetic_shop");}
 function closeCosmeticShop(){const box=document.getElementById("cosmeticShop");if(!box)return;box.style.display="none";box.setAttribute("aria-hidden","true");cosmeticShopDismissedUntil=performance.now()+1400;}
 function updateCosmeticShop(){
-  const near=Math.hypot(p.x-cosmeticShopNpc.x,p.y-cosmeticShopNpc.y)<=95,box=document.getElementById("cosmeticShop");
+  const near=Math.hypot(p.x-cosmeticShopNpc.x,p.y-cosmeticShopNpc.y)<=120,box=document.getElementById("cosmeticShop");
   if(!near){cosmeticShopWasNear=false;if(box)box.style.display="none";return;}
   if(near&&!cosmeticShopWasNear&&p.alive&&performance.now()>cosmeticShopDismissedUntil)openCosmeticShop();
   cosmeticShopWasNear=near;
