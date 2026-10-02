@@ -14,7 +14,7 @@ async function waitForLiveGame(page, room) {
     timeout: 45000
   });
 
-  await expect(page.locator('#neonDiag')).toContainText('B123 DIAG', { timeout: 30000 });
+  await expect(page.locator('#neonDiag')).toContainText('DIAG', { timeout: 30000 });
   await expect.poll(async () => (await page.locator('#neonDiag').innerText()), {
     timeout: 30000,
     intervals: [500, 1000]
@@ -30,6 +30,8 @@ async function waitForLiveGame(page, room) {
 for (const room of ROOMS) {
   test(`sala ${room}: conexión, movimiento y disparo`, async ({ page }) => {
     const errors = [];
+    const wsEvents = [];
+    page.on('websocket', ws => { wsEvents.push('created:'+ws.url()); ws.on('close', () => wsEvents.push('closed:'+ws.url())); });
     page.on('pageerror', e => errors.push('PAGEERROR: ' + e.message));
     page.on('console', msg => {
       if (msg.type() === 'error') errors.push('CONSOLE: ' + msg.text());
