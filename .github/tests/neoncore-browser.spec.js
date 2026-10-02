@@ -264,7 +264,7 @@ test('SHOP: arsenal, skins, códigos, rangos y buffs', async ({ page }) => {
   await page.locator('.cosmeticCard[data-weapon-skin-id="blaster_neonstorm"]').click();
   await expect(page.locator('#attackPower')).toHaveText('35');
   await expect(page.locator('#defenseValue')).toHaveText('2');
-  await expect(page.locator('.cosmeticCard.selected')).toHaveCount(0);
+  await expect(page.locator('.weaponSkinCard.selected')).toHaveCount(0);
 
   await page.locator('#redeemCode').isVisible().catch(()=>false);
   await page.locator('.shopTab[data-shop-section="redeem"]').click();
