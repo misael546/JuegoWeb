@@ -9,7 +9,7 @@
 <script>
 (function(){
   try{
-    var v="20261002-140";
+    var v="20261002-141";
     var k="neon_core_build";
     window.NEON_CORE_BUILD=v;
     var old=localStorage.getItem(k);
@@ -63,7 +63,7 @@
 </script>
 </head>
 <body>
-<canvas id="game"></canvas><div id="buildDisplay">NEON CORE · Build 140</div>
+<canvas id="game"></canvas><div id="buildDisplay">NEON CORE · Build 141</div>
 
 <div id="hud">
   <div class="panel" id="bars">
@@ -483,6 +483,7 @@ function connectMultiplayer(roomMode="quick",roomCode=""){ const publicRoomAuto=
           ownedSkins=Array.isArray(m.ownedSkins)?m.ownedSkins:["core_default"];
           equippedSkin=m.equippedSkin||"core_default";p.equippedSkin=equippedSkin;
           if(equippedSkin && !ownedSkins.includes(equippedSkin))ownedSkins=[...ownedSkins,equippedSkin];
+          if(m.unlockedSkin && !ownedSkins.includes(m.unlockedSkin))ownedSkins=[...ownedSkins,m.unlockedSkin];
           if(m.cosmeticShopNpc){cosmeticShopNpc.x=Number(m.cosmeticShopNpc.x)||cosmeticShopNpc.x;cosmeticShopNpc.y=Number(m.cosmeticShopNpc.y)||cosmeticShopNpc.y;cosmeticShopNpc.r=Number(m.cosmeticShopNpc.r)||cosmeticShopNpc.r;}
           renderCosmeticShop();showCosmeticMsg(m.message||"Tienda actualizada.");updateResourceHud();
         }else if(m.type==="cosmetic_result"){
