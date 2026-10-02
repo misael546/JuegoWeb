@@ -217,6 +217,7 @@ function sendStats(p) {
     weapon: p.weapon,
     shopNpc: SHOP_NPC,
     bankNpc: BANK_NPC,
+    cosmeticShopNpc: COSMETIC_SHOP_NPC,
     bankedGold: p.bankedGold || 0,
     bankedDiamonds: p.bankedDiamonds || 0,
     equippedSkin: cosmetics.getSkin(p.equippedSkin) ? p.equippedSkin : 'core_default',
@@ -1780,6 +1781,11 @@ wss.on('connection', (ws) => {
 
       if (msg.type === 'buy_weapon') {
         if (!p.frozen) shopBuy(ws, msg.weapon);
+        return;
+      }
+
+      if (msg.type === 'open_cosmetic_shop') {
+        if (!p.frozen) sendCosmeticState(p);
         return;
       }
 
