@@ -15,18 +15,23 @@ const SERVER_VERSION = '20261002-150';
 
 const AMMO_PACK_SIZE = 100;
 const AMMO_PACK_COST = 75;
-const MAX_AMMO = 450;
+const MAX_AMMO = 700;
 
 const SHOP_NPC = { x: 3000, y: 2200, r: 24 };
 const SHOP_INTERACTION_RADIUS = 48;
 const BANK_ENABLED = false;
 
 const WEAPONS = {
-  blaster: { name: 'BLASTER', cost: 0, damage: 35, fireRate: 320, maxAmmo: 220, range: 760 },
-  pulse: { name: 'PULSE', cost: 500, damage: 70, fireRate: 230, maxAmmo: 260, range: 820 },
-  cannon: { name: 'CANNON', cost: 1500, damage: 140, fireRate: 620, maxAmmo: 320, range: 880 },
-  railgun: { name: 'RAILGUN', cost: 6500, damage: 260, fireRate: 900, maxAmmo: 380, range: 960 },
-  nova: { name: 'NOVA', cost: 22000, damage: 520, fireRate: 1350, maxAmmo: 450, range: 1040 }
+  blaster: { name: 'BLASTER · NEONSTORM', cost: 0, damage: 35, fireRate: 320, maxAmmo: 220, range: 760 },
+  pulse: { name: 'PULSE · PRISMA', cost: 500, damage: 70, fireRate: 230, maxAmmo: 260, range: 820 },
+  cannon: { name: 'CANNON · SOLARIS', cost: 1500, damage: 140, fireRate: 620, maxAmmo: 320, range: 880 },
+  railgun: { name: 'RAILGUN · ECLIPSE', cost: 6500, damage: 260, fireRate: 900, maxAmmo: 380, range: 960 },
+  nova: { name: 'NOVA · SUPERNOVA', cost: 22000, damage: 520, fireRate: 1350, maxAmmo: 450, range: 1040 },
+  plasma: { name: 'PLASMA · INFERNO', cost: 60000, damage: 800, fireRate: 1050, maxAmmo: 500, range: 1120 },
+  vortex: { name: 'VORTEX · SHARD', cost: 150000, damage: 1150, fireRate: 1450, maxAmmo: 550, range: 1200 },
+  quasar: { name: 'QUASAR · RAY', cost: 400000, damage: 1550, fireRate: 1750, maxAmmo: 600, range: 1280 },
+  singularity: { name: 'SINGULARITY · CORE', cost: 900000, damage: 2100, fireRate: 2150, maxAmmo: 650, range: 1360 },
+  omega: { name: 'OMEGA · ASCENSION', cost: 2000000, damage: 2800, fireRate: 2600, maxAmmo: 700, range: 1440 }
 };
 
 const HP_REGEN_PER_SEC = 3;
@@ -45,11 +50,11 @@ const BOSS_NAME = 'DESTRUCTOR ESTELAR';
 const BOSS_AGGRO_RANGE = 1250;
 const BOSS_ATTACK_RANGE = 980;
 const BOSS_PROJECTILE_DAMAGE = 260;
-const BOSS_PROJECTILE_SPEED = 520;
+const BOSS_PROJECTILE_SPEED = 440;
 const BOSS_PROJECTILE_COOLDOWN_MS = 3000;
 const BOSS_AOE_DAMAGE = 240;
-const BOSS_AOE_RADIUS = 125;
-const BOSS_AOE_WARNING_MS = 1200;
+const BOSS_AOE_RADIUS = 72;
+const BOSS_AOE_WARNING_MS = 1600;
 const BOSS_AOE_COOLDOWN_MS = 6200;
 const BOSS_AOE_RANGE = 780;
 const AUTOSAVE_MS = 5000;
@@ -192,7 +197,6 @@ function publicPlayer(p) {
     speed: p.speed,
     color: p.color,
     weapon: p.weapon,
-    equippedWeaponSkin: cosmetics.getWeaponSkin(p.equippedWeaponSkin) ? p.equippedWeaponSkin : '',
     equippedSkin: cosmetics.getSkin(p.equippedSkin) ? p.equippedSkin : ''
   };
 }
@@ -239,9 +243,6 @@ function sendStats(p) {
     maxAmmo,
     weapon: p.weapon,
     ownedWeapons: normalizeOwnedWeapons(p.ownedWeapons, p.weapon || ''),
-    equippedWeaponSkin: cosmetics.getWeaponSkin(p.equippedWeaponSkin) ? p.equippedWeaponSkin : '',
-    ownedWeaponSkins: cosmetics.normalizeOwnedWeaponSkins(p.ownedWeaponSkins),
-    weaponSkinCatalog: cosmetics.publicWeaponCatalog(),
     shopNpc: SHOP_NPC,
     bankEnabled: BANK_ENABLED,
     equippedSkin: cosmetics.getSkin(p.equippedSkin) ? p.equippedSkin : '',
@@ -270,8 +271,6 @@ function capturePlayerData(p) {
     ammo: clamp(Number(p.ammo) || 0, 0, MAX_AMMO),
     weapon: WEAPONS[p.weapon] ? p.weapon : null,
     ownedWeapons: normalizeOwnedWeapons(p.ownedWeapons, p.weapon || ''),
-    equippedWeaponSkin: cosmetics.getWeaponSkin(p.equippedWeaponSkin) ? p.equippedWeaponSkin : '',
-    ownedWeaponSkins: cosmetics.normalizeOwnedWeaponSkins(p.ownedWeaponSkins),
     bankedGold: Math.max(0, Number(p.bankedGold) || 0),
     bankedDiamonds: Math.max(0, Number(p.bankedDiamonds) || 0),
     damageXp: Math.max(0, Number(p.damageXp) || 0),
@@ -345,8 +344,9 @@ function normalizeOwnedWeapons(value, fallbackWeapon = '') {
 }
 
 function weaponSkinAttackBonus(p) {
-  const skin = cosmetics.getWeaponSkin(p?.equippedWeaponSkin);
-  return skin && skin.weaponId === p?.weapon ? Math.max(0, Number(skin.attackBonus) || 0) : 0;
+  // Las armas ya incluyen su aspecto y su ATAQUE. Las antiguas skins de arma
+  // quedan ignoradas para compatibilidad con partidas guardadas.
+  return 0;
 }
 
 
@@ -365,7 +365,6 @@ function applyCombatStats(p) {
     p.weapon = null;
     p.damage = 10;
     p.fireRate = 999999;
-    p.equippedWeaponSkin = '';
   }
   p.defense = Math.max(0, Math.round(
     skinDefenseBonus(p) - (Number(p.defensePenalty) || 0)
@@ -1090,7 +1089,6 @@ function shopBuy(ws, requestedWeapon) {
 
   if (p.weapon === weaponId) {
     p.weapon = null;
-    p.equippedWeaponSkin = '';
     applyCombatStats(p);
     void persistPlayer(p);
     send(ws, {
@@ -1187,7 +1185,6 @@ function equipWeaponSkin(ws, skinId) {
   const id = String(skinId || '');
   p.ownedWeaponSkins = cosmetics.normalizeOwnedWeaponSkins(p.ownedWeaponSkins);
   if (id === '') {
-    p.equippedWeaponSkin = '';
     applyCombatStats(p);
     void persistPlayer(p);
     sendCosmeticState(p, 'Skin de arma desequipada · buff de ATAQUE/DEFENSA retirado.');
@@ -1225,8 +1222,6 @@ function sendCosmeticState(p, message = 'Tienda lista.', unlockedSkin = '', unlo
     equippedSkin: cosmetics.getSkin(p.equippedSkin) ? p.equippedSkin : '',
     ownedWeapons: normalizeOwnedWeapons(p.ownedWeapons, p.weapon || ''),
     weapon: p.weapon,
-    ownedWeaponSkins: cosmetics.normalizeOwnedWeaponSkins(p.ownedWeaponSkins),
-    equippedWeaponSkin: cosmetics.getWeaponSkin(p.equippedWeaponSkin) ? p.equippedWeaponSkin : '',
     weaponSkinCatalog: cosmetics.publicWeaponCatalog(),
     shopNpc: SHOP_NPC,
     catalog: cosmetics.publicCatalog(),
@@ -1343,7 +1338,6 @@ async function redeemCosmeticCode(ws, rawCode) {
     unlockedWeapon = weapon;
     if (!p.ownedWeapons.includes(weapon)) p.ownedWeapons.push(weapon);
     p.weapon = weapon;
-    p.equippedWeaponSkin = '';
   }
 
   if (reward.weaponSkinId) {
@@ -2773,7 +2767,7 @@ function runServerDiagnostics() {
   if (MAX_PLAYERS < 1) problems.push('MAX_PLAYERS inválido');
   if (PUBLIC_ROOMS.some((code) => !rooms.has(code))) problems.push('Sala pública ausente');
   if (WORLD_WALLS.length < 20) problems.push('Muy pocos muros');
-  if (Object.keys(WEAPONS).length < 3) problems.push('Arsenal incompleto');
+  if (Object.keys(WEAPONS).length < 10) problems.push('Arsenal incompleto');
   if (!cosmetics.getSkin('core_default')) problems.push('Skin base ausente');
   if (Object.keys(cosmetics.SKINS).length < 8) problems.push('Catálogo de skins incompleto');
   if (Object.keys(cosmetics.WEAPON_SKINS).length < 5) problems.push('Skins de arsenal incompletas');
