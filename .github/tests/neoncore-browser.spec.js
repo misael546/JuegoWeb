@@ -75,8 +75,13 @@ for (const room of ROOMS) {
     expect(Math.hypot(afterMove.x - 3000, afterMove.y - 2200)).toBeGreaterThan(250);
 
     const ammoBefore = Number((await page.locator('#ammo').innerText()).trim());
-    await page.locator('#fire').click();
-    await page.waitForTimeout(450);
+    const fireBox = await page.locator('#fire').boundingBox();
+    expect(fireBox).not.toBeNull();
+    await page.mouse.move(fireBox.x + fireBox.width/2, fireBox.y + fireBox.height/2);
+    await page.mouse.down();
+    await page.waitForTimeout(700);
+    await page.mouse.up();
+    await page.waitForTimeout(500);
     const ammoAfter = Number((await page.locator('#ammo').innerText()).trim());
     expect(ammoAfter).toBeLessThan(ammoBefore);
 
