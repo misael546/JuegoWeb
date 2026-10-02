@@ -204,7 +204,7 @@ test('menu principal: nombre y entrada a sala', async ({ browser }) => {
 });
 
 
-test('SHOP: arsenal, skins, selección y canje', async ({ page }) => {
+test('SHOP: arsenal, skins, códigos, rangos y buffs', async ({ page }) => {
   const errors = [];
   page.on('pageerror', e => errors.push('PAGEERROR: ' + e.message));
   page.on('console', msg => {
@@ -230,48 +230,48 @@ test('SHOP: arsenal, skins, selección y canje', async ({ page }) => {
   await expect(page.locator('.shopTab[data-shop-section="arsenal"]')).toBeVisible();
   await expect(page.locator('.shopTab[data-shop-section="skins"]')).toBeVisible();
   await expect(page.locator('.shopTab[data-shop-section="redeem"]')).toBeVisible();
-  await expect(page.locator('#cosmeticShopClose')).toHaveCount(0);
-  await expect(page.locator('#arsenalGrid')).toContainText('NOVA');
-  await expect(page.locator('#arsenalGrid')).toContainText('450');
+  await expect(page.locator('#weaponSkinGrid')).toContainText('BLASTER · NEONSTORM');
+  await expect(page.locator('#weaponSkinGrid')).toContainText('NOVA · SUPERNOVA');
   await expect(page.locator('#bankPanel')).toHaveCount(0);
-  await expect(page.locator('#defenseValue')).toHaveText('0');
 
   await page.locator('.shopTab[data-shop-section="skins"]').click();
-  await expect(page.locator('#skinShopGrid')).toContainText('NÚCLEO OXIDADO');
-  await expect(page.locator('#skinShopGrid')).toContainText('AURORA');
   await expect(page.locator('#skinShopGrid')).toContainText('SOBERANO DEL NÚCLEO');
-
-  const defaultCard = page.locator('.cosmeticCard[data-skin-id="core_default"]');
-  await expect(defaultCard).toContainText('SELECCIONADO');
+  await expect(page.locator('#skinShopGrid .cosmeticCard.selected')).toHaveCount(1);
+  await expect(page.locator('#defenseValue')).toHaveText('0');
 
   await page.locator('.shopTab[data-shop-section="redeem"]').click();
   await page.locator('#redeemCode').fill('NEONSTART');
   await page.locator('#redeemCodeBtn').click();
   await expect(page.locator('#cosmeticShopMsg')).toContainText('PIXEL CYAN', {timeout:10000});
-
-  await page.locator('.shopTab[data-shop-section="skins"]').click();
-  const pixelCard = page.locator('.cosmeticCard[data-skin-id="pixel_cyan"]');
-  await expect(pixelCard).toContainText('SELECCIONADO');
   await expect(page.locator('#defenseValue')).toHaveText('2');
 
-  const selectedCount = await page.locator('.cosmeticCard.selected').count();
-  expect(selectedCount).toBe(1);
+  await page.locator('#redeemCode').fill('NEONARMORY');
+  await page.locator('#redeemCodeBtn').click();
+  await expect(page.locator('#cosmeticShopMsg')).toContainText('BLASTER · NEONSTORM', {timeout:10000});
 
-  await page.keyboard.down('w');
-  await page.waitForTimeout(900);
-  await page.keyboard.up('w');
-  await expect(page.locator('#cosmeticShop')).toHaveCSS('display', 'none', {timeout:5000});
+  await page.locator('#redeemCode').fill('STARFORGE');
+  await page.locator('#redeemCodeBtn').click();
+  await expect(page.locator('#cosmeticShopMsg')).toContainText('PULSE', {timeout:10000});
 
-  await page.locator('#chatToggle').click();
-  await page.locator('#chatInput').fill('/soberano GMNEONCORE');
-  await page.locator('#chatForm').evaluate(form => form.requestSubmit());
-  await expect(page.locator('#chatMessages')).toContainText('SOBERANO DEL NÚCLEO', {timeout:10000});
+  await page.locator('#redeemCode').fill('SOBERANO2026');
+  await page.locator('#redeemCodeBtn').click();
+  await expect(page.locator('#cosmeticShopMsg')).toContainText('SOBERANO DEL NÚCLEO', {timeout:10000});
 
-  await expect(page.locator('#chatMessages')).toContainText('SOBERANO DEL NÚCLEO', {timeout:5000});
+  await page.locator('.shopTab[data-shop-section="skins"]').click();
+  await expect(page.locator('.cosmeticCard[data-skin-id="gm_core"]')).toContainText('SELECCIONADO');
+  await expect(page.locator('#defenseValue')).toHaveText('125');
 
-  if (errors.length) {
-    throw new Error('Errores SHOP: ' + errors.join(' | '));
-  }
+  await page.locator('#unequipTankSkin').click();
+  await expect(page.locator('#defenseValue')).toHaveText('0');
+
+  await page.locator('.shopTab[data-shop-section="arsenal"]').click();
+  const pulseCard = page.locator('[data-weapon-buy="pulse"]');
+  await expect(pulseCard).toContainText('EQUIPADA');
+  await pulseCard.locator('button').click();
+  await expect.poll(async () => page.locator('#weaponName').innerText(), {timeout:5000, intervals:[250,500]}).toContain('SIN ARSENAL');
+  await expect(page.locator('#attackLevel')).toHaveText('0');
+
+  if (errors.length) throw new Error('Errores SHOP: ' + errors.join(' | '));
 });
 
 test('mobile emulation: interfaz táctil y controles visibles', async ({ browser }) => {
