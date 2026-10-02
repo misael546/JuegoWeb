@@ -212,12 +212,12 @@ test('SHOP: arsenal, skins, códigos, rangos y buffs', async ({ page }) => {
   });
 
   await waitForLiveGame(page, '12345', {errors,wsEvents:[]});
-  await expect.poll(async () => page.evaluate(() => window.NEON_CORE_BUILD), {timeout:10000}).toBe('20261002-147');
+  await expect.poll(async () => page.evaluate(() => window.NEON_CORE_BUILD), {timeout:10000}).toBe('20261002-148');
 
   const health = await page.request.get('https://neon-core-multiplayer.onrender.com/health?ci=' + Date.now());
   expect(health.ok()).toBeTruthy();
   const healthJson = await health.json();
-  expect(healthJson.version).toBe('20261002-147');
+  expect(healthJson.version).toBe('20261002-148');
   expect(healthJson.diagnostics.bossTarget).toBe(1);
   expect(healthJson.diagnostics.eliteTarget).toBe(6);
 
