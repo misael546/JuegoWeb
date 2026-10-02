@@ -93,3 +93,44 @@ for (const room of ROOMS) {
     }
   });
 }
+
+test('mobile emulation: interfaz táctil y controles visibles', async ({ browser }) => {
+  const context = await browser.newContext({
+    viewport: { width: 390, height: 844 },
+    isMobile: true,
+    hasTouch: true
+  });
+  const page = await context.newPage();
+  const errors = [];
+  page.on('pageerror', e => errors.push('PAGEERROR: ' + e.message));
+  page.on('console', msg => {
+    if (msg.type() === 'error') errors.push('CONSOLE: ' + msg.text());
+  });
+
+  await page.goto('https://misael546.github.io/JuegoWeb/neoncore/12345/?mobileci=' + Date.now(), {
+    waitUntil: 'domcontentloaded',
+    timeout: 45000
+  });
+  await expect(page.locator('#neonDiag')).toContainText('DIAG', { timeout: 30000 });
+  await expect.poll(async () => page.locator('#neonDiag').innerText(), {
+    timeout: 15000,
+    intervals: [500, 1000]
+  }).toMatch(/game:true/);
+
+  await expect(page.locator('#moveJoy')).toBeVisible();
+  await expect(page.locator('#fire')).toBeVisible();
+
+  const body = await page.locator('body').evaluate(el => ({
+    width: el.clientWidth,
+    height: el.clientHeight,
+    scrollWidth: el.scrollWidth,
+    scrollHeight: el.scrollHeight
+  }));
+  expect(body.scrollWidth).toBeLessThanOrEqual(body.width + 2);
+  expect(body.scrollHeight).toBeLessThanOrEqual(body.height + 2);
+
+  if (errors.length) {
+    throw new Error('Errores mobile: ' + errors.join(' | '));
+  }
+  await context.close();
+});
