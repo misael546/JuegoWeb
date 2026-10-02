@@ -990,38 +990,6 @@ function smoothEnemies(dt){
     e.y+=errorY*correction;
   }
 }
-const bankNpc={x:3000,y:1985,r:22};let bankOpen=false;
-function ensureBankUi(){
-  if(document.getElementById("bankPanel"))return;
-  const style=document.createElement("style");
-  style.textContent="#bankPanel{position:fixed;left:50%;bottom:112px;transform:translateX(-50%);z-index:9;display:none;min-width:min(320px,90vw);background:rgba(5,8,17,.96);border:1px solid #a98cff;border-radius:14px;padding:12px;text-align:center;box-shadow:0 8px 30px #000}#bankPanel b{display:block;color:#c6b3ff}#bankPanel span{display:block;color:#c8d3e5;font-size:12px;margin:5px 0}.bankBalances{display:grid;gap:5px;margin:8px 0}.bankBalances span{background:#0b1424;border:1px solid #26344e;border-radius:7px;padding:5px}.bankBtn{width:100%;min-height:40px;border:0;border-radius:9px;background:#5b3fa3;color:#fff;font-weight:bold;margin-top:5px}.bankMsg{display:block;color:#9ca9bd;margin-top:7px;font-size:11px}";
-  document.head.appendChild(style);
-  document.body.insertAdjacentHTML("beforeend",'<div id="bankPanel"><b>🏦 BANCO NEON</b><span>Guarda tus recursos para protegerlos al morir.</span><div class="bankBalances"><span>🪙 Bolsa: <b id="bankWalletGold">0</b></span><span>💎 Bolsa: <b id="bankWalletDiamonds">0</b></span><span>🛡 Banco: <b id="bankSavedGold">0</b> 🪙 · <b id="bankSavedDiamonds">0</b> 💎</span></div><button class="bankBtn" id="depositBankBtn">GUARDAR TODO</button><button class="bankBtn" id="withdrawBankBtn">RETIRAR TODO</button><small class="bankMsg" id="bankMsg">Acércate al banco.</small></div>');
-  document.getElementById("depositBankBtn").addEventListener("click",()=>sendBankCommand("deposit_bank"));
-  document.getElementById("withdrawBankBtn").addEventListener("click",()=>sendBankCommand("withdraw_bank"));
-}
-function sendBankCommand(type){if(!multiplayerSocket||multiplayerSocket.readyState!==1)return;multiplayerSocket.send(JSON.stringify({type}));}
-function updateBank(){
-  ensureBankUi();
-  const near=Math.hypot(p.x-bankNpc.x,p.y-bankNpc.y)<=34;
-  const box=document.getElementById("bankPanel");
-  bankOpen=near&&p.alive;
-  box.style.display=bankOpen?"block":"none";
-  if(!near)return;
-  document.getElementById("bankWalletGold").textContent=p.gold||0;
-  document.getElementById("bankWalletDiamonds").textContent=p.diamonds||0;
-  document.getElementById("bankSavedGold").textContent=p.bankedGold||0;
-  document.getElementById("bankSavedDiamonds").textContent=p.bankedDiamonds||0;
-}
-function drawBankNpc(){
-  const x=sx(bankNpc.x),y=sy(bankNpc.y),t=performance.now()/1000;ctx.save();
-  ctx.globalAlpha=.15;ctx.fillStyle="#a98cff";ctx.beginPath();ctx.arc(x,y,39+Math.sin(t*2)*3,0,Math.PI*2);ctx.fill();
-  ctx.strokeStyle="#d2c2ff";ctx.lineWidth=2.5;ctx.setLineDash([7,6]);ctx.beginPath();ctx.arc(x,y,bankNpc.r+6,0,Math.PI*2);ctx.stroke();ctx.setLineDash([]);
-  ctx.fillStyle="#111020";ctx.beginPath();ctx.arc(x,y,22,0,Math.PI*2);ctx.fill();ctx.strokeStyle="#d9ccff";ctx.lineWidth=3;ctx.stroke();
-  ctx.fillStyle="#d9ccff";ctx.font="bold 18px Arial";ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText("✦",x,y);
-  for(let i=0;i<7;i++){const a=t*.7+i*Math.PI/3.5;ctx.fillStyle="#d9caff";ctx.globalAlpha=.85;ctx.beginPath();ctx.arc(x+Math.cos(a)*31,y+Math.sin(a)*31,2,0,Math.PI*2);ctx.fill();}
-  ctx.globalAlpha=1;ctx.fillStyle="#fff";ctx.font="bold 10px Arial";ctx.fillText("BANCO",x,y-36);ctx.restore();
-}
 function showShopMsg(msg){
   const e=document.getElementById("shopMsg");
   if(e)e.textContent=String(msg||"");
@@ -1358,7 +1326,7 @@ function draw(){
     if(e.dead)continue;
     drawEnemy(e);
     const enemyColor=e.kind==="boss"?"#ffd76a":e.kind==="elite"?"#ff9f43":"#ff5474";
-    drawNameTag(e.kind==="boss"?"👑 PRIMER BOSS":e.kind==="elite"?"ÉLITE":"ENEMIGO",e.x,e.y,e.r,enemyColor);
+    drawNameTag(e.kind==="boss"?"👑 JEFE PRINCIPAL":e.kind==="elite"?"ÉLITE":"ENEMIGO",e.x,e.y,e.r,enemyColor);
     const x=sx(e.x),y=sy(e.y)-e.r-12,w=e.kind==="boss"?84:50;
     ctx.fillStyle="#161c2a";ctx.fillRect(x-w/2,y,w,6);ctx.fillStyle=enemyColor;ctx.fillRect(x-w/2,y,w*clamp(e.hp/e.maxHp,0,1),6);
   }
