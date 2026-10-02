@@ -267,6 +267,10 @@ test('SHOP: arsenal, skins, selección y canje', async ({ page }) => {
   await page.locator('#chatForm').evaluate(form => form.requestSubmit());
   await expect(page.locator('#chatMessages')).toContainText('SOBERANO DEL NÚCLEO', {timeout:10000});
 
+  await page.keyboard.down('s');
+  await page.waitForTimeout(900);
+  await page.keyboard.up('s');
+  await expect(page.locator('#cosmeticShop')).toHaveCSS('display', 'flex', {timeout:5000});
   await page.locator('.shopTab[data-shop-section="skins"]').click();
   const gmCard = page.locator('.cosmeticCard[data-skin-id="gm_core"]');
   await expect(gmCard).toContainText('SELECCIONADO');
