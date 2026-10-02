@@ -59,7 +59,7 @@ for (const room of ROOMS) {
     await page.mouse.move(cx, cy);
     await page.mouse.down();
     await page.mouse.move(cx + Math.min(55, box.width * 0.45), cy, { steps: 12 });
-    await page.waitForTimeout(900);
+    await page.waitForTimeout(1800);
     await page.mouse.up();
 
     await expect.poll(async () => parsePos(await page.locator('#neonDiag').innerText()), {
@@ -69,6 +69,10 @@ for (const room of ROOMS) {
 
     const after = parsePos(await page.locator('#neonDiag').innerText());
     expect(Math.hypot(after.x - before.x, after.y - before.y)).toBeGreaterThan(5);
+
+    const afterMoveDiag = await page.locator('#neonDiag').innerText();
+    const afterMove = parsePos(afterMoveDiag);
+    expect(Math.hypot(afterMove.x - 3000, afterMove.y - 2200)).toBeGreaterThan(300);
 
     const ammoBefore = Number((await page.locator('#ammo').innerText()).trim());
     await page.locator('#fire').click();
