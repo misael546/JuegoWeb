@@ -11,7 +11,7 @@ const WORLD = { w: 6000, h: 4400 };
 const MAX_PLAYERS = 16;
 const SAFE_ZONE = { x: 3000, y: 2200, r: 300 };
 
-const SERVER_VERSION = '20261002-153';
+const SERVER_VERSION = '20261002-154';
 
 const AMMO_PACK_SIZE = 100;
 const AMMO_PACK_COST = 75;
@@ -1314,17 +1314,46 @@ async function redeemCosmeticCode(ws, rawCode) {
 
   const code = String(rawCode || '').trim().toUpperCase().replace(/[^A-Z0-9_-]/g, '').slice(0, 32);
   if (!code) return cosmeticShopError(ws, 'Escribe un código.');
+
   const reward = cosmetics.REDEEM_CODES[code];
   if (!reward) return cosmeticShopError(ws, 'Código no válido.');
+  if (reward.enabled === false) return cosmeticShopError(ws, 'Ese código está desactivado temporalmente.');
 
   p.redeemedCodes = cosmetics.normalizeRedeemedCodes(p.redeemedCodes);
-  if (p.redeemedCodes.includes(code)) return cosmeticShopError(ws, 'Ese código ya fue usado en esta cuenta.');
+  if (!reward.repeatable && p.redeemedCodes.includes(code)) {
+    return cosmeticShopError(ws, 'Ese código ya fue usado en esta cuenta.');
+  }
 
   p.ownedSkins = cosmetics.normalizeOwnedSkins(p.ownedSkins);
   p.ownedWeapons = normalizeOwnedWeapons(p.ownedWeapons, p.weapon || '');
   p.ownedWeaponSkins = cosmetics.normalizeOwnedWeaponSkins(p.ownedWeaponSkins);
 
   let unlockedSkin = '', unlockedWeapon = '', unlockedWeaponSkin = '';
+  const unlockedSkins = [];
+  const unlockedWeapons = [];
+
+  if (reward.allSkins) {
+    for (const skinId of Object.keys(cosmetics.SKINS)) {
+      if (skinId === 'core_default') continue;
+      if (!p.ownedSkins.includes(skinId)) p.ownedSkins.push(skinId);
+      unlockedSkins.push(skinId);
+    }
+    const preferredSkin = cosmetics.getSkin(p.equippedSkin) ? p.equippedSkin : 'gm_core';
+    if (preferredSkin) {
+      p.equippedSkin = preferredSkin;
+      unlockedSkin = preferredSkin;
+    }
+  }
+
+  if (reward.allWeapons) {
+    for (const weaponId of Object.keys(WEAPONS)) {
+      if (!p.ownedWeapons.includes(weaponId)) p.ownedWeapons.push(weaponId);
+      unlockedWeapons.push(weaponId);
+    }
+    const preferredWeapon = WEAPONS[p.weapon] ? p.weapon : 'omega';
+    p.weapon = preferredWeapon;
+    unlockedWeapon = preferredWeapon;
+  }
 
   if (reward.skinId) {
     const skin = cosmetics.getSkin(reward.skinId);
@@ -1352,15 +1381,24 @@ async function redeemCosmeticCode(ws, rawCode) {
     p.equippedWeaponSkin = weaponSkin.id;
   }
 
-  if (!unlockedSkin && !unlockedWeapon && !unlockedWeaponSkin) return cosmeticShopError(ws, 'El código no tiene una recompensa válida.');
+  if (!reward.allSkins && !reward.allWeapons && !unlockedSkin && !unlockedWeapon && !unlockedWeaponSkin) {
+    return cosmeticShopError(ws, 'El código no tiene una recompensa válida.');
+  }
 
-  p.redeemedCodes.push(code);
+  if (!reward.repeatable) p.redeemedCodes.push(code);
+
   p.ownedSkins = cosmetics.normalizeOwnedSkins(p.ownedSkins);
   p.ownedWeapons = normalizeOwnedWeapons(p.ownedWeapons, p.weapon || '');
   p.ownedWeaponSkins = cosmetics.normalizeOwnedWeaponSkins(p.ownedWeaponSkins);
   applyCombatStats(p);
   await persistPlayer(p);
-  sendCosmeticState(p, reward.message, unlockedSkin, unlockedWeapon, unlockedWeaponSkin);
+
+  const totalUnlocked = unlockedSkins.length + unlockedWeapons.length;
+  const message = reward.allSkins || reward.allWeapons
+    ? reward.message + ' (' + totalUnlocked + ' objetos disponibles para probar).'
+    : reward.message;
+
+  sendCosmeticState(p, message, unlockedSkin, unlockedWeapon, unlockedWeaponSkin);
   sendStats(p);
   sendPlayerList(p.room);
 }
