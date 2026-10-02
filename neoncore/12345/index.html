@@ -9,7 +9,7 @@
 <script>
 (function(){
   try{
-    var v="20261002-146";
+    var v="20261002-147";
     var k="neon_core_build";
     window.NEON_CORE_BUILD=v;
     var old=localStorage.getItem(k);
@@ -26,7 +26,7 @@
   }catch(e){}
 })();
 </script>
-<title>Neon Core · Build 144</title>
+<title>Neon Core · Build 147</title>
 <style>
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#050811;color:#fff;font-family:Arial,sans-serif;touch-action:none}
 #game{display:block;width:100vw;height:100vh}
@@ -91,7 +91,7 @@
     <div class="shopTabs">
       <button class="shopTab active" data-shop-section="arsenal" type="button">⚔ ARSENAL</button>
       <button class="shopTab" data-shop-section="skins" type="button">🎨 SKINS</button>
-      <button class="shopTab" data-shop-section="redeem" type="button">🎁 CANJEAR</button>
+      <button class="shopTab" data-shop-section="redeem" type="button">🎁 CENTRO DE CÓDIGOS</button>
     </div>
 
     <section id="shopArsenalSection" class="shopSection">
@@ -116,7 +116,7 @@
     </section>
   </div>
 </div>
-<div id="toastFeed"<div id="toastFeed" aria-live="polite"></div><div class="pcHint">PC: WASD / flechas para moverte · mouse para apuntar · clic izquierdo para disparar · ESPACIO también dispara</div><button id="chatToggle" type="button" aria-expanded="false" aria-controls="chatBox">💬 CHAT</button><div id="chatBox" aria-label="Chat del servidor" style="display:none"><button id="chatCloseStatic" type="button" aria-label="Cerrar chat">×</button><div id="chatMessages" aria-live="polite"></div><form id="chatForm"><input id="chatInput" maxlength="120" autocomplete="off" placeholder="Escribe un mensaje…"><button id="chatSend" type="submit">ENVIAR</button></form><div id="chatHint">Enter para enviar · máximo 120 caracteres</div></div>
+<div id="toastFeed" aria-live="polite"></div><div class="pcHint">PC: WASD / flechas para moverte · mouse para apuntar · clic izquierdo para disparar · ESPACIO también dispara</div><button id="chatToggle" type="button" aria-expanded="false" aria-controls="chatBox">💬 CHAT</button><div id="chatBox" aria-label="Chat del servidor" style="display:none"><button id="chatCloseStatic" type="button" aria-label="Cerrar chat">×</button><div id="chatMessages" aria-live="polite"></div><form id="chatForm"><input id="chatInput" maxlength="120" autocomplete="off" placeholder="Escribe un mensaje…"><button id="chatSend" type="submit">ENVIAR</button></form><div id="chatHint">Enter para enviar · máximo 120 caracteres</div></div>
 
 <div id="connectionOverlay" aria-live="polite"><div id="connectionCard"><div id="connectionSpinner"></div><b id="connectionTitle">CONECTANDO AL SERVIDOR</b><span id="connectionText">Despertando el servidor multiplayer…</span></div></div>
 
@@ -525,10 +525,10 @@ function connectMultiplayer(roomMode="quick",roomCode=""){ const publicRoomAuto=
           enemies.length=0;
         }else if(m.type==="boss_projectile_hit"){
           p.hp=Number.isFinite(m.hp)?m.hp:Math.max(0,p.hp-(Number(m.amount)||0));if(Number.isFinite(m.maxHp))p.maxHp=m.maxHp;
-          burst(Number(m.x)||p.x,Number(m.y)||p.y,"#ff6a45",12);showFloatingHit(Number(m.x)||p.x,Number(m.y)||p.y,Number(m.amount)||0,"#ff5b3e");
+          burst(Number(m.x)||p.x,Number(m.y)||p.y,"#ff6a45",12);showFloatingHit(Number(m.x)||p.x,Number(m.y)||p.y,Number(m.amount)||0,"#ff5b3e");updateHud();
         }else if(m.type==="boss_aoe_hit"){
           p.hp=Number.isFinite(m.hp)?m.hp:Math.max(0,p.hp-(Number(m.amount)||0));if(Number.isFinite(m.maxHp))p.maxHp=m.maxHp;
-          burst(Number(m.x)||p.x,Number(m.y)||p.y,"#ff3b32",18);showFloatingHit(Number(m.x)||p.x,Number(m.y)||p.y,Number(m.amount)||0,"#ff3b3e");
+          burst(Number(m.x)||p.x,Number(m.y)||p.y,"#ff3b32",18);showFloatingHit(Number(m.x)||p.x,Number(m.y)||p.y,Number(m.amount)||0,"#ff3b3e");updateHud();
         }else if(m.type==="pvp_damage"){
           p.hp=Number.isFinite(m.hp)?m.hp:Math.max(0,p.hp-(Number(m.amount)||0));
           if(Number.isFinite(m.maxHp))p.maxHp=m.maxHp;
@@ -608,6 +608,10 @@ function connectMultiplayer(roomMode="quick",roomCode=""){ const publicRoomAuto=
             const ix=Number.isFinite(Number(m.impactX))?Number(m.impactX):sx0+Math.cos(angle)*travelDistance;
             const iy=Number.isFinite(Number(m.impactY))?Number(m.impactY):sy0+Math.sin(angle)*travelDistance;
             bullets.push({x:sx0,y:sy0,startX:sx0,startY:sy0,vx:Math.cos(angle)*bulletSpeed,vy:Math.sin(angle)*bulletSpeed,life:travelDistance/bulletSpeed+0.08,damage:Number(m.damage)||p.damage,range:0,maxRange:travelDistance,impactX:ix,impactY:iy});
+            if(m.hitKind && m.hitKind!=="range"){
+              const impactColor=m.hitKind==="player"?"#ff5474":m.hitKind==="enemy"?"#ff9f43":"#8da2c1";
+              burst(ix,iy,impactColor,m.hitKind==="enemy"?10:7);
+            }
           }
           updateResourceHud();
         }else if(m.type==="bank_result"){        }else if(m.type==="bank_result"){
