@@ -11,7 +11,7 @@ const WORLD = { w: 6000, h: 4400 };
 const MAX_PLAYERS = 16;
 const SAFE_ZONE = { x: 3000, y: 2200, r: 300 };
 
-const SERVER_VERSION = '20261002-149';
+const SERVER_VERSION = '20261002-150';
 
 const AMMO_PACK_SIZE = 100;
 const AMMO_PACK_COST = 75;
@@ -22,11 +22,11 @@ const SHOP_INTERACTION_RADIUS = 48;
 const BANK_ENABLED = false;
 
 const WEAPONS = {
-  blaster: { name: 'BLASTER', cost: 0, damage: 35, fireRate: 320, tier: 1, maxAmmo: 220, range: 760 },
-  pulse: { name: 'PULSE', cost: 500, damage: 70, fireRate: 230, tier: 2, maxAmmo: 260, range: 820 },
-  cannon: { name: 'CANNON', cost: 1500, damage: 140, fireRate: 620, tier: 3, maxAmmo: 320, range: 880 },
-  railgun: { name: 'RAILGUN', cost: 6500, damage: 260, fireRate: 900, tier: 4, maxAmmo: 380, range: 960 },
-  nova: { name: 'NOVA', cost: 22000, damage: 520, fireRate: 1350, tier: 5, maxAmmo: 450, range: 1040 }
+  blaster: { name: 'BLASTER', cost: 0, damage: 35, fireRate: 320, maxAmmo: 220, range: 760 },
+  pulse: { name: 'PULSE', cost: 500, damage: 70, fireRate: 230, maxAmmo: 260, range: 820 },
+  cannon: { name: 'CANNON', cost: 1500, damage: 140, fireRate: 620, maxAmmo: 320, range: 880 },
+  railgun: { name: 'RAILGUN', cost: 6500, damage: 260, fireRate: 900, maxAmmo: 380, range: 960 },
+  nova: { name: 'NOVA', cost: 22000, damage: 520, fireRate: 1350, maxAmmo: 450, range: 1040 }
 };
 
 const HP_REGEN_PER_SEC = 3;
@@ -48,7 +48,7 @@ const BOSS_PROJECTILE_DAMAGE = 260;
 const BOSS_PROJECTILE_SPEED = 520;
 const BOSS_PROJECTILE_COOLDOWN_MS = 3000;
 const BOSS_AOE_DAMAGE = 240;
-const BOSS_AOE_RADIUS = 190;
+const BOSS_AOE_RADIUS = 125;
 const BOSS_AOE_WARNING_MS = 1200;
 const BOSS_AOE_COOLDOWN_MS = 6200;
 const BOSS_AOE_RANGE = 780;
@@ -213,8 +213,6 @@ function sendPlayerList(code) {
 function sendStats(p) {
   if (!p?.ws) return;
   const nextKills = p.kills % 5 === 0 ? 5 : 5 - (p.kills % 5);
-  const weapon = WEAPONS[p.weapon] || null;
-  const attackLevel = Number(weapon?.tier) || 0;
   const maxAmmo = maxAmmoForWeapon(p.weapon);
 
   send(p.ws, {
@@ -230,9 +228,8 @@ function sendStats(p) {
     speed: p.speed,
     maxHp: maxHpForLevel(p.level),
     xpNeed: xpToNextLevel(p.level),
-    attackLevel,
     attackPower: Number(p.damage) || 10,
-    attackFill: Math.round((attackLevel / 5) * 100),
+    attackFill: Math.round(clamp(((Number(p.damage) || 10) / 650) * 100, 0, 100)),
     defense: p.defense,
     defenseMax: 125,
     killsToLevel: nextKills,
@@ -376,7 +373,7 @@ function applyCombatStats(p) {
     p.equippedWeaponSkin = '';
   }
   p.defense = Math.max(0, Math.round(
-    skinDefenseBonus(p) + weaponSkinDefenseBonus(p) - (Number(p.defensePenalty) || 0)
+    skinDefenseBonus(p) - (Number(p.defensePenalty) || 0)
   ));
   p.speed = speedForLevel(p.level);
   const maxAmmo = maxAmmoForWeapon(p.weapon);
