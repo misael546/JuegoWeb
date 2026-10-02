@@ -210,10 +210,8 @@ test('tienda de skins: NPC, pestañas y código de regalo', async ({ page }) => 
   await waitForLiveGame(page, '12345', {errors,wsEvents:[]});
 
   await page.keyboard.down('d');
-  await page.keyboard.down('s');
-  await page.waitForTimeout(2300);
+  await page.waitForTimeout(1600);
   await page.keyboard.up('d');
-  await page.keyboard.up('s');
 
   await expect(page.locator('#cosmeticShop')).toHaveCSS('display', 'flex', {timeout:10000});
   await expect(page.locator('.shopTab[data-shop-tab="gold"]')).toBeVisible();
