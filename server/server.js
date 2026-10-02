@@ -11,7 +11,7 @@ const WORLD = { w: 6000, h: 4400 };
 const MAX_PLAYERS = 16;
 const SAFE_ZONE = { x: 3000, y: 2200, r: 300 };
 
-const SERVER_VERSION = '20261002-142';
+const SERVER_VERSION = '20261002-144';
 
 const AMMO_PACK_SIZE = 100;
 const AMMO_PACK_COST = 75;
@@ -1103,8 +1103,8 @@ function cosmeticShopError(ws, message) {
 function buyCosmeticSkin(ws, skinId) {
   const p = clients.get(ws);
   if (!p) return;
-  if (!p.room || !p.alive) return cosmeticShopError(ws, 'No puedes usar la tienda ahora.');
-  if (!cosmeticShopNearby(p)) return cosmeticShopError(ws, 'Acércate al NPC TIENDA NEON.');
+  if (!p.room || !p.alive) return cosmeticShopError(ws, 'No puedes usar el SHOP ahora.');
+  if (!cosmeticShopNearby(p)) return cosmeticShopError(ws, 'Párate sobre el SHOP.');
   const skin = cosmetics.getSkin(skinId);
   if (!skin || skin.id === 'core_default' || skin.rarity === 'Código') return cosmeticShopError(ws, 'Ese skin no se puede comprar aquí.');
 
@@ -1120,6 +1120,11 @@ function buyCosmeticSkin(ws, skinId) {
 
   const gold = Math.max(0, Number(p.gold) || 0);
   const diamonds = Math.max(0, Number(p.diamonds) || 0);
+
+  if (skin.realMoney) {
+    return cosmeticShopError(ws, 'SOBERANO DEL NÚCLEO cuesta $1 USD y se obtiene mediante compra real o comando autorizado.');
+  }
+
   if (skin.priceDiamonds > 0) {
     if (diamonds < skin.priceDiamonds) return cosmeticShopError(ws, 'Necesitas ' + skin.priceDiamonds + ' diamantes.');
     p.diamonds = diamonds - skin.priceDiamonds;
@@ -1190,7 +1195,10 @@ function buyPremiumItemStub(ws, sku) {
     ok: false,
     enabled: false,
     sku: offer?.sku || '',
-    message: 'Las compras con dinero real están preparadas, pero todavía no están activadas.'
+    priceUsd: Number(offer?.priceUsd) || 1,
+    message: offer
+      ? 'SOBERANO DEL NÚCLEO · $1 USD. El cobro real todavía no está conectado; usa /soberano GMNEONCORE para tu acceso por comando.'
+      : 'Producto premium no disponible.'
   });
 }
 
@@ -1528,9 +1536,6 @@ function handleShot(ws) {
       y: targetEnemy.y
     });
 
-    const masteryGain = Math.max(1, Math.round(damage * (targetEnemy.kind === 'boss' ? 0.55 : 0.35)));
-    addDamageXp(shooter, masteryGain);
-
     send(shooter.ws, {
       type: 'hit_confirm',
       kind: 'enemy',
@@ -1538,9 +1543,8 @@ function handleShot(ws) {
       amount: damage,
       x: targetEnemy.x,
       y: targetEnemy.y,
-      damageXp: masteryXpIntoLevel(shooter.damageXp),
-      damageXpNeed: masteryXpToNextLevel(masteryLevelFromXp(shooter.damageXp)),
-      damageLevel: masteryLevelFromXp(shooter.damageXp)
+      attackLevel: WEAPONS[shooter.weapon]?.tier || 1,
+      attackPower: shooter.damage
     });
 
     if (targetEnemy.hp <= 0) {
@@ -1569,7 +1573,7 @@ function handleShot(ws) {
           gold: reward,
           diamonds: 0,
           xp,
-          message: '👑 JEFE PRINCIPAL DERROTADO · +15,000 🪙'
+          message: '👑 JEFE PRINCIPAL DERROTADO · +15,000 🪙 · +5,000 XP'
         });
       }
 
@@ -1680,7 +1684,10 @@ const httpServer = http.createServer(async (req, res) => {
           players: clients.size,
           publicRooms: PUBLIC_ROOMS.length,
           walls: WORLD_WALLS.length,
-          enemyTarget: MOB_TARGET_COUNT + 1,
+          enemyTarget: MOB_TARGET_COUNT + ELITE_TARGET_COUNT + 1,
+          eliteTarget: ELITE_TARGET_COUNT,
+          bossTarget: 1,
+          bankEnabled: BANK_ENABLED,
           storageConfigured: Boolean(process.env.DATABASE_URL),
           storageReady: storage.enabled
         }
