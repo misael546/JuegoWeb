@@ -15,10 +15,15 @@ async function waitForLiveGame(page, room, debug) {
   });
 
   await expect(page.locator('#neonDiag')).toContainText('DIAG', { timeout: 30000 });
-  await expect.poll(async () => (await page.locator('#neonDiag').innerText()), {
-    timeout: 30000,
-    intervals: [500, 1000]
-  }).toMatch(/game:true/);
+  try {
+    await expect.poll(async () => (await page.locator('#neonDiag').innerText()), {
+      timeout: 10000,
+      intervals: [500, 1000]
+    }).toMatch(/game:true/);
+  } catch (e) {
+    const diag = await page.locator('#neonDiag').innerText();
+    throw new Error('Game no inició en sala '+room+'\\n'+diag+'\\nPage errors: '+(debug.errors.join(' | ')||'none')+'\\nWebSockets: '+(debug.wsEvents.join(' | ')||'NONE'));
+  }
 
   const diag = await page.locator('#neonDiag').innerText();
   expect(diag).toContain('ws:1');
