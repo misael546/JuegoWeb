@@ -3,6 +3,7 @@
 const http = require('http');
 const { WebSocketServer } = require('ws');
 const storage = require('./storage');
+const cosmetics = require('./cosmetics');
 
 const PORT = Number(process.env.PORT || 10000);
 
@@ -10,7 +11,7 @@ const WORLD = { w: 6000, h: 4400 };
 const MAX_PLAYERS = 16;
 const SAFE_ZONE = { x: 3000, y: 2200, r: 300 };
 
-const SERVER_VERSION = '20261001-127';
+const SERVER_VERSION = '20261001-129';
 
 const AMMO_PACK_SIZE = 50;
 const AMMO_PACK_COST = 50;
@@ -18,6 +19,8 @@ const MAX_AMMO = 120;
 
 const SHOP_NPC = { x: 3600, y: 2200, r: 30 };
 const SHOP_INTERACTION_RADIUS = 80;
+const COSMETIC_SHOP_NPC = { x: 3300, y: 2500, r: 32 };
+const COSMETIC_SHOP_INTERACTION_RADIUS = 95;
 const BANK_NPC = { x: 3000, y: 1800, r: 24 };
 const BANK_INTERACTION_RADIUS = 95;
 
@@ -28,8 +31,10 @@ const WEAPONS = {
 };
 
 const HP_REGEN_PER_SEC = 3;
-const WORLD_WALL_COUNT = 55;
+const WORLD_WALL_COUNT = 24;
 const WORLD_WALL_SEED = 739281;
+const WALL_DIAMOND_DROP_CHANCE = 0.035;
+const WALL_RESPAWN_MS = 5 * 60 * 1000;
 const AUTOSAVE_MS = 5000;
 const DEATH_HP_LOSS = 0.10;
 const DEATH_DAMAGE_LOSS = 0.05;
@@ -48,17 +53,20 @@ const savedPlayers = new Map();
 const rooms = new Map();
 const roomEnemies = new Map();
 const roomWalls = new Map();
+const roomWallRespawns = new Map();
 
 const PUBLIC_ROOMS = ['12345', '67890'];
 
 rooms.set('OPEN', new Set());
 roomEnemies.set('OPEN', []);
 roomWalls.set('OPEN', []);
+roomWallRespawns.set('OPEN', []);
 
 for (const code of PUBLIC_ROOMS) {
   rooms.set(code, new Set());
   roomEnemies.set(code, []);
   roomWalls.set(code, []);
+  roomWallRespawns.set(code, []);
 }
 
 const CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -160,7 +168,8 @@ function publicPlayer(p) {
     fireRate: p.fireRate,
     speed: p.speed,
     color: p.color,
-    weapon: p.weapon
+    weapon: p.weapon,
+    equippedSkin: cosmetics.getSkin(p.equippedSkin) ? p.equippedSkin : 'core_default'
   };
 }
 
@@ -209,7 +218,10 @@ function sendStats(p) {
     shopNpc: SHOP_NPC,
     bankNpc: BANK_NPC,
     bankedGold: p.bankedGold || 0,
-    bankedDiamonds: p.bankedDiamonds || 0
+    bankedDiamonds: p.bankedDiamonds || 0,
+    equippedSkin: cosmetics.getSkin(p.equippedSkin) ? p.equippedSkin : 'core_default',
+    ownedSkins: cosmetics.normalizeOwnedSkins(p.ownedSkins),
+    redeemedCodes: cosmetics.normalizeRedeemedCodes(p.redeemedCodes)
   });
 }
 
@@ -235,7 +247,10 @@ function capturePlayerData(p) {
     damageXp: Math.max(0, Number(p.damageXp) || 0),
     defenseXp: Math.max(0, Number(p.defenseXp) || 0),
     damagePenalty: Math.max(0, Number(p.damagePenalty) || 0),
-    defensePenalty: Math.max(0, Number(p.defensePenalty) || 0)
+    defensePenalty: Math.max(0, Number(p.defensePenalty) || 0),
+    ownedSkins: cosmetics.normalizeOwnedSkins(p.ownedSkins),
+    equippedSkin: cosmetics.getSkin(p.equippedSkin) ? p.equippedSkin : 'core_default',
+    redeemedCodes: cosmetics.normalizeRedeemedCodes(p.redeemedCodes)
   };
 }
 
@@ -416,8 +431,8 @@ function createWorldWalls() {
     let created = null;
 
     for (let attempt = 0; attempt < 80 && !created; attempt++) {
-      const w = Math.round(45 + random() * 85);
-      const h = Math.round(45 + random() * 85);
+      const w = Math.round(32 + random() * 28);
+      const h = Math.round(32 + random() * 28);
       const x = Math.round(120 + random() * (WORLD.w - 240));
       const y = Math.round(120 + random() * (WORLD.h - 240));
 
@@ -442,8 +457,9 @@ function createWorldWalls() {
           y,
           w,
           h,
-          hp: 100,
-          maxHp: 100
+          hp: 80,
+          maxHp: 80,
+          rewardEligible: true
         };
       }
     }
@@ -454,22 +470,19 @@ function createWorldWalls() {
   // B121: estructuras iniciales alrededor de la zona segura para que el
   // jugador tenga cobertura y referencias visibles desde el spawn.
   const starterStructures = [
-    { x: 3000, y: 1650, w: 110, h: 70 },
-    { x: 3000, y: 2750, w: 110, h: 70 },
-    { x: 2450, y: 2200, w: 90, h: 120 },
-    { x: 3550, y: 2200, w: 90, h: 120 },
-    { x: 2620, y: 1800, w: 120, h: 80 },
-    { x: 3380, y: 1800, w: 120, h: 80 },
-    { x: 2620, y: 2600, w: 120, h: 80 },
-    { x: 3380, y: 2600, w: 120, h: 80 }
+    { x: 3000, y: 1650, w: 70, h: 46 },
+    { x: 3000, y: 2750, w: 70, h: 46 },
+    { x: 2450, y: 2200, w: 46, h: 72 },
+    { x: 3550, y: 2200, w: 46, h: 72 }
   ];
   for (const structure of starterStructures) {
     if (!walls.some(w => w.x === structure.x && w.y === structure.y)) {
       walls.push({
         id: 'starter_' + (walls.length + 1),
         ...structure,
-        hp: 100,
-        maxHp: 100
+        hp: 80,
+        maxHp: 80,
+        rewardEligible: false
       });
     }
   }
@@ -479,7 +492,32 @@ function createWorldWalls() {
 
 const WORLD_WALLS = createWorldWalls();
 
+function restoreDueWalls(code, broadcast = false) {
+  const queue = roomWallRespawns.get(code) || [];
+  if (!queue.length) return 0;
+  const now = Date.now();
+  const walls = roomWalls.get(code) || [];
+  const pending = [];
+  let restored = 0;
+  for (const entry of queue) {
+    if (Number(entry?.respawnAt) <= now && entry?.wall) {
+      const template = entry.wall;
+      if (!walls.some((wall) => wall.id === template.id)) {
+        const wall = { ...template, hp: template.maxHp };
+        walls.push(wall);
+        restored++;
+        if (broadcast) broadcastRoom(code, { type: 'wall_respawn', wall });
+      }
+    } else {
+      pending.push(entry);
+    }
+  }
+  roomWallRespawns.set(code, pending);
+  return restored;
+}
+
 function ensureRoomWalls(code) {
+  restoreDueWalls(code, false);
   if (!roomWalls.has(code) || !roomWalls.get(code)?.length) {
     roomWalls.set(
       code,
@@ -644,6 +682,7 @@ async function leaveRoom(ws) {
       rooms.delete(code);
       roomEnemies.delete(code);
       roomWalls.delete(code);
+      roomWallRespawns.delete(code);
     } else {
       broadcastRoom(code, {
         type: 'player_leave',
@@ -689,6 +728,7 @@ async function joinRoom(ws, requestedCode, create = false) {
   room.add(ws);
   ensureRoomEnemies(code);
   ensureRoomWalls(code);
+  restoreDueWalls(code, false);
 
   p.room = code;
 
@@ -838,6 +878,122 @@ function shopBuy(ws, requestedWeapon) {
 
   sendStats(p);
   sendPlayerList(p.room);
+}
+
+function cosmeticShopNearby(p) {
+  return !!p && Math.hypot(p.x - COSMETIC_SHOP_NPC.x, p.y - COSMETIC_SHOP_NPC.y) <= COSMETIC_SHOP_INTERACTION_RADIUS;
+}
+
+function sendCosmeticState(p, message = 'Tienda de cosméticos lista.') {
+  if (!p?.ws) return;
+  send(p.ws, {
+    type: 'cosmetic_state',
+    message,
+    ownedSkins: cosmetics.normalizeOwnedSkins(p.ownedSkins),
+    equippedSkin: cosmetics.getSkin(p.equippedSkin) ? p.equippedSkin : 'core_default',
+    cosmeticShopNpc: COSMETIC_SHOP_NPC,
+    catalog: cosmetics.publicCatalog(),
+    realMoneyOffers: cosmetics.publicRealMoneyOffers(),
+    realMoneyEnabled: false
+  });
+}
+
+function cosmeticShopError(ws, message) {
+  send(ws, { type: 'cosmetic_result', ok: false, message: String(message || 'No se pudo completar la operación.') });
+}
+
+function buyCosmeticSkin(ws, skinId) {
+  const p = clients.get(ws);
+  if (!p) return;
+  if (!p.room || !p.alive) return cosmeticShopError(ws, 'No puedes usar la tienda ahora.');
+  if (!cosmeticShopNearby(p)) return cosmeticShopError(ws, 'Acércate al NPC TIENDA NEON.');
+  const skin = cosmetics.getSkin(skinId);
+  if (!skin || skin.id === 'core_default' || skin.rarity === 'Código') return cosmeticShopError(ws, 'Ese skin no se puede comprar aquí.');
+
+  p.ownedSkins = cosmetics.normalizeOwnedSkins(p.ownedSkins);
+  if (p.ownedSkins.includes(skin.id)) {
+    p.equippedSkin = skin.id;
+    void persistPlayer(p);
+    sendCosmeticState(p, 'Skin equipado: ' + skin.name + '.');
+    sendStats(p);
+    sendPlayerList(p.room);
+    return;
+  }
+
+  const gold = Math.max(0, Number(p.gold) || 0);
+  const diamonds = Math.max(0, Number(p.diamonds) || 0);
+  if (skin.priceDiamonds > 0) {
+    if (diamonds < skin.priceDiamonds) return cosmeticShopError(ws, 'Necesitas ' + skin.priceDiamonds + ' diamantes.');
+    p.diamonds = diamonds - skin.priceDiamonds;
+  } else if (skin.priceGold > 0) {
+    if (gold < skin.priceGold) return cosmeticShopError(ws, 'Necesitas ' + skin.priceGold + ' de oro.');
+    p.gold = gold - skin.priceGold;
+  } else {
+    return cosmeticShopError(ws, 'Este skin no tiene precio válido.');
+  }
+
+  p.ownedSkins.push(skin.id);
+  p.ownedSkins = cosmetics.normalizeOwnedSkins(p.ownedSkins);
+  p.equippedSkin = skin.id;
+  void persistPlayer(p);
+  sendCosmeticState(p, '¡Compraste ' + skin.name + ' y quedó equipado!');
+  sendStats(p);
+  sendPlayerList(p.room);
+}
+
+function equipCosmeticSkin(ws, skinId) {
+  const p = clients.get(ws);
+  if (!p) return;
+  if (!p.room || !p.alive) return cosmeticShopError(ws, 'No puedes cambiar de skin ahora.');
+  if (!cosmeticShopNearby(p)) return cosmeticShopError(ws, 'Acércate al NPC TIENDA NEON.');
+  const id = String(skinId || '');
+  p.ownedSkins = cosmetics.normalizeOwnedSkins(p.ownedSkins);
+  if (!cosmetics.getSkin(id) || !p.ownedSkins.includes(id)) return cosmeticShopError(ws, 'Skin bloqueado.');
+  p.equippedSkin = id;
+  void persistPlayer(p);
+  sendCosmeticState(p, 'Skin equipado: ' + cosmetics.getSkin(id).name + '.');
+  sendStats(p);
+  sendPlayerList(p.room);
+}
+
+async function redeemCosmeticCode(ws, rawCode) {
+  const p = clients.get(ws);
+  if (!p) return;
+  if (!p.room || !p.alive) return cosmeticShopError(ws, 'No puedes usar códigos ahora.');
+  if (!cosmeticShopNearby(p)) return cosmeticShopError(ws, 'Acércate al NPC TIENDA NEON.');
+
+  const code = String(rawCode || '').trim().toUpperCase().replace(/[^A-Z0-9_-]/g, '').slice(0, 32);
+  if (!code) return cosmeticShopError(ws, 'Escribe un código.');
+  const reward = cosmetics.REDEEM_CODES[code];
+  if (!reward) return cosmeticShopError(ws, 'Código no válido.');
+
+  p.redeemedCodes = cosmetics.normalizeRedeemedCodes(p.redeemedCodes);
+  if (p.redeemedCodes.includes(code)) return cosmeticShopError(ws, 'Ese código ya fue usado en esta cuenta.');
+
+  const skin = cosmetics.getSkin(reward.skinId);
+  if (!skin) return cosmeticShopError(ws, 'Código sin recompensa válida.');
+
+  p.ownedSkins = cosmetics.normalizeOwnedSkins(p.ownedSkins);
+  p.redeemedCodes.push(code);
+  if (!p.ownedSkins.includes(skin.id)) p.ownedSkins.push(skin.id);
+  p.ownedSkins = cosmetics.normalizeOwnedSkins(p.ownedSkins);
+  p.equippedSkin = skin.id;
+
+  await persistPlayer(p);
+  sendCosmeticState(p, reward.message);
+  sendStats(p);
+  sendPlayerList(p.room);
+}
+
+function buyPremiumItemStub(ws, sku) {
+  const offer = cosmetics.REAL_MONEY_OFFERS.find((item) => item.sku === String(sku || ''));
+  send(ws, {
+    type: 'premium_purchase_result',
+    ok: false,
+    enabled: false,
+    sku: offer?.sku || '',
+    message: 'Las compras con dinero real están preparadas, pero todavía no están activadas.'
+  });
 }
 
 async function depositBank(ws) {
@@ -1076,12 +1232,39 @@ function handleShot(ws) {
 
     if (nearestWall.hp <= 0) {
       const index = walls.findIndex((wall) => wall.id === nearestWall.id);
-      if (index >= 0) walls.splice(index, 1);
+      const destroyedWall = index >= 0 ? walls.splice(index, 1)[0] : null;
+      if (destroyedWall) {
+        const respawns = roomWallRespawns.get(shooter.room) || [];
+        respawns.push({
+          respawnAt: Date.now() + WALL_RESPAWN_MS,
+          wall: { ...destroyedWall, hp: destroyedWall.maxHp }
+        });
+        roomWallRespawns.set(shooter.room, respawns);
 
-      broadcastRoom(shooter.room, {
-        type: 'wall_dead',
-        id: nearestWall.id
-      });
+        let diamondReward = false;
+        if (destroyedWall.rewardEligible !== false && Math.random() < WALL_DIAMOND_DROP_CHANCE) {
+          shooter.diamonds = Math.max(0, Number(shooter.diamonds) || 0) + 1;
+          diamondReward = true;
+          void persistPlayer(shooter);
+          send(shooter.ws, {
+            type: 'wall_reward',
+            currency: 'diamonds',
+            amount: 1,
+            x: destroyedWall.x,
+            y: destroyedWall.y,
+            message: '💎 Encontraste 1 diamante.'
+          });
+          sendStats(shooter);
+        }
+
+        broadcastRoom(shooter.room, {
+          type: 'wall_dead',
+          id: destroyedWall.id,
+          x: destroyedWall.x,
+          y: destroyedWall.y,
+          diamond: diamondReward ? shooter.id : null
+        });
+      }
     }
 
     return;
@@ -1257,6 +1440,9 @@ function createPlayer(ws) {
     diamonds: 0,
     bankedGold: 0,
     bankedDiamonds: 0,
+    ownedSkins: ['core_default'],
+    equippedSkin: 'core_default',
+    redeemedCodes: [],
     ammo: 60,
     weapon: 'blaster',
     color: '#39e7ff',
@@ -1401,6 +1587,9 @@ wss.on('connection', (ws) => {
           if (p.ammo <= 0) p.ammo = 60;
           p.bankedGold = Math.max(0, Number(saved.bankedGold) || 0);
           p.bankedDiamonds = Math.max(0, Number(saved.bankedDiamonds) || 0);
+          p.ownedSkins = cosmetics.normalizeOwnedSkins(saved.ownedSkins);
+          p.equippedSkin = cosmetics.getSkin(saved.equippedSkin) && p.ownedSkins.includes(saved.equippedSkin) ? saved.equippedSkin : 'core_default';
+          p.redeemedCodes = cosmetics.normalizeRedeemedCodes(saved.redeemedCodes);
           p.weapon = WEAPONS[saved.weapon] ? saved.weapon : 'blaster';
           p.damagePenalty = Math.max(0, Number(saved.damagePenalty) || 0);
           p.defensePenalty = Math.max(0, Number(saved.defensePenalty) || 0);
@@ -1594,6 +1783,26 @@ wss.on('connection', (ws) => {
         return;
       }
 
+      if (msg.type === 'buy_skin') {
+        if (!p.frozen) buyCosmeticSkin(ws, msg.skinId);
+        return;
+      }
+
+      if (msg.type === 'equip_skin') {
+        if (!p.frozen) equipCosmeticSkin(ws, msg.skinId);
+        return;
+      }
+
+      if (msg.type === 'redeem_code') {
+        if (!p.frozen) await redeemCosmeticCode(ws, msg.code);
+        return;
+      }
+
+      if (msg.type === 'buy_premium_item') {
+        if (!p.frozen) buyPremiumItemStub(ws, msg.sku);
+        return;
+      }
+
       if (msg.type === 'save_on_exit') {
         if (!p.room || !p.saveKey) return;
         p.exitSaveRequested = true;
@@ -1725,6 +1934,7 @@ setInterval(() => {
   for (const [code, room] of rooms) {
     if (!room.size) continue;
 
+    restoreDueWalls(code, true);
     const enemies = ensureRoomEnemies(code);
     const walls = ensureRoomWalls(code);
     const players = roomPlayers(room).filter((p) => p.alive && !p.frozen);
@@ -1870,6 +2080,9 @@ function runServerDiagnostics() {
   if (PUBLIC_ROOMS.some((code) => !rooms.has(code))) problems.push('Sala pública ausente');
   if (WORLD_WALLS.length < 20) problems.push('Muy pocos muros');
   if (Object.keys(WEAPONS).length < 3) problems.push('Arsenal incompleto');
+  if (!cosmetics.getSkin('core_default')) problems.push('Skin base ausente');
+  if (Object.keys(cosmetics.SKINS).length < 8) problems.push('Catálogo de skins incompleto');
+  if (!cosmetics.REDEEM_CODES.NEONSTART) problems.push('Código NEONSTART ausente');
 
   if (problems.length) {
     console.error('[DIAGNOSTIC] FAIL ' + problems.join(' | '));
@@ -1881,6 +2094,7 @@ function runServerDiagnostics() {
     ' rooms=' + rooms.size +
     ' walls=' + WORLD_WALLS.length +
     ' weapons=' + Object.keys(WEAPONS).length +
+    ' skins=' + Object.keys(cosmetics.SKINS).length +
     ' storage=' + (storage.enabled ? 'postgres' : 'memory')
   );
   return true;
