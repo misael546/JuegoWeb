@@ -9,7 +9,7 @@
 <script>
 (function(){
   try{
-    var v="20261001-121";
+    var v="20261001-122";
     var k="neon_core_build";
     window.NEON_CORE_BUILD=v;
     var old=localStorage.getItem(k);
@@ -57,7 +57,7 @@
 </script>
 </head>
 <body>
-<canvas id="game"></canvas><div id="buildDisplay">NEON CORE · BUILD 120</div>
+<canvas id="game"></canvas><div id="buildDisplay">NEON CORE · Build 122</div>
 
 <div id="hud">
   <div class="panel" id="bars">
@@ -135,6 +135,24 @@ updateControlMode();
 const remotePlayers=new Map();
 let multiplayerSocket=null,multiplayerId="",lastNetSend=0,currentRoom="",multiplayerConnectTimer=null;
 let movementTelemetry={inputSince:0,lastX:p.x,lastY:p.y,lastReport:0};
+const neonDiag={inputEvents:0,lastInput:0,lastSync:"none",frames:0,started:performance.now()};
+(function installNeonDiag(){
+  const box=document.createElement("div");
+  box.id="neonDiag";
+  box.style.cssText="position:fixed;right:8px;top:8px;z-index:99999;padding:7px 9px;border:1px solid rgba(57,231,255,.45);border-radius:8px;background:rgba(3,8,18,.88);color:#dffbff;font:11px/1.35 monospace;pointer-events:none;white-space:pre;max-width:210px";
+  document.body.appendChild(box);
+  window.neonDiag=neonDiag;
+  window.updateNeonDiag=()=>{
+    const ws=multiplayerSocket?multiplayerSocket.readyState:-1;
+    box.textContent="B122 DIAG\\n"+
+      "game:"+!!gameActive+" alive:"+!!p.alive+"\\n"+
+      "input:"+moveX.toFixed(2)+","+moveY.toFixed(2)+" ev:"+neonDiag.inputEvents+"\\n"+
+      "pos:"+Math.round(p.x)+","+Math.round(p.y)+" sp:"+Math.round(p.speed)+"\\n"+
+      "ws:"+ws+" room:"+String(currentRoom||"-")+"\\n"+
+      "mobs:"+enemies.length+" walls:"+walls.length+"\\n"+
+      "sync:"+neonDiag.lastSync;
+  };
+})();
 
 const MULTIPLAYER_SERVER="wss://neon-core-multiplayer.onrender.com/ws";
 const RENDER_HEALTH_URL=MULTIPLAYER_SERVER.replace(/^wss:/,"https:").replace(/^ws:/,"http:").replace(/\/ws$/,"/health");
@@ -898,11 +916,12 @@ function draw(){
 
 function setupJoystick(id){
   const el=document.getElementById(id),stick=el.querySelector(".stick");
-  let active=false,pointerId=null,touchId=null;
+  let active=false,pointerId=null;
   function reset(){
-    active=false;pointerId=null;touchId=null;
+    active=false;pointerId=null;
     stick.style.transform="translate(0,0)";
     moveX=0;moveY=0;
+    if(el.hasPointerCapture?.(pointerId)){try{el.releasePointerCapture(pointerId)}catch{}}
   }
   function apply(clientX,clientY){
     const r=el.getBoundingClientRect();
@@ -914,54 +933,32 @@ function setupJoystick(id){
     moveX=clamp(x/max,-1,1);
     moveY=clamp(y/max,-1,1);
     stick.style.transform="translate("+x+"px,"+y+"px)";
+    if(window.neonDiag){neonDiag.inputEvents++;neonDiag.lastInput=performance.now();}
   }
-
-  // B121: mouse usa Pointer Events; Android usa Touch Events directamente.
-  // No mezclamos ambos modelos para el mismo dedo.
   el.addEventListener("pointerdown",e=>{
-    if(e.pointerType!=="mouse" || e.button!==0)return;
+    if(e.isPrimary===false)return;
+    if(e.pointerType==="mouse" && e.button!==0)return;
     e.preventDefault();
     active=true;pointerId=e.pointerId;
+    try{el.setPointerCapture(e.pointerId)}catch{}
     apply(e.clientX,e.clientY);
-    try{el.setPointerCapture(e.pointerId);}catch{}
   },{passive:false});
   el.addEventListener("pointermove",e=>{
-    if(!active || pointerId!==e.pointerId)return;
+    if(!active || e.pointerId!==pointerId)return;
     e.preventDefault();
     apply(e.clientX,e.clientY);
   },{passive:false});
-  el.addEventListener("pointerup",e=>{
-    if(pointerId!==e.pointerId)return;
-    e.preventDefault();reset();
-  },{passive:false});
-  el.addEventListener("pointercancel",e=>{
-    if(pointerId!==e.pointerId)return;
-    reset();
-  },{passive:false});
-
-  el.addEventListener("touchstart",e=>{
-    if(active)return;
-    const t=e.changedTouches&&e.changedTouches[0];
-    if(!t)return;
+  const end=e=>{
+    if(e.pointerId!==pointerId)return;
     e.preventDefault();
-    active=true;touchId=t.identifier;
-    apply(t.clientX,t.clientY);
-  },{passive:false});
-  el.addEventListener("touchmove",e=>{
-    if(!active || touchId===null)return;
-    const t=[...e.changedTouches].find(x=>x.identifier===touchId);
-    if(!t)return;
-    e.preventDefault();
-    apply(t.clientX,t.clientY);
-  },{passive:false});
-  const touchEnd=e=>{
-    if(!active || touchId===null)return;
-    if([...e.changedTouches].some(x=>x.identifier===touchId)){
-      e.preventDefault();reset();
-    }
+    try{if(el.hasPointerCapture(e.pointerId))el.releasePointerCapture(e.pointerId)}catch{}
+    active=false;pointerId=null;stick.style.transform="translate(0,0)";moveX=0;moveY=0;
   };
-  el.addEventListener("touchend",touchEnd,{passive:false});
-  el.addEventListener("touchcancel",touchEnd,{passive:false});
+  el.addEventListener("pointerup",end,{passive:false});
+  el.addEventListener("pointercancel",end,{passive:false});
+  el.addEventListener("lostpointercapture",e=>{
+    if(pointerId===e.pointerId){active=false;pointerId=null;stick.style.transform="translate(0,0)";moveX=0;moveY=0;}
+  });
   return reset;
 }
 const resetMoveJoystick=setupJoystick("moveJoy");
@@ -1169,6 +1166,8 @@ fireButton.addEventListener("lostpointercapture",()=>{pointer.down=false;});
 
 loadStats();
 function frame(now){
+  neonDiag.frames++;
+  if(neonDiag.frames%6===0 && window.updateNeonDiag)window.updateNeonDiag();
   const dt=Math.min(.05,(now-last)/1000);
   last=now;
   update(dt);
