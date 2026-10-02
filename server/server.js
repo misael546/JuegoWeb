@@ -208,6 +208,9 @@ function sendPlayerList(code) {
 function sendStats(p) {
   if (!p?.ws) return;
   const nextKills = p.kills % 5 === 0 ? 5 : 5 - (p.kills % 5);
+  const weapon = WEAPONS[p.weapon] || WEAPONS.blaster;
+  const attackLevel = Number(weapon.tier) || 1;
+  const maxAmmo = maxAmmoForWeapon(p.weapon);
 
   send(p.ws, {
     type: 'server_stats',
@@ -222,26 +225,23 @@ function sendStats(p) {
     speed: p.speed,
     maxHp: maxHpForLevel(p.level),
     xpNeed: xpToNextLevel(p.level),
-    damageXp: masteryXpIntoLevel(p.damageXp),
-    damageXpNeed: masteryXpToNextLevel(masteryLevelFromXp(p.damageXp)),
-    damageLevel: masteryLevelFromXp(p.damageXp),
-    defenseXp: masteryXpIntoLevel(p.defenseXp),
-    defenseXpNeed: masteryXpToNextLevel(masteryLevelFromXp(p.defenseXp)),
-    defenseLevel: masteryLevelFromXp(p.defenseXp),
+    attackLevel,
+    attackPower: p.damage || weapon.damage,
+    attackFill: Math.round((attackLevel / 5) * 100),
+    defense: p.defense || 0,
+    defenseMax: 125,
     killsToLevel: nextKills,
     gold: p.gold || 0,
     diamonds: p.diamonds || 0,
-    ammo: p.ammo ?? 0,
-    maxAmmo: MAX_AMMO,
+    ammo: clamp(Number(p.ammo) || 0, 0, maxAmmo),
+    maxAmmo,
     weapon: p.weapon,
     shopNpc: SHOP_NPC,
-    bankNpc: BANK_NPC,
-    cosmeticShopNpc: COSMETIC_SHOP_NPC,
-    bankedGold: p.bankedGold || 0,
-    bankedDiamonds: p.bankedDiamonds || 0,
+    bankEnabled: BANK_ENABLED,
     equippedSkin: cosmetics.getSkin(p.equippedSkin) ? p.equippedSkin : 'core_default',
     ownedSkins: cosmetics.normalizeOwnedSkins(p.ownedSkins),
-    redeemedCodes: cosmetics.normalizeRedeemedCodes(p.redeemedCodes)
+    redeemedCodes: cosmetics.normalizeRedeemedCodes(p.redeemedCodes),
+    skinDefense: skinDefenseBonus(p)
   });
 }
 
