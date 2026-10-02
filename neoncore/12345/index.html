@@ -1328,7 +1328,12 @@ function updateCosmeticShop(){
   if(!near){cosmeticShopWasNear=false;if(box)box.style.display="none";return;}
   if(near&&!cosmeticShopWasNear&&p.alive&&performance.now()>cosmeticShopDismissedUntil)openCosmeticShop();
   cosmeticShopWasNear=near;
-  if(box&&box.style.display!=="none"&&p.alive)renderCosmeticShop();
+  if(box&&box.style.display!=="none"&&p.alive){
+    const g=document.getElementById("cosmeticGold"),d=document.getElementById("cosmeticDiamonds"),owned=document.getElementById("cosmeticOwned");
+    if(g)g.textContent=Math.max(0,Number(p.gold)||0).toLocaleString("es-MX");
+    if(d)d.textContent=Math.max(0,Number(p.diamonds)||0).toLocaleString("es-MX");
+    if(owned)owned.textContent=Array.isArray(ownedSkins)?ownedSkins.length:1;
+  }
 }
 function drawCosmeticShopNpc(){
   const x=sx(cosmeticShopNpc.x),y=sy(cosmeticShopNpc.y);ctx.save();
