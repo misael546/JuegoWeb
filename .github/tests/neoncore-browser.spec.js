@@ -212,6 +212,14 @@ test('SHOP: arsenal, skins, códigos, rangos y buffs', async ({ page }) => {
   });
 
   await waitForLiveGame(page, '12345', {errors,wsEvents:[]});
+  await expect.poll(async () => page.evaluate(() => window.NEON_CORE_BUILD), {timeout:10000}).toBe('20261002-147');
+
+  const health = await page.request.get('https://neon-core-multiplayer.onrender.com/health?ci=' + Date.now());
+  expect(health.ok()).toBeTruthy();
+  const healthJson = await health.json();
+  expect(healthJson.version).toBe('20261002-147');
+  expect(healthJson.diagnostics.bossTarget).toBe(1);
+  expect(healthJson.diagnostics.eliteTarget).toBe(6);
 
   const startPos = parsePos(await page.locator('#neonDiag').innerText());
   const moveKeys = [];
@@ -230,6 +238,7 @@ test('SHOP: arsenal, skins, códigos, rangos y buffs', async ({ page }) => {
   await expect(page.locator('.shopTab[data-shop-section="arsenal"]')).toBeVisible();
   await expect(page.locator('.shopTab[data-shop-section="skins"]')).toBeVisible();
   await expect(page.locator('.shopTab[data-shop-section="redeem"]')).toBeVisible();
+  await expect(page.locator('.shopTab[data-shop-section="redeem"]')).toContainText('CENTRO DE CÓDIGOS');
   await expect(page.locator('#weaponSkinGrid')).toContainText('BLASTER · NEONSTORM');
   await expect(page.locator('#weaponSkinGrid')).toContainText('NOVA · SUPERNOVA');
   await expect(page.locator('#bankPanel')).toHaveCount(0);
@@ -248,7 +257,17 @@ test('SHOP: arsenal, skins, códigos, rangos y buffs', async ({ page }) => {
   await page.locator('#redeemCode').fill('NEONARMORY');
   await page.locator('#redeemCodeBtn').click();
   await expect(page.locator('#cosmeticShopMsg')).toContainText('BLASTER · NEONSTORM', {timeout:10000});
+  await page.locator('.shopTab[data-shop-section="arsenal"]').click();
+  await expect(page.locator('.cosmeticCard[data-weapon-skin-id="blaster_neonstorm"]')).toContainText('EQUIPADA');
+  await expect(page.locator('#attackPower')).toHaveText('43');
+  await expect(page.locator('#defenseValue')).toHaveText('4');
+  await page.locator('.cosmeticCard[data-weapon-skin-id="blaster_neonstorm"]').click();
+  await expect(page.locator('#attackPower')).toHaveText('35');
+  await expect(page.locator('#defenseValue')).toHaveText('2');
+  await expect(page.locator('.cosmeticCard.selected')).toHaveCount(0);
 
+  await page.locator('#redeemCode').isVisible().catch(()=>false);
+  await page.locator('.shopTab[data-shop-section="redeem"]').click();
   await page.locator('#redeemCode').fill('STARFORGE');
   await page.locator('#redeemCodeBtn').click();
   await expect(page.locator('#cosmeticShopMsg')).toContainText('PULSE', {timeout:10000});
