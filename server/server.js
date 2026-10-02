@@ -228,7 +228,7 @@ function sendStats(p) {
     attackLevel,
     attackPower: p.damage || weapon.damage,
     attackFill: Math.round((attackLevel / 5) * 100),
-    defense: p.defense || 0,
+    defense: skinDefenseBonus(p),
     defenseMax: 125,
     killsToLevel: nextKills,
     gold: p.gold || 0,
@@ -1138,6 +1138,7 @@ function buyCosmeticSkin(ws, skinId) {
   p.ownedSkins.push(skin.id);
   p.ownedSkins = cosmetics.normalizeOwnedSkins(p.ownedSkins);
   p.equippedSkin = skin.id;
+  applyCombatStats(p);
   void persistPlayer(p);
   sendCosmeticState(p, '¡Compraste ' + skin.name + ' y quedó equipado!');
   sendStats(p);
@@ -1153,6 +1154,7 @@ function equipCosmeticSkin(ws, skinId) {
   p.ownedSkins = cosmetics.normalizeOwnedSkins(p.ownedSkins);
   if (!cosmetics.getSkin(id) || !p.ownedSkins.includes(id)) return cosmeticShopError(ws, 'Skin bloqueado.');
   p.equippedSkin = id;
+  applyCombatStats(p);
   void persistPlayer(p);
   sendCosmeticState(p, 'Skin equipado: ' + cosmetics.getSkin(id).name + '.');
   sendStats(p);
@@ -1181,6 +1183,7 @@ async function redeemCosmeticCode(ws, rawCode) {
   if (!p.ownedSkins.includes(skin.id)) p.ownedSkins.push(skin.id);
   p.ownedSkins = cosmetics.normalizeOwnedSkins(p.ownedSkins);
   p.equippedSkin = skin.id;
+  applyCombatStats(p);
 
   await persistPlayer(p);
   sendCosmeticState(p, reward.message, skin.id);
