@@ -26,12 +26,12 @@ jobs:
         run: |
           for i in $(seq 1 30); do
             if curl -fsSL "https://misael546.github.io/JuegoWeb/neoncore/12345/?ci=$i" | grep -q '20261001-129'; then
-              echo "Pages build 127 is public"
+              echo "Pages build 129 is public"
               exit 0
             fi
             sleep 5
           done
-          echo "Pages build 125 was not detected"
+          echo "Pages build 129 was not detected"
           exit 1
 
       - name: Run live browser tests
