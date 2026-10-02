@@ -10,7 +10,7 @@ const WORLD = { w: 6000, h: 4400 };
 const MAX_PLAYERS = 16;
 const SAFE_ZONE = { x: 3000, y: 2200, r: 300 };
 
-const SERVER_VERSION = '20261001-120';
+const SERVER_VERSION = '20261001-121';
 
 const AMMO_PACK_SIZE = 50;
 const AMMO_PACK_COST = 50;
@@ -451,6 +451,29 @@ function createWorldWalls() {
     if (created) walls.push(created);
   }
 
+  // B121: estructuras iniciales alrededor de la zona segura para que el
+  // jugador tenga cobertura y referencias visibles desde el spawn.
+  const starterStructures = [
+    { x: 3000, y: 1650, w: 110, h: 70 },
+    { x: 3000, y: 2750, w: 110, h: 70 },
+    { x: 2450, y: 2200, w: 90, h: 120 },
+    { x: 3550, y: 2200, w: 90, h: 120 },
+    { x: 2620, y: 1800, w: 120, h: 80 },
+    { x: 3380, y: 1800, w: 120, h: 80 },
+    { x: 2620, y: 2600, w: 120, h: 80 },
+    { x: 3380, y: 2600, w: 120, h: 80 }
+  ];
+  for (const structure of starterStructures) {
+    if (!walls.some(w => w.x === structure.x && w.y === structure.y)) {
+      walls.push({
+        id: 'starter_' + (walls.length + 1),
+        ...structure,
+        hp: 100,
+        maxHp: 100
+      });
+    }
+  }
+
   return walls;
 }
 
@@ -541,8 +564,10 @@ function makeEnemy() {
   let y = 0;
 
   do {
-    x = Math.random() * (WORLD.w - 200) + 100;
-    y = Math.random() * (WORLD.h - 200) + 100;
+    const angle = Math.random() * Math.PI * 2;
+    const distance = 450 + Math.random() * 500;
+    x = clamp(SAFE_ZONE.x + Math.cos(angle) * distance, 100, WORLD.w - 100);
+    y = clamp(SAFE_ZONE.y + Math.sin(angle) * distance, 100, WORLD.h - 100);
   } while (
     inSafeZone(x, y, 60) ||
     collidesWithWall(x, y, r, WORLD_WALLS)
