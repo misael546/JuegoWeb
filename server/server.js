@@ -11,34 +11,43 @@ const WORLD = { w: 6000, h: 4400 };
 const MAX_PLAYERS = 16;
 const SAFE_ZONE = { x: 3000, y: 2200, r: 300 };
 
-const SERVER_VERSION = '20261002-141';
+const SERVER_VERSION = '20261002-142';
 
-const AMMO_PACK_SIZE = 50;
-const AMMO_PACK_COST = 50;
-const MAX_AMMO = 120;
+const AMMO_PACK_SIZE = 100;
+const AMMO_PACK_COST = 75;
+const MAX_AMMO = 450;
 
-const SHOP_NPC = { x: 3060, y: 2200, r: 22 };
-const SHOP_INTERACTION_RADIUS = 34;
-const COSMETIC_SHOP_NPC = { x: 2940, y: 2200, r: 22 };
-const COSMETIC_SHOP_INTERACTION_RADIUS = 34;
-const BANK_NPC = { x: 3000, y: 1985, r: 22 };
-const BANK_INTERACTION_RADIUS = 34;
+const SHOP_NPC = { x: 3000, y: 2200, r: 24 };
+const SHOP_INTERACTION_RADIUS = 48;
+const BANK_ENABLED = false;
 
 const WEAPONS = {
-  blaster: { name: 'BLASTER', cost: 0, damage: 25, fireRate: 350 },
-  pulse: { name: 'PULSE', cost: 150, damage: 18, fireRate: 170 },
-  cannon: { name: 'CANNON', cost: 300, damage: 65, fireRate: 700 }
+  blaster: { name: 'BLASTER', cost: 0, damage: 35, fireRate: 320, tier: 1, maxAmmo: 220 },
+  pulse: { name: 'PULSE', cost: 500, damage: 70, fireRate: 230, tier: 2, maxAmmo: 260 },
+  cannon: { name: 'CANNON', cost: 1500, damage: 140, fireRate: 620, tier: 3, maxAmmo: 320 },
+  railgun: { name: 'RAILGUN', cost: 6500, damage: 260, fireRate: 900, tier: 4, maxAmmo: 380 },
+  nova: { name: 'NOVA', cost: 22000, damage: 520, fireRate: 1350, tier: 5, maxAmmo: 450 }
 };
 
 const HP_REGEN_PER_SEC = 3;
 const WORLD_WALL_COUNT = 24;
 const WORLD_WALL_SEED = 739281;
 const WALL_RESPAWN_MS = 5 * 60 * 1000;
-const MOB_TARGET_COUNT = 18;
+const MOB_TARGET_COUNT = 14;
+const ELITE_TARGET_COUNT = 6;
 const MOB_RESPAWN_MS = 8 * 1000;
 const MOB_RESPAWN_JITTER_MS = 4 * 1000;
-const BOSS_RESPAWN_MS = 90 * 1000;
-const BOSS_DIAMOND_REWARD = 25;
+const BOSS_RESPAWN_MS = 120 * 1000;
+const BOSS_GOLD_REWARD = 15000;
+const BOSS_XP_REWARD = 5000;
+const BOSS_HP = 60000;
+const BOSS_PROJECTILE_DAMAGE = 190;
+const BOSS_PROJECTILE_SPEED = 250;
+const BOSS_PROJECTILE_COOLDOWN_MS = 2800;
+const BOSS_AOE_DAMAGE = 165;
+const BOSS_AOE_RADIUS = 190;
+const BOSS_AOE_WARNING_MS = 1400;
+const BOSS_AOE_COOLDOWN_MS = 6500;
 const AUTOSAVE_MS = 5000;
 const DEATH_HP_LOSS = 0.10;
 const DEATH_DAMAGE_LOSS = 0.05;
@@ -57,6 +66,7 @@ const savedPlayers = new Map();
 const rooms = new Map();
 const roomEnemies = new Map();
 const roomEnemyRespawns = new Map();
+const roomBossProjectiles = new Map();
 const roomWalls = new Map();
 const roomWallRespawns = new Map();
 
@@ -65,6 +75,7 @@ const PUBLIC_ROOMS = ['12345'];
 rooms.set('OPEN', new Set());
 roomEnemies.set('OPEN', []);
 roomEnemyRespawns.set('OPEN', []);
+roomBossProjectiles.set('OPEN', []);
 roomWalls.set('OPEN', null);
 roomWallRespawns.set('OPEN', []);
 
@@ -72,6 +83,7 @@ for (const code of PUBLIC_ROOMS) {
   rooms.set(code, new Set());
   roomEnemies.set(code, []);
   roomEnemyRespawns.set(code, []);
+  roomBossProjectiles.set(code, []);
   roomWalls.set(code, null);
   roomWallRespawns.set(code, []);
 }
@@ -841,6 +853,7 @@ async function leaveRoom(ws) {
       rooms.delete(code);
       roomEnemies.delete(code);
       roomEnemyRespawns.delete(code);
+      roomBossProjectiles.delete(code);
       roomWalls.delete(code);
       roomWallRespawns.delete(code);
     } else {
@@ -869,6 +882,7 @@ async function joinRoom(ws, requestedCode, create = false) {
     rooms.set(code, new Set());
     roomEnemies.set(code, []);
     roomEnemyRespawns.set(code, []);
+    roomBossProjectiles.set(code, []);
     roomWalls.set(code, WORLD_WALLS.map((wall) => ({ ...wall })));
   }
 
