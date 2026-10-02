@@ -63,7 +63,7 @@
 </script>
 </head>
 <body>
-<canvas id="game"></canvas><div id="buildDisplay">NEON CORE · Build 144</div>
+<canvas id="game"></canvas><div id="buildDisplay">NEON CORE · Build 145</div>
 
 <div id="hud">
   <div class="panel" id="bars">
@@ -102,10 +102,10 @@
 
     <section id="shopRedeemSection" class="shopSection" style="display:none">
       <div class="codeBox">
-        <b>🎁 CANJEAR SKINS</b>
-        <small>Los skins de código no se compran con oro ni diamantes.</small>
+        <b>🎁 CENTRO DE CÓDIGOS</b>
+        <small>Los códigos se validan directamente en el servidor y pueden entregar skins, armas o skins del arsenal.</small>
         <div class="codeRow"><input id="redeemCode" maxlength="32" placeholder="ESCRIBE TU CÓDIGO" autocomplete="off"><button id="redeemCodeBtn" type="button">CANJEAR</button></div>
-        <small id="cosmeticShopMsg" class="cosmeticMsg">Introduce un código para desbloquear un skin.</small>
+        <small id="cosmeticShopMsg" class="cosmeticMsg">Introduce un código de regalo. La recompensa se entrega directamente desde el servidor.</small>
       </div>
     </section>
   </div>
@@ -160,11 +160,11 @@ const p={x:3000,y:2200,r:16,angle:0,hp:100,maxHp:100,xp:0,level:1,score:0,kills:
 const shopNpc={x:3000,y:2200,r:24};
 const weaponNames={blaster:"BLASTER",pulse:"PULSE",cannon:"CANNON",railgun:"RAILGUN",nova:"NOVA"};
 const weaponStats={
-  blaster:{name:"BLASTER",damage:35,fireRate:320,tier:1,maxAmmo:220,cost:0},
-  pulse:{name:"PULSE",damage:70,fireRate:230,tier:2,maxAmmo:260,cost:500},
-  cannon:{name:"CANNON",damage:140,fireRate:620,tier:3,maxAmmo:320,cost:1500},
-  railgun:{name:"RAILGUN",damage:260,fireRate:900,tier:4,maxAmmo:380,cost:6500},
-  nova:{name:"NOVA",damage:520,fireRate:1350,tier:5,maxAmmo:450,cost:22000}
+  blaster:{name:"BLASTER",damage:35,fireRate:320,tier:1,maxAmmo:220,cost:0,range:760},
+  pulse:{name:"PULSE",damage:70,fireRate:230,tier:2,maxAmmo:260,cost:500,range:820},
+  cannon:{name:"CANNON",damage:140,fireRate:620,tier:3,maxAmmo:320,cost:1500,range:880},
+  railgun:{name:"RAILGUN",damage:260,fireRate:900,tier:4,maxAmmo:380,cost:6500,range:960},
+  nova:{name:"NOVA",damage:520,fireRate:1350,tier:5,maxAmmo:450,cost:22000,range:1040}
 };
 let shopOpen=false,shopSection="arsenal";
 const SHOP_INTERACTION_RADIUS_CLIENT=48;
@@ -181,10 +181,19 @@ const COSMETIC_SKINS=[
 {id:"angel_seraph",name:"ÁNGEL SERAFÍN",rarity:"Legendario",currency:"diamonds",price:12000,priceUsd:0,defenseBonus:72,desc:"Halo, alas de luz y plumas."},
 {id:"demon_infernal",name:"DEMONIO INFERNAL",rarity:"Supremo",currency:"diamonds",price:25000,priceUsd:0,defenseBonus:88,desc:"Cuernos, alas y brasas demoníacas."},
 {id:"eternal_void",name:"VACÍO ETERNO",rarity:"Supremo",currency:"diamonds",price:30000,priceUsd:0,defenseBonus:105,desc:"Vórtice oscuro de energía."},
-{id:"gm_core",name:"SOBERANO DEL NÚCLEO",rarity:"Supremo",currency:"real",price:0,priceUsd:1,defenseBonus:125,desc:"Skin premium individual · $1 USD.",realMoney:true}
+{id:"gm_core",name:"SOBERANO DEL NÚCLEO",rarity:"Supremo",currency:"code",price:0,priceUsd:1,defenseBonus:125,desc:"Skin premium de prueba · $1 USD · código de regalo.",realMoney:true}
 ];
 let cosmeticShopNpc={...shopNpc};
-let ownedSkins=["core_default"],equippedSkin="core_default",cosmeticShopWasNear=false,cosmeticShopDismissedUntil=0;
+let ownedSkins=["core_default"],equippedSkin="core_default";
+let ownedWeapons=["blaster"],equippedWeaponSkin="",ownedWeaponSkins=[];
+let weaponSkinCatalog=[
+{id:"blaster_neonstorm",name:"BLASTER · NEONSTORM",weaponId:"blaster",rarity:"Raro",priceGold:2500,priceDiamonds:0,attackBonus:8,defenseBonus:2,style:"neonstorm",redeemable:false},
+{id:"pulse_prism",name:"PULSE · PRISMA",weaponId:"pulse",rarity:"Épico",priceGold:10000,priceDiamonds:0,attackBonus:15,defenseBonus:4,style:"prism",redeemable:false},
+{id:"cannon_solaris",name:"CANNON · SOLARIS",weaponId:"cannon",rarity:"Legendario",priceGold:0,priceDiamonds:1200,attackBonus:25,defenseBonus:6,style:"solaris",redeemable:false},
+{id:"railgun_eclipse",name:"RAILGUN · ECLIPSE",weaponId:"railgun",rarity:"Supremo",priceGold:0,priceDiamonds:7000,attackBonus:40,defenseBonus:8,style:"eclipse",redeemable:false},
+{id:"nova_supernova",name:"NOVA · SUPERNOVA",weaponId:"nova",rarity:"Supremo",priceGold:0,priceDiamonds:18000,attackBonus:65,defenseBonus:12,style:"supernova",redeemable:false}
+];
+let cosmeticShopWasNear=false,cosmeticShopDismissedUntil=0;
 let bullets=[],enemies=[],drops=[],particles=[],walls=[],hitTexts=[],bossProjectiles=[],bossWarnings=[];
 let serverXpNeed=100,serverKillsToLevel=5,serverAttackLevel=1,serverAttackPower=35,serverAttackFill=20,serverDefense=0,serverDefenseMax=125;
 let gameActive=false;
@@ -493,7 +502,7 @@ function connectMultiplayer(roomMode="quick",roomCode=""){ const publicRoomAuto=
         }else if(m.type==="boss_reward"){
           p.gold=Math.max(0,(p.gold||0)+(Number(m.gold)||0));
           p.diamonds=Math.max(0,(p.diamonds||0)+(Number(m.diamonds)||0));
-          showToast(m.message||"👑 BOSS DERROTADO");
+          showToast(m.message||"☄️ DESTRUCTOR ESTELAR DESTRUIDO");
           burst(p.x,p.y,"#ffd76a",30);
           updateResourceHud();
         }else if(m.type==="enemy_dead"){
@@ -508,6 +517,12 @@ function connectMultiplayer(roomMode="quick",roomCode=""){ const publicRoomAuto=
           const r=m.respawn||{};
           applyServerRespawn(r);
           enemies.length=0;
+        }else if(m.type==="boss_projectile_hit"){
+          p.hp=Number.isFinite(m.hp)?m.hp:Math.max(0,p.hp-(Number(m.amount)||0));if(Number.isFinite(m.maxHp))p.maxHp=m.maxHp;
+          burst(Number(m.x)||p.x,Number(m.y)||p.y,"#ff6a45",12);showFloatingHit(Number(m.x)||p.x,Number(m.y)||p.y,Number(m.amount)||0,"#ff5b3e");
+        }else if(m.type==="boss_aoe_hit"){
+          p.hp=Number.isFinite(m.hp)?m.hp:Math.max(0,p.hp-(Number(m.amount)||0));if(Number.isFinite(m.maxHp))p.maxHp=m.maxHp;
+          burst(Number(m.x)||p.x,Number(m.y)||p.y,"#ff3b32",18);showFloatingHit(Number(m.x)||p.x,Number(m.y)||p.y,Number(m.amount)||0,"#ff3b3e");
         }else if(m.type==="pvp_damage"){
           p.hp=Number.isFinite(m.hp)?m.hp:Math.max(0,p.hp-(Number(m.amount)||0));
           if(Number.isFinite(m.maxHp))p.maxHp=m.maxHp;
@@ -528,7 +543,13 @@ function connectMultiplayer(roomMode="quick",roomCode=""){ const publicRoomAuto=
           if(Number.isFinite(m.fireRate))p.fireRate=m.fireRate;
           if(Number.isFinite(m.speed))p.speed=m.speed;
           if(Number.isFinite(m.maxHp))p.maxHp=m.maxHp;
-          if(m.weapon&&weaponStats[m.weapon])p.weapon=m.weapon;if(m.equippedSkin)p.equippedSkin=m.equippedSkin;if(Array.isArray(m.ownedSkins))ownedSkins=m.ownedSkins;
+          if(Object.prototype.hasOwnProperty.call(m,"weapon"))p.weapon=m.weapon;
+           if(Object.prototype.hasOwnProperty.call(m,"equippedSkin")){equippedSkin=m.equippedSkin||"";p.equippedSkin=equippedSkin;}
+           if(Array.isArray(m.ownedSkins))ownedSkins=m.ownedSkins;
+           if(Array.isArray(m.ownedWeapons))ownedWeapons=m.ownedWeapons;
+           if(Object.prototype.hasOwnProperty.call(m,"equippedWeaponSkin"))equippedWeaponSkin=m.equippedWeaponSkin||"";
+           if(Array.isArray(m.ownedWeaponSkins))ownedWeaponSkins=m.ownedWeaponSkins;
+           if(Array.isArray(m.weaponSkinCatalog))weaponSkinCatalog=m.weaponSkinCatalog;
           if(Number.isFinite(m.xpNeed))serverXpNeed=m.xpNeed;
           if(Number.isFinite(m.attackLevel))serverAttackLevel=m.attackLevel;
           if(Number.isFinite(m.attackPower))serverAttackPower=m.attackPower;
@@ -543,19 +564,26 @@ function connectMultiplayer(roomMode="quick",roomCode=""){ const publicRoomAuto=
           if(m.shopNpc){shopNpc.x=Number(m.shopNpc.x)||shopNpc.x;shopNpc.y=Number(m.shopNpc.y)||shopNpc.y;shopNpc.r=Number(m.shopNpc.r)||shopNpc.r;cosmeticShopNpc={...shopNpc};}
           if(m.weapon)p.weapon=m.weapon;
           updateResourceHud();
-        }else if(m.type==="cosmetic_state"){
+         }else if(m.type==="cosmetic_state"){
           ownedSkins=Array.isArray(m.ownedSkins)?m.ownedSkins:["core_default"];
-          equippedSkin=m.equippedSkin||"core_default";p.equippedSkin=equippedSkin;
-          if(equippedSkin && !ownedSkins.includes(equippedSkin))ownedSkins=[...ownedSkins,equippedSkin];
-          if(m.unlockedSkin && !ownedSkins.includes(m.unlockedSkin))ownedSkins=[...ownedSkins,m.unlockedSkin];
+          equippedSkin=m.equippedSkin||"";p.equippedSkin=equippedSkin;
+          if(equippedSkin&&!ownedSkins.includes(equippedSkin))ownedSkins=[...ownedSkins,equippedSkin];
+          if(m.unlockedSkin&&!ownedSkins.includes(m.unlockedSkin))ownedSkins=[...ownedSkins,m.unlockedSkin];
+          if(Array.isArray(m.ownedWeapons))ownedWeapons=m.ownedWeapons;
+          if(Object.prototype.hasOwnProperty.call(m,"weapon"))p.weapon=m.weapon;
+          if(Array.isArray(m.ownedWeaponSkins))ownedWeaponSkins=m.ownedWeaponSkins;
+          if(Object.prototype.hasOwnProperty.call(m,"equippedWeaponSkin"))equippedWeaponSkin=m.equippedWeaponSkin||"";
+          if(Array.isArray(m.weaponSkinCatalog))weaponSkinCatalog=m.weaponSkinCatalog;
+          if(m.unlockedWeapon&&!ownedWeapons.includes(m.unlockedWeapon))ownedWeapons=[...ownedWeapons,m.unlockedWeapon];
+          if(m.unlockedWeaponSkin&&!ownedWeaponSkins.includes(m.unlockedWeaponSkin))ownedWeaponSkins=[...ownedWeaponSkins,m.unlockedWeaponSkin];
           if(m.shopNpc){shopNpc.x=Number(m.shopNpc.x)||shopNpc.x;shopNpc.y=Number(m.shopNpc.y)||shopNpc.y;shopNpc.r=Number(m.shopNpc.r)||shopNpc.r;cosmeticShopNpc={...shopNpc};}
           renderCosmeticShop();showCosmeticMsg(m.message||"SHOP actualizado.");updateResourceHud();
-        }else if(m.type==="cosmetic_result"){
+        }else if(m.type==="cosmetic_result"){        }else if(m.type==="cosmetic_result"){
           if(Array.isArray(m.ownedSkins))ownedSkins=m.ownedSkins;
-          if(m.equippedSkin){
-            equippedSkin=m.equippedSkin;p.equippedSkin=m.equippedSkin;
-            if(!ownedSkins.includes(equippedSkin))ownedSkins=[...ownedSkins,equippedSkin];
-          }
+          if(Array.isArray(m.ownedWeapons))ownedWeapons=m.ownedWeapons;
+          if(Array.isArray(m.ownedWeaponSkins))ownedWeaponSkins=m.ownedWeaponSkins;
+          if(Object.prototype.hasOwnProperty.call(m,"equippedSkin")){equippedSkin=m.equippedSkin||"";p.equippedSkin=equippedSkin;}
+          if(Object.prototype.hasOwnProperty.call(m,"equippedWeaponSkin"))equippedWeaponSkin=m.equippedWeaponSkin||"";
           renderCosmeticShop();showCosmeticMsg(m.message||"");updateResourceHud();
         }else if(m.type==="wall_respawn"){
           if(m.wall){m.wall.dead=false;walls.push({...m.wall});burst(Number(m.wall.x)||0,Number(m.wall.y)||0,"#39e7ff",8);}
@@ -567,20 +595,25 @@ function connectMultiplayer(roomMode="quick",roomCode=""){ const publicRoomAuto=
           if(Number.isFinite(Number(m.ammo)))p.ammo=Math.max(0,Number(m.ammo));
           if(m.ok){
             const angle=Number.isFinite(Number(m.angle))?Number(m.angle):p.angle;
-            bullets.push({
-              x:Number.isFinite(Number(m.x))?Number(m.x):p.x,
-              y:Number.isFinite(Number(m.y))?Number(m.y):p.y,
-              vx:Math.cos(angle)*650,
-              vy:Math.sin(angle)*650,
-              life:1.5,
-              damage:Number(m.damage)||p.damage,
-              range:0
-            });
+            const sx0=Number.isFinite(Number(m.x))?Number(m.x):p.x;
+            const sy0=Number.isFinite(Number(m.y))?Number(m.y):p.y;
+            const travelDistance=Math.max(1,Number(m.travelDistance)||Number(m.range)||weaponStats[p.weapon]?.range||760);
+            const bulletSpeed=1200;
+            const ix=Number.isFinite(Number(m.impactX))?Number(m.impactX):sx0+Math.cos(angle)*travelDistance;
+            const iy=Number.isFinite(Number(m.impactY))?Number(m.impactY):sy0+Math.sin(angle)*travelDistance;
+            bullets.push({x:sx0,y:sy0,startX:sx0,startY:sy0,vx:Math.cos(angle)*bulletSpeed,vy:Math.sin(angle)*bulletSpeed,life:travelDistance/bulletSpeed+0.08,damage:Number(m.damage)||p.damage,range:0,maxRange:travelDistance,impactX:ix,impactY:iy});
           }
           updateResourceHud();
-        }else if(m.type==="bank_result"){
+        }else if(m.type==="bank_result"){        }else if(m.type==="bank_result"){
           showToast(m.message||"Banco desactivado.");
-        }else if(m.type==="shop_result"){if(Number.isFinite(m.gold))p.gold=m.gold;if(Number.isFinite(m.ammo))p.ammo=m.ammo;if(Number.isFinite(m.maxAmmo))p.maxAmmo=m.maxAmmo;if(m.weapon)p.weapon=m.weapon;showShopMsg(m.message||"");updateResourceHud();
+        }else if(m.type==="shop_result"){
+          if(Number.isFinite(m.gold))p.gold=m.gold;
+          if(Object.prototype.hasOwnProperty.call(m,"ammo"))p.ammo=Number(m.ammo)||0;
+          if(Object.prototype.hasOwnProperty.call(m,"maxAmmo"))p.maxAmmo=Number(m.maxAmmo)||0;
+          if(Object.prototype.hasOwnProperty.call(m,"weapon"))p.weapon=m.weapon;
+          if(Array.isArray(m.ownedWeapons))ownedWeapons=m.ownedWeapons;
+          if(Object.prototype.hasOwnProperty.call(m,"equippedWeaponSkin"))equippedWeaponSkin=m.equippedWeaponSkin||"";
+          showShopMsg(m.message||"");renderCosmeticShop();updateResourceHud();
         }else if(m.type==="respawn_ok"){
           if(m.safeZone){safeZone=m.safeZone;}
           spawnProtectionUntil=performance.now()+(Number(m.spawnProtectionMs)||5000);
@@ -793,8 +826,11 @@ function update(dt){
 
 
   for(const b of bullets){
-    b.x+=b.vx*dt;b.y+=b.vy*dt;b.life-=dt;b.range+=650*dt;
-    if(b.life<=0||b.range>1000||b.x<0||b.y<0||b.x>world.w||b.y>world.h||hitWall(b))b.dead=true;
+    const step=Math.min(b.maxRange||1040,(b.range||0)+1200*dt);
+    const t=clamp(step/Math.max(1,b.maxRange||1040),0,1);
+    b.x=b.startX+(b.impactX-b.startX)*t;b.y=b.startY+(b.impactY-b.startY)*t;
+    b.range=step;b.life-=dt;
+    if(b.range>=(b.maxRange||1040)-1||b.life<=0){b.x=b.impactX;b.y=b.impactY;b.dead=true;}
   }
 
   for(const q of particles){
@@ -874,7 +910,7 @@ function drawSkinEffects(skin,r){
   }
   ctx.restore();
 }
-function drawTank(x,y,angle,color="#39e7ff",r=24,weapon="blaster",skinId="core_default"){
+function drawTank(x,y,angle,color="#39e7ff",r=24,weapon="blaster",skinId="core_default",weaponSkinId=""){
   ctx.save();ctx.translate(sx(x),sy(y));ctx.rotate(angle);
   ctx.fillStyle="rgba(0,0,0,.35)";ctx.beginPath();ctx.arc(3,4,r+5,0,Math.PI*2);ctx.fill();
   ctx.fillStyle="#09111f";ctx.beginPath();ctx.arc(0,0,r+3,0,Math.PI*2);ctx.fill();
@@ -910,7 +946,12 @@ function drawTank(x,y,angle,color="#39e7ff",r=24,weapon="blaster",skinId="core_d
   if(skin==="eternal_void"){ctx.strokeStyle="#e879ff";ctx.lineWidth=2;ctx.beginPath();ctx.arc(0,0,r*.8,-2.7,.2);ctx.stroke();ctx.strokeStyle="#39e7ff";ctx.beginPath();ctx.arc(0,0,r*.72,.55,2.9);ctx.stroke();}
   drawSkinEffects(skin,r);
   ctx.fillStyle="#142238";ctx.fillRect(-r*.15,-7,r+10,14);
-  if(weapon==="pulse"){
+  if(weaponSkinId==="blaster_neonstorm"){ctx.fillStyle="#39e7ff";ctx.shadowBlur=12;ctx.shadowColor="#39e7ff";ctx.fillRect(r+4,-4,24,8);ctx.shadowBlur=0;}
+  else if(weaponSkinId==="pulse_prism"){ctx.fillStyle="#dca8ff";ctx.fillRect(r-2,-10,r+14,6);ctx.fillRect(r-2,4,r+14,6);}
+  else if(weaponSkinId==="cannon_solaris"){ctx.fillStyle="#ffd76a";ctx.fillRect(r-2,-11,r+24,22);}
+  else if(weaponSkinId==="railgun_eclipse"){ctx.fillStyle="#a4b6ff";ctx.fillRect(r-2,-6,r+28,12);ctx.strokeStyle="#ffd76a";ctx.strokeRect(r+7,-7,r+14,14);}
+  else if(weaponSkinId==="nova_supernova"){ctx.fillStyle="#fff1b8";ctx.shadowBlur=14;ctx.shadowColor="#ff9b3f";ctx.fillRect(r-2,-11,r+28,22);ctx.shadowBlur=0;}
+  else if(weapon==="pulse"){
     ctx.fillStyle="#b56cff";ctx.fillRect(r-2,-10,r+10,6);ctx.fillRect(r-2,4,r+10,6);
     ctx.fillStyle="#f0d7ff";ctx.fillRect(r+8,-9,10,4);ctx.fillRect(r+8,5,10,4);
   }else if(weapon==="cannon"){
@@ -1049,83 +1090,56 @@ function skinCostText(item){
 
 function skinClass(id){return "skin-"+String(id||"core_default").replace(/_/g,"-");}
 
+function weaponCostText(item){
+  if(Number(item.priceGold)>0)return "🪙 "+Number(item.priceGold).toLocaleString("es-MX");
+  if(Number(item.priceDiamonds)>0)return "💎 "+Number(item.priceDiamonds).toLocaleString("es-MX");
+  return "GRATIS";
+}
 function renderArsenal(){
-  const grid=document.getElementById("arsenalGrid");
+  const grid=document.getElementById("arsenalGrid"),skinGrid=document.getElementById("weaponSkinGrid");
   if(!grid)return;
-
   grid.innerHTML=Object.entries(weaponStats).map(([id,item])=>{
-    const selected=p.weapon===id;
-    return '<div class="shopWeaponCard '+(selected?"equipped":"")+'">'+
-      '<strong>'+item.name+'</strong>'+
-      '<div class="weaponStats">⚔ ATAQUE T'+item.tier+' · '+item.damage+'</div>'+
-      '<small>⏱ '+item.fireRate+'ms · 🔸 '+item.maxAmmo+' munición máxima</small>'+
-      '<small>'+((item.cost||0)===0?"Gratis":"🪙 "+item.cost.toLocaleString("es-MX"))+'</small>'+
-      '<button type="button" data-weapon-buy="'+id+'">'+(selected?"✓ EQUIPADO":"EQUIPAR")+'</button>'+
-      '</div>';
+    const selected=p.weapon===id,owned=ownedWeapons.includes(id);
+    const action=selected?"✓ EQUIPADA · CLIC PARA DESEQUIPAR":owned?"EQUIPAR":"COMPRAR";
+    return '<div class="shopWeaponCard '+(selected?"equipped":"")+'"><strong>'+item.name+'</strong><div class="weaponStats">⚔ ATAQUE T'+item.tier+' · '+item.damage+' base</div><small>⏱ '+item.fireRate+'ms · 🔸 '+item.maxAmmo+' · 🎯 '+item.range+' rango</small><small>'+((item.cost||0)===0?"Gratis":"🪙 "+item.cost.toLocaleString("es-MX"))+'</small><button type="button" data-weapon-buy="'+id+'">'+action+'</button></div>';
   }).join("");
-
-  grid.querySelectorAll("[data-weapon-buy]").forEach(btn=>{
-    btn.addEventListener("click",e=>{
+  grid.querySelectorAll("[data-weapon-buy]").forEach(btn=>btn.addEventListener("click",e=>{e.preventDefault();e.stopPropagation();sendShopCommand("buy_weapon",btn.dataset.weaponBuy);}));
+  if(skinGrid){
+    skinGrid.innerHTML=weaponSkinCatalog.map(item=>{
+      const owned=ownedWeaponSkins.includes(item.id),selected=equippedWeaponSkin===item.id,compatible=p.weapon===item.weaponId;
+      const action=selected?"✓ EQUIPADA · DESEQUIPAR":owned?"EQUIPAR":item.redeemable?"🎁 CANJEAR":compatible?"COMPRAR":"EQUIPA "+(weaponNames[item.weaponId]||item.weaponId);
+      const cost=item.redeemable?"🎁 Código de regalo":weaponCostText(item);
+      return '<button type="button" class="cosmeticCard weaponSkinCard '+(owned?"owned ":"")+(selected?"selected ":"")+'" data-weapon-skin-id="'+item.id+'"><div class="skinPreview weaponPreview weapon-skin-'+String(item.id).replace(/_/g,"-")+'"></div><strong>'+item.name+'</strong><small>'+item.rarity+' · ⚔ +'+Number(item.attackBonus||0)+' ATAQUE · 🛡 +'+Number(item.defenseBonus||0)+' DEF<br>Compatible: '+(weaponNames[item.weaponId]||item.weaponId)+'</small><span class="cosmeticCost">'+cost+'</span><span class="cosmeticAction">'+action+'</span></button>';
+    }).join("");
+    skinGrid.querySelectorAll("[data-weapon-skin-id]").forEach(btn=>btn.addEventListener("click",e=>{
       e.preventDefault();e.stopPropagation();
-      sendShopCommand("buy_weapon",btn.dataset.weaponBuy);
-    });
-  });
-
-  const msg=document.getElementById("shopMsg");
-  if(msg)msg.textContent="El arsenal cambia tu ATAQUE y tu límite de munición.";
+      const item=weaponSkinCatalog.find(x=>x.id===btn.dataset.weaponSkinId);if(!item)return;
+      if(item.redeemable&&!ownedWeaponSkins.includes(item.id)){setShopSection("redeem");showCosmeticMsg("Usa CENTRO DE CÓDIGOS para esta recompensa.");return;}
+      if(equippedWeaponSkin===item.id){sendCosmeticCommand("equip_weapon_skin","");return;}
+      if(ownedWeaponSkins.includes(item.id)){sendCosmeticCommand("equip_weapon_skin",item.id);return;}
+      if(p.weapon!==item.weaponId){showShopMsg("Equipa primero "+(weaponNames[item.weaponId]||item.weaponId)+".");return;}
+      sendCosmeticCommand("buy_weapon_skin",item.id);
+    }));
+  }
+  const msg=document.getElementById("shopMsg");if(msg)msg.textContent=p.weapon?"El arsenal equipado define tu ATAQUE; su skin puede sumar ATAQUE y DEFENSA.":"Arsenal desequipado · ATAQUE base 10 y sin munición.";
 }
-
 function renderSkinShop(){
-  const grid=document.getElementById("skinShopGrid");
-  if(!grid)return;
-
-  grid.innerHTML=COSMETIC_SKINS.map(item=>{
-    const isOwned=ownedSkins.includes(item.id);
-    const selected=equippedSkin===item.id;
-    const action=selected
-      ?"✓ SELECCIONADO"
-      :isOwned
-        ?"EQUIPAR"
-        :item.currency==="code"
-          ?"🎁 CANJEO"
-          :item.currency==="real"
-            ?"COMPRAR $1"
-            :"COMPRAR";
-
-    const cost=item.currency==="code"
-      ?"🎁 Código de regalo"
-      :item.currency==="real"
-        ?"$"+Number(item.priceUsd||1).toFixed(2)+" USD"
-        :skinCostText(item);
-
-    return '<button type="button" class="cosmeticCard '+(isOwned?"owned ":"")+(selected?"selected ":"")+(item.currency==="code"&&!isOwned?"locked ":"")+'" data-skin-id="'+item.id+'">'+
-      '<div class="skinPreview '+skinClass(item.id)+'"></div>'+
-      '<strong>'+item.name+'</strong>'+
-      '<small>'+item.rarity+' · 🛡 +'+Number(item.defenseBonus||0)+' DEF<br>'+item.desc+'</small>'+
-      '<span class="cosmeticCost">'+cost+'</span>'+
-      '<span class="cosmeticAction">'+action+'</span>'+
-      '</button>';
+  const grid=document.getElementById("skinShopGrid");if(!grid)return;
+  grid.innerHTML='<button type="button" class="shopUnequipBtn" id="unequipTankSkin">DESEQUIPAR SKIN · quitar buff de DEFENSA</button>'+COSMETIC_SKINS.map(item=>{
+    const owned=ownedSkins.includes(item.id),selected=equippedSkin===item.id;
+    const action=selected?"✓ SELECCIONADO":owned?"EQUIPAR":item.currency==="code"?"🎁 CANJEAR":"COMPRAR";
+    const cost=item.currency==="code"?"🎁 Código de regalo":skinCostText(item);
+    return '<button type="button" class="cosmeticCard '+(owned?"owned ":"")+(selected?"selected ":"")+'" data-skin-id="'+item.id+'"><div class="skinPreview '+skinClass(item.id)+'"></div><strong>'+item.name+'</strong><small>'+item.rarity+' · 🛡 +'+Number(item.defenseBonus||0)+' DEF<br>'+item.desc+'</small><span class="cosmeticCost">'+cost+'</span><span class="cosmeticAction">'+action+'</span></button>';
   }).join("");
-
-  grid.querySelectorAll(".cosmeticCard").forEach(btn=>{
-    btn.addEventListener("click",e=>{
-      e.preventDefault();e.stopPropagation();
-      const id=btn.dataset.skinId;
-      if(!id)return;
-      const item=COSMETIC_SKINS.find(x=>x.id===id);
-      if(ownedSkins.includes(id)){
-        sendCosmeticCommand("equip_skin",id);
-      }else if(item?.currency==="gold"||item?.currency==="diamonds"){
-        sendCosmeticCommand("buy_skin",id);
-      }else if(item?.currency==="real"){
-        sendCosmeticPremiumCommand("gm_core_usd");
-      }else if(item?.currency==="code"){
-        shopSection="redeem";setShopSection("redeem");showCosmeticMsg("Ve a CANJEAR para desbloquear este skin.");
-      }
-    });
-  });
+  document.getElementById("unequipTankSkin")?.addEventListener("click",e=>{e.preventDefault();e.stopPropagation();sendCosmeticCommand("equip_skin","");});
+  grid.querySelectorAll(".cosmeticCard").forEach(btn=>btn.addEventListener("click",e=>{
+    e.preventDefault();e.stopPropagation();
+    const id=btn.dataset.skinId,item=COSMETIC_SKINS.find(x=>x.id===id);if(!id)return;
+    if(ownedSkins.includes(id))sendCosmeticCommand("equip_skin",id);
+    else if(item?.currency==="gold"||item?.currency==="diamonds")sendCosmeticCommand("buy_skin",id);
+    else if(item?.currency==="code"){setShopSection("redeem");showCosmeticMsg("Usa CENTRO DE CÓDIGOS para desbloquear este skin.");}
+  }));
 }
-
 function setShopSection(section){
   shopSection=["arsenal","skins","redeem"].includes(section)?section:"arsenal";
   const sections={
@@ -1193,13 +1207,6 @@ function sendCosmeticCommand(type,skinId,code){
   multiplayerSocket.send(JSON.stringify(msg));
 }
 
-function sendCosmeticPremiumCommand(sku){
-  if(!multiplayerSocket||multiplayerSocket.readyState!==1){
-    showCosmeticMsg("Servidor no conectado.");
-    return;
-  }
-  multiplayerSocket.send(JSON.stringify({type:"buy_premium_item",sku}));
-}
 
 function redeemGiftCode(){
   const code=String(document.getElementById("redeemCode")?.value||"").trim();
@@ -1316,7 +1323,7 @@ function draw(){
     ctx.restore();
   }
   for(const other of remotePlayers.values()){
-    drawTank(other.x,other.y,other.angle,other.color||"#7cff72",24,other.weapon||"blaster",other.equippedSkin||"core_default");
+    drawTank(other.x,other.y,other.angle,other.color||"#7cff72",24,other.weapon||"blaster",other.equippedSkin||"core_default",other.equippedWeaponSkin||"");
     drawNameTag(other.name||"Jugador",other.x,other.y,24,"#7cff72");
     const ox=sx(other.x),oy=sy(other.y)-31;
     ctx.fillStyle="#101827";ctx.fillRect(ox-24,oy,48,4);
@@ -1326,7 +1333,7 @@ function draw(){
     if(e.dead)continue;
     drawEnemy(e);
     const enemyColor=e.kind==="boss"?"#ffd76a":e.kind==="elite"?"#ff9f43":"#ff5474";
-    drawNameTag(e.kind==="boss"?"👑 JEFE PRINCIPAL":e.kind==="elite"?"ÉLITE":"ENEMIGO",e.x,e.y,e.r,enemyColor);
+    drawNameTag(e.kind==="boss"?(e.name||"☄ DESTRUCTOR ESTELAR"):e.kind==="elite"?"ÉLITE":"ENEMIGO",e.x,e.y,e.r,enemyColor);
     const x=sx(e.x),y=sy(e.y)-e.r-12,w=e.kind==="boss"?84:50;
     ctx.fillStyle="#161c2a";ctx.fillRect(x-w/2,y,w,6);ctx.fillStyle=enemyColor;ctx.fillRect(x-w/2,y,w*clamp(e.hp/e.maxHp,0,1),6);
   }
@@ -1343,7 +1350,7 @@ function draw(){
     }
     ctx.globalAlpha=1;
   }
-  drawTank(p.x,p.y,p.angle,"#39e7ff",p.r,p.weapon||"blaster",p.equippedSkin||"core_default");
+  drawTank(p.x,p.y,p.angle,"#39e7ff",p.r,p.weapon||"blaster",p.equippedSkin||"core_default",equippedWeaponSkin||"");
   drawNameTag(playerName,p.x,p.y,p.r,"#39e7ff");
   if(controlMode==="mouse"&&gameActive){ctx.save();ctx.strokeStyle="rgba(57,231,255,.95)";ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(pointer.x,pointer.y,10,0,Math.PI*2);ctx.moveTo(pointer.x-16,pointer.y);ctx.lineTo(pointer.x+16,pointer.y);ctx.moveTo(pointer.x,pointer.y-16);ctx.lineTo(pointer.x,pointer.y+16);ctx.stroke();ctx.restore();}
   drawMinimap();updateCosmeticShop();updateResourceHud();
