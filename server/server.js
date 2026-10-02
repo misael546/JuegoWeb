@@ -11,7 +11,7 @@ const WORLD = { w: 6000, h: 4400 };
 const MAX_PLAYERS = 16;
 const SAFE_ZONE = { x: 3000, y: 2200, r: 300 };
 
-const SERVER_VERSION = '20261002-148';
+const SERVER_VERSION = '20261002-149';
 
 const AMMO_PACK_SIZE = 100;
 const AMMO_PACK_COST = 75;
@@ -33,8 +33,8 @@ const HP_REGEN_PER_SEC = 3;
 const WORLD_WALL_COUNT = 24;
 const WORLD_WALL_SEED = 739281;
 const WALL_RESPAWN_MS = 5 * 60 * 1000;
-const MOB_TARGET_COUNT = 14;
-const ELITE_TARGET_COUNT = 6;
+const MOB_TARGET_COUNT = 24;
+const ELITE_TARGET_COUNT = 10;
 const MOB_RESPAWN_MS = 8 * 1000;
 const MOB_RESPAWN_JITTER_MS = 4 * 1000;
 const BOSS_RESPAWN_MS = 120 * 1000;
@@ -45,11 +45,11 @@ const BOSS_NAME = 'DESTRUCTOR ESTELAR';
 const BOSS_AGGRO_RANGE = 1250;
 const BOSS_ATTACK_RANGE = 980;
 const BOSS_PROJECTILE_DAMAGE = 260;
-const BOSS_PROJECTILE_SPEED = 230;
-const BOSS_PROJECTILE_COOLDOWN_MS = 2800;
+const BOSS_PROJECTILE_SPEED = 520;
+const BOSS_PROJECTILE_COOLDOWN_MS = 3000;
 const BOSS_AOE_DAMAGE = 240;
-const BOSS_AOE_RADIUS = 210;
-const BOSS_AOE_WARNING_MS = 1600;
+const BOSS_AOE_RADIUS = 190;
+const BOSS_AOE_WARNING_MS = 1200;
 const BOSS_AOE_COOLDOWN_MS = 6200;
 const BOSS_AOE_RANGE = 780;
 const AUTOSAVE_MS = 5000;
@@ -354,8 +354,8 @@ function weaponSkinAttackBonus(p) {
 }
 
 function weaponSkinDefenseBonus(p) {
-  const skin = cosmetics.getWeaponSkin(p?.equippedWeaponSkin);
-  return skin && skin.weaponId === p?.weapon ? Math.max(0, Number(skin.defenseBonus) || 0) : 0;
+  // Las skins de armas solo modifican ATAQUE. La DEFENSA pertenece al tanque/skin de tanque.
+  return 0;
 }
 
 function skinDefenseBonus(p) {
@@ -2401,7 +2401,22 @@ setInterval(() => {
           hasLineOfSight(boss.x, boss.y, target.x, target.y, walls)
         ) {
           boss.lastBossShotAt = now;
+
+          // El Destructor fija un punto de impacto. El proyectil viaja hasta el
+          // centro del círculo de advertencia y EXPLOTA ahí; no atraviesa ni
+          // aplica daño de contacto a jugadores o mobs durante el trayecto.
           const distance = Math.max(1, Math.hypot(target.x - boss.x, target.y - boss.y));
+          const travelTime = distance / BOSS_PROJECTILE_SPEED;
+
+          const warning = {
+            id: 'ba_' + Math.random().toString(36).slice(2, 10),
+            x: target.x,
+            y: target.y,
+            r: BOSS_AOE_RADIUS,
+            damage: BOSS_AOE_DAMAGE,
+            telegraphAt: now,
+            hitAt: now + Math.max(450, Math.min(BOSS_AOE_WARNING_MS, travelTime * 1000))
+          };
 
           bossProjectiles.push({
             id: 'bp_' + Math.random().toString(36).slice(2, 10),
@@ -2410,24 +2425,14 @@ setInterval(() => {
             y: boss.y,
             vx: ((target.x - boss.x) / distance) * BOSS_PROJECTILE_SPEED,
             vy: ((target.y - boss.y) / distance) * BOSS_PROJECTILE_SPEED,
+            impactX: target.x,
+            impactY: target.y,
             r: 18,
             damage: BOSS_PROJECTILE_DAMAGE,
-            range: BOSS_ATTACK_RANGE,
-            life: BOSS_ATTACK_RANGE / BOSS_PROJECTILE_SPEED
+            range: distance,
+            life: travelTime,
+            warning
           });
-        }
-
-        if (!boss.bossArea && best <= BOSS_AOE_RANGE && now - boss.lastBossAreaAt >= BOSS_AOE_COOLDOWN_MS) {
-          boss.lastBossAreaAt = now;
-          boss.bossArea = {
-            id: 'ba_' + Math.random().toString(36).slice(2, 10),
-            x: target.x,
-            y: target.y,
-            r: BOSS_AOE_RADIUS,
-            damage: BOSS_AOE_DAMAGE,
-            telegraphAt: now,
-            hitAt: now + BOSS_AOE_WARNING_MS
-          };
         }
       } else if (
         !boss.patrolUntil ||
@@ -2510,11 +2515,6 @@ setInterval(() => {
       const dirX = (nextX - previousX) / Math.max(0.0001, travel);
       const dirY = (nextY - previousY) / Math.max(0.0001, travel);
 
-      projectile.x = nextX;
-      projectile.y = nextY;
-      projectile.life -= dt;
-      projectile.range = Math.max(0, Number(projectile.range) || BOSS_ATTACK_RANGE) - travel;
-
       let nearestWallDistance = Infinity;
       for (const wall of walls) {
         const wallHit = rayAabbDistance(previousX, previousY, dirX, dirY, wall);
@@ -2523,93 +2523,107 @@ setInterval(() => {
         }
       }
 
-      let hitPlayer = null;
-      let hitDistance = Infinity;
-      for (const pl of players) {
-        if (inSafeZone(pl.x, pl.y, 24)) continue;
+      // Las paredes sí bloquean el disparo. Si no hay obstáculo, el proyectil
+      // termina exactamente en el centro de su círculo de advertencia.
+      const remainingToImpact = Math.hypot(
+        (Number(projectile.impactX) || projectile.x) - previousX,
+        (Number(projectile.impactY) || projectile.y) - previousY
+      );
 
-        const playerHit = rayCircleDistance(
-          previousX,
-          previousY,
-          dirX,
-          dirY,
-          pl.x,
-          pl.y,
-          projectile.r + pl.r
-        );
-
-        if (playerHit <= travel && playerHit < hitDistance) {
-          hitDistance = playerHit;
-          hitPlayer = pl;
-        }
-      }
-
-      // Primero cuenta el objeto que realmente está enfrente:
-      // una pared puede bloquear al proyectil, pero no puede "comerse"
-      // el impacto si el jugador está antes de esa pared.
-      if (nearestWallDistance <= travel + projectile.r && nearestWallDistance <= hitDistance) {
+      if (nearestWallDistance <= travel + projectile.r && nearestWallDistance <= remainingToImpact) {
         projectile.x = previousX + dirX * Math.max(0, nearestWallDistance);
         projectile.y = previousY + dirY * Math.max(0, nearestWallDistance);
+        broadcastRoom(code, {
+          type: 'boss_explosion',
+          x: projectile.x,
+          y: projectile.y,
+          r: Math.max(80, Number(projectile.warning?.r) || BOSS_AOE_RADIUS),
+          blocked: true
+        });
         bossProjectiles.splice(i, 1);
         continue;
       }
 
-      if (!hitPlayer) {
-        if (
-          projectile.life <= 0 ||
-          projectile.range <= 0 ||
-          projectile.x < 20 || projectile.y < 20 ||
-          projectile.x > WORLD.w - 20 || projectile.y > WORLD.h - 20
-        ) {
-          bossProjectiles.splice(i, 1);
-        }
+      projectile.x = nextX;
+      projectile.y = nextY;
+      projectile.life -= dt;
+      projectile.range = Math.max(0, Number(projectile.range) || BOSS_ATTACK_RANGE) - travel;
+
+      if (
+        projectile.life > 0 &&
+        projectile.range > 0 &&
+        Math.hypot(projectile.x - (Number(projectile.impactX) || projectile.x), projectile.y - (Number(projectile.impactY) || projectile.y)) > 12
+      ) {
         continue;
       }
 
-      const actualDamage = Math.max(
-        25,
-        Math.round((Number(projectile.damage) || BOSS_PROJECTILE_DAMAGE) - Math.max(0, Number(hitPlayer.defense) || 0) * 0.5)
-      );
+      // Explosión server-authoritative: SOLO afecta a jugadores dentro del área.
+      // Los demás mobs nunca son candidatos de daño.
+      const impactX = Number(projectile.impactX) || projectile.x;
+      const impactY = Number(projectile.impactY) || projectile.y;
+      projectile.x = impactX;
+      projectile.y = impactY;
+      const impactRadius = Math.max(80, Number(projectile.warning?.r) || BOSS_AOE_RADIUS);
 
-      hitPlayer.hp = clamp(hitPlayer.hp - actualDamage, 0, maxHpForLevel(hitPlayer.level));
-      const found = findPlayer(hitPlayer.id, room);
+      broadcastRoom(code, {
+        type: 'boss_explosion',
+        x: impactX,
+        y: impactY,
+        r: impactRadius,
+        blocked: false
+      });
 
-      if (found) {
-        send(found.ws, {
-          type: 'boss_projectile_hit',
-          amount: actualDamage,
-          hp: hitPlayer.hp,
-          maxHp: maxHpForLevel(hitPlayer.level),
-          x: projectile.x,
-          y: projectile.y
-        });
-      }
+      for (const pl of players) {
+        if (inSafeZone(pl.x, pl.y, 24)) continue;
+        const d = Math.hypot(pl.x - impactX, pl.y - impactY);
+        if (d > impactRadius + pl.r) continue;
 
-      if (hitPlayer.hp <= 0 && hitPlayer.alive && !hitPlayer.frozen) {
-        hitPlayer.alive = false;
-        const lostScore = hitPlayer.score || 0;
-        applyDeathPenalty(hitPlayer);
-        respawnAfterDeath(hitPlayer);
-        void persistPlayer(hitPlayer);
+        const actualDamage = Math.max(
+          25,
+          Math.round((Number(projectile.damage) || BOSS_PROJECTILE_DAMAGE) - Math.max(0, Number(pl.defense) || 0) * 0.5)
+        );
 
-        const foundTarget = findPlayer(hitPlayer.id, room);
-        if (foundTarget) {
-          send(foundTarget.ws, {
-            type: 'pve_dead',
-            lostScore,
-            respawn: {
-              x: hitPlayer.x,
-              y: hitPlayer.y,
-              hp: hitPlayer.hp,
-              maxHp: maxHpForLevel(hitPlayer.level),
-              xp: hitPlayer.xp,
-              gold: hitPlayer.gold,
-              damage: hitPlayer.damage,
-              defense: hitPlayer.defense,
-              level: hitPlayer.level
-            }
+        pl.hp = clamp(pl.hp - actualDamage, 0, maxHpForLevel(pl.level));
+        const found = findPlayer(pl.id, room);
+
+        if (found) {
+          send(found.ws, {
+            type: 'boss_projectile_hit',
+            amount: actualDamage,
+            hp: pl.hp,
+            maxHp: maxHpForLevel(pl.level),
+            x: impactX,
+            y: impactY,
+            radius: impactRadius
           });
-          sendStats(hitPlayer);
+        }
+
+        if (pl.hp <= 0 && pl.alive && !pl.frozen) {
+          pl.alive = false;
+          const lostScore = pl.score || 0;
+          applyDeathPenalty(pl);
+          respawnAfterDeath(pl);
+          void persistPlayer(pl);
+
+          const foundTarget = findPlayer(pl.id, room);
+          if (foundTarget) {
+            send(foundTarget.ws, {
+              type: 'pve_dead',
+              lostScore,
+              respawn: {
+                x: pl.x,
+                y: pl.y,
+                hp: pl.hp,
+                maxHp: maxHpForLevel(pl.level),
+                xp: pl.xp,
+                gold: pl.gold,
+                damage: pl.damage,
+                defense: pl.defense,
+                level: pl.level
+              }
+            });
+            sendStats(pl);
+          }
         }
       }
 
@@ -2735,7 +2749,9 @@ setInterval(() => {
       type: 'enemy_state',
       enemies,
       bossProjectiles,
-      bossWarnings: enemies.filter((enemy) => enemy.kind === 'boss' && enemy.bossArea).map((enemy) => enemy.bossArea)
+      bossWarnings: bossProjectiles
+        .map(projectile => projectile.warning)
+        .filter(Boolean)
     });
   }
 }, ENEMY_SYNC_MS);
