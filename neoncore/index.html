@@ -2,78 +2,140 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Neon Core · Salas</title>
+<title>Neon Core · Menú principal</title>
 <style>
 *{box-sizing:border-box}
 html,body{margin:0;min-height:100%;background:#050811;color:#fff;font-family:Arial,sans-serif}
-body{display:flex;align-items:center;justify-content:center;padding:20px}
-.card{width:min(520px,100%);background:#0b1020;border:1px solid #26344e;border-radius:20px;padding:24px;box-shadow:0 15px 60px #000}
-h1{margin:0;color:#39e7ff;letter-spacing:3px;font-size:32px}
-.sub{color:#9ca9bd;margin:6px 0 20px}
-label{display:block;color:#9ca9bd;font-size:12px;margin-bottom:6px}
-input{width:100%;padding:13px;border:1px solid #33415d;background:#111a2d;color:#fff;border-radius:10px;font-size:16px;outline:none}
-h2{font-size:15px;margin:22px 0 10px}
+body{display:grid;place-items:center;padding:18px;touch-action:manipulation}
+.card{width:min(560px,100%);background:#0b1020;border:1px solid #26344e;border-radius:22px;padding:24px;box-shadow:0 18px 70px #000}
+h1{margin:0;color:#39e7ff;letter-spacing:3px;font-size:34px;text-align:center}
+.sub{color:#9ca9bd;text-align:center;margin:6px 0 22px}
+label{display:block;color:#9ca9bd;font-size:12px;margin-bottom:7px}
+#username{width:100%;padding:14px;border:1px solid #33415d;background:#111a2d;color:#fff;border-radius:11px;font-size:17px;outline:none}
+#username:focus{border-color:#39e7ff;box-shadow:0 0 0 2px #39e7ff22}
+.status{min-height:18px;margin:8px 0 14px;color:#9ca9bd;font-size:12px;text-align:center}
+h2{font-size:15px;margin:18px 0 10px}
 .rooms{display:grid;gap:10px}
-.room{display:block;text-decoration:none;color:#fff;background:#101a2c;border:1px solid #2a3a56;border-radius:14px;padding:16px;transition:.15s;touch-action:manipulation;user-select:none;-webkit-user-select:none;cursor:pointer;-webkit-tap-highlight-color:transparent}
-.room:hover{border-color:#39e7ff;background:#122238}
+.room{display:block;width:100%;text-align:left;text-decoration:none;color:#fff;background:#101a2c;border:1px solid #2a3a56;border-radius:14px;padding:16px;transition:.15s;touch-action:manipulation;user-select:none;-webkit-user-select:none;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.room:hover:not(.disabled){border-color:#39e7ff;background:#122238}
+.room:active:not(.disabled){transform:scale(.985)}
+.room.disabled{opacity:.42;filter:saturate(.55);cursor:not-allowed}
 .room strong{display:block;font-size:20px;letter-spacing:2px;color:#39e7ff}
 .room span{display:block;color:#9ca9bd;font-size:12px;margin-top:5px}
-.back{display:block;text-align:center;margin-top:18px;color:#9ca9bd;text-decoration:none;font-size:13px}
-.msg{min-height:18px;color:#ff8b8b;font-size:12px;margin-top:7px}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.action{min-height:44px;border:0;border-radius:10px;background:#183d58;color:#fff;font-weight:bold;touch-action:manipulation}
+.action.secondary{background:#26344e}
 .build{margin-top:18px;color:#53627b;font-size:10px;text-align:center}
+.msg{min-height:18px;color:#ff8b8b;font-size:12px;text-align:center;margin-top:8px}
 </style>
 </head>
 <body>
 <main class="card">
   <h1>NEON CORE</h1>
-  <div class="sub">SALAS PÚBLICAS</div>
+  <div class="sub">MENÚ PRINCIPAL · SALAS PÚBLICAS</div>
 
-    <h2>ELIGE UNA SALA</h2>
+  <label for="username">NOMBRE DEL TANQUE</label>
+  <input id="username" maxlength="20" autocomplete="nickname" autocapitalize="words" placeholder="Escribe tu nombre">
+  <div id="status" class="status">Escribe tu nombre para desbloquear las salas.</div>
+
+  <h2>ELIGE UNA SALA</h2>
   <div class="rooms">
-    <a class="room" data-room="12345" href="12345/">
+    <a class="room disabled" data-room="12345" href="neoncore/12345/" aria-disabled="true" tabindex="-1">
       <strong>SALA 12345</strong>
       <span>Entrar a la arena pública</span>
     </a>
-    <a class="room" data-room="67890" href="67890/">
+    <a class="room disabled" data-room="67890" href="neoncore/67890/" aria-disabled="true" tabindex="-1">
       <strong>SALA 67890</strong>
       <span>Entrar a la arena pública</span>
     </a>
   </div>
 
-  <a class="back" href="../">VOLVER AL MENÚ</a>
-  <div class="build">NEON CORE · SALAS PÚBLICAS · 20261001-125</div>
+  <div class="actions">
+    <button class="action" id="quickPlay" type="button">ENTRAR RÁPIDO</button>
+    <button class="action secondary" id="clearName" type="button">CAMBIAR NOMBRE</button>
+  </div>
+
+  <div id="msg" class="msg"></div>
+  <div class="build">NEON CORE · BUILD 126</div>
 </main>
+
 <script>
 (function(){
-  const rooms=document.querySelectorAll(".room[data-room]");
-  let navigating=false;
-  function openRoom(room){
-    if(navigating)return;
-    const code=String(room||"").replace(/[^0-9]/g,"");
-    if(!code)return;
-    navigating=true;
-    location.assign(code+"/?menu="+Date.now());
+  const input=document.getElementById("username");
+  const status=document.getElementById("status");
+  const msg=document.getElementById("msg");
+  const cards=[...document.querySelectorAll(".room[data-room]")];
+
+  function getName(){return String(input.value||"").trim().slice(0,20)}
+  function loadName(){try{return localStorage.getItem("neon_core_name")||""}catch(e){return""}}
+  function saveName(name){try{localStorage.setItem("neon_core_name",name)}catch(e){}}
+
+  function refresh(){
+    const name=getName();
+    const ok=!!name;
+    cards.forEach(card=>{
+      card.classList.toggle("disabled",!ok);
+      card.setAttribute("aria-disabled",ok?"false":"true");
+      card.tabIndex=ok?0:-1;
+    });
+    status.textContent=ok?"Nombre listo. Elige una sala.":"Escribe tu nombre para desbloquear las salas.";
+    msg.textContent="";
   }
-  rooms.forEach(card=>{
+
+  function openRoom(room){
+    const name=getName();
+    const code=String(room||"").replace(/[^0-9]/g,"");
+    if(!name){msg.textContent="Escribe tu nombre primero.";input.focus();return}
+    if(!code)return;
+    saveName(name);
+    status.textContent="Entrando a la sala "+code+"…";
+    window.location.assign(code+"/?menu="+Date.now());
+  }
+
+  input.value=loadName();
+  input.addEventListener("input",refresh);
+
+  cards.forEach(card=>{
     const code=card.getAttribute("data-room");
     card.addEventListener("pointerup",e=>{
       if(e.pointerType==="touch"||e.pointerType==="pen"){
-        e.preventDefault();
-        e.stopPropagation();
-        openRoom(code);
+        e.preventDefault();e.stopPropagation();openRoom(code);
       }
     });
     card.addEventListener("click",e=>{
-      e.preventDefault();
-      e.stopPropagation();
-      openRoom(code);
+      e.preventDefault();e.stopPropagation();openRoom(code);
     });
   });
-  window.openRoom=openRoom;
+
+  document.getElementById("quickPlay").addEventListener("click",()=>{
+    const name=getName();
+    if(!name){msg.textContent="Escribe tu nombre primero.";input.focus();return}
+    saveName(name);
+    openRoom("12345");
+  });
+
+  document.getElementById("clearName").addEventListener("click",()=>{
+    input.value="";
+    try{localStorage.removeItem("neon_core_name")}catch(e){}
+    refresh();
+    input.focus();
+  });
+
+  input.addEventListener("keydown",e=>{
+    if(e.key==="Enter"){
+      e.preventDefault();
+      const name=getName();
+      if(!name){msg.textContent="Escribe tu nombre primero.";return}
+      saveName(name);
+      openRoom("12345");
+    }
+  });
+
+  refresh();
 })();
 </script>
 </body>
