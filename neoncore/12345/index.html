@@ -167,6 +167,7 @@ const weaponStats={
   nova:{name:"NOVA",damage:520,fireRate:1350,tier:5,maxAmmo:450,cost:22000}
 };
 let shopOpen=false,shopSection="arsenal";
+const SHOP_INTERACTION_RADIUS_CLIENT=48;
 const COSMETIC_SKINS=[
 {id:"core_default",name:"NÚCLEO ORIGINAL",rarity:"Común",currency:"free",price:0,priceUsd:0,defenseBonus:0,desc:"El núcleo base de Neon Core."},
 {id:"pixel_cyan",name:"PIXEL CYAN",rarity:"Código",currency:"code",price:0,priceUsd:0,defenseBonus:2,desc:"Recompensa secreta de veteranos."},
@@ -1020,98 +1021,221 @@ function drawBankNpc(){
   for(let i=0;i<7;i++){const a=t*.7+i*Math.PI/3.5;ctx.fillStyle="#d9caff";ctx.globalAlpha=.85;ctx.beginPath();ctx.arc(x+Math.cos(a)*31,y+Math.sin(a)*31,2,0,Math.PI*2);ctx.fill();}
   ctx.globalAlpha=1;ctx.fillStyle="#fff";ctx.font="bold 10px Arial";ctx.fillText("BANCO",x,y-36);ctx.restore();
 }
-function showShopMsg(msg){const e=document.getElementById("shopMsg");if(e)e.textContent=msg;}
-function updateWeaponHud(){const el=document.getElementById("weaponName");if(el)el.textContent=weaponNames[p.weapon]||"BLASTER";}
+function showShopMsg(msg){
+  const e=document.getElementById("shopMsg");
+  if(e)e.textContent=String(msg||"");
+}
+
+function showCosmeticMsg(message){
+  const el=document.getElementById("cosmeticShopMsg");
+  if(el)el.textContent=String(message||"").slice(0,180);
+}
+
+function updateWeaponHud(){
+  const el=document.getElementById("weaponName");
+  if(el)el.textContent=weaponNames[p.weapon]||"BLASTER";
+}
+
 function updateHud(){
   const hpEl=document.getElementById("hp"),maxHpEl=document.getElementById("maxHp"),levelEl=document.getElementById("level"),pvpEl=document.getElementById("pvpKills"),killsEl=document.getElementById("kills");
-  if(hpEl)hpEl.textContent=Math.ceil(p.hp);if(maxHpEl)maxHpEl.textContent=p.maxHp;if(levelEl)levelEl.textContent="Nv. "+p.level;if(pvpEl)pvpEl.textContent=p.pvpKills;if(killsEl)killsEl.textContent=p.kills;
+  if(hpEl)hpEl.textContent=Math.ceil(p.hp);
+  if(maxHpEl)maxHpEl.textContent=p.maxHp;
+  if(levelEl)levelEl.textContent="Nv. "+p.level;
+  if(pvpEl)pvpEl.textContent=p.pvpKills;
+  if(killsEl)killsEl.textContent=p.kills;
   updateResourceHud();
 }
-function updateResourceHud(){updateWeaponHud();const g=document.getElementById("gold"),d=document.getElementById("diamonds"),a=document.getElementById("ammo"),m=document.getElementById("maxAmmo"),f=document.getElementById("fire");if(g)g.textContent=p.gold||0;if(d)d.textContent=p.diamonds||0;if(a)a.textContent=p.ammo||0;if(m)m.textContent=p.maxAmmo||120;if(f)f.disabled=(p.ammo||0)<=0;}
-function updateAmmoShop(){const near=Math.hypot(p.x-shopNpc.x,p.y-shopNpc.y)<=34;const box=document.getElementById("ammoShop");if(!box)return;shopOpen=near&&p.alive;box.style.display=shopOpen?"block":"none";if(near){const b=document.getElementById("buyAmmoBtn");if(b)b.disabled=!multiplayerSocket||multiplayerSocket.readyState!==1||(p.ammo||0)>=p.maxAmmo;showShopMsg((p.ammo||0)>=p.maxAmmo?"Munición al máximo.":(p.gold||0)<50?"Necesitas 50 de oro.":"50 balas por 50 de oro.");}}
-function drawShopNpc(){
-  const x=sx(shopNpc.x),y=sy(shopNpc.y),t=performance.now()/1000;ctx.save();
-  ctx.globalAlpha=.15;ctx.fillStyle="#39e7ff";ctx.beginPath();ctx.arc(x,y,38+Math.sin(t*2.4)*3,0,Math.PI*2);ctx.fill();
-  ctx.strokeStyle="#7df3ff";ctx.lineWidth=2.5;ctx.setLineDash([7,5]);ctx.beginPath();ctx.arc(x,y,shopNpc.r+6,0,Math.PI*2);ctx.stroke();ctx.setLineDash([]);
-  ctx.fillStyle="#09111f";ctx.beginPath();ctx.arc(x,y,22,0,Math.PI*2);ctx.fill();ctx.strokeStyle="#7df3ff";ctx.lineWidth=3;ctx.stroke();
-  ctx.fillStyle="#39e7ff";ctx.font="bold 18px Arial";ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText("⚡",x,y);
-  for(let i=0;i<7;i++){const a=-t*.8+i*Math.PI/3.5;ctx.fillStyle="#7df3ff";ctx.globalAlpha=.85;ctx.beginPath();ctx.arc(x+Math.cos(a)*31,y+Math.sin(a)*31,2,0,Math.PI*2);ctx.fill();}
-  ctx.globalAlpha=1;ctx.fillStyle="#fff";ctx.font="bold 9px Arial";ctx.fillText("ARSENAL",x,y-36);ctx.restore();
+
+function updateResourceHud(){
+  updateWeaponHud();
+  const g=document.getElementById("gold"),d=document.getElementById("diamonds"),a=document.getElementById("ammo"),m=document.getElementById("maxAmmo"),f=document.getElementById("fire");
+  if(g)g.textContent=p.gold||0;
+  if(d)d.textContent=p.diamonds||0;
+  if(a)a.textContent=p.ammo||0;
+  if(m)m.textContent=p.maxAmmo||220;
+  if(f)f.disabled=(p.ammo||0)<=0;
+  const def=document.getElementById("shopDefense");
+  if(def)def.textContent=Math.round(serverDefense);
 }
-function showCosmeticMsg(message){const el=document.getElementById("cosmeticShopMsg");if(el)el.textContent=String(message||"").slice(0,160);}
-function skinCostText(item){if(item.currency==="gold")return "🪙 "+item.price.toLocaleString("es-MX");if(item.currency==="diamonds")return "💎 "+item.price.toLocaleString("es-MX");if(item.currency==="code")return "🎁 CÓDIGO";return "GRATIS";}
+
+function skinCostText(item){
+  if(item.currency==="gold")return "🪙 "+item.price.toLocaleString("es-MX");
+  if(item.currency==="diamonds")return "💎 "+item.price.toLocaleString("es-MX");
+  if(item.currency==="real")return "$"+Number(item.priceUsd||1).toFixed(2)+" USD";
+  if(item.currency==="code")return "🎁 CANJEO";
+  return "GRATIS";
+}
+
 function skinClass(id){return "skin-"+String(id||"core_default").replace(/_/g,"-");}
+
+function renderArsenal(){
+  const grid=document.getElementById("arsenalGrid");
+  if(!grid)return;
+
+  grid.innerHTML=Object.entries(weaponStats).map(([id,item])=>{
+    const selected=p.weapon===id;
+    return '<div class="shopWeaponCard '+(selected?"equipped":"")+'">'+
+      '<strong>'+item.name+'</strong>'+
+      '<div class="weaponStats">⚔ ATAQUE T'+item.tier+' · '+item.damage+'</div>'+
+      '<small>⏱ '+item.fireRate+'ms · 🔸 '+item.maxAmmo+' munición máxima</small>'+
+      '<small>'+((item.cost||0)===0?"Gratis":"🪙 "+item.cost.toLocaleString("es-MX"))+'</small>'+
+      '<button type="button" data-weapon-buy="'+id+'">'+(selected?"✓ EQUIPADO":"EQUIPAR")+'</button>'+
+      '</div>';
+  }).join("");
+
+  grid.querySelectorAll("[data-weapon-buy]").forEach(btn=>{
+    btn.addEventListener("click",e=>{
+      e.preventDefault();e.stopPropagation();
+      sendShopCommand("buy_weapon",btn.dataset.weaponBuy);
+    });
+  });
+
+  const msg=document.getElementById("shopMsg");
+  if(msg)msg.textContent="El arsenal cambia tu ATAQUE y tu límite de munición.";
+}
+
+function renderSkinShop(){
+  const grid=document.getElementById("skinShopGrid");
+  if(!grid)return;
+
+  grid.innerHTML=COSMETIC_SKINS.map(item=>{
+    const isOwned=ownedSkins.includes(item.id);
+    const selected=equippedSkin===item.id;
+    const action=selected
+      ?"✓ SELECCIONADO"
+      :isOwned
+        ?"EQUIPAR"
+        :item.currency==="code"
+          ?"🎁 CANJEO"
+          :item.currency==="real"
+            ?"COMPRAR $1"
+            :"COMPRAR";
+
+    const cost=item.currency==="code"
+      ?"🎁 Código de regalo"
+      :item.currency==="real"
+        ?"$"+Number(item.priceUsd||1).toFixed(2)+" USD"
+        :skinCostText(item);
+
+    return '<button type="button" class="cosmeticCard '+(isOwned?"owned ":"")+(selected?"selected ":"")+(item.currency==="code"&&!isOwned?"locked ":"")+'" data-skin-id="'+item.id+'">'+
+      '<div class="skinPreview '+skinClass(item.id)+'"></div>'+
+      '<strong>'+item.name+'</strong>'+
+      '<small>'+item.rarity+' · 🛡 +'+Number(item.defenseBonus||0)+' DEF<br>'+item.desc+'</small>'+
+      '<span class="cosmeticCost">'+cost+'</span>'+
+      '<span class="cosmeticAction">'+action+'</span>'+
+      '</button>';
+  }).join("");
+
+  grid.querySelectorAll(".cosmeticCard").forEach(btn=>{
+    btn.addEventListener("click",e=>{
+      e.preventDefault();e.stopPropagation();
+      const id=btn.dataset.skinId;
+      if(!id)return;
+      const item=COSMETIC_SKINS.find(x=>x.id===id);
+      if(ownedSkins.includes(id)){
+        sendCosmeticCommand("equip_skin",id);
+      }else if(item?.currency==="gold"||item?.currency==="diamonds"){
+        sendCosmeticCommand("buy_skin",id);
+      }else if(item?.currency==="real"){
+        sendCosmeticPremiumCommand("gm_core_usd");
+      }else if(item?.currency==="code"){
+        shopSection="redeem";setShopSection("redeem");showCosmeticMsg("Ve a CANJEAR para desbloquear este skin.");
+      }
+    });
+  });
+}
+
+function setShopSection(section){
+  shopSection=["arsenal","skins","redeem"].includes(section)?section:"arsenal";
+  const sections={
+    arsenal:document.getElementById("shopArsenalSection"),
+    skins:document.getElementById("shopSkinsSection"),
+    redeem:document.getElementById("shopRedeemSection")
+  };
+  for(const [key,node] of Object.entries(sections))if(node)node.style.display=key===shopSection?"block":"none";
+  document.querySelectorAll(".shopTab").forEach(btn=>{
+    btn.classList.toggle("active",btn.dataset.shopSection===shopSection);
+  });
+  if(shopSection==="arsenal")renderArsenal();
+  if(shopSection==="skins")renderSkinShop();
+}
+
 function renderCosmeticShop(){
-  const grid=document.getElementById("skinShopGrid"),premium=document.getElementById("premiumGrid");
+  renderSkinShop();
+  setShopSection(shopSection);
   const gold=document.getElementById("cosmeticGold"),diamonds=document.getElementById("cosmeticDiamonds"),owned=document.getElementById("cosmeticOwned");
   if(gold)gold.textContent=Math.max(0,Number(p.gold)||0).toLocaleString("es-MX");
   if(diamonds)diamonds.textContent=Math.max(0,Number(p.diamonds)||0).toLocaleString("es-MX");
   if(owned)owned.textContent=Array.isArray(ownedSkins)?ownedSkins.length:1;
-  document.querySelectorAll(".shopTab").forEach(btn=>btn.classList.toggle("active",btn.dataset.shopTab===cosmeticShopTab));
-  if(!grid||!premium)return;
-  if(cosmeticShopTab==="real"){
-    grid.style.display="none";premium.style.display="grid";
-    premium.innerHTML=PREMIUM_OFFERS.map(o=>'<div class="premiumCard"><strong>'+o.name+'</strong><small>'+o.description+'</small><b>$'+o.priceUsd.toFixed(2)+' USD</b><button type="button" disabled>PRÓXIMAMENTE</button></div>').join("");
+}
+
+function openCosmeticShop(){
+  const box=document.getElementById("cosmeticShop");
+  if(!box)return;
+  cosmeticShopDismissedUntil=0;
+  box.style.display="flex";
+  box.setAttribute("aria-hidden","false");
+  renderCosmeticShop();
+  sendCosmeticCommand("open_cosmetic_shop");
+}
+
+function closeCosmeticShop(){
+  const box=document.getElementById("cosmeticShop");
+  if(!box)return;
+  box.style.display="none";
+  box.setAttribute("aria-hidden","true");
+  cosmeticShopDismissedUntil=performance.now()+1200;
+}
+
+function updateCosmeticShop(){
+  const near=Math.hypot(p.x-shopNpc.x,p.y-shopNpc.y)<=SHOP_INTERACTION_RADIUS_CLIENT;
+  const box=document.getElementById("cosmeticShop");
+  if(!near){
+    cosmeticShopWasNear=false;
+    if(box)box.style.display="none";
     return;
   }
-  premium.style.display="none";grid.style.display="grid";
-  const list=COSMETIC_SKINS.filter(item=>item.currency===cosmeticShopTab||item.currency==="free"||item.currency==="code");
-  grid.innerHTML=list.map(item=>{
-    const isOwned=ownedSkins.includes(item.id),isLocked=item.currency==="free"||item.currency==="code";
-    return '<button type="button" class="cosmeticCard '+(isOwned?"owned ":"")+(isLocked&&!isOwned?"locked":"")+'" data-skin-id="'+item.id+'"><div class="skinPreview '+skinClass(item.id)+'"></div><strong>'+item.name+'</strong><small>'+item.rarity+(item.desc?" · "+item.desc:"")+'</small><span class="cosmeticCost">'+(isOwned?"✓ DESBLOQUEADO":skinCostText(item))+'</span><span class="cosmeticAction">'+(isOwned?"EQUIPAR":"COMPRAR")+'</span></button>';
-  }).join("");
-  grid.querySelectorAll(".cosmeticCard").forEach(btn=>btn.addEventListener("click",()=>{
-    const id=btn.dataset.skinId;if(!id)return;
-    if(ownedSkins.includes(id)){sendCosmeticCommand("equip_skin",id);return;}
-    const item=COSMETIC_SKINS.find(x=>x.id===id);
-    if(item?.currency==="gold"||item?.currency==="diamonds")sendCosmeticCommand("buy_skin",id);
-    else if(item?.currency==="code")showCosmeticMsg("Este skin se obtiene con código.");
-  }));
-}
-function openCosmeticShop(){const box=document.getElementById("cosmeticShop");if(!box)return;cosmeticShopDismissedUntil=0;box.style.display="flex";box.setAttribute("aria-hidden","false");renderCosmeticShop();sendCosmeticCommand("open_cosmetic_shop");}
-function closeCosmeticShop(){const box=document.getElementById("cosmeticShop");if(!box)return;box.style.display="none";box.setAttribute("aria-hidden","true");cosmeticShopDismissedUntil=performance.now()+1400;}
-function updateCosmeticShop(){
-  const near=Math.hypot(p.x-cosmeticShopNpc.x,p.y-cosmeticShopNpc.y)<=34,box=document.getElementById("cosmeticShop");
-  if(!near){cosmeticShopWasNear=false;if(box)box.style.display="none";return;}
   if(near&&!cosmeticShopWasNear&&p.alive&&performance.now()>cosmeticShopDismissedUntil)openCosmeticShop();
   cosmeticShopWasNear=near;
-  if(box&&box.style.display!=="none"&&p.alive){
-    const g=document.getElementById("cosmeticGold"),d=document.getElementById("cosmeticDiamonds"),owned=document.getElementById("cosmeticOwned");
-    if(g)g.textContent=Math.max(0,Number(p.gold)||0).toLocaleString("es-MX");
-    if(d)d.textContent=Math.max(0,Number(p.diamonds)||0).toLocaleString("es-MX");
-    if(owned)owned.textContent=Array.isArray(ownedSkins)?ownedSkins.length:1;
-  }
+  const def=document.getElementById("shopDefense");
+  if(def)def.textContent=Math.round(serverDefense);
 }
-function drawCosmeticShopNpc(){
-  const x=sx(cosmeticShopNpc.x),y=sy(cosmeticShopNpc.y),t=performance.now()/1000;ctx.save();
-  ctx.globalAlpha=.16;ctx.fillStyle="#e879ff";ctx.beginPath();ctx.arc(x,y,42+Math.sin(t*2)*3,0,Math.PI*2);ctx.fill();
-  ctx.strokeStyle="#ffb0ff";ctx.lineWidth=2.5;ctx.setLineDash([6,5]);ctx.beginPath();ctx.arc(x,y,cosmeticShopNpc.r+6,0,Math.PI*2);ctx.stroke();ctx.setLineDash([]);
-  ctx.fillStyle="#0c1020";ctx.beginPath();ctx.arc(x,y,22,0,Math.PI*2);ctx.fill();ctx.strokeStyle="#ffb0ff";ctx.lineWidth=3;ctx.stroke();
-  ctx.fillStyle="#e879ff";ctx.font="bold 18px Arial";ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText("✦",x,y);
-  for(let i=0;i<9;i++){const a=t*.9+i*Math.PI/4.5;ctx.fillStyle=i%2?"#e879ff":"#fff";ctx.globalAlpha=.88;ctx.beginPath();ctx.arc(x+Math.cos(a)*32,y+Math.sin(a)*32,2,0,Math.PI*2);ctx.fill();}
-  ctx.globalAlpha=1;ctx.fillStyle="#fff";ctx.font="bold 9px Arial";ctx.fillText("SKINS",x,y-36);ctx.restore();
-}
+
 function sendCosmeticCommand(type,skinId,code){
-  if(!multiplayerSocket||multiplayerSocket.readyState!==1){showCosmeticMsg("Servidor no conectado.");return;}
-  const msg={type};if(skinId)msg.skinId=skinId;if(code)msg.code=code;multiplayerSocket.send(JSON.stringify(msg));
+  if(!multiplayerSocket||multiplayerSocket.readyState!==1){
+    showCosmeticMsg("Servidor no conectado.");
+    return;
+  }
+  const msg={type};
+  if(skinId)msg.skinId=skinId;
+  if(code)msg.code=code;
+  multiplayerSocket.send(JSON.stringify(msg));
 }
+
+function sendCosmeticPremiumCommand(sku){
+  if(!multiplayerSocket||multiplayerSocket.readyState!==1){
+    showCosmeticMsg("Servidor no conectado.");
+    return;
+  }
+  multiplayerSocket.send(JSON.stringify({type:"buy_premium_item",sku}));
+}
+
+function redeemGiftCode(){
+  const code=String(document.getElementById("redeemCode")?.value||"").trim();
+  if(!code){showCosmeticMsg("Escribe un código.");document.getElementById("redeemCode")?.focus();return;}
+  sendCosmeticCommand("redeem_code","",code);
+  const input=document.getElementById("redeemCode");if(input)input.value="";
+}
+
 document.querySelectorAll(".shopTab").forEach(btn=>btn.addEventListener("click",e=>{
   e.preventDefault();e.stopPropagation();
-  const tab=String(btn.dataset.shopTab||"gold");
-  cosmeticShopTab=["gold","diamonds","real"].includes(tab)?tab:"gold";
-  renderCosmeticShop();
+  setShopSection(btn.dataset.shopSection);
 }));
-const redeemCodeInput=document.getElementById("redeemCode");
-const redeemCodeBtn=document.getElementById("redeemCodeBtn");
-function redeemGiftCode(){
-  const code=String(redeemCodeInput?.value||"").trim();
-  if(!code){showCosmeticMsg("Escribe un código.");redeemCodeInput?.focus();return;}
-  sendCosmeticCommand("redeem_code","",code);
-  if(redeemCodeInput)redeemCodeInput.value="";
-}
-if(redeemCodeBtn)redeemCodeBtn.addEventListener("click",e=>{e.preventDefault();e.stopPropagation();redeemGiftCode();});
-if(redeemCodeInput)redeemCodeInput.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();redeemGiftCode();}});
 
+const redeemBtn=document.getElementById("redeemCodeBtn");
+if(redeemBtn)redeemBtn.addEventListener("click",e=>{e.preventDefault();e.stopPropagation();redeemGiftCode();});
+const redeemInput=document.getElementById("redeemCode");
+if(redeemInput)redeemInput.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();redeemGiftCode();}});
 
 function drawMinimap(){
   const mm=document.getElementById("minimap");
