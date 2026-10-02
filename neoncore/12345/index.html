@@ -430,14 +430,23 @@ function connectMultiplayer(roomMode="quick",roomCode=""){ const publicRoomAuto=
           for(const e of incoming){
             const old=byId.get(e.id);
             if(old){
-              old.lastTargetX=old.targetX;old.lastTargetY=old.targetY;old.targetX=e.x;old.targetY=e.y;old.vx=Number.isFinite(e.vx)?e.vx:(e.x-old.lastTargetX)/0.1;old.vy=Number.isFinite(e.vy)?e.vy:(e.y-old.lastTargetY)/0.1;old.hp=e.hp;old.maxHp=e.maxHp;old.r=e.r;old.kind=e.kind;old.shape=e.shape||old.shape;old.speed=e.speed;old.damage=e.damage;
+              old.lastTargetX=old.targetX;old.lastTargetY=old.targetY;
+              old.targetX=e.x;old.targetY=e.y;
+              old.vx=Number.isFinite(e.vx)?e.vx:(e.x-old.lastTargetX)/0.12;
+              old.vy=Number.isFinite(e.vy)?e.vy:(e.y-old.lastTargetY)/0.12;
+              old.hp=e.hp;old.maxHp=e.maxHp;old.r=e.r;old.kind=e.kind;old.shape=e.shape||old.shape;
+              old.speed=e.speed;old.damage=e.damage;old.homeX=e.homeX;old.homeY=e.homeY;old.areaRadius=e.areaRadius;
               old.dead=false;next.push(old);
             }else{
-              e.targetX=e.x;e.targetY=e.y;e.lastTargetX=e.x;e.lastTargetY=e.y;e.vx=Number(e.vx)||0;e.vy=Number(e.vy)||0;e.shape=e.shape||"triangle";next.push(e);
+              e.targetX=e.x;e.targetY=e.y;e.lastTargetX=e.x;e.lastTargetY=e.y;
+              e.vx=Number(e.vx)||0;e.vy=Number(e.vy)||0;e.shape=e.shape||"triangle";next.push(e);
             }
           }
           enemies.length=0;
           for(const e of next) enemies.push(e);
+
+          bossProjectiles=Array.isArray(m.bossProjectiles)?m.bossProjectiles.map(q=>({...q})):bossProjectiles;
+          bossWarnings=Array.isArray(m.bossWarnings)?m.bossWarnings.map(q=>({...q})):bossWarnings;
         }else if(m.type==="wall_state"){
           walls.length=0;for(const w of (m.walls||[]))walls.push({...w});
         }else if(m.type==="wall_hit"){
@@ -493,9 +502,7 @@ function connectMultiplayer(roomMode="quick",roomCode=""){ const publicRoomAuto=
         }else if(m.type==="pve_damage"){
           p.hp=Number.isFinite(m.hp)?m.hp:Math.max(0,p.hp-(Number(m.amount)||0));
           if(Number.isFinite(m.maxHp))p.maxHp=m.maxHp;
-          if(Number.isFinite(m.defenseXp))serverDefenseXp=m.defenseXp;
-          if(Number.isFinite(m.defenseXpNeed))serverDefenseXpNeed=m.defenseXpNeed;
-          if(Number.isFinite(m.defenseLevel))serverDefenseLevel=m.defenseLevel;
+          if(Number.isFinite(m.defense))serverDefense=m.defense;
           burst(p.x,p.y,m.boss?"#ffd76a":"#ff5474",m.boss?8:4);
         }else if(m.type==="pve_dead"){
           const r=m.respawn||{};
@@ -504,9 +511,7 @@ function connectMultiplayer(roomMode="quick",roomCode=""){ const publicRoomAuto=
         }else if(m.type==="pvp_damage"){
           p.hp=Number.isFinite(m.hp)?m.hp:Math.max(0,p.hp-(Number(m.amount)||0));
           if(Number.isFinite(m.maxHp))p.maxHp=m.maxHp;
-          if(Number.isFinite(m.defenseXp))serverDefenseXp=m.defenseXp;
-          if(Number.isFinite(m.defenseXpNeed))serverDefenseXpNeed=m.defenseXpNeed;
-          if(Number.isFinite(m.defenseLevel))serverDefenseLevel=m.defenseLevel;
+          if(Number.isFinite(m.defense))serverDefense=m.defense;
           burst(p.x,p.y,"#ff5474",8);
         }else if(m.type==="pvp_dead"){
           const r=m.respawn||{};
@@ -524,15 +529,27 @@ function connectMultiplayer(roomMode="quick",roomCode=""){ const publicRoomAuto=
           if(Number.isFinite(m.speed))p.speed=m.speed;
           if(Number.isFinite(m.maxHp))p.maxHp=m.maxHp;
           if(m.weapon&&weaponStats[m.weapon])p.weapon=m.weapon;if(m.equippedSkin)p.equippedSkin=m.equippedSkin;if(Array.isArray(m.ownedSkins))ownedSkins=m.ownedSkins;
-          if(Number.isFinite(m.xpNeed))serverXpNeed=m.xpNeed;if(Number.isFinite(m.damageXp))serverDamageXp=m.damageXp;if(Number.isFinite(m.damageXpNeed))serverDamageXpNeed=m.damageXpNeed;if(Number.isFinite(m.damageLevel))serverDamageLevel=m.damageLevel;if(Number.isFinite(m.defenseXp))serverDefenseXp=m.defenseXp;if(Number.isFinite(m.defenseXpNeed))serverDefenseXpNeed=m.defenseXpNeed;if(Number.isFinite(m.defenseLevel))serverDefenseLevel=m.defenseLevel;
-          if(Number.isFinite(m.killsToLevel))serverKillsToLevel=m.killsToLevel;if(Number.isFinite(m.bankedGold))p.bankedGold=m.bankedGold;if(Number.isFinite(m.bankedDiamonds))p.bankedDiamonds=m.bankedDiamonds;if(m.bankNpc){bankNpc.x=Number(m.bankNpc.x)||bankNpc.x;bankNpc.y=Number(m.bankNpc.y)||bankNpc.y;bankNpc.r=Number(m.bankNpc.r)||bankNpc.r;}if(Number.isFinite(m.gold))p.gold=m.gold;if(Number.isFinite(m.diamonds))p.diamonds=m.diamonds;if(Number.isFinite(m.ammo))p.ammo=m.ammo;if(Number.isFinite(m.maxAmmo))p.maxAmmo=m.maxAmmo;if(m.shopNpc){shopNpc.x=Number(m.shopNpc.x)||shopNpc.x;shopNpc.y=Number(m.shopNpc.y)||shopNpc.y;shopNpc.r=Number(m.shopNpc.r)||shopNpc.r;}if(m.cosmeticShopNpc){cosmeticShopNpc.x=Number(m.cosmeticShopNpc.x)||cosmeticShopNpc.x;cosmeticShopNpc.y=Number(m.cosmeticShopNpc.y)||cosmeticShopNpc.y;cosmeticShopNpc.r=Number(m.cosmeticShopNpc.r)||cosmeticShopNpc.r;}if(m.weapon)p.weapon=m.weapon;updateResourceHud();
+          if(Number.isFinite(m.xpNeed))serverXpNeed=m.xpNeed;
+          if(Number.isFinite(m.attackLevel))serverAttackLevel=m.attackLevel;
+          if(Number.isFinite(m.attackPower))serverAttackPower=m.attackPower;
+          if(Number.isFinite(m.attackFill))serverAttackFill=m.attackFill;
+          if(Number.isFinite(m.defense))serverDefense=m.defense;
+          if(Number.isFinite(m.defenseMax))serverDefenseMax=m.defenseMax;
+          if(Number.isFinite(m.killsToLevel))serverKillsToLevel=m.killsToLevel;
+          if(Number.isFinite(m.gold))p.gold=m.gold;
+          if(Number.isFinite(m.diamonds))p.diamonds=m.diamonds;
+          if(Number.isFinite(m.ammo))p.ammo=m.ammo;
+          if(Number.isFinite(m.maxAmmo))p.maxAmmo=m.maxAmmo;
+          if(m.shopNpc){shopNpc.x=Number(m.shopNpc.x)||shopNpc.x;shopNpc.y=Number(m.shopNpc.y)||shopNpc.y;shopNpc.r=Number(m.shopNpc.r)||shopNpc.r;cosmeticShopNpc={...shopNpc};}
+          if(m.weapon)p.weapon=m.weapon;
+          updateResourceHud();
         }else if(m.type==="cosmetic_state"){
           ownedSkins=Array.isArray(m.ownedSkins)?m.ownedSkins:["core_default"];
           equippedSkin=m.equippedSkin||"core_default";p.equippedSkin=equippedSkin;
           if(equippedSkin && !ownedSkins.includes(equippedSkin))ownedSkins=[...ownedSkins,equippedSkin];
           if(m.unlockedSkin && !ownedSkins.includes(m.unlockedSkin))ownedSkins=[...ownedSkins,m.unlockedSkin];
-          if(m.cosmeticShopNpc){cosmeticShopNpc.x=Number(m.cosmeticShopNpc.x)||cosmeticShopNpc.x;cosmeticShopNpc.y=Number(m.cosmeticShopNpc.y)||cosmeticShopNpc.y;cosmeticShopNpc.r=Number(m.cosmeticShopNpc.r)||cosmeticShopNpc.r;}
-          renderCosmeticShop();showCosmeticMsg(m.message||"Tienda actualizada.");updateResourceHud();
+          if(m.shopNpc){shopNpc.x=Number(m.shopNpc.x)||shopNpc.x;shopNpc.y=Number(m.shopNpc.y)||shopNpc.y;shopNpc.r=Number(m.shopNpc.r)||shopNpc.r;cosmeticShopNpc={...shopNpc};}
+          renderCosmeticShop();showCosmeticMsg(m.message||"SHOP actualizado.");updateResourceHud();
         }else if(m.type==="cosmetic_result"){
           if(Array.isArray(m.ownedSkins))ownedSkins=m.ownedSkins;
           if(m.equippedSkin){
