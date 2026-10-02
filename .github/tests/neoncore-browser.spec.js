@@ -101,6 +101,36 @@ for (const room of ROOMS) {
   });
 }
 
+
+for (const room of ROOMS) {
+  test(`sala ${room}: salir y volver a entrar reconecta`, async ({ page }) => {
+    const errors = [];
+    page.on('pageerror', e => errors.push('PAGEERROR: ' + e.message));
+    page.on('console', msg => {
+      if (msg.type() === 'error') errors.push('CONSOLE: ' + msg.text());
+    });
+
+    await waitForLiveGame(page, room, {errors,wsEvents:[]});
+
+    await page.goto('https://misael546.github.io/JuegoWeb/neoncore/?rejoinci=' + Date.now(), {
+      waitUntil: 'domcontentloaded',
+      timeout: 45000
+    });
+    await expect(page.locator('.room[data-room="' + room + '"]')).toBeVisible({timeout:15000});
+    await page.locator('.room[data-room="' + room + '"]').click();
+
+    await expect.poll(async () => (await page.locator('#neonDiag').innerText()), {
+      timeout: 45000,
+      intervals: [500, 1000, 2000]
+    }).toMatch(/game:true/);
+
+    const diag = await page.locator('#neonDiag').innerText();
+    expect(diag).toContain('ws:1');
+    expect(diag).toContain('room:' + room);
+    if(errors.length) throw new Error('Errores durante reingreso:\n' + errors.join('\n'));
+  });
+}
+
 test('mobile emulation: interfaz táctil y controles visibles', async ({ browser }) => {
   const context = await browser.newContext({
     viewport: { width: 390, height: 844 },
