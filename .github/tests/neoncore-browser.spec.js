@@ -233,6 +233,8 @@ test('SHOP: arsenal, skins, selección y canje', async ({ page }) => {
   await expect(page.locator('#cosmeticShopClose')).toHaveCount(0);
   await expect(page.locator('#arsenalGrid')).toContainText('NOVA');
   await expect(page.locator('#arsenalGrid')).toContainText('450');
+  await expect(page.locator('#bankPanel')).toHaveCount(0);
+  await expect(page.locator('#defenseValue')).toHaveText('0');
 
   await page.locator('.shopTab[data-shop-section="skins"]').click();
   await expect(page.locator('#skinShopGrid')).toContainText('NÚCLEO OXIDADO');
@@ -250,6 +252,7 @@ test('SHOP: arsenal, skins, selección y canje', async ({ page }) => {
   await page.locator('.shopTab[data-shop-section="skins"]').click();
   const pixelCard = page.locator('.cosmeticCard[data-skin-id="pixel_cyan"]');
   await expect(pixelCard).toContainText('SELECCIONADO');
+  await expect(page.locator('#defenseValue')).toHaveText('2');
 
   const selectedCount = await page.locator('.cosmeticCard.selected').count();
   expect(selectedCount).toBe(1);
