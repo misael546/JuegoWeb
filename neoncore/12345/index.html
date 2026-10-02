@@ -560,7 +560,7 @@ function connectMultiplayer(roomMode="quick",roomCode=""){ const publicRoomAuto=
           applyServerRespawn(r);
           enemies.length=0;
         }else if(m.type==="boss_explosion"){
-          const ex=Number(m.x)||p.x,ey=Number(m.y)||p.y,er=Math.max(80,Number(m.r)||72);
+          const ex=Number(m.x)||p.x,ey=Number(m.y)||p.y,er=Math.max(80,Number(m.r)||42);
           burst(ex,ey,m.blocked?"#ff8b4a":"#ff3b32",m.blocked?22:42);
           particles.push({x:ex,y:ey,vx:0,vy:0,life:.55,maxLife:.55,color:"#ffd76a",size:er,ring:true});
           if(Math.hypot(p.x-ex,p.y-ey)<=er+p.r)showToast("⚠ IMPACTO DEL DESTRUCTOR ESTELAR");
