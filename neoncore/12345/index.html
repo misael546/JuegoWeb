@@ -9,7 +9,7 @@
 <script>
 (function(){
   try{
-    var v="20261002-153";
+    var v="20261002-154";
     var k="neon_core_build";
     window.NEON_CORE_BUILD=v;
     var old=localStorage.getItem(k);
@@ -26,7 +26,7 @@
   }catch(e){}
 })();
 </script>
-<title>Neon Core · Build 153</title>
+<title>Neon Core · Build 154</title>
 <style>
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#050811;color:#fff;font-family:Arial,sans-serif;touch-action:none}
 #game{display:block;width:100vw;height:100vh}
@@ -97,7 +97,7 @@
 </script>
 </head>
 <body>
-<canvas id="game"></canvas><div id="buildDisplay">NEON CORE · Build 153</div>
+<canvas id="game"></canvas><div id="buildDisplay">NEON CORE · Build 154</div>
 
 <div id="hud">
   <div class="panel" id="bars">
@@ -141,9 +141,9 @@
     <section id="shopRedeemSection" class="shopSection" style="display:none">
       <div class="codeBox">
         <b>🎁 CENTRO DE CÓDIGOS</b>
-        <small>Los códigos se validan directamente en el servidor y pueden entregar skins, armas o skins del arsenal.</small>
+        <small>Los códigos se validan directamente en el servidor y pueden desbloquear cualquier arma o skin.</small>
         <div class="codeRow"><input id="redeemCode" maxlength="32" placeholder="ESCRIBE TU CÓDIGO" autocomplete="off"><button id="redeemCodeBtn" type="button">CANJEAR</button></div>
-        <small id="cosmeticShopMsg" class="cosmeticMsg">Introduce un código de regalo. La recompensa se entrega directamente desde el servidor.</small>
+        <small id="cosmeticShopMsg" class="cosmeticMsg">Introduce un código. Los códigos desactivados no pueden canjearse.</small>
       </div>
     </section>
   </div>
@@ -223,7 +223,7 @@ const weaponStats={
 const SHOP_INTERACTION_RADIUS_CLIENT=48;
 const COSMETIC_SKINS=[
 {id:"core_default",name:"NÚCLEO ORIGINAL",rarity:"Común",currency:"free",price:0,priceUsd:0,defenseBonus:0,desc:"El núcleo base de Neon Core."},
-{id:"pixel_cyan",name:"PIXEL CYAN",rarity:"Código",currency:"code",price:0,priceUsd:0,defenseBonus:0,desc:"Recompensa secreta de veteranos."},
+{id:"pixel_cyan",name:"PIXEL CYAN",rarity:"Raro",currency:"gold",price:5000,priceUsd:0,defenseBonus:0,desc:"Núcleo pixelado para el tanque."},
 {id:"rust_core",name:"NÚCLEO OXIDADO",rarity:"Raro",currency:"gold",price:1500,priceUsd:0,defenseBonus:0,desc:"Metal viejo con chispas de energía."},
 {id:"toxic_orb",name:"ORBE TÓXICO",rarity:"Épico",currency:"gold",price:12000,priceUsd:0,defenseBonus:0,desc:"Aura verde con residuos radiactivos."},
 {id:"plasma_violet",name:"PLASMA VIOLETA",rarity:"Mítico",currency:"gold",price:60000,priceUsd:0,defenseBonus:0,desc:"Plasma inestable alrededor del núcleo."},
@@ -234,7 +234,7 @@ const COSMETIC_SKINS=[
 {id:"angel_seraph",name:"ÁNGEL SERAFÍN",rarity:"Legendario",currency:"diamonds",price:12000,priceUsd:0,defenseBonus:0,desc:"Halo, alas de luz y plumas."},
 {id:"demon_infernal",name:"DEMONIO INFERNAL",rarity:"Supremo",currency:"diamonds",price:25000,priceUsd:0,defenseBonus:0,desc:"Cuernos, alas y brasas demoníacas."},
 {id:"eternal_void",name:"VACÍO ETERNO",rarity:"Supremo",currency:"diamonds",price:30000,priceUsd:0,defenseBonus:0,desc:"Vórtice oscuro de energía."},
-{id:"gm_core",name:"SOBERANO DEL NÚCLEO",rarity:"Supremo",currency:"code",price:0,priceUsd:1,defenseBonus:0,desc:"Skin premium de prueba · $1 USD · código de regalo.",realMoney:true}
+{id:"gm_core",name:"SOBERANO DEL NÚCLEO",rarity:"Supremo",currency:"diamonds",price:50000,priceUsd:0,defenseBonus:0,desc:"Núcleo soberano para el tanque."}
 ];
 let cosmeticShopNpc={...shopNpc};
 let ownedSkins=["core_default"],equippedSkin="core_default";
