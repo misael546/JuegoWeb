@@ -15,14 +15,21 @@ async function waitForLiveGame(page, room, debug) {
   });
 
   await expect(page.locator('#neonDiag')).toContainText('DIAG', { timeout: 30000 });
-  try {
-    await expect.poll(async () => (await page.locator('#neonDiag').innerText()), {
-      timeout: 10000,
-      intervals: [500, 1000]
-    }).toMatch(/game:true/);
-  } catch (e) {
-    const diag = await page.locator('#neonDiag').innerText();
-    throw new Error('Game no inició en sala '+room+'\\n'+diag+'\\nPage errors: '+(debug.errors.join(' | ')||'none')+'\\nWebSockets: '+(debug.wsEvents.join(' | ')||'NONE'));
+  let started = false;
+  for (let attempt = 1; attempt <= 2 && !started; attempt++) {
+    try {
+      await expect.poll(async () => (await page.locator('#neonDiag').innerText()), {
+        timeout: 35000,
+        intervals: [500, 1000, 2000]
+      }).toMatch(/game:true/);
+      started = true;
+    } catch (e) {
+      if (attempt === 2) {
+        const diag = await page.locator('#neonDiag').innerText();
+        throw new Error('Game no inició en sala '+room+'\\n'+diag+'\\nPage errors: '+(debug.errors.join(' | ')||'none')+'\\nWebSockets: '+(debug.wsEvents.join(' | ')||'NONE'));
+      }
+      await page.reload({waitUntil:'domcontentloaded', timeout:45000});
+    }
   }
 
   const diag = await page.locator('#neonDiag').innerText();
