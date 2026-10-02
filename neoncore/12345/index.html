@@ -228,6 +228,7 @@ function connectMultiplayer(roomMode="quick",roomCode=""){ const publicRoomAuto=
   if(!MULTIPLAYER_SERVER || !("WebSocket" in window)){setConnectionStatus("SERVIDOR NO DISPONIBLE","Tu navegador no permite conexión multiplayer.",true);return;}
   try{
     multiplayerSocket=new WebSocket(MULTIPLAYER_SERVER);
+    const socket=multiplayerSocket;
     multiplayerConnectTimer=setTimeout(()=>{
       if(multiplayerSocket===socket && socket.readyState!==1){
         setConnectionStatus("NO SE PUDO CONECTAR","Render tardó demasiado en responder. Tu nombre se conservó; pulsa SALAS PÚBLICAS para reintentar.",true);
