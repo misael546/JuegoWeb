@@ -1026,6 +1026,18 @@ function showShopMsg(msg){
   if(e)e.textContent=String(msg||"");
 }
 
+function drawShopNpc(){
+  const x=sx(shopNpc.x),y=sy(shopNpc.y),t=performance.now()/1000;
+  ctx.save();
+  ctx.globalAlpha=.16;ctx.fillStyle="#39e7ff";ctx.beginPath();ctx.arc(x,y,48+Math.sin(t*2.2)*4,0,Math.PI*2);ctx.fill();
+  ctx.strokeStyle="#7df3ff";ctx.lineWidth=2.5;ctx.setLineDash([8,5]);ctx.beginPath();ctx.arc(x,y,shopNpc.r+8,0,Math.PI*2);ctx.stroke();ctx.setLineDash([]);
+  ctx.fillStyle="#09111f";ctx.beginPath();ctx.arc(x,y,24,0,Math.PI*2);ctx.fill();ctx.strokeStyle="#7df3ff";ctx.lineWidth=3;ctx.stroke();
+  ctx.fillStyle="#39e7ff";ctx.font="bold 19px Arial";ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText("⚡",x,y);
+  for(let i=0;i<10;i++){const a=-t*.75+i*Math.PI/5;ctx.fillStyle=i%2?"#7df3ff":"#fff";ctx.globalAlpha=.9;ctx.beginPath();ctx.arc(x+Math.cos(a)*34,y+Math.sin(a)*34,2,0,Math.PI*2);ctx.fill();}
+  ctx.globalAlpha=1;ctx.fillStyle="#fff";ctx.font="bold 12px Arial";ctx.fillText("SHOP",x,y-42);
+  ctx.fillStyle="#39e7ff";ctx.font="bold 9px Arial";ctx.fillText("ARSENAL · SKINS",x,y+40);
+  ctx.restore();
+}
 function showCosmeticMsg(message){
   const el=document.getElementById("cosmeticShopMsg");
   if(el)el.textContent=String(message||"").slice(0,180);
@@ -1267,8 +1279,8 @@ function drawMinimap(){
   }
   const shopX=ox+shopNpc.x*scale,shopY=oy+shopNpc.y*scale;
   mctx.fillStyle="#39e7ff";mctx.beginPath();mctx.arc(shopX,shopY,4,0,Math.PI*2);mctx.fill();
-  const cosmeticX=ox+cosmeticShopNpc.x*scale,cosmeticY=oy+cosmeticShopNpc.y*scale;
-  mctx.fillStyle="#e879ff";mctx.beginPath();mctx.arc(cosmeticX,cosmeticY,5,0,Math.PI*2);mctx.fill();
+  const shopMarkerX=ox+shopNpc.x*scale,shopMarkerY=oy+shopNpc.y*scale;
+  mctx.fillStyle="#39e7ff";mctx.beginPath();mctx.arc(shopMarkerX,shopMarkerY,5,0,Math.PI*2);mctx.fill();
   const px=ox+p.x*scale,py=oy+p.y*scale;
   mctx.fillStyle="#39e7ff";mctx.beginPath();mctx.arc(px,py,5,0,Math.PI*2);mctx.fill();
   mctx.strokeStyle="#ffffff";mctx.lineWidth=1.5;mctx.beginPath();mctx.moveTo(px,py);mctx.lineTo(px+Math.cos(p.angle)*10,py+Math.sin(p.angle)*10);mctx.stroke();
@@ -1298,7 +1310,7 @@ function draw(){
     ctx.globalAlpha=.45;ctx.font="bold 11px Arial";ctx.fillText("PROTECCIÓN DE SPAWN",zsx,zsy+zrad+18);
   }
   ctx.restore();
-  drawBankNpc();drawShopNpc();drawCosmeticShopNpc();
+  drawShopNpc();
 
   for(const w of walls){
     const x=sx(w.x-w.w/2),y=sy(w.y-w.h/2);
@@ -1307,7 +1319,35 @@ function draw(){
     ctx.fillStyle="#39e7ff";ctx.globalAlpha=.15;ctx.fillRect(x,y,w.w*(w.hp/w.maxHp),4);ctx.globalAlpha=1;
   }
 
-  for(const b of bullets){ctx.fillStyle="#dffbff";ctx.beginPath();ctx.arc(sx(b.x),sy(b.y),4,0,Math.PI*2);ctx.fill()}
+  const starTime=performance.now()/1000;
+  for(const star of worldStars){
+    const tw=.35+.65*(.5+.5*Math.sin(star.phase+starTime*star.speed));
+    ctx.globalAlpha=.5*tw;ctx.fillStyle="#dffbff";
+    ctx.beginPath();ctx.arc(sx(star.x),sy(star.y),star.size*(.65+.35*tw),0,Math.PI*2);ctx.fill();
+  }
+  ctx.globalAlpha=1;
+
+  for(const warning of bossWarnings){
+    const remain=Math.max(0,(Number(warning.hitAt)||0)-Date.now());
+    const progress=clamp(1-remain/1400,0,1);
+    const x=sx(warning.x),y=sy(warning.y),r=warning.r*(.72+.28*Math.sin(progress*Math.PI));
+    ctx.save();
+    ctx.globalAlpha=.18+.32*progress;ctx.fillStyle="#ff3b32";ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill();
+    ctx.globalAlpha=.96;ctx.strokeStyle="#ff704c";ctx.lineWidth=3;ctx.setLineDash([10,7]);ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.stroke();ctx.setLineDash([]);
+    ctx.strokeStyle="#ffd76a";ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(x-15,y);ctx.lineTo(x+15,y);ctx.moveTo(x,y-15);ctx.lineTo(x,y+15);ctx.stroke();
+    ctx.fillStyle="#fff";ctx.font="bold 11px Arial";ctx.textAlign="center";ctx.fillText("¡ESQUIVA!",x,y-r-9);
+    ctx.restore();
+  }
+
+    for(const b of bullets){ctx.fillStyle="#dffbff";ctx.beginPath();ctx.arc(sx(b.x),sy(b.y),4,0,Math.PI*2);ctx.fill()}
+  for(const b of bossProjectiles){
+    const x=sx(b.x),y=sy(b.y);
+    ctx.save();
+    ctx.globalAlpha=.22;ctx.strokeStyle="#ff5b3e";ctx.lineWidth=11;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x-(b.vx||0)*.045,y-(b.vy||0)*.045);ctx.stroke();
+    ctx.globalAlpha=.98;ctx.fillStyle="#ff4b36";ctx.strokeStyle="#ffd76a";ctx.lineWidth=2.5;ctx.beginPath();ctx.arc(x,y,b.r||14,0,Math.PI*2);ctx.fill();ctx.stroke();
+    ctx.fillStyle="#fff1b8";ctx.beginPath();ctx.arc(x,y,(b.r||14)*.33,0,Math.PI*2);ctx.fill();
+    ctx.restore();
+  }
   for(const other of remotePlayers.values()){
     drawTank(other.x,other.y,other.angle,other.color||"#7cff72",24,other.weapon||"blaster",other.equippedSkin||"core_default");
     drawNameTag(other.name||"Jugador",other.x,other.y,24,"#7cff72");
@@ -1339,7 +1379,7 @@ function draw(){
   drawTank(p.x,p.y,p.angle,"#39e7ff",p.r,p.weapon||"blaster",p.equippedSkin||"core_default");
   drawNameTag(playerName,p.x,p.y,p.r,"#39e7ff");
   if(controlMode==="mouse"&&gameActive){ctx.save();ctx.strokeStyle="rgba(57,231,255,.95)";ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(pointer.x,pointer.y,10,0,Math.PI*2);ctx.moveTo(pointer.x-16,pointer.y);ctx.lineTo(pointer.x+16,pointer.y);ctx.moveTo(pointer.x,pointer.y-16);ctx.lineTo(pointer.x,pointer.y+16);ctx.stroke();ctx.restore();}
-  drawMinimap();updateAmmoShop();updateBank();updateCosmeticShop();updateResourceHud();
+  drawMinimap();updateCosmeticShop();updateResourceHud();
 
   document.getElementById("hp").textContent=Math.ceil(p.hp);
   document.getElementById("maxHp").textContent=p.maxHp;
@@ -1347,9 +1387,15 @@ function draw(){
   document.getElementById("pvpKills").textContent=p.pvpKills;
   document.getElementById("kills").textContent=p.kills;
   const need=Math.max(1,serverXpNeed);
-  document.getElementById("xp").textContent=p.xp;document.getElementById("xpNeed").textContent=need;document.getElementById("damageLevel").textContent=serverDamageLevel;document.getElementById("damageXp").textContent=Math.floor(serverDamageXp);document.getElementById("damageXpNeed").textContent=serverDamageXpNeed;document.getElementById("defenseLevel").textContent=serverDefenseLevel;document.getElementById("defenseXp").textContent=Math.floor(serverDefenseXp);document.getElementById("defenseXpNeed").textContent=serverDefenseXpNeed;
+  document.getElementById("xp").textContent=p.xp;
+  document.getElementById("xpNeed").textContent=need;
+  document.getElementById("attackLevel").textContent=serverAttackLevel;
+  document.getElementById("attackPower").textContent=Math.round(serverAttackPower);
+  document.getElementById("defenseValue").textContent=Math.round(serverDefense);
   document.getElementById("hpFill").style.width=clamp(p.hp/p.maxHp*100,0,100)+"%";
-  document.getElementById("xpFill").style.width=clamp(p.xp/need*100,0,100)+"%";document.getElementById("damageXpFill").style.width=clamp(serverDamageXp/serverDamageXpNeed*100,0,100)+"%";document.getElementById("defenseXpFill").style.width=clamp(serverDefenseXp/serverDefenseXpNeed*100,0,100)+"%";
+  document.getElementById("xpFill").style.width=clamp(p.xp/need*100,0,100)+"%";
+  document.getElementById("attackFill").style.width=clamp(serverAttackFill,0,100)+"%";
+  document.getElementById("defenseFill").style.width=clamp(serverDefense/serverDefenseMax*100,0,100)+"%";
 }
 
 function setupJoystick(id){
