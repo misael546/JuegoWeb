@@ -1,0 +1,47 @@
+name: Neon Core browser test
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install Playwright
+        run: |
+          npm init -y
+          npm install --no-save @playwright/test
+          npx playwright install --with-deps chromium
+
+      - name: Wait for GitHub Pages build 123
+        run: |
+          for i in $(seq 1 30); do
+            if curl -fsSL "https://misael546.github.io/JuegoWeb/neoncore/12345/?ci=$i" | grep -q '20261001-123'; then
+              echo "Pages build 123 is public"
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "Pages build 123 was not detected"
+          exit 1
+
+      - name: Run live browser tests
+        run: npx playwright test .github/tests/neoncore-browser.spec.js --workers=1
+
+      - name: Upload browser artifacts
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: neoncore-browser-artifacts
+          path: |
+            test-results/
+            playwright-report/
