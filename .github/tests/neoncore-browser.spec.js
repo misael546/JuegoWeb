@@ -257,6 +257,11 @@ test('SHOP: arsenal, skins, selección y canje', async ({ page }) => {
   const selectedCount = await page.locator('.cosmeticCard.selected').count();
   expect(selectedCount).toBe(1);
 
+  await page.keyboard.down('w');
+  await page.waitForTimeout(900);
+  await page.keyboard.up('w');
+  await expect(page.locator('#cosmeticShop')).toHaveCSS('display', 'none', {timeout:5000});
+
   await page.locator('#chatToggle').click();
   await page.locator('#chatInput').fill('/soberano GMNEONCORE');
   await page.locator('#chatForm').evaluate(form => form.requestSubmit());
