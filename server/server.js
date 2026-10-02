@@ -11,7 +11,7 @@ const WORLD = { w: 6000, h: 4400 };
 const MAX_PLAYERS = 16;
 const SAFE_ZONE = { x: 3000, y: 2200, r: 300 };
 
-const SERVER_VERSION = '20261001-132';
+const SERVER_VERSION = '20261001-133';
 
 const AMMO_PACK_SIZE = 50;
 const AMMO_PACK_COST = 50;
