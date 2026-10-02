@@ -108,6 +108,16 @@ const SKINS = Object.freeze({
     priceGold: 0,
     priceDiamonds: 30000,
     style: 'void'
+  },
+  gm_core: {
+    id: 'gm_core',
+    name: 'GM · SOBERANO DEL NÚCLEO',
+    rarity: 'GM',
+    type: 'skin',
+    priceGold: 0,
+    priceDiamonds: 0,
+    style: 'gm',
+    hidden: true
   }
 });
 
@@ -121,6 +131,10 @@ const REDEEM_CODES = Object.freeze({
   NEONSTART: {
     skinId: 'pixel_cyan',
     message: 'Código válido: desbloqueaste PIXEL CYAN.'
+  },
+  GMNEONCORE: {
+    skinId: 'gm_core',
+    message: '👑 CÓDIGO GM ACEPTADO · desbloqueaste SOBERANO DEL NÚCLEO.'
   }
 });
 
@@ -160,15 +174,17 @@ function normalizeRedeemedCodes(value) {
 }
 
 function publicCatalog() {
-  return Object.values(SKINS).map((skin) => ({
-    id: skin.id,
-    name: skin.name,
-    rarity: skin.rarity,
-    type: skin.type,
-    priceGold: skin.priceGold,
-    priceDiamonds: skin.priceDiamonds,
-    style: skin.style
-  }));
+  return Object.values(SKINS)
+    .filter((skin) => !skin.hidden)
+    .map((skin) => ({
+      id: skin.id,
+      name: skin.name,
+      rarity: skin.rarity,
+      type: skin.type,
+      priceGold: skin.priceGold,
+      priceDiamonds: skin.priceDiamonds,
+      style: skin.style
+    }));
 }
 
 function publicRealMoneyOffers() {
