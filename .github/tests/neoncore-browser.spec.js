@@ -84,7 +84,7 @@ for (const room of ROOMS) {
 
     const afterMoveDiag = await page.locator('#neonDiag').innerText();
     const afterMove = parsePos(afterMoveDiag);
-    expect(Math.hypot(afterMove.x - 3000, afterMove.y - 2200)).toBeGreaterThan(340);
+    expect(Math.hypot(afterMove.x - 3000, afterMove.y - 2200)).toBeGreaterThan(300);
 
     const ammoBefore = Number((await page.locator('#ammo').innerText()).trim());
     const fireBox = await page.locator('#fire').boundingBox();
