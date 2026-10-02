@@ -11,7 +11,7 @@ const WORLD = { w: 6000, h: 4400 };
 const MAX_PLAYERS = 16;
 const SAFE_ZONE = { x: 3000, y: 2200, r: 300 };
 
-const SERVER_VERSION = '20261002-144';
+const SERVER_VERSION = '20261002-145';
 
 const AMMO_PACK_SIZE = 100;
 const AMMO_PACK_COST = 75;
@@ -22,11 +22,11 @@ const SHOP_INTERACTION_RADIUS = 48;
 const BANK_ENABLED = false;
 
 const WEAPONS = {
-  blaster: { name: 'BLASTER', cost: 0, damage: 35, fireRate: 320, tier: 1, maxAmmo: 220 },
-  pulse: { name: 'PULSE', cost: 500, damage: 70, fireRate: 230, tier: 2, maxAmmo: 260 },
-  cannon: { name: 'CANNON', cost: 1500, damage: 140, fireRate: 620, tier: 3, maxAmmo: 320 },
-  railgun: { name: 'RAILGUN', cost: 6500, damage: 260, fireRate: 900, tier: 4, maxAmmo: 380 },
-  nova: { name: 'NOVA', cost: 22000, damage: 520, fireRate: 1350, tier: 5, maxAmmo: 450 }
+  blaster: { name: 'BLASTER', cost: 0, damage: 35, fireRate: 320, tier: 1, maxAmmo: 220, range: 760 },
+  pulse: { name: 'PULSE', cost: 500, damage: 70, fireRate: 230, tier: 2, maxAmmo: 260, range: 820 },
+  cannon: { name: 'CANNON', cost: 1500, damage: 140, fireRate: 620, tier: 3, maxAmmo: 320, range: 880 },
+  railgun: { name: 'RAILGUN', cost: 6500, damage: 260, fireRate: 900, tier: 4, maxAmmo: 380, range: 960 },
+  nova: { name: 'NOVA', cost: 22000, damage: 520, fireRate: 1350, tier: 5, maxAmmo: 450, range: 1040 }
 };
 
 const HP_REGEN_PER_SEC = 3;
@@ -41,13 +41,17 @@ const BOSS_RESPAWN_MS = 120 * 1000;
 const BOSS_GOLD_REWARD = 15000;
 const BOSS_XP_REWARD = 5000;
 const BOSS_HP = 60000;
-const BOSS_PROJECTILE_DAMAGE = 190;
-const BOSS_PROJECTILE_SPEED = 250;
+const BOSS_NAME = 'DESTRUCTOR ESTELAR';
+const BOSS_AGGRO_RANGE = 1150;
+const BOSS_ATTACK_RANGE = 900;
+const BOSS_PROJECTILE_DAMAGE = 260;
+const BOSS_PROJECTILE_SPEED = 230;
 const BOSS_PROJECTILE_COOLDOWN_MS = 2800;
-const BOSS_AOE_DAMAGE = 165;
-const BOSS_AOE_RADIUS = 190;
-const BOSS_AOE_WARNING_MS = 1400;
-const BOSS_AOE_COOLDOWN_MS = 6500;
+const BOSS_AOE_DAMAGE = 240;
+const BOSS_AOE_RADIUS = 210;
+const BOSS_AOE_WARNING_MS = 1600;
+const BOSS_AOE_COOLDOWN_MS = 6200;
+const BOSS_AOE_RANGE = 780;
 const AUTOSAVE_MS = 5000;
 const DEATH_HP_LOSS = 0.10;
 const DEATH_DAMAGE_LOSS = 0.05;
@@ -188,7 +192,7 @@ function publicPlayer(p) {
     speed: p.speed,
     color: p.color,
     weapon: p.weapon,
-    equippedSkin: cosmetics.getSkin(p.equippedSkin) ? p.equippedSkin : 'core_default'
+    equippedSkin: cosmetics.getSkin(p.equippedSkin) ? p.equippedSkin : ''
   };
 }
 
@@ -236,12 +240,18 @@ function sendStats(p) {
     ammo: clamp(Number(p.ammo) || 0, 0, maxAmmo),
     maxAmmo,
     weapon: p.weapon,
+    ownedWeapons: normalizeOwnedWeapons(p.ownedWeapons, p.weapon || ''),
+    equippedWeaponSkin: cosmetics.getWeaponSkin(p.equippedWeaponSkin) ? p.equippedWeaponSkin : '',
+    ownedWeaponSkins: cosmetics.normalizeOwnedWeaponSkins(p.ownedWeaponSkins),
+    weaponSkinCatalog: cosmetics.publicWeaponCatalog(),
     shopNpc: SHOP_NPC,
     bankEnabled: BANK_ENABLED,
-    equippedSkin: cosmetics.getSkin(p.equippedSkin) ? p.equippedSkin : 'core_default',
+    equippedSkin: cosmetics.getSkin(p.equippedSkin) ? p.equippedSkin : '',
     ownedSkins: cosmetics.normalizeOwnedSkins(p.ownedSkins),
     redeemedCodes: cosmetics.normalizeRedeemedCodes(p.redeemedCodes),
-    skinDefense: skinDefenseBonus(p)
+    skinDefense: skinDefenseBonus(p),
+    weaponSkinAttack: weaponSkinAttackBonus(p),
+    weaponSkinDefense: weaponSkinDefenseBonus(p)
   });
 }
 
@@ -261,7 +271,10 @@ function capturePlayerData(p) {
     gold: p.gold || 0,
     diamonds: p.diamonds || 0,
     ammo: clamp(Number(p.ammo) || 0, 0, MAX_AMMO),
-    weapon: WEAPONS[p.weapon] ? p.weapon : 'blaster',
+    weapon: WEAPONS[p.weapon] ? p.weapon : null,
+    ownedWeapons: normalizeOwnedWeapons(p.ownedWeapons, p.weapon || ''),
+    equippedWeaponSkin: cosmetics.getWeaponSkin(p.equippedWeaponSkin) ? p.equippedWeaponSkin : '',
+    ownedWeaponSkins: cosmetics.normalizeOwnedWeaponSkins(p.ownedWeaponSkins),
     bankedGold: Math.max(0, Number(p.bankedGold) || 0),
     bankedDiamonds: Math.max(0, Number(p.bankedDiamonds) || 0),
     damageXp: Math.max(0, Number(p.damageXp) || 0),
@@ -316,7 +329,32 @@ async function loadSavedPlayer(saveKey) {
 }
 
 function maxAmmoForWeapon(weaponId) {
-  return Number(WEAPONS[weaponId]?.maxAmmo) || WEAPONS.blaster.maxAmmo;
+  return Number(WEAPONS[weaponId]?.maxAmmo) || 0;
+}
+
+function normalizeOwnedWeapons(value, fallbackWeapon = '') {
+  const input = Array.isArray(value) ? value : [];
+  const out = [];
+  const seen = new Set();
+  for (const raw of input) {
+    const id = String(raw || '');
+    if (!WEAPONS[id] || seen.has(id)) continue;
+    seen.add(id);
+    out.push(id);
+  }
+  if (WEAPONS[fallbackWeapon] && !seen.has(fallbackWeapon)) out.push(fallbackWeapon);
+  if (!out.includes('blaster')) out.unshift('blaster');
+  return out;
+}
+
+function weaponSkinAttackBonus(p) {
+  const skin = cosmetics.getWeaponSkin(p?.equippedWeaponSkin);
+  return skin && skin.weaponId === p?.weapon ? Math.max(0, Number(skin.attackBonus) || 0) : 0;
+}
+
+function weaponSkinDefenseBonus(p) {
+  const skin = cosmetics.getWeaponSkin(p?.equippedWeaponSkin);
+  return skin && skin.weaponId === p?.weapon ? Math.max(0, Number(skin.defenseBonus) || 0) : 0;
 }
 
 function skinDefenseBonus(p) {
@@ -325,20 +363,24 @@ function skinDefenseBonus(p) {
 }
 
 function applyCombatStats(p) {
-  const item = WEAPONS[p.weapon] || WEAPONS.blaster;
-  p.weapon = WEAPONS[p.weapon] ? p.weapon : 'blaster';
-  const levelDamage = Math.max(0, Number(p.level || 1) - 1) * 2;
-
-  p.damage = Math.max(5, Math.round(item.damage + levelDamage - (Number(p.damagePenalty) || 0)));
-  p.fireRate = Math.max(100, item.fireRate - Math.max(0, p.level - 1) * 3);
-
-  // Defensa única: depende del skin equipado y no progresa al recibir golpes.
-  p.defense = Math.max(0, Math.round(skinDefenseBonus(p) - (Number(p.defensePenalty) || 0)));
+  const item = WEAPONS[p.weapon] || null;
+  if (item) {
+    const levelDamage = Math.max(0, Number(p.level || 1) - 1) * 2;
+    p.damage = Math.max(5, Math.round(item.damage + levelDamage + weaponSkinAttackBonus(p) - (Number(p.damagePenalty) || 0)));
+    p.fireRate = Math.max(100, item.fireRate - Math.max(0, p.level - 1) * 3);
+  } else {
+    p.weapon = null;
+    p.damage = 10;
+    p.fireRate = 999999;
+    p.equippedWeaponSkin = '';
+  }
+  p.defense = Math.max(0, Math.round(
+    skinDefenseBonus(p) + weaponSkinDefenseBonus(p) - (Number(p.defensePenalty) || 0)
+  ));
   p.speed = speedForLevel(p.level);
-
   const maxAmmo = maxAmmoForWeapon(p.weapon);
-  p.ammo = clamp(Number(p.ammo) || 0, 0, maxAmmo);
-  if (p.ammo <= 0) p.ammo = Math.min(60, maxAmmo);
+  p.ammo = maxAmmo > 0 ? clamp(Number(p.ammo) || 0, 0, maxAmmo) : 0;
+  if (maxAmmo > 0 && p.ammo <= 0) p.ammo = Math.min(60, maxAmmo);
 }
 
 function addDamageXp(p, amount) {
@@ -611,6 +653,17 @@ function rayAabbDistance(originX, originY, dirX, dirY, wall) {
   return entry >= 0 ? entry : exit >= 0 ? 0 : Infinity;
 }
 
+function distancePointToSegment(px, py, x1, y1, x2, y2) {
+  const dx = x2 - x1;
+  const dy = y2 - y1;
+  const lenSq = dx * dx + dy * dy;
+  if (lenSq <= 0.000001) return Math.hypot(px - x1, py - y1);
+  const t = clamp(((px - x1) * dx + (py - y1) * dy) / lenSq, 0, 1);
+  const cx = x1 + dx * t;
+  const cy = y1 + dy * t;
+  return Math.hypot(px - cx, py - cy);
+}
+
 function randomEnemySpawnPoint(radius = 24) {
   for (let attempt = 0; attempt < 160; attempt++) {
     const x = clamp(140 + Math.random() * (WORLD.w - 280), 100, WORLD.w - 100);
@@ -629,8 +682,10 @@ function enemyStats(kind) {
       hp: BOSS_HP,
       speed: 58,
       damage: 0,
-      areaRadius: 1500,
-      aggroRadius: 1700,
+      name: BOSS_NAME,
+      areaRadius: BOSS_AGGRO_RANGE,
+      aggroRadius: BOSS_AGGRO_RANGE,
+      attackRange: BOSS_ATTACK_RANGE,
       leashRadius: Infinity,
       attackCooldown: 0,
       shape: 'boss'
@@ -692,6 +747,7 @@ function createEnemy(kind = 'drone') {
     lastBossAreaAt: 0,
     bossArea: null,
     kind,
+    name: stats.name || '',
     shape: stats.shape
   };
 }
@@ -1010,69 +1066,132 @@ function findPlayer(id, room) {
 function shopBuy(ws, requestedWeapon) {
   const p = clients.get(ws);
   if (!p) return;
+  if (!p.room || !p.alive) return send(ws, { type: 'shop_result', ok: false, message: 'No puedes usar el arsenal ahora.' });
+  if (!cosmeticShopNearby(p)) return send(ws, { type: 'shop_result', ok: false, message: 'Párate sobre el SHOP.' });
 
-  const weapon = String(requestedWeapon || '').toLowerCase();
-  const item = WEAPONS[weapon];
+  const weaponId = String(requestedWeapon || '');
+  const item = WEAPONS[weaponId];
+  if (!item) return send(ws, { type: 'shop_result', ok: false, message: 'Arma no disponible.' });
 
-  if (!p.room) {
-    send(ws, { type: 'shop_result', ok: false, message: 'No estás dentro de una sala.' });
-    return;
-  }
+  p.ownedWeapons = normalizeOwnedWeapons(p.ownedWeapons, p.weapon || '');
 
-  if (!p.alive) {
-    send(ws, { type: 'shop_result', ok: false, message: 'No puedes comprar estando destruido.' });
-    return;
-  }
-
-  if (Math.hypot(p.x - SHOP_NPC.x, p.y - SHOP_NPC.y) > SHOP_INTERACTION_RADIUS) {
-    send(ws, { type: 'shop_result', ok: false, message: 'Acércate al vendedor de munición.' });
-    return;
-  }
-
-  if (!item) {
-    send(ws, { type: 'shop_result', ok: false, message: 'Arma no disponible.' });
-    return;
-  }
-
-  if (p.weapon === weapon) {
+  if (p.weapon === weaponId) {
+    p.weapon = null;
+    p.equippedWeaponSkin = '';
+    applyCombatStats(p);
+    void persistPlayer(p);
     send(ws, {
       type: 'shop_result',
-      ok: false,
-      message: 'Ya tienes equipada ' + item.name + '.',
-      weapon: p.weapon
+      ok: true,
+      message: 'Arsenal desequipado · buff de ATAQUE del arma retirado.',
+      weapon: null,
+      ownedWeapons: p.ownedWeapons,
+      equippedWeaponSkin: '',
+      damage: p.damage,
+      defense: p.defense,
+      fireRate: p.fireRate,
+      maxAmmo: 0,
+      ammo: 0,
+      gold: p.gold || 0
     });
+    sendStats(p);
+    sendPlayerList(p.room);
     return;
   }
 
-  const gold = Math.max(0, Number(p.gold) || 0);
-
-  if (gold < item.cost) {
-    send(ws, {
-      type: 'shop_result',
-      ok: false,
-      message: 'Necesitas ' + item.cost + ' de oro para ' + item.name + '.'
-    });
-    return;
+  const owned = p.ownedWeapons.includes(weaponId);
+  if (!owned) {
+    const gold = Math.max(0, Number(p.gold) || 0);
+    if (gold < item.cost) return send(ws, { type: 'shop_result', ok: false, message: 'Necesitas ' + item.cost + ' de oro para ' + item.name + '.' });
+    p.gold = gold - item.cost;
+    p.ownedWeapons.push(weaponId);
   }
 
-  p.gold = gold - item.cost;
-  p.weapon = weapon;
+  p.weapon = weaponId;
+  p.equippedWeaponSkin = '';
   applyCombatStats(p);
-
   void persistPlayer(p);
-
   send(ws, {
     type: 'shop_result',
     ok: true,
-    message: 'Equipada ' + item.name + '.',
+    message: (owned ? 'Equipada ' : 'Comprada y equipada ') + item.name + '.',
     weapon: p.weapon,
+    ownedWeapons: p.ownedWeapons,
+    equippedWeaponSkin: '',
     gold: p.gold,
+    ammo: p.ammo,
+    maxAmmo: maxAmmoForWeapon(p.weapon),
     damage: p.damage,
     defense: p.defense,
     fireRate: p.fireRate,
     speed: p.speed
   });
+  sendStats(p);
+  sendPlayerList(p.room);
+}
+function buyWeaponSkin(ws, skinId) {
+  const p = clients.get(ws);
+  if (!p) return;
+  if (!p.room || !p.alive) return cosmeticShopError(ws, 'No puedes usar skins de arma ahora.');
+  if (!cosmeticShopNearby(p)) return cosmeticShopError(ws, 'Párate sobre el SHOP.');
 
+  const skin = cosmetics.getWeaponSkin(skinId);
+  if (!skin) return cosmeticShopError(ws, 'Skin de arma no disponible.');
+  if (!p.weapon || skin.weaponId !== p.weapon) return cosmeticShopError(ws, 'Equipa primero el arma compatible.');
+
+  p.ownedWeaponSkins = cosmetics.normalizeOwnedWeaponSkins(p.ownedWeaponSkins);
+  if (p.ownedWeaponSkins.includes(skin.id)) {
+    p.equippedWeaponSkin = p.equippedWeaponSkin === skin.id ? '' : skin.id;
+  } else {
+    const gold = Math.max(0, Number(p.gold) || 0);
+    const diamonds = Math.max(0, Number(p.diamonds) || 0);
+    if (skin.priceDiamonds > 0) {
+      if (diamonds < skin.priceDiamonds) return cosmeticShopError(ws, 'Necesitas ' + skin.priceDiamonds + ' diamantes.');
+      p.diamonds = diamonds - skin.priceDiamonds;
+    } else if (skin.priceGold > 0) {
+      if (gold < skin.priceGold) return cosmeticShopError(ws, 'Necesitas ' + skin.priceGold + ' de oro.');
+      p.gold = gold - skin.priceGold;
+    } else {
+      return cosmeticShopError(ws, 'Esta skin de arma no tiene un precio válido.');
+    }
+    p.ownedWeaponSkins.push(skin.id);
+    p.equippedWeaponSkin = skin.id;
+  }
+
+  applyCombatStats(p);
+  void persistPlayer(p);
+  sendCosmeticState(p, p.equippedWeaponSkin ? 'Skin de arma equipada: ' + skin.name + '.' : 'Skin de arma desequipada · buff de ATAQUE/DEFENSA retirado.');
+  sendStats(p);
+  sendPlayerList(p.room);
+}
+
+function equipWeaponSkin(ws, skinId) {
+  const p = clients.get(ws);
+  if (!p) return;
+  if (!p.room || !p.alive) return cosmeticShopError(ws, 'No puedes cambiar la skin de arma ahora.');
+  if (!cosmeticShopNearby(p)) return cosmeticShopError(ws, 'Acércate al SHOP.');
+
+  const id = String(skinId || '');
+  p.ownedWeaponSkins = cosmetics.normalizeOwnedWeaponSkins(p.ownedWeaponSkins);
+  if (id === '') {
+    p.equippedWeaponSkin = '';
+    applyCombatStats(p);
+    void persistPlayer(p);
+    sendCosmeticState(p, 'Skin de arma desequipada · buff de ATAQUE/DEFENSA retirado.');
+    sendStats(p);
+    sendPlayerList(p.room);
+    return;
+  }
+
+  const skin = cosmetics.getWeaponSkin(id);
+  if (!skin || !p.ownedWeaponSkins.includes(id) || skin.weaponId !== p.weapon) {
+    return cosmeticShopError(ws, 'Skin de arma no disponible para tu arsenal equipado.');
+  }
+
+  p.equippedWeaponSkin = id;
+  applyCombatStats(p);
+  void persistPlayer(p);
+  sendCosmeticState(p, 'Skin de arma equipada: ' + skin.name + '.');
   sendStats(p);
   sendPlayerList(p.room);
 }
@@ -1081,14 +1200,21 @@ function cosmeticShopNearby(p) {
   return !!p && Math.hypot(p.x - SHOP_NPC.x, p.y - SHOP_NPC.y) <= SHOP_INTERACTION_RADIUS;
 }
 
-function sendCosmeticState(p, message = 'Tienda de cosméticos lista.', unlockedSkin = '') {
+function sendCosmeticState(p, message = 'Tienda lista.', unlockedSkin = '', unlockedWeapon = '', unlockedWeaponSkin = '') {
   if (!p?.ws) return;
   send(p.ws, {
     type: 'cosmetic_state',
     message,
     unlockedSkin: cosmetics.getSkin(unlockedSkin) ? unlockedSkin : '',
+    unlockedWeapon: WEAPONS[unlockedWeapon] ? unlockedWeapon : '',
+    unlockedWeaponSkin: cosmetics.getWeaponSkin(unlockedWeaponSkin) ? unlockedWeaponSkin : '',
     ownedSkins: cosmetics.normalizeOwnedSkins(p.ownedSkins),
-    equippedSkin: cosmetics.getSkin(p.equippedSkin) ? p.equippedSkin : 'core_default',
+    equippedSkin: cosmetics.getSkin(p.equippedSkin) ? p.equippedSkin : '',
+    ownedWeapons: normalizeOwnedWeapons(p.ownedWeapons, p.weapon || ''),
+    weapon: p.weapon,
+    ownedWeaponSkins: cosmetics.normalizeOwnedWeaponSkins(p.ownedWeaponSkins),
+    equippedWeaponSkin: cosmetics.getWeaponSkin(p.equippedWeaponSkin) ? p.equippedWeaponSkin : '',
+    weaponSkinCatalog: cosmetics.publicWeaponCatalog(),
     shopNpc: SHOP_NPC,
     catalog: cosmetics.publicCatalog(),
     realMoneyOffers: cosmetics.publicRealMoneyOffers(),
@@ -1099,7 +1225,6 @@ function sendCosmeticState(p, message = 'Tienda de cosméticos lista.', unlocked
 function cosmeticShopError(ws, message) {
   send(ws, { type: 'cosmetic_result', ok: false, message: String(message || 'No se pudo completar la operación.') });
 }
-
 function buyCosmeticSkin(ws, skinId) {
   const p = clients.get(ws);
   if (!p) return;
@@ -1122,7 +1247,7 @@ function buyCosmeticSkin(ws, skinId) {
   const diamonds = Math.max(0, Number(p.diamonds) || 0);
 
   if (skin.realMoney) {
-    return cosmeticShopError(ws, 'SOBERANO DEL NÚCLEO cuesta $1 USD y se obtiene mediante compra real o comando autorizado.');
+    return cosmeticShopError(ws, 'SOBERANO DEL NÚCLEO cuesta $1 USD y actualmente se prueba con un código de regalo.');
   }
 
   if (skin.priceDiamonds > 0) {
@@ -1149,9 +1274,20 @@ function equipCosmeticSkin(ws, skinId) {
   const p = clients.get(ws);
   if (!p) return;
   if (!p.room || !p.alive) return cosmeticShopError(ws, 'No puedes cambiar de skin ahora.');
-  if (!cosmeticShopNearby(p)) return cosmeticShopError(ws, 'Acércate al NPC TIENDA NEON.');
+  if (!cosmeticShopNearby(p)) return cosmeticShopError(ws, 'Acércate al SHOP.');
+
   const id = String(skinId || '');
   p.ownedSkins = cosmetics.normalizeOwnedSkins(p.ownedSkins);
+  if (id === '') {
+    p.equippedSkin = '';
+    applyCombatStats(p);
+    void persistPlayer(p);
+    sendCosmeticState(p, 'Skin de tanque desequipado · DEFENSA del skin retirada.');
+    sendStats(p);
+    sendPlayerList(p.room);
+    return;
+  }
+
   if (!cosmetics.getSkin(id) || !p.ownedSkins.includes(id)) return cosmeticShopError(ws, 'Skin bloqueado.');
   p.equippedSkin = id;
   applyCombatStats(p);
@@ -1160,12 +1296,11 @@ function equipCosmeticSkin(ws, skinId) {
   sendStats(p);
   sendPlayerList(p.room);
 }
-
 async function redeemCosmeticCode(ws, rawCode) {
   const p = clients.get(ws);
   if (!p) return;
   if (!p.room || !p.alive) return cosmeticShopError(ws, 'No puedes usar códigos ahora.');
-  if (!cosmeticShopNearby(p)) return cosmeticShopError(ws, 'Acércate al NPC TIENDA NEON.');
+  if (!cosmeticShopNearby(p)) return cosmeticShopError(ws, 'Acércate al SHOP.');
 
   const code = String(rawCode || '').trim().toUpperCase().replace(/[^A-Z0-9_-]/g, '').slice(0, 32);
   if (!code) return cosmeticShopError(ws, 'Escribe un código.');
@@ -1175,22 +1310,51 @@ async function redeemCosmeticCode(ws, rawCode) {
   p.redeemedCodes = cosmetics.normalizeRedeemedCodes(p.redeemedCodes);
   if (p.redeemedCodes.includes(code)) return cosmeticShopError(ws, 'Ese código ya fue usado en esta cuenta.');
 
-  const skin = cosmetics.getSkin(reward.skinId);
-  if (!skin) return cosmeticShopError(ws, 'Código sin recompensa válida.');
-
   p.ownedSkins = cosmetics.normalizeOwnedSkins(p.ownedSkins);
+  p.ownedWeapons = normalizeOwnedWeapons(p.ownedWeapons, p.weapon || '');
+  p.ownedWeaponSkins = cosmetics.normalizeOwnedWeaponSkins(p.ownedWeaponSkins);
+
+  let unlockedSkin = '', unlockedWeapon = '', unlockedWeaponSkin = '';
+
+  if (reward.skinId) {
+    const skin = cosmetics.getSkin(reward.skinId);
+    if (!skin) return cosmeticShopError(ws, 'Código sin recompensa de skin válida.');
+    unlockedSkin = skin.id;
+    if (!p.ownedSkins.includes(skin.id)) p.ownedSkins.push(skin.id);
+    p.equippedSkin = skin.id;
+  }
+
+  if (reward.weaponId) {
+    const weapon = String(reward.weaponId);
+    if (!WEAPONS[weapon]) return cosmeticShopError(ws, 'Código sin recompensa de arma válida.');
+    unlockedWeapon = weapon;
+    if (!p.ownedWeapons.includes(weapon)) p.ownedWeapons.push(weapon);
+    p.weapon = weapon;
+    p.equippedWeaponSkin = '';
+  }
+
+  if (reward.weaponSkinId) {
+    const weaponSkin = cosmetics.getWeaponSkin(reward.weaponSkinId);
+    if (!weaponSkin) return cosmeticShopError(ws, 'Código sin recompensa de skin de arma válida.');
+    if (!p.ownedWeapons.includes(weaponSkin.weaponId)) p.ownedWeapons.push(weaponSkin.weaponId);
+    p.weapon = weaponSkin.weaponId;
+    unlockedWeaponSkin = weaponSkin.id;
+    if (!p.ownedWeaponSkins.includes(weaponSkin.id)) p.ownedWeaponSkins.push(weaponSkin.id);
+    p.equippedWeaponSkin = weaponSkin.id;
+  }
+
+  if (!unlockedSkin && !unlockedWeapon && !unlockedWeaponSkin) return cosmeticShopError(ws, 'El código no tiene una recompensa válida.');
+
   p.redeemedCodes.push(code);
-  if (!p.ownedSkins.includes(skin.id)) p.ownedSkins.push(skin.id);
   p.ownedSkins = cosmetics.normalizeOwnedSkins(p.ownedSkins);
-  p.equippedSkin = skin.id;
+  p.ownedWeapons = normalizeOwnedWeapons(p.ownedWeapons, p.weapon || '');
+  p.ownedWeaponSkins = cosmetics.normalizeOwnedWeaponSkins(p.ownedWeaponSkins);
   applyCombatStats(p);
-
   await persistPlayer(p);
-  sendCosmeticState(p, reward.message, skin.id);
+  sendCosmeticState(p, reward.message, unlockedSkin, unlockedWeapon, unlockedWeaponSkin);
   sendStats(p);
   sendPlayerList(p.room);
 }
-
 function buyPremiumItemStub(ws, sku) {
   const offer = cosmetics.REAL_MONEY_OFFERS.find((item) => item.sku === String(sku || ''));
   send(ws, {
@@ -1200,7 +1364,7 @@ function buyPremiumItemStub(ws, sku) {
     sku: offer?.sku || '',
     priceUsd: Number(offer?.priceUsd) || 1,
     message: offer
-      ? 'SOBERANO DEL NÚCLEO · $1 USD. El cobro real todavía no está conectado; usa /soberano GMNEONCORE para tu acceso por comando.'
+      ? 'SOBERANO DEL NÚCLEO · $1 USD. El cobro real todavía no está conectado; usa el código de regalo de prueba.'
       : 'Producto premium no disponible.'
   });
 }
@@ -1576,7 +1740,7 @@ function handleShot(ws) {
           gold: reward,
           diamonds: 0,
           xp,
-          message: '👑 JEFE PRINCIPAL DERROTADO · +15,000 🪙 · +5,000 XP'
+          message: '☄️ DESTRUCTOR ESTELAR DESTRUIDO · +15,000 🪙 · +5,000 XP'
         });
       }
 
@@ -1620,6 +1784,9 @@ function createPlayer(ws) {
     bankedDiamonds: 0,
     ownedSkins: ['core_default'],
     equippedSkin: 'core_default',
+    ownedWeapons: ['blaster'],
+    equippedWeaponSkin: '',
+    ownedWeaponSkins: [],
     redeemedCodes: [],
     ammo: 60,
     weapon: 'blaster',
@@ -1789,9 +1956,12 @@ wss.on('connection', (ws) => {
           p.bankedGold = Math.max(0, Number(saved.bankedGold) || 0);
           p.bankedDiamonds = Math.max(0, Number(saved.bankedDiamonds) || 0);
           p.ownedSkins = cosmetics.normalizeOwnedSkins(saved.ownedSkins);
-          p.equippedSkin = cosmetics.getSkin(saved.equippedSkin) && p.ownedSkins.includes(saved.equippedSkin) ? saved.equippedSkin : 'core_default';
+          p.equippedSkin = saved.equippedSkin === '' ? '' : (cosmetics.getSkin(saved.equippedSkin) && p.ownedSkins.includes(saved.equippedSkin) ? saved.equippedSkin : 'core_default');
           p.redeemedCodes = cosmetics.normalizeRedeemedCodes(saved.redeemedCodes);
-          p.weapon = WEAPONS[saved.weapon] ? saved.weapon : 'blaster';
+          p.ownedWeapons = normalizeOwnedWeapons(saved.ownedWeapons, saved.weapon || '');
+          p.weapon = WEAPONS[saved.weapon] ? saved.weapon : null;
+          p.ownedWeaponSkins = cosmetics.normalizeOwnedWeaponSkins(saved.ownedWeaponSkins);
+          p.equippedWeaponSkin = cosmetics.getWeaponSkin(saved.equippedWeaponSkin) && p.ownedWeaponSkins.includes(saved.equippedWeaponSkin) ? saved.equippedWeaponSkin : '';
           p.damagePenalty = Math.max(0, Number(saved.damagePenalty) || 0);
           p.defensePenalty = Math.max(0, Number(saved.defensePenalty) || 0);
         }
@@ -1839,24 +2009,6 @@ wss.on('connection', (ws) => {
           .slice(0, 120);
 
         if (!text) return;
-
-        // Comando de propietario para probar/usar el skin premium.
-        if (/^\/soberano(?:\s+GMNEONCORE)?$/i.test(text) ||
-            /^\/skin\s+soberano(?:\s+GMNEONCORE)?$/i.test(text)) {
-          if (!/GMNEONCORE/i.test(text)) {
-            send(ws, { type: 'chat', id: 'server', name: 'SERVER', text: 'Usa: /soberano GMNEONCORE', at: now });
-          } else {
-            p.ownedSkins = cosmetics.normalizeOwnedSkins([...(p.ownedSkins || []), 'gm_core']);
-            p.equippedSkin = 'gm_core';
-            applyCombatStats(p);
-            await persistPlayer(p);
-            sendCosmeticState(p, '👑 SOBERANO DEL NÚCLEO equipado por comando.', 'gm_core');
-            sendStats(p);
-            sendPlayerList(p.room);
-            send(ws, { type: 'chat', id: 'server', name: 'SERVER', text: '👑 SOBERANO DEL NÚCLEO equipado.', at: now });
-          }
-          return;
-        }
 
         p.lastChatAt = now;
         broadcastRoom(p.room, {
@@ -1998,6 +2150,16 @@ wss.on('connection', (ws) => {
 
       if (msg.type === 'buy_weapon') {
         if (!p.frozen) shopBuy(ws, msg.weapon);
+        return;
+      }
+
+      if (msg.type === 'buy_weapon_skin') {
+        if (!p.frozen) buyWeaponSkin(ws, msg.skinId);
+        return;
+      }
+
+      if (msg.type === 'equip_weapon_skin') {
+        if (!p.frozen) equipWeaponSkin(ws, msg.skinId);
         return;
       }
 
@@ -2185,7 +2347,7 @@ setInterval(() => {
         if (best > 220) moveEnemyToward(boss, target.x, target.y, dt, walls);
 
         if (
-          best <= boss.aggroRadius &&
+          best <= BOSS_ATTACK_RANGE &&
           now - boss.lastBossShotAt >= BOSS_PROJECTILE_COOLDOWN_MS &&
           hasLineOfSight(boss.x, boss.y, target.x, target.y, walls)
         ) {
@@ -2198,13 +2360,14 @@ setInterval(() => {
             y: boss.y,
             vx: ((target.x - boss.x) / distance) * BOSS_PROJECTILE_SPEED,
             vy: ((target.y - boss.y) / distance) * BOSS_PROJECTILE_SPEED,
-            r: 14,
+            r: 18,
             damage: BOSS_PROJECTILE_DAMAGE,
-            life: 8
+            range: BOSS_ATTACK_RANGE,
+            life: BOSS_ATTACK_RANGE / BOSS_PROJECTILE_SPEED
           });
         }
 
-        if (!boss.bossArea && now - boss.lastBossAreaAt >= BOSS_AOE_COOLDOWN_MS) {
+        if (!boss.bossArea && best <= BOSS_AOE_RANGE && now - boss.lastBossAreaAt >= BOSS_AOE_COOLDOWN_MS) {
           boss.lastBossAreaAt = now;
           boss.bossArea = {
             id: 'ba_' + Math.random().toString(36).slice(2, 10),
@@ -2289,26 +2452,43 @@ setInterval(() => {
 
     for (let i = bossProjectiles.length - 1; i >= 0; i--) {
       const projectile = bossProjectiles[i];
-      projectile.x += projectile.vx * dt;
-      projectile.y += projectile.vy * dt;
+      const previousX = projectile.x;
+      const previousY = projectile.y;
+      const nextX = projectile.x + projectile.vx * dt;
+      const nextY = projectile.y + projectile.vy * dt;
+      const travel = Math.hypot(nextX - previousX, nextY - previousY);
+      const dirX = (nextX - previousX) / Math.max(0.0001, travel);
+      const dirY = (nextY - previousY) / Math.max(0.0001, travel);
+
+      projectile.x = nextX;
+      projectile.y = nextY;
       projectile.life -= dt;
+      projectile.range = Math.max(0, Number(projectile.range) || BOSS_ATTACK_RANGE) - travel;
+
+      const wallCollision = walls.some((wall) => {
+        const hit = rayAabbDistance(previousX, previousY, dirX, dirY, wall);
+        return hit >= 0 && hit <= travel + projectile.r;
+      });
 
       if (
         projectile.life <= 0 ||
+        projectile.range <= 0 ||
         projectile.x < 20 || projectile.y < 20 ||
         projectile.x > WORLD.w - 20 || projectile.y > WORLD.h - 20 ||
-        collidesWithWall(projectile.x, projectile.y, projectile.r, walls)
+        wallCollision
       ) {
         bossProjectiles.splice(i, 1);
         continue;
       }
 
       let hitPlayer = null;
+      let hitDistance = Infinity;
       for (const pl of players) {
         if (inSafeZone(pl.x, pl.y, 24)) continue;
-        if (Math.hypot(pl.x - projectile.x, pl.y - projectile.y) <= projectile.r + pl.r) {
+        const d = distancePointToSegment(pl.x, pl.y, previousX, previousY, projectile.x, projectile.y);
+        if (d <= projectile.r + pl.r && d < hitDistance) {
+          hitDistance = d;
           hitPlayer = pl;
-          break;
         }
       }
 
