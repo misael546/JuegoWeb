@@ -11,18 +11,18 @@ const WORLD = { w: 6000, h: 4400 };
 const MAX_PLAYERS = 16;
 const SAFE_ZONE = { x: 3000, y: 2200, r: 300 };
 
-const SERVER_VERSION = '20261002-136';
+const SERVER_VERSION = '20261002-137';
 
 const AMMO_PACK_SIZE = 50;
 const AMMO_PACK_COST = 50;
 const MAX_AMMO = 120;
 
-const SHOP_NPC = { x: 3600, y: 2200, r: 30 };
-const SHOP_INTERACTION_RADIUS = 80;
-const COSMETIC_SHOP_NPC = { x: 3250, y: 2200, r: 36 };
-const COSMETIC_SHOP_INTERACTION_RADIUS = 120;
-const BANK_NPC = { x: 3000, y: 1800, r: 24 };
-const BANK_INTERACTION_RADIUS = 95;
+const SHOP_NPC = { x: 3140, y: 2200, r: 22 };
+const SHOP_INTERACTION_RADIUS = 34;
+const COSMETIC_SHOP_NPC = { x: 2860, y: 2200, r: 22 };
+const COSMETIC_SHOP_INTERACTION_RADIUS = 34;
+const BANK_NPC = { x: 3000, y: 1985, r: 22 };
+const BANK_INTERACTION_RADIUS = 34;
 
 const WEAPONS = {
   blaster: { name: 'BLASTER', cost: 0, damage: 25, fireRate: 350 },
@@ -33,8 +33,12 @@ const WEAPONS = {
 const HP_REGEN_PER_SEC = 3;
 const WORLD_WALL_COUNT = 24;
 const WORLD_WALL_SEED = 739281;
-const WALL_DIAMOND_DROP_CHANCE = 0.035;
 const WALL_RESPAWN_MS = 5 * 60 * 1000;
+const MOB_TARGET_COUNT = 18;
+const MOB_RESPAWN_MS = 8 * 1000;
+const MOB_RESPAWN_JITTER_MS = 4 * 1000;
+const BOSS_RESPAWN_MS = 90 * 1000;
+const BOSS_DIAMOND_REWARD = 25;
 const AUTOSAVE_MS = 5000;
 const DEATH_HP_LOSS = 0.10;
 const DEATH_DAMAGE_LOSS = 0.05;
@@ -52,6 +56,7 @@ const savedPlayers = new Map();
 
 const rooms = new Map();
 const roomEnemies = new Map();
+const roomEnemyRespawns = new Map();
 const roomWalls = new Map();
 const roomWallRespawns = new Map();
 
@@ -59,12 +64,14 @@ const PUBLIC_ROOMS = ['12345'];
 
 rooms.set('OPEN', new Set());
 roomEnemies.set('OPEN', []);
+roomEnemyRespawns.set('OPEN', []);
 roomWalls.set('OPEN', null);
 roomWallRespawns.set('OPEN', []);
 
 for (const code of PUBLIC_ROOMS) {
   rooms.set(code, new Set());
   roomEnemies.set(code, []);
+  roomEnemyRespawns.set(code, []);
   roomWalls.set(code, null);
   roomWallRespawns.set(code, []);
 }
@@ -203,10 +210,10 @@ function sendStats(p) {
     speed: p.speed,
     maxHp: maxHpForLevel(p.level),
     xpNeed: xpToNextLevel(p.level),
-    damageXp: p.damageXp,
+    damageXp: masteryXpIntoLevel(p.damageXp),
     damageXpNeed: masteryXpToNextLevel(masteryLevelFromXp(p.damageXp)),
     damageLevel: masteryLevelFromXp(p.damageXp),
-    defenseXp: p.defenseXp,
+    defenseXp: masteryXpIntoLevel(p.defenseXp),
     defenseXpNeed: masteryXpToNextLevel(masteryLevelFromXp(p.defenseXp)),
     defenseLevel: masteryLevelFromXp(p.defenseXp),
     killsToLevel: nextKills,
@@ -594,46 +601,197 @@ function rayAabbDistance(originX, originY, dirX, dirY, wall) {
   return entry >= 0 ? entry : exit >= 0 ? 0 : Infinity;
 }
 
-function makeEnemy() {
-  const elite = Math.random() < 0.2;
-  const r = elite ? 27 : 21;
-  const shapes = ['square', 'triangle', 'hex'];
+function randomEnemySpawnPoint(radius = 24) {
+  for (let attempt = 0; attempt < 120; attempt++) {
+    const x = clamp(140 + Math.random() * (WORLD.w - 280), 100, WORLD.w - 100);
+    const y = clamp(140 + Math.random() * (WORLD.h - 280), 100, WORLD.h - 100);
+    if (inSafeZone(x, y, 90)) continue;
+    if (collidesWithWall(x, y, radius, WORLD_WALLS)) continue;
+    return { x, y };
+  }
+  return { x: 900, y: 900 };
+}
 
-  let x = 0;
-  let y = 0;
-
-  do {
-    const angle = Math.random() * Math.PI * 2;
-    const distance = 450 + Math.random() * 500;
-    x = clamp(SAFE_ZONE.x + Math.cos(angle) * distance, 100, WORLD.w - 100);
-    y = clamp(SAFE_ZONE.y + Math.sin(angle) * distance, 100, WORLD.h - 100);
-  } while (
-    inSafeZone(x, y, 60) ||
-    collidesWithWall(x, y, r, WORLD_WALLS)
-  );
-
+function enemyStats(kind) {
+  if (kind === 'boss') {
+    return {
+      r: 42,
+      hp: 12000,
+      speed: 72,
+      damage: 82,
+      areaRadius: 420,
+      aggroRadius: 850,
+      leashRadius: 900,
+      attackCooldown: 650,
+      shape: 'boss'
+    };
+  }
+  if (kind === 'elite') {
+    return {
+      r: 27,
+      hp: 180,
+      speed: 74,
+      damage: 20,
+      areaRadius: 240,
+      aggroRadius: 520,
+      leashRadius: 500,
+      attackCooldown: 650,
+      shape: 'hex'
+    };
+  }
   return {
-    id: Math.random().toString(36).slice(2, 10),
-    x,
-    y,
-    r,
-    hp: elite ? 85 : 50,
-    maxHp: elite ? 85 : 50,
-    speed: elite ? 55 : 75,
-    damage: elite ? 14 : 9,
-    lastAttackAt: 0,
-    kind: elite ? 'elite' : 'drone',
-    shape: shapes[Math.floor(Math.random() * shapes.length)]
+    r: 21,
+    hp: 90,
+    speed: 68,
+    damage: 12,
+    areaRadius: 180,
+    aggroRadius: 430,
+    leashRadius: 400,
+    attackCooldown: 720,
+    shape: ['square', 'triangle', 'hex'][Math.floor(Math.random() * 3)]
   };
 }
 
-function ensureRoomEnemies(code) {
-  if (!roomEnemies.has(code)) {
-    roomEnemies.set(code, []);
+function createEnemy(kind = 'drone') {
+  const stats = enemyStats(kind);
+  const spawn = randomEnemySpawnPoint(stats.r);
+  const now = Date.now();
+  return {
+    id: Math.random().toString(36).slice(2, 10),
+    x: spawn.x,
+    y: spawn.y,
+    homeX: spawn.x,
+    homeY: spawn.y,
+    areaRadius: stats.areaRadius,
+    aggroRadius: stats.aggroRadius,
+    leashRadius: stats.leashRadius,
+    patrolTargetX: spawn.x,
+    patrolTargetY: spawn.y,
+    patrolUntil: now + 1500 + Math.random() * 2500,
+    r: stats.r,
+    hp: stats.hp,
+    maxHp: stats.hp,
+    speed: stats.speed,
+    damage: stats.damage,
+    attackCooldown: stats.attackCooldown,
+    lastAttackAt: 0,
+    kind,
+    shape: stats.shape
+  };
+}
+
+function scheduleEnemyRespawn(code, kind) {
+  const queue = roomEnemyRespawns.get(code) || [];
+  const delay = kind === 'boss'
+    ? BOSS_RESPAWN_MS
+    : MOB_RESPAWN_MS + Math.floor(Math.random() * MOB_RESPAWN_JITTER_MS);
+  queue.push({ respawnAt: Date.now() + delay, kind });
+  roomEnemyRespawns.set(code, queue);
+}
+
+function pendingEnemyKindCount(code, kind) {
+  return (roomEnemyRespawns.get(code) || []).filter((entry) => entry.kind === kind).length;
+}
+
+function restoreDueEnemies(code, broadcast = false) {
+  const queue = roomEnemyRespawns.get(code) || [];
+  if (!queue.length) return 0;
+  const now = Date.now();
+  const enemies = roomEnemies.get(code) || [];
+  const pending = [];
+  let restored = 0;
+
+  for (const entry of queue) {
+    if (Number(entry?.respawnAt) <= now && entry?.kind) {
+      const enemy = createEnemy(entry.kind);
+      enemies.push(enemy);
+      restored++;
+      if (broadcast) {
+        broadcastRoom(code, {
+          type: 'enemy_respawn',
+          enemy
+        });
+      }
+    } else {
+      pending.push(entry);
+    }
   }
 
+  roomEnemyRespawns.set(code, pending);
+  return restored;
+}
+
+function despawnEnemy(code, enemy, reason = 'leash') {
+  const enemies = roomEnemies.get(code) || [];
+  const index = enemies.findIndex((item) => item.id === enemy.id);
+  if (index < 0) return;
+  const removed = enemies.splice(index, 1)[0];
+  scheduleEnemyRespawn(code, removed.kind);
+  broadcastRoom(code, {
+    type: 'enemy_vanish',
+    id: removed.id,
+    reason
+  });
+}
+
+function choosePatrolTarget(enemy, walls) {
+  for (let attempt = 0; attempt < 40; attempt++) {
+    const angle = Math.random() * Math.PI * 2;
+    const distance = 20 + Math.random() * Math.max(20, enemy.areaRadius);
+    const x = clamp(enemy.homeX + Math.cos(angle) * distance, 60, WORLD.w - 60);
+    const y = clamp(enemy.homeY + Math.sin(angle) * distance, 60, WORLD.h - 60);
+    if (inSafeZone(x, y, enemy.r + 14)) continue;
+    if (collidesWithWall(x, y, enemy.r, walls)) continue;
+    enemy.patrolTargetX = x;
+    enemy.patrolTargetY = y;
+    enemy.patrolUntil = Date.now() + 1800 + Math.random() * 3000;
+    return;
+  }
+  enemy.patrolTargetX = enemy.homeX;
+  enemy.patrolTargetY = enemy.homeY;
+  enemy.patrolUntil = Date.now() + 1500;
+}
+
+function moveEnemyToward(enemy, tx, ty, dt, walls) {
+  const distance = Math.max(1, Math.hypot(tx - enemy.x, ty - enemy.y));
+  const dx = (tx - enemy.x) / distance;
+  const dy = (ty - enemy.y) / distance;
+  enemy.vx = dx * enemy.speed;
+  enemy.vy = dy * enemy.speed;
+
+  const nextX = clamp(enemy.x + enemy.vx * dt, 35, WORLD.w - 35);
+  const nextY = clamp(enemy.y + enemy.vy * dt, 35, WORLD.h - 35);
+  if (!collidesWithWall(nextX, nextY, enemy.r, walls)) {
+    enemy.x = nextX;
+    enemy.y = nextY;
+  } else if (!collidesWithWall(nextX, enemy.y, enemy.r, walls)) {
+    enemy.x = nextX;
+  } else if (!collidesWithWall(enemy.x, nextY, enemy.r, walls)) {
+    enemy.y = nextY;
+  }
+}
+
+function ensureRoomEnemies(code) {
+  if (!roomEnemies.has(code)) roomEnemies.set(code, []);
+  if (!roomEnemyRespawns.has(code)) roomEnemyRespawns.set(code, []);
+
+  restoreDueEnemies(code, false);
+
   const list = roomEnemies.get(code);
-  while (list.length < 18) list.push(makeEnemy());
+  const regularCount = list.filter((enemy) => enemy.kind !== 'boss').length;
+  const pendingRegular = pendingEnemyKindCount(code, 'drone') + pendingEnemyKindCount(code, 'elite');
+  const missingRegular = Math.max(0, MOB_TARGET_COUNT - regularCount - pendingRegular);
+
+  for (let i = 0; i < missingRegular; i++) {
+    const elites = list.filter((enemy) => enemy.kind === 'elite').length +
+      pendingEnemyKindCount(code, 'elite');
+    list.push(createEnemy(elites < 2 ? 'elite' : 'drone'));
+  }
+
+  if (!list.some((enemy) => enemy.kind === 'boss') && pendingEnemyKindCount(code, 'boss') === 0) {
+    list.push(createEnemy('boss'));
+  }
+
   return list;
 }
 
@@ -682,6 +840,7 @@ async function leaveRoom(ws) {
     if (room.size === 0 && code !== 'OPEN' && !PUBLIC_ROOMS.includes(code)) {
       rooms.delete(code);
       roomEnemies.delete(code);
+      roomEnemyRespawns.delete(code);
       roomWalls.delete(code);
       roomWallRespawns.delete(code);
     } else {
@@ -709,6 +868,7 @@ async function joinRoom(ws, requestedCode, create = false) {
     code = makeCode();
     rooms.set(code, new Set());
     roomEnemies.set(code, []);
+    roomEnemyRespawns.set(code, []);
     roomWalls.set(code, WORLD_WALLS.map((wall) => ({ ...wall })));
   }
 
@@ -1242,28 +1402,12 @@ function handleShot(ws) {
         });
         roomWallRespawns.set(shooter.room, respawns);
 
-        let diamondReward = false;
-        if (destroyedWall.rewardEligible !== false && Math.random() < WALL_DIAMOND_DROP_CHANCE) {
-          shooter.diamonds = Math.max(0, Number(shooter.diamonds) || 0) + 1;
-          diamondReward = true;
-          void persistPlayer(shooter);
-          send(shooter.ws, {
-            type: 'wall_reward',
-            currency: 'diamonds',
-            amount: 1,
-            x: destroyedWall.x,
-            y: destroyedWall.y,
-            message: '💎 Encontraste 1 diamante.'
-          });
-          sendStats(shooter);
-        }
-
         broadcastRoom(shooter.room, {
           type: 'wall_dead',
           id: destroyedWall.id,
           x: destroyedWall.x,
           y: destroyedWall.y,
-          diamond: diamondReward ? shooter.id : null
+          diamond: null
         });
       }
     }
@@ -1283,14 +1427,17 @@ function handleShot(ws) {
       targetMaxHp
     );
 
-    addDefenseXp(target, actualDamage);
+    addDefenseXp(target, Math.max(1, Math.round(actualDamage * 8)));
 
     send(targetPlayer.ws, {
       type: 'pvp_damage',
       from: shooter.id,
       amount: damage,
       hp: target.hp,
-      maxHp: targetMaxHp
+      maxHp: targetMaxHp,
+      defenseXp: masteryXpIntoLevel(target.defenseXp),
+      defenseXpNeed: masteryXpToNextLevel(masteryLevelFromXp(target.defenseXp)),
+      defenseLevel: masteryLevelFromXp(target.defenseXp)
     });
 
     broadcastRoom(shooter.room, {
@@ -1308,7 +1455,10 @@ function handleShot(ws) {
       target: target.id,
       amount: actualDamage,
       x: target.x,
-      y: target.y
+      y: target.y,
+      damageXp: masteryXpIntoLevel(shooter.damageXp),
+      damageXpNeed: masteryXpToNextLevel(masteryLevelFromXp(shooter.damageXp)),
+      damageLevel: masteryLevelFromXp(shooter.damageXp)
     });
 
     if (target.hp <= 0) {
@@ -1366,7 +1516,8 @@ function handleShot(ws) {
   }
 
   if (targetEnemy) {
-    targetEnemy.hp = clamp(targetEnemy.hp - damage, 0, targetEnemy.maxHp);
+    const incomingDamage = targetEnemy.kind === 'boss' ? Math.max(1, Math.round(damage * 0.62)) : damage;
+    targetEnemy.hp = clamp(targetEnemy.hp - incomingDamage, 0, targetEnemy.maxHp);
 
     broadcastRoom(shooter.room, {
       type: 'enemy_hit',
@@ -1376,39 +1527,59 @@ function handleShot(ws) {
       y: targetEnemy.y
     });
 
+    const masteryGain = Math.max(1, Math.round(damage * (targetEnemy.kind === 'boss' ? 0.55 : 0.35)));
+    addDamageXp(shooter, masteryGain);
+
     send(shooter.ws, {
       type: 'hit_confirm',
       kind: 'enemy',
       target: targetEnemy.id,
       amount: damage,
       x: targetEnemy.x,
-      y: targetEnemy.y
+      y: targetEnemy.y,
+      damageXp: masteryXpIntoLevel(shooter.damageXp),
+      damageXpNeed: masteryXpToNextLevel(masteryLevelFromXp(shooter.damageXp)),
+      damageLevel: masteryLevelFromXp(shooter.damageXp)
     });
 
     if (targetEnemy.hp <= 0) {
-      const reward = targetEnemy.kind === 'elite' ? 30 : 12;
-      const xp = targetEnemy.kind === 'elite' ? 35 : 20;
+      const isBoss = targetEnemy.kind === 'boss';
+      const reward = isBoss ? 2500 : targetEnemy.kind === 'elite' ? 120 : 25;
+      const xp = isBoss ? 1500 : targetEnemy.kind === 'elite' ? 120 : 45;
+      const diamonds = isBoss ? BOSS_DIAMOND_REWARD : 0;
 
       shooter.gold = (shooter.gold || 0) + reward;
+      shooter.diamonds = (shooter.diamonds || 0) + diamonds;
 
       const index = enemies.findIndex((enemy) => enemy.id === targetEnemy.id);
       if (index >= 0) enemies.splice(index, 1);
+      scheduleEnemyRespawn(shooter.room, targetEnemy.kind);
 
       shooter.kills = (shooter.kills || 0) + 1;
       shooter.score = (shooter.score || 0) + reward;
       shooter.xp = (shooter.xp || 0) + xp;
-      addDamageXp(shooter, xp);
+      addDamageXp(shooter, isBoss ? 250 : xp);
 
       levelUpIfNeeded(shooter);
-
       void persistPlayer(shooter);
-
       sendStats(shooter);
+
+      if (isBoss) {
+        send(shooter.ws, {
+          type: 'boss_reward',
+          gold: reward,
+          diamonds,
+          xp,
+          message: '👑 PRIMER BOSS DERROTADO · +25 💎'
+        });
+      }
 
       broadcastRoom(shooter.room, {
         type: 'enemy_dead',
         id: targetEnemy.id,
-        killer: shooter.id
+        killer: shooter.id,
+        boss: isBoss,
+        respawnMs: isBoss ? BOSS_RESPAWN_MS : MOB_RESPAWN_MS
       });
     }
   }
@@ -1510,7 +1681,7 @@ const httpServer = http.createServer(async (req, res) => {
           players: clients.size,
           publicRooms: PUBLIC_ROOMS.length,
           walls: WORLD_WALLS.length,
-          enemyTarget: 18,
+          enemyTarget: MOB_TARGET_COUNT + 1,
           storageConfigured: Boolean(process.env.DATABASE_URL),
           storageReady: storage.enabled
         }
@@ -1957,94 +2128,74 @@ setInterval(() => {
 
 setInterval(() => {
   const now = Date.now();
+  const dt = TICK_MS / 1000;
+
   for (const [code, room] of rooms) {
     if (!room.size) continue;
 
     restoreDueWalls(code, true);
+    restoreDueEnemies(code, true);
+
     const enemies = ensureRoomEnemies(code);
     const walls = ensureRoomWalls(code);
     const players = roomPlayers(room).filter((p) => p.alive && !p.frozen);
 
-    for (const enemy of enemies) {
+    for (const enemy of [...enemies]) {
+      const fromHome = Math.hypot(enemy.x - enemy.homeX, enemy.y - enemy.homeY);
+      if (fromHome > enemy.leashRadius) {
+        despawnEnemy(code, enemy, 'leash');
+        continue;
+      }
+
       let target = null;
-      let best = Infinity;
+      let best = enemy.aggroRadius;
 
       for (const pl of players) {
+        if (inSafeZone(pl.x, pl.y, 24)) continue;
         const d = Math.hypot(pl.x - enemy.x, pl.y - enemy.y);
-        if (d < best) {
+        if (d <= best) {
           best = d;
           target = pl;
         }
       }
 
-      if (target && inSafeZone(target.x, target.y, 24)) target = null;
-
       if (target) {
-        const distance = Math.max(best, 1);
-        const dx = (target.x - enemy.x) / distance;
-        const dy = (target.y - enemy.y) / distance;
-
-        enemy.vx = dx * enemy.speed;
-        enemy.vy = dy * enemy.speed;
-
-        const nextX = clamp(enemy.x + enemy.vx * (TICK_MS / 1000), 35, WORLD.w - 35);
-        const nextY = clamp(enemy.y + enemy.vy * (TICK_MS / 1000), 35, WORLD.h - 35);
-
-        if (!collidesWithWall(nextX, nextY, enemy.r, walls)) {
-          enemy.x = nextX;
-          enemy.y = nextY;
-        }
-
-        if (inSafeZone(enemy.x, enemy.y, enemy.r)) {
-          const dxSafe = enemy.x - SAFE_ZONE.x;
-          const dySafe = enemy.y - SAFE_ZONE.y;
-          const dSafe = Math.max(1, Math.hypot(dxSafe, dySafe));
-
-          enemy.x =
-            SAFE_ZONE.x + (dxSafe / dSafe) * (SAFE_ZONE.r + enemy.r + 4);
-          enemy.y =
-            SAFE_ZONE.y + (dySafe / dSafe) * (SAFE_ZONE.r + enemy.r + 4);
-        }
+        moveEnemyToward(enemy, target.x, target.y, dt, walls);
 
         if (
           best < enemy.r + 24 &&
-          now - (enemy.lastAttackAt || 0) >= ENEMY_ATTACK_COOLDOWN_MS &&
+          now - (enemy.lastAttackAt || 0) >= (enemy.attackCooldown || ENEMY_ATTACK_COOLDOWN_MS) &&
           hasLineOfSight(enemy.x, enemy.y, target.x, target.y, walls)
         ) {
           enemy.lastAttackAt = now;
-          const actualDamage =
-            Math.max(0.5, enemy.damage - (target.defense || 0)) *
-            (TICK_MS / 1000);
+          const rawDamage = Math.max(0.5, enemy.damage - (target.defense || 0));
+          const actualDamage = rawDamage * dt;
 
-          target.hp = clamp(
-            target.hp - actualDamage,
-            0,
-            maxHpForLevel(target.level)
-          );
-
-          addDefenseXp(target, actualDamage);
+          target.hp = clamp(target.hp - actualDamage, 0, maxHpForLevel(target.level));
+          addDefenseXp(target, Math.max(1, Math.round(rawDamage * 5)));
 
           const found = findPlayer(target.id, room);
           if (found) {
             send(found.ws, {
               type: 'pve_damage',
-              amount: enemy.damage * (TICK_MS / 1000),
+              amount: actualDamage,
               hp: target.hp,
-              maxHp: maxHpForLevel(target.level)
+              maxHp: maxHpForLevel(target.level),
+              defenseXp: masteryXpIntoLevel(target.defenseXp),
+              defenseXpNeed: masteryXpToNextLevel(masteryLevelFromXp(target.defenseXp)),
+              defenseLevel: masteryLevelFromXp(target.defenseXp),
+              boss: enemy.kind === 'boss'
             });
           }
 
           if (target.hp <= 0 && target.alive && !target.frozen) {
             target.alive = false;
-
             const lostScore = target.score || 0;
-
             applyDeathPenalty(target);
             respawnAfterDeath(target);
             void persistPlayer(target);
 
             const foundTarget = findPlayer(target.id, room);
-
             if (foundTarget) {
               send(foundTarget.ws, {
                 type: 'pve_dead',
@@ -2063,19 +2214,36 @@ setInterval(() => {
               });
               sendStats(target);
             }
-
             sendPlayerList(code);
           }
         }
+        continue;
+      }
+
+      if (!enemy.patrolUntil || now >= enemy.patrolUntil ||
+          Math.hypot(enemy.patrolTargetX - enemy.x, enemy.patrolTargetY - enemy.y) < 18) {
+        choosePatrolTarget(enemy, walls);
+      }
+
+      if (Math.hypot(enemy.x - enemy.homeX, enemy.y - enemy.homeY) > enemy.areaRadius * 0.92) {
+        moveEnemyToward(enemy, enemy.homeX, enemy.homeY, dt, walls);
+      } else {
+        moveEnemyToward(enemy, enemy.patrolTargetX, enemy.patrolTargetY, dt, walls);
       }
     }
 
-    while (enemies.length < 18) enemies.push(makeEnemy());
+    const regularCount = enemies.filter((enemy) => enemy.kind !== 'boss').length;
+    const pendingRegular = pendingEnemyKindCount(code, 'drone') + pendingEnemyKindCount(code, 'elite');
+    for (let i = regularCount + pendingRegular; i < MOB_TARGET_COUNT; i++) {
+      const elites = enemies.filter((enemy) => enemy.kind === 'elite').length + pendingEnemyKindCount(code, 'elite');
+      enemies.push(createEnemy(elites < 2 ? 'elite' : 'drone'));
+    }
 
-    broadcastRoom(code, {
-      type: 'enemy_state',
-      enemies
-    });
+    if (!enemies.some((enemy) => enemy.kind === 'boss') && pendingEnemyKindCount(code, 'boss') === 0) {
+      enemies.push(createEnemy('boss'));
+    }
+
+    broadcastRoom(code, { type: 'enemy_state', enemies });
   }
 }, ENEMY_SYNC_MS);
 
