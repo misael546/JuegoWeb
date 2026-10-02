@@ -213,9 +213,18 @@ test('tienda de skins: NPC, pestañas y código de regalo', async ({ page }) => 
 
   await waitForLiveGame(page, '12345', {errors,wsEvents:[]});
 
-  await page.keyboard.down('a');
-  await expect(page.locator('#cosmeticShop')).toHaveCSS('display', 'flex', {timeout:3000});
-  await page.keyboard.up('a');
+  const startPos = parsePos(await page.locator('#neonDiag').innerText());
+  const moveKeys = [];
+  if (2940 - startPos.x > 10) moveKeys.push('d');
+  else if (2940 - startPos.x < -10) moveKeys.push('a');
+  if (2200 - startPos.y > 10) moveKeys.push('s');
+  else if (2200 - startPos.y < -10) moveKeys.push('w');
+  for (const key of moveKeys) await page.keyboard.down(key);
+  try {
+    await expect(page.locator('#cosmeticShop')).toHaveCSS('display', 'flex', {timeout:5000});
+  } finally {
+    for (const key of moveKeys) await page.keyboard.up(key);
+  }
   await expect(page.locator('.shopTab[data-shop-tab="gold"]')).toBeVisible();
   await expect(page.locator('.shopTab[data-shop-tab="diamonds"]')).toBeVisible();
   await expect(page.locator('.shopTab[data-shop-tab="real"]')).toBeVisible();
