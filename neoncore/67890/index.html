@@ -144,7 +144,7 @@ const neonDiag={inputEvents:0,lastInput:0,lastSync:"none",frames:0,started:perfo
   window.neonDiag=neonDiag;
   window.updateNeonDiag=()=>{
     const ws=multiplayerSocket?multiplayerSocket.readyState:-1;
-    box.textContent="B122 DIAG\\n"+
+    box.textContent="B123 DIAG\\n"+
       "game:"+!!gameActive+" alive:"+!!p.alive+"\\n"+
       "input:"+moveX.toFixed(2)+","+moveY.toFixed(2)+" ev:"+neonDiag.inputEvents+"\\n"+
       "pos:"+Math.round(p.x)+","+Math.round(p.y)+" sp:"+Math.round(p.speed)+"\\n"+
