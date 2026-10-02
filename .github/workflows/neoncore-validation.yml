@@ -61,8 +61,8 @@ jobs:
           if (new Set(versions).size !== 1) throw new Error('Build mismatch: ' + versions.join(', '));
           if (!/^20261001-\d+$/.test(versions[0])) throw new Error('Invalid build marker: ' + versions[0]);
           const root = fs.readFileSync('index.html','utf8');
-if (!root.includes('location.replace("neoncore/")')) throw new Error('Root launcher is not synchronized');
-const roomsPage = fs.readFileSync('neoncore/index.html','utf8');
-if (!roomsPage.includes('20261001-123')) throw new Error('Rooms page build marker missing');
-console.log('Build synchronization: OK');
+          if (!root.includes('location.replace("neoncore/")')) throw new Error('Root launcher is not synchronized');
+          const roomsPage = fs.readFileSync('neoncore/index.html','utf8');
+          if (!roomsPage.includes('20261001-123')) throw new Error('Rooms page build marker missing');
+          console.log('Build synchronization: OK');
           NODE
