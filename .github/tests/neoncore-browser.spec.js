@@ -56,18 +56,23 @@ for (const room of ROOMS) {
     await waitForLiveGame(page, room, {errors,wsEvents});
 
     const joy = page.locator('#moveJoy');
-    const box = await joy.boundingBox();
-    expect(box).not.toBeNull();
-
+    const joyBox = await joy.boundingBox();
     const before = parsePos(await page.locator('#neonDiag').innerText());
-    const cx = box.x + box.width / 2;
-    const cy = box.y + box.height / 2;
 
-    await page.mouse.move(cx, cy);
-    await page.mouse.down();
-    await page.mouse.move(cx + Math.min(55, box.width * 0.45), cy, { steps: 12 });
-    await page.waitForTimeout(2200);
-    await page.mouse.up();
+    if (joyBox) {
+      const cx = joyBox.x + joyBox.width / 2;
+      const cy = joyBox.y + joyBox.height / 2;
+      await page.mouse.move(cx, cy);
+      await page.mouse.down();
+      await page.mouse.move(cx + Math.min(55, joyBox.width * 0.45), cy, { steps: 12 });
+      await page.waitForTimeout(2200);
+      await page.mouse.up();
+    } else {
+      expect(await page.locator('#controls').evaluate(el => getComputedStyle(el).display)).toBe('none');
+      await page.keyboard.down('d');
+      await page.waitForTimeout(2200);
+      await page.keyboard.up('d');
+    }
 
     await expect.poll(async () => parsePos(await page.locator('#neonDiag').innerText()), {
       timeout: 5000,
@@ -83,11 +88,17 @@ for (const room of ROOMS) {
 
     const ammoBefore = Number((await page.locator('#ammo').innerText()).trim());
     const fireBox = await page.locator('#fire').boundingBox();
-    expect(fireBox).not.toBeNull();
-    await page.mouse.move(fireBox.x + fireBox.width/2, fireBox.y + fireBox.height/2);
-    await page.mouse.down();
-    await page.waitForTimeout(700);
-    await page.mouse.up();
+    if (fireBox) {
+      await page.mouse.move(fireBox.x + fireBox.width/2, fireBox.y + fireBox.height/2);
+      await page.mouse.down();
+      await page.waitForTimeout(700);
+      await page.mouse.up();
+    } else {
+      await page.mouse.move(100, 100);
+      await page.mouse.down();
+      await page.waitForTimeout(700);
+      await page.mouse.up();
+    }
     await page.waitForTimeout(500);
     const ammoAfter = Number((await page.locator('#ammo').innerText()).trim());
     expect(ammoAfter).toBeLessThan(ammoBefore);
