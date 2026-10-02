@@ -11,7 +11,7 @@ const WORLD = { w: 6000, h: 4400 };
 const MAX_PLAYERS = 16;
 const SAFE_ZONE = { x: 3000, y: 2200, r: 300 };
 
-const SERVER_VERSION = '20261002-140';
+const SERVER_VERSION = '20261002-141';
 
 const AMMO_PACK_SIZE = 50;
 const AMMO_PACK_COST = 50;
@@ -1045,11 +1045,12 @@ function cosmeticShopNearby(p) {
   return !!p && Math.hypot(p.x - COSMETIC_SHOP_NPC.x, p.y - COSMETIC_SHOP_NPC.y) <= COSMETIC_SHOP_INTERACTION_RADIUS;
 }
 
-function sendCosmeticState(p, message = 'Tienda de cosméticos lista.') {
+function sendCosmeticState(p, message = 'Tienda de cosméticos lista.', unlockedSkin = '') {
   if (!p?.ws) return;
   send(p.ws, {
     type: 'cosmetic_state',
     message,
+    unlockedSkin: cosmetics.getSkin(unlockedSkin) ? unlockedSkin : '',
     ownedSkins: cosmetics.normalizeOwnedSkins(p.ownedSkins),
     equippedSkin: cosmetics.getSkin(p.equippedSkin) ? p.equippedSkin : 'core_default',
     cosmeticShopNpc: COSMETIC_SHOP_NPC,
@@ -1141,7 +1142,7 @@ async function redeemCosmeticCode(ws, rawCode) {
   p.equippedSkin = skin.id;
 
   await persistPlayer(p);
-  sendCosmeticState(p, reward.message);
+  sendCosmeticState(p, reward.message, skin.id);
   sendStats(p);
   sendPlayerList(p.room);
 }
