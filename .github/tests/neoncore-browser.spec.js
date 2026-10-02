@@ -8,7 +8,7 @@ function parsePos(text) {
   return { x: Number(m[1]), y: Number(m[2]) };
 }
 
-async function waitForLiveGame(page, room) {
+async function waitForLiveGame(page, room, debug) {
   await page.goto(`https://misael546.github.io/JuegoWeb/neoncore/${room}/?ci=${Date.now()}`, {
     waitUntil: 'domcontentloaded',
     timeout: 45000
@@ -41,7 +41,7 @@ for (const room of ROOMS) {
       if (!url.includes('favicon')) errors.push('REQUESTFAILED: ' + url + ' :: ' + (req.failure()?.errorText || 'unknown'));
     });
 
-    await waitForLiveGame(page, room);
+    await waitForLiveGame(page, room, {errors,wsEvents});
 
     const joy = page.locator('#moveJoy');
     const box = await joy.boundingBox();
