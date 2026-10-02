@@ -192,6 +192,7 @@ function publicPlayer(p) {
     speed: p.speed,
     color: p.color,
     weapon: p.weapon,
+    equippedWeaponSkin: cosmetics.getWeaponSkin(p.equippedWeaponSkin) ? p.equippedWeaponSkin : '',
     equippedSkin: cosmetics.getSkin(p.equippedSkin) ? p.equippedSkin : ''
   };
 }
@@ -212,8 +213,8 @@ function sendPlayerList(code) {
 function sendStats(p) {
   if (!p?.ws) return;
   const nextKills = p.kills % 5 === 0 ? 5 : 5 - (p.kills % 5);
-  const weapon = WEAPONS[p.weapon] || WEAPONS.blaster;
-  const attackLevel = Number(weapon.tier) || 1;
+  const weapon = WEAPONS[p.weapon] || null;
+  const attackLevel = Number(weapon?.tier) || 0;
   const maxAmmo = maxAmmoForWeapon(p.weapon);
 
   send(p.ws, {
@@ -230,7 +231,7 @@ function sendStats(p) {
     maxHp: maxHpForLevel(p.level),
     xpNeed: xpToNextLevel(p.level),
     attackLevel,
-    attackPower: p.damage || weapon.damage,
+    attackPower: Number(p.damage) || 10,
     attackFill: Math.round((attackLevel / 5) * 100),
     defense: skinDefenseBonus(p),
     defenseMax: 125,
@@ -282,7 +283,7 @@ function capturePlayerData(p) {
     damagePenalty: Math.max(0, Number(p.damagePenalty) || 0),
     defensePenalty: Math.max(0, Number(p.defensePenalty) || 0),
     ownedSkins: cosmetics.normalizeOwnedSkins(p.ownedSkins),
-    equippedSkin: cosmetics.getSkin(p.equippedSkin) ? p.equippedSkin : 'core_default',
+    equippedSkin: cosmetics.getSkin(p.equippedSkin) ? p.equippedSkin : '',
     redeemedCodes: cosmetics.normalizeRedeemedCodes(p.redeemedCodes)
   };
 }
@@ -1461,8 +1462,14 @@ function handleShot(ws) {
   const room = rooms.get(shooter.room);
   if (!room) return;
 
-  const damage = clamp(Number(shooter.damage) || 35, 10, 1000);
-  const maxRange = 1000;
+  const weapon = WEAPONS[shooter.weapon];
+  if (!weapon) {
+    send(ws, { type: 'shot_result', ok: false, reason: 'no_weapon', ammo: 0, maxAmmo: 0 });
+    return;
+  }
+
+  const damage = clamp(Number(shooter.damage) || weapon.damage, 10, 1000);
+  const maxRange = Number(weapon.range) || 760;
 
   let targetPlayer = null;
   let targetEnemy = null;
@@ -1534,16 +1541,35 @@ function handleShot(ws) {
     }
   }
 
+  const impactDistance = Math.min(maxRange, nearestWallDistance, best);
+  const impactX = shooter.x + dirX * impactDistance;
+  const impactY = shooter.y + dirY * impactDistance;
+  const hitKind = nearestWall && nearestWallDistance <= best
+    ? 'wall'
+    : targetPlayer
+      ? 'player'
+      : targetEnemy
+        ? 'enemy'
+        : 'range';
+  const hitTarget = targetPlayer?.p?.id || targetEnemy?.id || '';
+
   shooter.ammo = Math.max(0, (shooter.ammo || 0) - 1);
 
   send(ws, {
     type: 'shot_result',
     ok: true,
     ammo: shooter.ammo,
+    maxAmmo: maxRange > 0 ? maxAmmoForWeapon(shooter.weapon) : 0,
     x: shooter.x,
     y: shooter.y,
     angle: shooter.angle,
-    damage
+    damage,
+    range: maxRange,
+    travelDistance: impactDistance,
+    impactX,
+    impactY,
+    hitKind,
+    hitTarget
   });
 
   sendStats(shooter);
