@@ -9,7 +9,7 @@
 <script>
 (function(){
   try{
-    var v="20261001-128";
+    var v="20261001-129";
     var k="neon_core_build";
     window.NEON_CORE_BUILD=v;
     var old=localStorage.getItem(k);
@@ -26,7 +26,7 @@
   }catch(e){}
 })();
 </script>
-<title>Neon Core · Build 128</title>
+<title>Neon Core · Build 129</title>
 <style>
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#050811;color:#fff;font-family:Arial,sans-serif;touch-action:none}
 #game{display:block;width:100vw;height:100vh}
@@ -52,13 +52,14 @@
 @media(min-width:800px){#controls{display:none!important}}
 .pcHint{display:none;position:fixed;left:50%;bottom:12px;transform:translateX(-50%);z-index:7;padding:7px 11px;border:1px solid #26344e;border-radius:9px;background:rgba(5,8,17,.82);color:#9ca9bd;font:11px Arial,sans-serif;pointer-events:none}html.pc-controls #controls{display:none!important}html.pc-controls #controlConfigBtn{display:none!important}html.pc-controls .pcHint{display:block!important}html.touch-controls .pcHint{display:none!important}
 #roomActions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}#roomActions button{width:100%;min-height:44px;border:0;border-radius:10px;background:#183d58;color:#fff;font-weight:bold}#roomCodeInput{width:100%;padding:13px;border:1px solid #33415d;background:#111a2d;color:white;border-radius:10px;font-size:16px;outline:none;margin-top:8px;text-transform:uppercase}@media(max-width:799px){#playersPanel{top:8px;right:calc(min(42vw,150px) + 14px);width:min(160px,42vw)}#controlConfigBtn{display:block}#hud{top:8px;left:8px;right:8px}.panel{padding:7px 8px;font-size:12px}#bars{min-width:0;width:min(190px,58vw)}#hud>.panel:last-child{white-space:nowrap}#gameActions{top:74px;left:8px}#gameActions button{min-height:38px;padding:0 9px;font-size:11px}#minimapWrap{top:8px;right:8px;width:min(150px,42vw);height:min(112px,32vw);padding:5px}#playersPanel{top:126px;right:8px;width:min(180px,48vw);padding:7px 8px;font-size:11px}#playersList{max-height:130px;gap:3px}#controls{padding:12px}.joy{width:100px;height:100px}.stick{width:44px;height:44px;left:28px;top:28px}#fire{width:78px;height:78px}}@media(max-width:430px){#hud>.panel:last-child{max-width:105px;overflow:hidden;text-overflow:ellipsis}#playersPanel{max-width:45vw}.onlinePlayer{font-size:10px}} .shopGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:8px 0}.shopItem{min-height:58px;border:1px solid #263b55;border-radius:9px;background:#0d1827;color:#fff;padding:6px}.shopItem strong{display:block;color:#39e7ff;font-size:11px}.shopItem small{display:block;color:#9ca9bd;font-size:9px;margin-top:3px}.shopItem:active{transform:scale(.97)}#weaponHud{margin-top:5px;color:#9ca9bd;font-size:11px;letter-spacing:1px}#weaponName{color:#39e7ff}#resourceHud{display:flex;gap:10px;margin-top:5px;color:#dffbff;font-size:12px}#resourceHud span{background:#0b1424;border:1px solid #26344e;border-radius:7px;padding:3px 6px}#ammoShop,.shopItem,#buyAmmoBtn{touch-action:manipulation;pointer-events:auto}#ammoShop{position:fixed;left:50%;bottom:112px;transform:translateX(-50%);z-index:8;display:none;min-width:min(310px,88vw);background:rgba(5,8,17,.94);border:1px solid #39e7ff;border-radius:14px;padding:12px;text-align:center;backdrop-filter:blur(6px);box-shadow:0 8px 30px #000}#ammoShop b{display:block;color:#39e7ff;font-size:13px}#ammoShop span{display:block;color:#c8d3e5;font-size:12px;margin:4px 0 8px}#buyAmmoBtn{width:100%;min-height:42px;border:0;border-radius:9px;background:#183d58;color:#fff;font-weight:bold}#shopMsg{display:block;color:#9ca9bd;margin-top:7px;font-size:11px}#fire:disabled{filter:grayscale(1);opacity:.45}html.public-room #nameBox{display:none!important}
+#cosmeticShop{position:fixed;inset:0;display:none;align-items:center;justify-content:center;padding:14px;z-index:80;background:rgba(1,4,10,.66);backdrop-filter:blur(6px);pointer-events:auto;touch-action:auto}.cosmeticShopCard{position:relative;width:min(760px,96vw);max-height:min(86vh,760px);overflow:auto;background:linear-gradient(180deg,#0b1425,#070d18);border:1px solid #39e7ff66;border-radius:20px;padding:18px;box-shadow:0 20px 80px #000}.cosmeticShopHead{display:flex;align-items:center;gap:12px}.cosmeticShopTitle{flex:1}.cosmeticShopTitle strong{display:block;color:#39e7ff;letter-spacing:2px;font-size:20px}.cosmeticShopTitle small{display:block;color:#8ea0b8;margin-top:3px}.cosmeticShopClose{width:38px;height:38px;border:1px solid #33415d;border-radius:10px;background:#111a2d;color:#fff;font-size:22px}.cosmeticBalance{display:flex;flex-wrap:wrap;gap:7px;margin:12px 0}.cosmeticBalance span{background:#0a1220;border:1px solid #26344e;border-radius:9px;padding:7px 10px;color:#dffbff;font-size:12px}.shopTabs{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;margin:10px 0}.shopTab{min-height:42px;border:1px solid #26344e;border-radius:10px;background:#111a2d;color:#9ca9bd;font-weight:900}.shopTab.active{background:#183d58;border-color:#39e7ff;color:#fff}.cosmeticGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}.cosmeticCard{border:1px solid #26344e;border-radius:13px;background:#0c1625;color:#fff;padding:9px;text-align:left;min-height:145px;display:flex;flex-direction:column;gap:6px}.cosmeticCard:hover{border-color:#39e7ff}.cosmeticCard.owned{border-color:#5bcb93aa}.cosmeticCard.locked{opacity:.76}.cosmeticCard:disabled{cursor:not-allowed}.skinPreview{width:58px;height:58px;border-radius:50%;margin:1px auto 2px;border:2px solid #fff4;box-shadow:0 0 15px #000,inset 0 0 14px #fff2;position:relative}.skinPreview:after{content:"";position:absolute;inset:12px;border-radius:50%;border:2px solid #fff7;opacity:.7}.skin-core-default{background:radial-gradient(circle at 35% 28%,#dfffff,#39e7ff 42%,#12627b 78%,#09111f)}.skin-pixel-cyan{background:radial-gradient(circle at 34% 28%,#fff,#70f5ff 35%,#39e7ff 65%,#07506d)}.skin-rust-core{background:radial-gradient(circle at 33% 28%,#ffe2b1,#d97835 36%,#703112 70%,#27110a)}.skin-toxic-orb{background:radial-gradient(circle at 34% 25%,#eaffc3,#8cff66 34%,#2c972a 67%,#082a12);box-shadow:0 0 22px #72ff5d55,inset 0 0 16px #fff3}.skin-plasma-violet{background:radial-gradient(circle at 35% 25%,#fff,#e3b3ff 24%,#a855f7 54%,#3d176b 82%,#10061e);box-shadow:0 0 25px #a855f766,inset 0 0 18px #fff4}.skin-aurora{background:linear-gradient(145deg,#39e7ff,#82ffd7 42%,#a855f7 72%,#261343);box-shadow:0 0 25px #39e7ff55,inset 0 0 18px #fff4}.skin-eclipse-gold{background:radial-gradient(circle at 50% 45%,#2a2d39 0 45%,#0a0b10 64%);border-color:#ffd76a;box-shadow:0 0 20px #ffd76a66,inset 0 0 14px #ffd76a44}.skin-celestial{background:radial-gradient(circle at 35% 30%,#d6efff,#4d90ff 37%,#202a8e 68%,#090a29);box-shadow:0 0 25px #5d8dff77,inset 0 0 16px #fff4}.skin-eternal-void{background:radial-gradient(circle at 45% 45%,#25122f,#08050d 52%,#020207 74%);border-color:#e879ff;box-shadow:0 0 30px #e879ff66,0 0 50px #39e7ff2e,inset 0 0 18px #e879ff44}.cosmeticCard strong{font-size:12px;letter-spacing:.5px}.cosmeticCard small{color:#9ca9bd;font-size:10px;line-height:1.3}.cosmeticCost{margin-top:auto;color:#dffbff;font-weight:900;font-size:11px}.cosmeticAction{min-height:31px;border:0;border-radius:8px;background:#183d58;color:#fff;font-weight:bold;font-size:10px}.cosmeticCard.owned .cosmeticAction{background:#1d5f4e}.codeBox{margin-top:13px;padding:11px;border:1px solid #26344e;border-radius:12px;background:#091321}.codeBox b{display:block;color:#39e7ff;font-size:12px}.codeRow{display:flex;gap:7px;margin-top:7px}.codeRow input{min-width:0;flex:1;padding:10px;border:1px solid #33415d;border-radius:9px;background:#111a2d;color:#fff;outline:none;text-transform:uppercase}.codeRow button{min-width:110px;border:0;border-radius:9px;background:#39e7ff;color:#041019;font-weight:900}.cosmeticMsg{display:block;min-height:18px;margin-top:7px;color:#9ca9bd;font-size:11px}.premiumGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.premiumCard{border:1px dashed #7f8da366;border-radius:13px;padding:12px;background:#09111c}.premiumCard strong{display:block;color:#dffbff}.premiumCard small{display:block;color:#8ea0b8;min-height:32px;margin:5px 0}.premiumCard button{width:100%;min-height:35px;border:0;border-radius:8px;background:#26344e;color:#74839a;font-weight:bold}.shopNpcHint{position:fixed;left:50%;bottom:64px;transform:translateX(-50%);z-index:79;background:rgba(5,8,17,.9);border:1px solid #39e7ff66;border-radius:10px;padding:7px 11px;color:#dffbff;font-size:11px;pointer-events:none}@media(max-width:700px){.cosmeticShopCard{padding:13px;border-radius:16px;max-height:90vh}.cosmeticGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.premiumGrid{grid-template-columns:1fr}.skinPreview{width:52px;height:52px}.cosmeticCard{min-height:138px}.shopTabs{gap:5px}.shopTab{font-size:11px}.codeRow{flex-direction:column}.codeRow button{min-height:40px}.shopNpcHint{bottom:108px}}
 </style>
 <script>
 (function(){try{if(/\/(?:12345|67890)(?:\/|\/index\.html)?(?:$|[?#])/.test(location.pathname+location.search)){document.documentElement.classList.add("public-room");}}catch(e){}})();
 </script>
 </head>
 <body>
-<canvas id="game"></canvas><div id="buildDisplay">NEON CORE · Build 128</div>
+<canvas id="game"></canvas><div id="buildDisplay">NEON CORE · Build 129</div>
 
 <div id="hud">
   <div class="panel" id="bars">
@@ -70,7 +71,7 @@
 </div>
 
 <div id="minimapWrap"><canvas id="minimap" width="360" height="270"></canvas><span id="minimapTitle">MINIMAPA</span></div><div id="ammoShop" aria-live="polite"><b>🛠 ARSENAL NEON</b><span>Compra armas y munición. El oro se conserva al volver.</span><div class="shopGrid"><button class="shopItem" data-weapon="blaster" type="button"><strong>BLASTER</strong><small>25 daño · 350ms · GRATIS</small></button><button class="shopItem" data-weapon="pulse" type="button"><strong>PULSE</strong><small>18 daño · 170ms · 🪙 150</small></button><button class="shopItem" data-weapon="cannon" type="button"><strong>CANNON</strong><small>65 daño · 700ms · 🪙 300</small></button></div><button id="buyAmmoBtn" type="button">🔸 COMPRAR 50 BALAS · 🪙 50</button><small id="shopMsg">Elige un arma o compra munición.</small></div>
-<div id="toastFeed" aria-live="polite"></div><div class="pcHint">PC: WASD / flechas para moverte · mouse para apuntar · clic izquierdo para disparar · ESPACIO también dispara</div><button id="chatToggle" type="button" aria-expanded="false" aria-controls="chatBox">💬 CHAT</button><div id="chatBox" aria-label="Chat del servidor" style="display:none"><button id="chatCloseStatic" type="button" aria-label="Cerrar chat">×</button><div id="chatMessages" aria-live="polite"></div><form id="chatForm"><input id="chatInput" maxlength="120" autocomplete="off" placeholder="Escribe un mensaje…"><button id="chatSend" type="submit">ENVIAR</button></form><div id="chatHint">Enter para enviar · máximo 120 caracteres</div></div>
+<div id="cosmeticShop" aria-hidden="true"><div class="cosmeticShopCard"><div class="cosmeticShopHead"><div class="cosmeticShopTitle"><strong>🧩 TIENDA NEON</strong><small>Skins circulares y cosméticos. No cambian las estadísticas de combate.</small></div><button class="cosmeticShopClose" id="cosmeticShopClose" type="button" aria-label="Cerrar tienda">×</button></div><div class="cosmeticBalance"><span>🪙 <b id="cosmeticGold">0</b></span><span>💎 <b id="cosmeticDiamonds">0</b></span><span>🎨 <b id="cosmeticOwned">1</b> skins</span></div><div class="shopTabs"><button class="shopTab active" data-shop-tab="gold" type="button">🪙 ORO</button><button class="shopTab" data-shop-tab="diamonds" type="button">💎 DIAMANTES</button><button class="shopTab" data-shop-tab="real" type="button">💳 DINERO REAL</button></div><div id="skinShopGrid" class="cosmeticGrid"></div><div id="premiumGrid" class="premiumGrid" style="display:none"></div><div class="codeBox"><b>🎁 CÓDIGO DE REGALO</b><div class="codeRow"><input id="redeemCode" maxlength="32" placeholder="ESCRIBE TU CÓDIGO" autocomplete="off"><button id="redeemCodeBtn" type="button">CANJEAR</button></div><small id="cosmeticShopMsg" class="cosmeticMsg">Acércate al NPC para comprar o canjear.</small></div></div></div><div id="toastFeed" aria-live="polite"></div><div class="pcHint">PC: WASD / flechas para moverte · mouse para apuntar · clic izquierdo para disparar · ESPACIO también dispara</div><button id="chatToggle" type="button" aria-expanded="false" aria-controls="chatBox">💬 CHAT</button><div id="chatBox" aria-label="Chat del servidor" style="display:none"><button id="chatCloseStatic" type="button" aria-label="Cerrar chat">×</button><div id="chatMessages" aria-live="polite"></div><form id="chatForm"><input id="chatInput" maxlength="120" autocomplete="off" placeholder="Escribe un mensaje…"><button id="chatSend" type="submit">ENVIAR</button></form><div id="chatHint">Enter para enviar · máximo 120 caracteres</div></div>
 
 <div id="connectionOverlay" aria-live="polite"><div id="connectionCard"><div id="connectionSpinner"></div><b id="connectionTitle">CONECTANDO AL SERVIDOR</b><span id="connectionText">Despertando el servidor multiplayer…</span></div></div>
 
@@ -116,9 +117,27 @@ function resize(){W=innerWidth;H=innerHeight;DPR=Math.min(devicePixelRatio||1,2)
 addEventListener("resize",resize);resize();
 
 const world={w:6000,h:4400};
-const p={x:3000,y:2200,r:16,angle:0,hp:100,maxHp:100,xp:0,level:1,score:0,kills:0,pvpKills:0,damage:25,defense:0,speed:205,fireRate:350,lastShot:0,alive:true,gold:0,diamonds:0,ammo:60,maxAmmo:120,weapon:"blaster"};
+const p={x:3000,y:2200,r:16,angle:0,hp:100,maxHp:100,xp:0,level:1,score:0,kills:0,pvpKills:0,damage:25,defense:0,speed:205,fireRate:350,lastShot:0,alive:true,gold:0,diamonds:0,ammo:60,maxAmmo:120,weapon:"blaster",equippedSkin:"core_default"};
 const shopNpc={x:3600,y:2200,r:30};const weaponNames={blaster:"BLASTER",pulse:"PULSE",cannon:"CANNON"};
 const weaponStats={blaster:{damage:25,fireRate:350},pulse:{damage:18,fireRate:170},cannon:{damage:65,fireRate:700}};let shopOpen=false;
+const COSMETIC_SKINS=[
+{id:"core_default",name:"NÚCLEO ORIGINAL",rarity:"Común",currency:"free",price:0},
+{id:"pixel_cyan",name:"PIXEL CYAN",rarity:"Código",currency:"code",price:0},
+{id:"rust_core",name:"NÚCLEO OXIDADO",rarity:"Raro",currency:"gold",price:1500},
+{id:"toxic_orb",name:"ORBE TÓXICO",rarity:"Épico",currency:"gold",price:12000},
+{id:"plasma_violet",name:"PLASMA VIOLETA",rarity:"Mítico",currency:"gold",price:60000},
+{id:"aurora",name:"AURORA",rarity:"Épico",currency:"diamonds",price:250},
+{id:"eclipse_gold",name:"ECLIPSE DORADO",rarity:"Legendario",currency:"diamonds",price:2000},
+{id:"celestial",name:"CIELO CELESTE",rarity:"Legendario",currency:"diamonds",price:7500},
+{id:"eternal_void",name:"VACÍO ETERNO",rarity:"Supremo",currency:"diamonds",price:30000}
+];
+const PREMIUM_OFFERS=[
+{sku:"skin_pack_01",name:"PAQUETE NEON I",description:"Cosméticos exclusivos futuros.",priceUsd:2.99},
+{sku:"skin_pack_02",name:"PAQUETE NEON II",description:"Cosméticos premium futuros.",priceUsd:7.99},
+{sku:"skin_pack_03",name:"COLECCIÓN ETERNA",description:"Cosméticos de máxima rareza.",priceUsd:19.99}
+];
+let cosmeticShopNpc={x:3300,y:2500,r:32};
+let ownedSkins=["core_default"],equippedSkin="core_default",cosmeticShopTab="gold",cosmeticShopWasNear=false,cosmeticShopDismissedUntil=0;
 let bullets=[],enemies=[],drops=[],particles=[],walls=[],hitTexts=[];
 let serverXpNeed=100,serverKillsToLevel=5,serverDamageXp=0,serverDamageXpNeed=100,serverDamageLevel=1,serverDefenseXp=0,serverDefenseXpNeed=100,serverDefenseLevel=1;
 let gameActive=false;
@@ -281,7 +300,7 @@ function connectMultiplayer(roomMode="quick",roomCode=""){ const publicRoomAuto=
             if(Number.isFinite(me.defense))p.defense=me.defense;
             if(Number.isFinite(me.maxHp))p.maxHp=me.maxHp;else p.maxHp=100+(p.level-1)*15;
             if(Number.isFinite(me.speed))p.speed=me.speed;else p.speed=205+(p.level-1)*4;
-            if(me.weapon)p.weapon=me.weapon;
+            if(me.weapon)p.weapon=me.weapon;if(me.equippedSkin)p.equippedSkin=me.equippedSkin;
           }
           enemies.length=0;
           for(const e of (m.enemies||[])){e.targetX=e.x;e.targetY=e.y;e.shape=e.shape||"triangle";enemies.push(e);}
@@ -328,7 +347,7 @@ function connectMultiplayer(roomMode="quick",roomCode=""){ const publicRoomAuto=
             if(Number.isFinite(me.fireRate))p.fireRate=me.fireRate;
             if(Number.isFinite(me.maxHp))p.maxHp=me.maxHp;else p.maxHp=100+(p.level-1)*15;
             if(Number.isFinite(me.speed))p.speed=me.speed;else p.speed=205+(p.level-1)*4;
-            if(me.weapon)p.weapon=me.weapon;
+            if(me.weapon)p.weapon=me.weapon;if(me.equippedSkin)p.equippedSkin=me.equippedSkin;
           }
           updatePlayersFromList(m.players||[]);
         }else if(m.type==="welcome"){
@@ -342,11 +361,11 @@ function connectMultiplayer(roomMode="quick",roomCode=""){ const publicRoomAuto=
             if(old){
               old.targetX=m.player.x;old.targetY=m.player.y;old.targetAngle=m.player.angle;
               old.targetHp=m.player.hp;old.targetAlive=m.player.alive;
-              old.name=m.player.name;old.level=m.player.level;old.score=m.player.score;old.kills=m.player.kills;old.color=m.player.color;old.weapon=m.player.weapon;old.maxHp=m.player.maxHp;old.speed=m.player.speed;
+              old.name=m.player.name;old.level=m.player.level;old.score=m.player.score;old.kills=m.player.kills;old.color=m.player.color;old.weapon=m.player.weapon;old.equippedSkin=m.player.equippedSkin||"core_default";old.maxHp=m.player.maxHp;old.speed=m.player.speed;
             }else{
               m.player.targetX=m.player.x;m.player.targetY=m.player.y;m.player.targetAngle=m.player.angle;
               m.player.targetHp=m.player.hp;m.player.targetAlive=m.player.alive;
-              m.player.weapon=m.player.weapon||"blaster";m.player.maxHp=m.player.maxHp||100;m.player.speed=m.player.speed||205;
+              m.player.weapon=m.player.weapon||"blaster";m.player.equippedSkin=m.player.equippedSkin||"core_default";m.player.maxHp=m.player.maxHp||100;m.player.speed=m.player.speed||205;
               remotePlayers.set(m.player.id,m.player);
             }
           }
@@ -425,9 +444,25 @@ function connectMultiplayer(roomMode="quick",roomCode=""){ const publicRoomAuto=
           if(Number.isFinite(m.fireRate))p.fireRate=m.fireRate;
           if(Number.isFinite(m.speed))p.speed=m.speed;
           if(Number.isFinite(m.maxHp))p.maxHp=m.maxHp;
-          if(m.weapon&&weaponStats[m.weapon])p.weapon=m.weapon;
+          if(m.weapon&&weaponStats[m.weapon])p.weapon=m.weapon;if(m.equippedSkin)p.equippedSkin=m.equippedSkin;if(Array.isArray(m.ownedSkins))ownedSkins=m.ownedSkins;
           if(Number.isFinite(m.xpNeed))serverXpNeed=m.xpNeed;if(Number.isFinite(m.damageXp))serverDamageXp=m.damageXp;if(Number.isFinite(m.damageXpNeed))serverDamageXpNeed=m.damageXpNeed;if(Number.isFinite(m.damageLevel))serverDamageLevel=m.damageLevel;if(Number.isFinite(m.defenseXp))serverDefenseXp=m.defenseXp;if(Number.isFinite(m.defenseXpNeed))serverDefenseXpNeed=m.defenseXpNeed;if(Number.isFinite(m.defenseLevel))serverDefenseLevel=m.defenseLevel;
           if(Number.isFinite(m.killsToLevel))serverKillsToLevel=m.killsToLevel;if(Number.isFinite(m.bankedGold))p.bankedGold=m.bankedGold;if(Number.isFinite(m.bankedDiamonds))p.bankedDiamonds=m.bankedDiamonds;if(m.bankNpc){bankNpc.x=Number(m.bankNpc.x)||bankNpc.x;bankNpc.y=Number(m.bankNpc.y)||bankNpc.y;bankNpc.r=Number(m.bankNpc.r)||bankNpc.r;}if(Number.isFinite(m.gold))p.gold=m.gold;if(Number.isFinite(m.diamonds))p.diamonds=m.diamonds;if(Number.isFinite(m.ammo))p.ammo=m.ammo;if(Number.isFinite(m.maxAmmo))p.maxAmmo=m.maxAmmo;if(m.shopNpc){shopNpc.x=Number(m.shopNpc.x)||shopNpc.x;shopNpc.y=Number(m.shopNpc.y)||shopNpc.y;shopNpc.r=Number(m.shopNpc.r)||shopNpc.r;}if(m.weapon)p.weapon=m.weapon;updateResourceHud();
+        }else if(m.type==="cosmetic_state"){
+          ownedSkins=Array.isArray(m.ownedSkins)?m.ownedSkins:["core_default"];
+          equippedSkin=m.equippedSkin||"core_default";p.equippedSkin=equippedSkin;
+          if(m.cosmeticShopNpc){cosmeticShopNpc.x=Number(m.cosmeticShopNpc.x)||cosmeticShopNpc.x;cosmeticShopNpc.y=Number(m.cosmeticShopNpc.y)||cosmeticShopNpc.y;cosmeticShopNpc.r=Number(m.cosmeticShopNpc.r)||cosmeticShopNpc.r;}
+          renderCosmeticShop();showCosmeticMsg(m.message||"Tienda actualizada.");updateResourceHud();
+        }else if(m.type==="cosmetic_result"){
+          if(Array.isArray(m.ownedSkins))ownedSkins=m.ownedSkins;
+          if(m.equippedSkin){equippedSkin=m.equippedSkin;p.equippedSkin=m.equippedSkin;}
+          renderCosmeticShop();showCosmeticMsg(m.message||"");updateResourceHud();
+        }else if(m.type==="wall_reward"){
+          if(m.currency==="diamonds")p.diamonds=Math.max(0,(p.diamonds||0)+(Number(m.amount)||0));
+          showToast(m.message||"💎 +1 diamante");burst(Number(m.x)||p.x,Number(m.y)||p.y,"#72d9ff",16);updateResourceHud();
+        }else if(m.type==="wall_respawn"){
+          if(m.wall){m.wall.dead=false;walls.push({...m.wall});burst(Number(m.wall.x)||0,Number(m.wall.y)||0,"#39e7ff",8);}
+        }else if(m.type==="premium_purchase_result"){
+          showCosmeticMsg(m.message||"Compras reales aún no activadas.");
         }else if(m.type==="hp_regen"){p.hp=Math.min(Number(m.maxHp)||p.maxHp,Number(m.hp)||p.hp);updateHud();
         }else if(m.type==="ammo_empty"){p.ammo=0;updateResourceHud();showShopMsg("Sin munición. Ve con el vendedor.");
         }else if(m.type==="shot_result"){
@@ -682,11 +717,28 @@ function update(dt){
 function sx(x){return x-camera.x+W/2}
 function sy(y){return y-camera.y+H/2}
 
-function drawTank(x,y,angle,color="#39e7ff",r=24,weapon="blaster"){
+function drawTank(x,y,angle,color="#39e7ff",r=24,weapon="blaster",skinId="core_default"){
   ctx.save();ctx.translate(sx(x),sy(y));ctx.rotate(angle);
   ctx.fillStyle="rgba(0,0,0,.35)";ctx.beginPath();ctx.arc(3,4,r+5,0,Math.PI*2);ctx.fill();
   ctx.fillStyle="#09111f";ctx.beginPath();ctx.arc(0,0,r+3,0,Math.PI*2);ctx.fill();
-  ctx.fillStyle=color;ctx.beginPath();ctx.arc(0,0,r,0,Math.PI*2);ctx.fill();
+  let bodyFill=color;
+  const skin=String(skinId||"core_default");
+  if(skin==="rust_core") bodyFill="#c96e32";
+  else if(skin==="toxic_orb") bodyFill="#69e85d";
+  else if(skin==="plasma_violet"){const g=ctx.createRadialGradient(-r*.35,-r*.4,r*.1,r*.25,r*.2,r*1.2);g.addColorStop(0,"#fff");g.addColorStop(.24,"#e1a9ff");g.addColorStop(.58,"#a855f7");g.addColorStop(1,"#3a155f");bodyFill=g;}
+  else if(skin==="aurora"){const g=ctx.createLinearGradient(-r,-r,r,r);g.addColorStop(0,"#39e7ff");g.addColorStop(.45,"#7fffd6");g.addColorStop(.78,"#a855f7");g.addColorStop(1,"#24103d");bodyFill=g;}
+  else if(skin==="eclipse_gold") bodyFill="#16171e";
+  else if(skin==="celestial"){const g=ctx.createRadialGradient(-r*.35,-r*.4,r*.1,r*.2,r*.2,r*1.2);g.addColorStop(0,"#d7efff");g.addColorStop(.3,"#4e92ff");g.addColorStop(.7,"#222c8f");g.addColorStop(1,"#090a29");bodyFill=g;}
+  else if(skin==="eternal_void"){const g=ctx.createRadialGradient(0,0,r*.05,0,0,r*1.15);g.addColorStop(0,"#4c1d57");g.addColorStop(.46,"#17101d");g.addColorStop(1,"#030207");bodyFill=g;}
+  ctx.fillStyle=bodyFill;ctx.beginPath();ctx.arc(0,0,r,0,Math.PI*2);ctx.fill();
+  if(skin==="pixel_cyan"){ctx.fillStyle="#a8fbff";ctx.fillRect(-r*.45,-r*.45,5,5);ctx.fillRect(r*.18,-r*.58,6,6);ctx.fillRect(-r*.6,r*.08,4,4);}
+  if(skin==="rust_core"){ctx.strokeStyle="#ffad63";ctx.lineWidth=2;ctx.beginPath();ctx.arc(0,0,r*.72,-.9,.2);ctx.stroke();ctx.beginPath();ctx.arc(0,0,r*.72,1.8,2.65);ctx.stroke();}
+  if(skin==="toxic_orb"){ctx.strokeStyle="#d7ffc8";ctx.lineWidth=2;ctx.beginPath();ctx.arc(0,0,r*.72,.4,2.7);ctx.stroke();}
+  if(skin==="plasma_violet"){ctx.strokeStyle="#e8c7ff";ctx.lineWidth=2;ctx.beginPath();ctx.arc(0,0,r*.78,-2.6,.6);ctx.stroke();}
+  if(skin==="aurora"){ctx.strokeStyle="#d7ffff";ctx.lineWidth=2;ctx.beginPath();ctx.arc(0,0,r*.78,-2.8,.6);ctx.stroke();ctx.strokeStyle="#caa2ff";ctx.beginPath();ctx.arc(0,0,r*.68,.7,2.9);ctx.stroke();}
+  if(skin==="eclipse_gold"){ctx.strokeStyle="#ffd76a";ctx.lineWidth=3;ctx.beginPath();ctx.arc(0,0,r*.78,0,Math.PI*2);ctx.stroke();}
+  if(skin==="celestial"){ctx.fillStyle="#fff";for(let i=0;i<5;i++){const a=i*1.25+.4;ctx.beginPath();ctx.arc(Math.cos(a)*r*.48,Math.sin(a)*r*.48,1.4,0,Math.PI*2);ctx.fill();}}
+  if(skin==="eternal_void"){ctx.strokeStyle="#e879ff";ctx.lineWidth=2;ctx.beginPath();ctx.arc(0,0,r*.8,-2.7,.2);ctx.stroke();ctx.strokeStyle="#39e7ff";ctx.beginPath();ctx.arc(0,0,r*.72,.55,2.9);ctx.stroke();}
   ctx.fillStyle="#142238";ctx.fillRect(-r*.15,-7,r+10,14);
   if(weapon==="pulse"){
     ctx.fillStyle="#b56cff";ctx.fillRect(r-2,-10,r+10,6);ctx.fillRect(r-2,4,r+10,6);
@@ -823,6 +875,474 @@ function updateHud(){
 function updateResourceHud(){updateWeaponHud();const g=document.getElementById("gold"),d=document.getElementById("diamonds"),a=document.getElementById("ammo"),m=document.getElementById("maxAmmo"),f=document.getElementById("fire");if(g)g.textContent=p.gold||0;if(d)d.textContent=p.diamonds||0;if(a)a.textContent=p.ammo||0;if(m)m.textContent=p.maxAmmo||120;if(f)f.disabled=(p.ammo||0)<=0;}
 function updateAmmoShop(){const near=Math.hypot(p.x-shopNpc.x,p.y-shopNpc.y)<=80;const box=document.getElementById("ammoShop");if(!box)return;shopOpen=near&&p.alive;box.style.display=shopOpen?"block":"none";if(near){const b=document.getElementById("buyAmmoBtn");if(b)b.disabled=!multiplayerSocket||multiplayerSocket.readyState!==1||(p.ammo||0)>=p.maxAmmo;showShopMsg((p.ammo||0)>=p.maxAmmo?"Munición al máximo.":(p.gold||0)<50?"Necesitas 50 de oro.":"50 balas por 50 de oro.");}}
 function drawShopNpc(){const x=sx(shopNpc.x),y=sy(shopNpc.y);ctx.save();ctx.fillStyle="rgba(57,231,255,.08)";ctx.beginPath();ctx.arc(x,y,shopNpc.r,0,Math.PI*2);ctx.fill();ctx.strokeStyle="#39e7ff";ctx.lineWidth=2;ctx.setLineDash([8,7]);ctx.beginPath();ctx.arc(x,y,shopNpc.r,0,Math.PI*2);ctx.stroke();ctx.setLineDash([]);ctx.fillStyle="#09111f";ctx.beginPath();ctx.arc(x,y,25,0,Math.PI*2);ctx.fill();ctx.strokeStyle="#39e7ff";ctx.lineWidth=3;ctx.stroke();ctx.fillStyle="#39e7ff";ctx.font="bold 20px Arial";ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText("M",x,y);ctx.fillStyle="#fff";ctx.font="bold 11px Arial";ctx.fillText("MUNICIÓN",x,y-38);ctx.restore();}
+function showCosmeticMsg(message){const el=document.getElementById("cosmeticShopMsg");if(el)el.textContent=String(message||"").slice(0,160);}
+function skinCostText(item){if(item.currency==="gold")return "🪙 "+item.price.toLocaleString("es-MX");if(item.currency==="diamonds")return "💎 "+item.price.toLocaleString("es-MX");if(item.currency==="code")return "🎁 CÓDIGO";return "GRATIS";}
+function skinClass(id){return "skin-"+String(id||"core_default").replace(/_/g,"-");}
+function renderCosmeticShop(){
+  const grid=document.getElementById("skinShopGrid"),premium=document.getElementById("premiumGrid");
+  const gold=document.getElementById("cosmeticGold"),diamonds=document.getElementById("cosmeticDiamonds"),owned=document.getElementById("cosmeticOwned");
+  if(gold)gold.textContent=Math.max(0,Number(p.gold)||0).toLocaleString("es-MX");if(diamonds)diamonds.textContent=Math.max(0,Number(p.diamonds)||0).toLocaleString("es-MX");if(owned)owned.textContent=Array.isArray(ownedSkins)?ownedSkins.length:1;
+  document.querySelectorAll(".shopTab").forEach(btn=>btn.classList.toggle("active",btn.dataset.shopTab===cosmeticShopTab));
+  if(!grid||!premium)return;
+  if(cosmeticShopTab==="real"){
+    grid.style.display="none";premium.style.display="grid";
+    premium.innerHTML=PREMIUM_OFFERS.map(o=>'<div class="premiumCard"><strong>'+o.name+'</strong><small>'+o.description+'</small><b>
+  const mm=document.getElementById("minimap");
+  if(!mm)return;
+  const mctx=mm.getContext("2d");
+  const mw=mm.width,mh=mm.height;
+  mctx.clearRect(0,0,mw,mh);
+  mctx.fillStyle="#08101b";mctx.fillRect(0,0,mw,mh);
+  const pad=10,scale=Math.min((mw-pad*2)/world.w,(mh-pad*2)/world.h);
+  const ox=(mw-world.w*scale)/2,oy=(mh-world.h*scale)/2;
+  mctx.fillStyle="#101b29";mctx.fillRect(ox,oy,world.w*scale,world.h*scale);
+  mctx.strokeStyle="#344865";mctx.lineWidth=3;mctx.strokeRect(ox,oy,world.w*scale,world.h*scale);
+  for(const w of walls){
+    mctx.fillStyle="#35445a";
+    mctx.fillRect(ox+(w.x-w.w/2)*scale,oy+(w.y-w.h/2)*scale,Math.max(1,w.w*scale),Math.max(1,w.h*scale));
+  }
+  const zx=ox+safeZone.x*scale,zy=oy+safeZone.y*scale,zr=safeZone.r*scale;
+  mctx.fillStyle="rgba(57,231,255,.12)";mctx.beginPath();mctx.arc(zx,zy,zr,0,Math.PI*2);mctx.fill();
+  mctx.strokeStyle="#39e7ff";mctx.lineWidth=2;mctx.setLineDash([7,5]);mctx.beginPath();mctx.arc(zx,zy,zr,0,Math.PI*2);mctx.stroke();mctx.setLineDash([]);
+  for(const e of enemies){
+    const ex=ox+e.x*scale,ey=oy+e.y*scale;
+    mctx.fillStyle=e.kind==="elite"?"#ff9f43":"#ff5474";
+    mctx.beginPath();mctx.arc(ex,ey,e.kind==="elite"?3:2,0,Math.PI*2);mctx.fill();
+  }
+  for(const other of remotePlayers.values()){
+    if(other.alive===false)continue;
+    mctx.fillStyle="#7cff72";mctx.beginPath();mctx.arc(ox+other.x*scale,oy+other.y*scale,3,0,Math.PI*2);mctx.fill();
+  }
+  const shopX=ox+shopNpc.x*scale,shopY=oy+shopNpc.y*scale;
+  mctx.fillStyle="#39e7ff";mctx.beginPath();mctx.arc(shopX,shopY,4,0,Math.PI*2);mctx.fill();
+  const cosmeticX=ox+cosmeticShopNpc.x*scale,cosmeticY=oy+cosmeticShopNpc.y*scale;
+  mctx.fillStyle="#e879ff";mctx.beginPath();mctx.arc(cosmeticX,cosmeticY,4,0,Math.PI*2);mctx.fill();
+  const px=ox+p.x*scale,py=oy+p.y*scale;
+  mctx.fillStyle="#39e7ff";mctx.beginPath();mctx.arc(px,py,5,0,Math.PI*2);mctx.fill();
+  mctx.strokeStyle="#ffffff";mctx.lineWidth=1.5;mctx.beginPath();mctx.moveTo(px,py);mctx.lineTo(px+Math.cos(p.angle)*10,py+Math.sin(p.angle)*10);mctx.stroke();
+}
+
+function draw(){
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle="#070b13";ctx.fillRect(0,0,W,H);
+
+  const grid=80,ox=((W/2-camera.x)%grid+grid)%grid,oy=((H/2-camera.y)%grid+grid)%grid;
+  ctx.strokeStyle="#101b2b";ctx.lineWidth=1;
+  for(let x=ox;x<W;x+=grid){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke()}
+  for(let y=oy;y<H;y+=grid){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke()}
+
+  ctx.strokeStyle="#26344e";ctx.strokeRect(sx(0),sy(0),world.w,world.h);
+
+  // Zona segura visible: los enemigos no pueden entrar y los jugadores no reciben daño dentro.
+  const zsx=sx(safeZone.x),zsy=sy(safeZone.y);
+  const zrad=safeZone.r;
+  ctx.save();
+  ctx.fillStyle="rgba(57,231,255,.055)";
+  ctx.beginPath();ctx.arc(zsx,zsy,zrad,0,Math.PI*2);ctx.fill();
+  ctx.strokeStyle="#39e7ff";ctx.lineWidth=3;ctx.setLineDash([14,10]);
+  ctx.globalAlpha=.9;ctx.beginPath();ctx.arc(zsx,zsy,zrad,0,Math.PI*2);ctx.stroke();ctx.setLineDash([]);
+  ctx.globalAlpha=.75;ctx.fillStyle="#39e7ff";ctx.font="bold 12px Arial";ctx.textAlign="center";ctx.fillText("ZONA SEGURA",zsx,zsy-zrad-10);
+  if(performance.now()<spawnProtectionUntil){
+    ctx.globalAlpha=.45;ctx.font="bold 11px Arial";ctx.fillText("PROTECCIÓN DE SPAWN",zsx,zsy+zrad+18);
+  }
+  ctx.restore();
+  drawBankNpc();drawShopNpc();drawCosmeticShopNpc();
+
+  for(const w of walls){
+    const x=sx(w.x-w.w/2),y=sy(w.y-w.h/2);
+    ctx.fillStyle="#182438";ctx.fillRect(x,y,w.w,w.h);
+    ctx.strokeStyle="#344865";ctx.strokeRect(x,y,w.w,w.h);
+    ctx.fillStyle="#39e7ff";ctx.globalAlpha=.15;ctx.fillRect(x,y,w.w*(w.hp/w.maxHp),4);ctx.globalAlpha=1;
+  }
+
+  for(const b of bullets){ctx.fillStyle="#dffbff";ctx.beginPath();ctx.arc(sx(b.x),sy(b.y),4,0,Math.PI*2);ctx.fill()}
+  for(const other of remotePlayers.values()){
+    drawTank(other.x,other.y,other.angle,other.color||"#7cff72",24,other.weapon||"blaster",other.equippedSkin||"core_default");
+    drawNameTag(other.name||"Jugador",other.x,other.y,24,"#7cff72");
+    const ox=sx(other.x),oy=sy(other.y)-31;
+    ctx.fillStyle="#101827";ctx.fillRect(ox-24,oy,48,4);
+    ctx.fillStyle=other.color||"#7cff72";ctx.fillRect(ox-24,oy,48*clamp((other.hp||100)/(other.maxHp||100),0,1),4);
+  }
+  for(const e of enemies){
+    const enemyAngle=Math.atan2(p.y-e.y,p.x-e.x);
+    drawEnemy(e);
+    drawNameTag(e.kind==="elite"?"ÉLITE":"ENEMIGO",e.x,e.y,e.r,e.kind==="elite"?"#ff9f43":"#ff5474");
+    const x=sx(e.x),y=sy(e.y)-e.r-10;ctx.fillStyle="#161c2a";ctx.fillRect(x-25,y,50,5);ctx.fillStyle=e.kind==="elite"?"#ff9f43":"#ff5474";ctx.fillRect(x-25,y,50*(e.hp/e.maxHp),5);
+  }
+  for(const q of particles){
+    const alpha=Math.max(0,q.life/(q.maxLife||.6));
+    ctx.globalAlpha=alpha;
+    ctx.fillStyle=q.color;
+    if(q.ring){
+      const progress=1-alpha;
+      ctx.strokeStyle=q.color;ctx.lineWidth=3;
+      ctx.beginPath();ctx.arc(sx(q.x),sy(q.y),q.size*(1+progress*2.8),0,Math.PI*2);ctx.stroke();
+    }else{
+      ctx.beginPath();ctx.arc(sx(q.x),sy(q.y),q.size||3,0,Math.PI*2);ctx.fill();
+    }
+    ctx.globalAlpha=1;
+  }
+  drawTank(p.x,p.y,p.angle,"#39e7ff",p.r,p.weapon||"blaster",p.equippedSkin||"core_default");
+  drawNameTag(playerName,p.x,p.y,p.r,"#39e7ff");
+  if(controlMode==="mouse"&&gameActive){ctx.save();ctx.strokeStyle="rgba(57,231,255,.95)";ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(pointer.x,pointer.y,10,0,Math.PI*2);ctx.moveTo(pointer.x-16,pointer.y);ctx.lineTo(pointer.x+16,pointer.y);ctx.moveTo(pointer.x,pointer.y-16);ctx.lineTo(pointer.x,pointer.y+16);ctx.stroke();ctx.restore();}
+  drawMinimap();updateAmmoShop();updateBank();updateCosmeticShop();updateResourceHud();
+
+  document.getElementById("hp").textContent=Math.ceil(p.hp);
+  document.getElementById("maxHp").textContent=p.maxHp;
+  document.getElementById("level").textContent="Nv. "+p.level;
+  document.getElementById("pvpKills").textContent=p.pvpKills;
+  document.getElementById("kills").textContent=p.kills;
+  const need=Math.max(1,serverXpNeed);
+  document.getElementById("xp").textContent=p.xp;document.getElementById("xpNeed").textContent=need;document.getElementById("damageLevel").textContent=serverDamageLevel;document.getElementById("defenseLevel").textContent=serverDefenseLevel;
+  document.getElementById("hpFill").style.width=clamp(p.hp/p.maxHp*100,0,100)+"%";
+  document.getElementById("xpFill").style.width=clamp(p.xp/need*100,0,100)+"%";document.getElementById("damageXpFill").style.width=clamp(serverDamageXp/serverDamageXpNeed*100,0,100)+"%";document.getElementById("defenseXpFill").style.width=clamp(serverDefenseXp/serverDefenseXpNeed*100,0,100)+"%";
+}
+
+function setupJoystick(id){
+  const el=document.getElementById(id),stick=el.querySelector(".stick");
+  let active=false,pointerId=null;
+  function reset(){
+    active=false;pointerId=null;
+    stick.style.transform="translate(0,0)";
+    moveX=0;moveY=0;
+    
+  }
+  function apply(clientX,clientY){
+    const r=el.getBoundingClientRect();
+    const cx=r.left+r.width/2,cy=r.top+r.height/2;
+    const max=Math.max(1,(r.width-stick.offsetWidth)/2);
+    let x=Number(clientX)-cx,y=Number(clientY)-cy;
+    const len=Math.hypot(x,y);
+    if(len>max){x=x/len*max;y=y/len*max;}
+    moveX=clamp(x/max,-1,1);
+    moveY=clamp(y/max,-1,1);
+    stick.style.transform="translate("+x+"px,"+y+"px)";
+    if(window.neonDiag){neonDiag.inputEvents++;neonDiag.lastInput=performance.now();}
+  }
+  el.addEventListener("pointerdown",e=>{
+    if(e.isPrimary===false)return;
+    if(e.pointerType==="mouse" && e.button!==0)return;
+    e.preventDefault();
+    active=true;pointerId=e.pointerId;
+    try{el.setPointerCapture(e.pointerId)}catch{}
+    apply(e.clientX,e.clientY);
+  },{passive:false});
+  el.addEventListener("pointermove",e=>{
+    if(!active || e.pointerId!==pointerId)return;
+    e.preventDefault();
+    apply(e.clientX,e.clientY);
+  },{passive:false});
+  const end=e=>{
+    if(e.pointerId!==pointerId)return;
+    e.preventDefault();
+    try{if(el.hasPointerCapture(e.pointerId))el.releasePointerCapture(e.pointerId)}catch{}
+    active=false;pointerId=null;stick.style.transform="translate(0,0)";moveX=0;moveY=0;
+  };
+  el.addEventListener("pointerup",end,{passive:false});
+  el.addEventListener("pointercancel",end,{passive:false});
+  el.addEventListener("lostpointercapture",e=>{
+    if(pointerId===e.pointerId){active=false;pointerId=null;stick.style.transform="translate(0,0)";moveX=0;moveY=0;}
+  });
+  return reset;
+}
+const resetMoveJoystick=setupJoystick("moveJoy");
+const controlDefaults={joySize:112,fireSize:86,joyX:8,joyY:8,fireX:8,fireY:8};
+let controlConfig={...controlDefaults};
+try{const saved=JSON.parse(localStorage.getItem("neon_core_controls")||"null");if(saved)controlConfig={...controlDefaults,...saved};}catch{}
+function applyControlConfig(){
+  const joy=document.getElementById("moveJoy"),fireEl=document.getElementById("fire");
+  const clampPct=v=>Math.max(0,Math.min(100,Number(v)||0));
+  joy.style.width=controlConfig.joySize+"px";joy.style.height=controlConfig.joySize+"px";
+  joy.style.left=clampPct(controlConfig.joyX)+"%";joy.style.bottom=clampPct(controlConfig.joyY)+"%";joy.style.transform="translateX(-"+clampPct(controlConfig.joyX)+"%)";
+  fireEl.style.width=controlConfig.fireSize+"px";fireEl.style.height=controlConfig.fireSize+"px";
+  fireEl.style.position="fixed";fireEl.style.right=clampPct(controlConfig.fireX)+"%";fireEl.style.bottom=clampPct(controlConfig.fireY)+"%";fireEl.style.transform="translateX("+clampPct(controlConfig.fireX)+"%)";
+  const stick=joy.querySelector(".stick");if(stick){stick.style.left=((controlConfig.joySize-48)/2)+"px";stick.style.top=((controlConfig.joySize-48)/2)+"px";}
+}
+function saveControlConfig(){try{localStorage.setItem("neon_core_controls",JSON.stringify(controlConfig));}catch{}applyControlConfig();}
+const controlEditor=document.getElementById("controlEditor"),controlConfigBtn=document.getElementById("controlConfigBtn");
+const bindMsg=document.getElementById("bindMsg");
+let controlCapture=null;
+function formatBind(code){const map={Space:"ESPACIO",ArrowUp:"↑",ArrowDown:"↓",ArrowLeft:"←",ArrowRight:"→"};if(map[code])return map[code];if(/^Key[A-Z]$/.test(code))return code.slice(3);if(/^Digit[0-9]$/.test(code))return code.slice(5);return String(code||"").replace(/^Numpad/,"NUM ").toUpperCase();}
+function updateBindButtons(){document.querySelectorAll(".bindKey").forEach(btn=>{const k=btn.dataset.bind;btn.textContent=controlCapture===k?"PULSA UNA TECLA":formatBind(pcBindings[k]);});}
+updateBindButtons();
+document.querySelectorAll(".bindKey").forEach(btn=>btn.addEventListener("click",e=>{e.preventDefault();e.stopPropagation();controlCapture=btn.dataset.bind;if(bindMsg)bindMsg.textContent="Presiona la tecla que quieres usar.";updateBindButtons();}));
+controlConfigBtn.style.display=controlMode==="touch"?"block":"none";
+const controlInputs={joySize:document.getElementById("joySize"),fireSize:document.getElementById("fireSize"),joyX:document.getElementById("joyX"),joyY:document.getElementById("joyY"),fireX:document.getElementById("fireX"),fireY:document.getElementById("fireY")};
+function syncControlInputs(){for(const k in controlInputs)controlInputs[k].value=controlConfig[k];}
+for(const [k,input] of Object.entries(controlInputs))input.addEventListener("input",()=>{controlConfig[k]=Number(input.value);saveControlConfig();});
+syncControlInputs();applyControlConfig();
+controlConfigBtn.addEventListener("click",e=>{e.preventDefault();e.stopPropagation();syncControlInputs();controlEditor.style.display="flex";});
+document.getElementById("controlDone").addEventListener("click",()=>{controlEditor.style.display="none";});document.getElementById("controlClose").addEventListener("click",()=>{controlEditor.style.display="none";});controlEditor.addEventListener("click",e=>{if(e.target===controlEditor)controlEditor.style.display="none";});
+document.getElementById("controlReset").addEventListener("click",()=>{controlConfig={...controlDefaults};pcBindings={...pcBindDefaults};savePcBindings();controlCapture=null;if(bindMsg)bindMsg.textContent="Controles restablecidos.";updateBindButtons();syncControlInputs();saveControlConfig();});
+
+
+function resetAllControls(){
+  resetMoveJoystick();
+  pointer.down=false;
+  keys.w=keys.a=keys.s=keys.d=false;
+  closeCosmeticShop();
+  cosmeticShopWasNear=false;
+  controlCapture=null;
+  if(bindMsg)bindMsg.textContent="";
+  updateBindButtons();
+}
+addEventListener("resize",resetAllControls);
+addEventListener("orientationchange",()=>{updateControlMode();resetAllControls();applyControlConfig();controlConfigBtn.style.display=controlMode==="touch"?"block":"none";});
+addEventListener("blur",resetAllControls);
+document.addEventListener("visibilitychange",()=>{
+  if(document.hidden){
+    resetAllControls();
+    requestServerSaveAndClose();
+  }
+});
+
+const chatToggle=document.getElementById("chatToggle"),chatBox=document.getElementById("chatBox");
+let chatOpen=false;
+function setChatOpen(open){chatOpen=!!open;chatBox.style.display=chatOpen?"block":"none";chatToggle.style.display=chatOpen?"none":"block";chatToggle.setAttribute("aria-expanded",String(chatOpen));if(chatOpen)chatInput.focus();}
+chatToggle.addEventListener("click",()=>setChatOpen(true));
+const chatCloseBtn=document.createElement("button");chatCloseBtn.type="button";chatCloseBtn.textContent="×";chatCloseBtn.setAttribute("aria-label","Cerrar chat");chatCloseBtn.style.cssText="position:absolute;right:8px;top:6px;width:28px;height:28px;border:1px solid #33415d;border-radius:7px;background:#111a2d;color:#fff;font-weight:bold";chatBox.insertBefore(chatCloseBtn,chatBox.firstChild);const chatCloseStatic=document.getElementById("chatCloseStatic");if(chatCloseStatic)chatCloseStatic.addEventListener("click",()=>setChatOpen(false));chatCloseBtn.addEventListener("click",()=>setChatOpen(false));
+const chatForm=document.getElementById("chatForm"),chatInput=document.getElementById("chatInput");
+chatForm.addEventListener("submit",e=>{
+  e.preventDefault();
+  const text=String(chatInput.value||"").trim().slice(0,120);
+  if(!text||!multiplayerSocket||multiplayerSocket.readyState!==1)return;
+  multiplayerSocket.send(JSON.stringify({type:"chat",text}));
+  chatInput.value="";
+});
+chatInput.addEventListener("keydown",e=>{if(e.key==="Escape"){chatInput.blur();setChatOpen(false);}});
+setChatOpen(false);
+const nameBox=document.getElementById("nameBox");
+const nameForm=document.getElementById("nameForm");
+const username=document.getElementById("username");
+const nameMsg=document.getElementById("nameMsg");
+const createRoomBtn=document.getElementById("createRoom");
+const joinRoomBtn=document.getElementById("joinRoom");
+const roomCodeInput=document.getElementById("roomCodeInput");
+
+const restartBtn=document.getElementById("restart");
+let saveKey="";
+try{saveKey=localStorage.getItem("neon_core_save_key")||"";if(!saveKey){saveKey="p_"+Math.random().toString(36).slice(2)+Date.now().toString(36);localStorage.setItem("neon_core_save_key",saveKey);}}catch(e){saveKey="guest_"+Math.random().toString(36).slice(2)}
+
+function startGame(mode="quick",code=""){
+  let n=String(username.value||"").trim().slice(0,20);
+  if(!n && PUBLIC_ROOM_CODE){
+    n="Jugador-"+Math.random().toString(36).slice(2,7).toUpperCase();
+    username.value=n;
+  }
+  if(!n){
+    nameMsg.textContent="Escribe un nombre para entrar.";
+    username.focus();
+    return;
+  }
+  playerName=n;
+  saveName(n);
+  gameActive=false;
+    enemies.length=0;
+  nameMsg.textContent="";
+  if(!PUBLIC_ROOM_CODE)nameBox.style.display="flex";
+  connectMultiplayer(mode,code);
+}
+
+const PUBLIC_ROOM_CODE="12345";
+const publicRoomsBtn=document.getElementById("publicRoomsBtn");
+function enterPublicRooms(){
+  const n=String(username.value||"").trim().slice(0,20);
+  if(!n){
+    nameMsg.textContent="Escribe un nombre para entrar.";
+    username.focus();
+    return;
+  }
+  playerName=n;
+  saveName(n);
+  username.value=n;
+  nameMsg.textContent="Abriendo salas públicas…";
+  location.href=PUBLIC_ROOM_CODE?"../":"./";
+}
+publicRoomsBtn.addEventListener("click",enterPublicRooms);
+nameForm.addEventListener("submit",e=>{
+  e.preventDefault();
+  enterPublicRooms();
+});
+
+createRoomBtn.addEventListener("click",()=>{
+  const n=String(username.value||"").trim();
+  if(!n){nameMsg.textContent="Escribe un nombre primero.";username.focus();return;}
+  startGame("create","");
+});
+
+joinRoomBtn.addEventListener("click",()=>{
+  const n=String(username.value||"").trim();
+  const code=String(roomCodeInput.value||"").trim().toUpperCase().replace(/[^A-Z0-9]/g,"").slice(0,4);
+  roomCodeInput.value=code;
+  if(!n){nameMsg.textContent="Escribe un nombre primero.";username.focus();return;}
+  if(code.length!==4){nameMsg.textContent="El código debe tener 4 caracteres.";roomCodeInput.focus();return;}
+  startGame("join",code);
+});
+
+roomCodeInput.addEventListener("input",()=>{
+  roomCodeInput.value=roomCodeInput.value.toUpperCase().replace(/[^A-Z0-9]/g,"").slice(0,4);
+});
+
+restartBtn.addEventListener("click",()=>returnToMenu());
+
+// Cierra la conexión al salir de esta página para que al volver no quede el tanque anterior conectado.
+function requestServerSaveAndClose(){
+  try{
+    if(multiplayerSocket && multiplayerSocket.readyState===WebSocket.OPEN && currentRoom && gameActive){
+      multiplayerSocket.send(JSON.stringify({type:"save_on_exit"}));
+      setTimeout(()=>{try{if(multiplayerSocket)multiplayerSocket.close(1000,"page_leave");}catch{}},250);
+      return;
+    }
+  }catch{}
+  try{if(multiplayerSocket)multiplayerSocket.close(1000,"page_leave");}catch{}
+}
+addEventListener("pagehide",requestServerSaveAndClose);
+
+addEventListener("pageshow",e=>{
+  if(!e.persisted || !PUBLIC_ROOM_CODE)return;
+  setTimeout(()=>{
+    if(!multiplayerSocket || multiplayerSocket.readyState!==WebSocket.OPEN){
+      startGame("join",PUBLIC_ROOM_CODE);
+    }
+  },120);
+});
+
+
+
+username.value=loadName();
+startRenderMonitor();
+if(PUBLIC_ROOM_CODE){
+  const roomTitle=document.querySelector("#nameCard h1");
+  const roomText=document.querySelector("#nameCard p");
+  if(roomTitle)roomTitle.textContent="NEON CORE · SALA "+PUBLIC_ROOM_CODE;
+  if(roomText)roomText.textContent="Conectando a la sala pública…";
+  const oldBtn=document.getElementById("publicRoomsBtn");
+  if(oldBtn)oldBtn.textContent="VOLVER A SALAS";
+  let savedRoomName=String(username.value||"").trim();
+  if(!savedRoomName){
+    savedRoomName="Jugador";
+    username.value=savedRoomName;
+    playerName=savedRoomName;
+    saveName(savedRoomName);
+  }
+  nameBox.style.display="none";
+  setConnectionStatus("CONECTANDO A LA SALA","Entrando automáticamente a la sala "+PUBLIC_ROOM_CODE+"…",true);
+  setTimeout(()=>startGame("join",PUBLIC_ROOM_CODE),250);
+}
+username.addEventListener("keydown",e=>{
+  if(e.key==="Enter"){e.preventDefault();if(PUBLIC_ROOM_CODE)startGame("join",PUBLIC_ROOM_CODE);else enterPublicRooms();}
+});
+
+addEventListener("keydown",e=>{
+  if(e.target===username||e.target===roomCodeInput||e.target===chatInput)return;
+  if(controlCapture){
+    e.preventDefault();
+    if(e.code==="Escape"){controlCapture=null;updateBindButtons();if(bindMsg)bindMsg.textContent="";return;}
+    if(e.code!=="Unidentified"){const action=controlCapture;pcBindings[action]=e.code;savePcBindings();controlCapture=null;updateBindButtons();if(bindMsg)bindMsg.textContent="Asignado: "+formatBind(pcBindings[action]);}
+    return;
+  }
+  if(controlMode!=="mouse")return;
+  if(e.code===pcBindings.up){e.preventDefault();keys.w=true;}
+  if(e.code===pcBindings.left){e.preventDefault();keys.a=true;}
+  if(e.code===pcBindings.down){e.preventDefault();keys.s=true;}
+  if(e.code===pcBindings.right){e.preventDefault();keys.d=true;}
+  if(e.code===pcBindings.fire){e.preventDefault();pointer.down=true;fire();}
+});
+addEventListener("keyup",e=>{
+  if(e.code===pcBindings.up)keys.w=false;
+  if(e.code===pcBindings.left)keys.a=false;
+  if(e.code===pcBindings.down)keys.s=false;
+  if(e.code===pcBindings.right)keys.d=false;
+  if(e.code===pcBindings.fire)pointer.down=false;
+});
+
+addEventListener("pointermove",e=>{
+  if(e.pointerType==="mouse"){
+    pointer.x=e.clientX;
+    pointer.y=e.clientY;
+  }
+});
+canvas.addEventListener("pointerdown",e=>{
+  if(e.pointerType==="mouse"){
+    pointer.x=e.clientX;pointer.y=e.clientY;pointer.down=true;fire();
+  }
+});
+addEventListener("pointerup",e=>{if(e.pointerType==="mouse")pointer.down=false;});
+
+function sendShopCommand(type,weapon){if(!multiplayerSocket||multiplayerSocket.readyState!==1)return;const msg={type};if(weapon)msg.weapon=weapon;multiplayerSocket.send(JSON.stringify(msg));}const buyAmmoBtn=document.getElementById("buyAmmoBtn");buyAmmoBtn.addEventListener("click",e=>{e.preventDefault();e.stopPropagation();sendShopCommand("buy_ammo");});document.querySelectorAll(".shopItem").forEach(btn=>btn.addEventListener("click",e=>{e.preventDefault();e.stopPropagation();sendShopCommand("buy_weapon",btn.dataset.weapon);}));
+
+const fireButton=document.getElementById("fire");
+fireButton.addEventListener("pointerdown",e=>{e.preventDefault();fire();},{passive:false});
+fireButton.addEventListener("pointerup",e=>{e.preventDefault();pointer.down=false;},{passive:false});
+fireButton.addEventListener("pointercancel",()=>{pointer.down=false;});
+fireButton.addEventListener("lostpointercapture",()=>{pointer.down=false;});
+
+document.querySelectorAll(".shopTab").forEach(btn=>btn.addEventListener("click",()=>{cosmeticShopTab=btn.dataset.shopTab||"gold";renderCosmeticShop();}));
+document.getElementById("cosmeticShopClose").addEventListener("click",closeCosmeticShop);
+document.getElementById("cosmeticShop").addEventListener("click",e=>{if(e.target.id==="cosmeticShop")closeCosmeticShop();});
+document.getElementById("redeemCodeBtn").addEventListener("click",()=>{
+  const input=document.getElementById("redeemCode");
+  const code=String(input?.value||"").trim().toUpperCase().replace(/[^A-Z0-9_-]/g,"").slice(0,32);
+  if(!code){showCosmeticMsg("Escribe un código.");return;}
+  sendCosmeticCommand("redeem_code",null,code);
+});
+document.getElementById("redeemCode").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();document.getElementById("redeemCodeBtn").click();}});
+renderCosmeticShop();
+
+loadStats();
+function frame(now){
+  neonDiag.frames++;
+  if(neonDiag.frames%6===0 && window.updateNeonDiag)window.updateNeonDiag();
+  const dt=Math.min(.05,(now-last)/1000);
+  last=now;
+  update(dt);
+  smoothRemotePlayers(dt);
+  smoothEnemies(dt);
+  draw();
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>
++o.priceUsd.toFixed(2)+' USD</b><button type="button" disabled>PRÓXIMAMENTE</button></div>').join("");
+    return;
+  }
+  premium.style.display="none";grid.style.display="grid";
+  const list=COSMETIC_SKINS.filter(item=>item.currency===cosmeticShopTab||item.currency==="free"||item.currency==="code");
+  grid.innerHTML=list.map(item=>{
+    const isOwned=ownedSkins.includes(item.id),isLocked=item.currency==="free"||item.currency==="code";
+    return '<button type="button" class="cosmeticCard '+(isOwned?"owned ":"")+(isLocked&&!isOwned?"locked":"")+'" data-skin-id="'+item.id+'"><div class="skinPreview '+skinClass(item.id)+'"></div><strong>'+item.name+'</strong><small>'+item.rarity+'</small><span class="cosmeticCost">'+(isOwned?"✓ DESBLOQUEADO":skinCostText(item))+'</span><span class="cosmeticAction">'+(isOwned?"EQUIPAR":"COMPRAR")+'</span></button>';
+  }).join("");
+  grid.querySelectorAll(".cosmeticCard").forEach(btn=>btn.addEventListener("click",()=>{
+    const id=btn.dataset.skinId;if(!id)return;
+    if(ownedSkins.includes(id)){sendCosmeticCommand("equip_skin",id);return;}
+    const item=COSMETIC_SKINS.find(x=>x.id===id);
+    if(item?.currency==="gold"||item?.currency==="diamonds")sendCosmeticCommand("buy_skin",id);else if(item?.currency==="code")showCosmeticMsg("Este skin se obtiene con código.");
+  }));
+}
+function openCosmeticShop(){const box=document.getElementById("cosmeticShop");if(!box)return;cosmeticShopDismissedUntil=0;box.style.display="flex";box.setAttribute("aria-hidden","false");renderCosmeticShop();}
+function closeCosmeticShop(){const box=document.getElementById("cosmeticShop");if(!box)return;box.style.display="none";box.setAttribute("aria-hidden","true");cosmeticShopDismissedUntil=performance.now()+1400;}
+function updateCosmeticShop(){
+  const near=Math.hypot(p.x-cosmeticShopNpc.x,p.y-cosmeticShopNpc.y)<=95,box=document.getElementById("cosmeticShop");
+  if(!near){cosmeticShopWasNear=false;if(box)box.style.display="none";return;}
+  if(near&&!cosmeticShopWasNear&&p.alive&&performance.now()>cosmeticShopDismissedUntil)openCosmeticShop();
+  cosmeticShopWasNear=near;
+  if(box&&box.style.display!=="none"&&p.alive)renderCosmeticShop();
+}
+function drawCosmeticShopNpc(){
+  const x=sx(cosmeticShopNpc.x),y=sy(cosmeticShopNpc.y);ctx.save();
+  ctx.fillStyle="rgba(236,112,255,.10)";ctx.beginPath();ctx.arc(x,y,cosmeticShopNpc.r+9,0,Math.PI*2);ctx.fill();
+  ctx.strokeStyle="#e879ff";ctx.lineWidth=2;ctx.setLineDash([7,6]);ctx.beginPath();ctx.arc(x,y,cosmeticShopNpc.r+5,0,Math.PI*2);ctx.stroke();ctx.setLineDash([]);
+  ctx.fillStyle="#0c1020";ctx.beginPath();ctx.arc(x,y,27,0,Math.PI*2);ctx.fill();ctx.strokeStyle="#e879ff";ctx.lineWidth=3;ctx.stroke();
+  ctx.fillStyle="#e879ff";ctx.font="bold 18px Arial";ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText("★",x,y);
+  ctx.fillStyle="#fff";ctx.font="bold 10px Arial";ctx.fillText("TIENDA",x,y-39);ctx.restore();
+}
+function sendCosmeticCommand(type,skinId,code){
+  if(!multiplayerSocket||multiplayerSocket.readyState!==1){showCosmeticMsg("Servidor no conectado.");return;}
+  const msg={type};if(skinId)msg.skinId=skinId;if(code)msg.code=code;multiplayerSocket.send(JSON.stringify(msg));
+}
+
 function drawMinimap(){
   const mm=document.getElementById("minimap");
   if(!mm)return;
@@ -892,7 +1412,7 @@ function draw(){
 
   for(const b of bullets){ctx.fillStyle="#dffbff";ctx.beginPath();ctx.arc(sx(b.x),sy(b.y),4,0,Math.PI*2);ctx.fill()}
   for(const other of remotePlayers.values()){
-    drawTank(other.x,other.y,other.angle,other.color||"#7cff72",24,other.weapon||"blaster");
+    drawTank(other.x,other.y,other.angle,other.color||"#7cff72",24,other.weapon||"blaster",other.equippedSkin||"core_default");
     drawNameTag(other.name||"Jugador",other.x,other.y,24,"#7cff72");
     const ox=sx(other.x),oy=sy(other.y)-31;
     ctx.fillStyle="#101827";ctx.fillRect(ox-24,oy,48,4);
@@ -917,7 +1437,7 @@ function draw(){
     }
     ctx.globalAlpha=1;
   }
-  drawTank(p.x,p.y,p.angle,"#39e7ff",p.r,p.weapon||"blaster");
+  drawTank(p.x,p.y,p.angle,"#39e7ff",p.r,p.weapon||"blaster",p.equippedSkin||"core_default");
   drawNameTag(playerName,p.x,p.y,p.r,"#39e7ff");
   if(controlMode==="mouse"&&gameActive){ctx.save();ctx.strokeStyle="rgba(57,231,255,.95)";ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(pointer.x,pointer.y,10,0,Math.PI*2);ctx.moveTo(pointer.x-16,pointer.y);ctx.lineTo(pointer.x+16,pointer.y);ctx.moveTo(pointer.x,pointer.y-16);ctx.lineTo(pointer.x,pointer.y+16);ctx.stroke();ctx.restore();}
   drawMinimap();updateAmmoShop();updateBank();updateResourceHud();
