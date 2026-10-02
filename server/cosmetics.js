@@ -2,140 +2,65 @@
 
 const SKINS = Object.freeze({
   core_default: {
-    id: 'core_default',
-    name: 'NÚCLEO ORIGINAL',
-    rarity: 'Común',
-    type: 'skin',
-    priceGold: 0,
-    priceDiamonds: 0,
-    style: 'core'
+    id: 'core_default', name: 'NÚCLEO ORIGINAL', rarity: 'Común',
+    type: 'skin', priceGold: 0, priceDiamonds: 0, priceUsd: 0, style: 'core', defenseBonus: 0
   },
   pixel_cyan: {
-    id: 'pixel_cyan',
-    name: 'PIXEL CYAN',
-    rarity: 'Código',
-    type: 'skin',
-    priceGold: 0,
-    priceDiamonds: 0,
-    style: 'pixel'
+    id: 'pixel_cyan', name: 'PIXEL CYAN', rarity: 'Código',
+    type: 'skin', priceGold: 0, priceDiamonds: 0, priceUsd: 0, style: 'pixel', defenseBonus: 2
   },
   rust_core: {
-    id: 'rust_core',
-    name: 'NÚCLEO OXIDADO',
-    rarity: 'Raro',
-    type: 'skin',
-    priceGold: 1500,
-    priceDiamonds: 0,
-    style: 'rust'
+    id: 'rust_core', name: 'NÚCLEO OXIDADO', rarity: 'Raro',
+    type: 'skin', priceGold: 1500, priceDiamonds: 0, priceUsd: 0, style: 'rust', defenseBonus: 6
   },
   toxic_orb: {
-    id: 'toxic_orb',
-    name: 'ORBE TÓXICO',
-    rarity: 'Épico',
-    type: 'skin',
-    priceGold: 12000,
-    priceDiamonds: 0,
-    style: 'toxic'
+    id: 'toxic_orb', name: 'ORBE TÓXICO', rarity: 'Épico',
+    type: 'skin', priceGold: 12000, priceDiamonds: 0, priceUsd: 0, style: 'toxic', defenseBonus: 12
   },
   plasma_violet: {
-    id: 'plasma_violet',
-    name: 'PLASMA VIOLETA',
-    rarity: 'Mítico',
-    type: 'skin',
-    priceGold: 60000,
-    priceDiamonds: 0,
-    style: 'plasma'
-  },
-  angel_seraph: {
-    id: 'angel_seraph',
-    name: 'ÁNGEL SERAFÍN',
-    rarity: 'Legendario',
-    type: 'skin',
-    priceGold: 0,
-    priceDiamonds: 12000,
-    style: 'angel'
-  },
-  demon_infernal: {
-    id: 'demon_infernal',
-    name: 'DEMONIO INFERNAL',
-    rarity: 'Supremo',
-    type: 'skin',
-    priceGold: 0,
-    priceDiamonds: 25000,
-    style: 'demon'
-  },
-  nebula_prism: {
-    id: 'nebula_prism',
-    name: 'NEBULOSA PRISMA',
-    rarity: 'Mítico',
-    type: 'skin',
-    priceGold: 0,
-    priceDiamonds: 4500,
-    style: 'nebula'
+    id: 'plasma_violet', name: 'PLASMA VIOLETA', rarity: 'Mítico',
+    type: 'skin', priceGold: 60000, priceDiamonds: 0, priceUsd: 0, style: 'plasma', defenseBonus: 20
   },
   aurora: {
-    id: 'aurora',
-    name: 'AURORA',
-    rarity: 'Épico',
-    type: 'skin',
-    priceGold: 0,
-    priceDiamonds: 250,
-    style: 'aurora'
+    id: 'aurora', name: 'AURORA', rarity: 'Épico',
+    type: 'skin', priceGold: 0, priceDiamonds: 250, priceUsd: 0, style: 'aurora', defenseBonus: 28
+  },
+  nebula_prism: {
+    id: 'nebula_prism', name: 'NEBULOSA PRISMA', rarity: 'Mítico',
+    type: 'skin', priceGold: 0, priceDiamonds: 4500, priceUsd: 0, style: 'nebula', defenseBonus: 36
   },
   eclipse_gold: {
-    id: 'eclipse_gold',
-    name: 'ECLIPSE DORADO',
-    rarity: 'Legendario',
-    type: 'skin',
-    priceGold: 0,
-    priceDiamonds: 2000,
-    style: 'eclipse'
+    id: 'eclipse_gold', name: 'ECLIPSE DORADO', rarity: 'Legendario',
+    type: 'skin', priceGold: 0, priceDiamonds: 2000, priceUsd: 0, style: 'eclipse', defenseBonus: 45
   },
   celestial: {
-    id: 'celestial',
-    name: 'CIELO CELESTE',
-    rarity: 'Legendario',
-    type: 'skin',
-    priceGold: 0,
-    priceDiamonds: 7500,
-    style: 'celestial'
+    id: 'celestial', name: 'CIELO CELESTE', rarity: 'Legendario',
+    type: 'skin', priceGold: 0, priceDiamonds: 7500, priceUsd: 0, style: 'celestial', defenseBonus: 58
+  },
+  angel_seraph: {
+    id: 'angel_seraph', name: 'ÁNGEL SERAFÍN', rarity: 'Legendario',
+    type: 'skin', priceGold: 0, priceDiamonds: 12000, priceUsd: 0, style: 'angel', defenseBonus: 72
+  },
+  demon_infernal: {
+    id: 'demon_infernal', name: 'DEMONIO INFERNAL', rarity: 'Supremo',
+    type: 'skin', priceGold: 0, priceDiamonds: 25000, priceUsd: 0, style: 'demon', defenseBonus: 88
   },
   eternal_void: {
-    id: 'eternal_void',
-    name: 'VACÍO ETERNO',
-    rarity: 'Supremo',
-    type: 'skin',
-    priceGold: 0,
-    priceDiamonds: 30000,
-    style: 'void'
+    id: 'eternal_void', name: 'VACÍO ETERNO', rarity: 'Supremo',
+    type: 'skin', priceGold: 0, priceDiamonds: 30000, priceUsd: 0, style: 'void', defenseBonus: 105
   },
   gm_core: {
-    id: 'gm_core',
-    name: 'GM · SOBERANO DEL NÚCLEO',
-    rarity: 'GM',
-    type: 'skin',
-    priceGold: 0,
-    priceDiamonds: 0,
-    style: 'gm',
-    hidden: true
+    id: 'gm_core', name: 'SOBERANO DEL NÚCLEO', rarity: 'Supremo',
+    type: 'skin', priceGold: 0, priceDiamonds: 0, priceUsd: 1, style: 'gm', defenseBonus: 125, realMoney: true
   }
 });
 
 const REAL_MONEY_OFFERS = Object.freeze([
-  { sku: 'skin_pack_01', name: 'PAQUETE NEON I', description: 'Cosméticos exclusivos futuros.', priceUsd: 2.99, skinId: 'plasma_violet', enabled: false },
-  { sku: 'skin_pack_02', name: 'PAQUETE NEON II', description: 'Cosméticos premium futuros.', priceUsd: 7.99, skinId: 'eclipse_gold', enabled: false },
-  { sku: 'skin_pack_03', name: 'COLECCIÓN ETERNA', description: 'Cosméticos premium de máxima rareza.', priceUsd: 19.99, skinId: 'eternal_void', enabled: false }
+  { sku: 'gm_core_usd', name: 'SOBERANO DEL NÚCLEO', description: 'Skin premium individual.', priceUsd: 1, skinId: 'gm_core', enabled: false }
 ]);
 
 const REDEEM_CODES = Object.freeze({
-  NEONSTART: {
-    skinId: 'pixel_cyan',
-    message: 'Código válido: desbloqueaste PIXEL CYAN.'
-  },
-  GMNEONCORE: {
-    skinId: 'gm_core',
-    message: '👑 CÓDIGO GM ACEPTADO · desbloqueaste SOBERANO DEL NÚCLEO.'
-  }
+  NEONSTART: { skinId: 'pixel_cyan', message: 'Código válido: desbloqueaste PIXEL CYAN.' }
 });
 
 function getSkin(id) {
@@ -146,14 +71,12 @@ function normalizeOwnedSkins(value) {
   const input = Array.isArray(value) ? value : [];
   const out = [];
   const seen = new Set();
-
   for (const raw of input) {
     const id = String(raw || '');
     if (!SKINS[id] || seen.has(id)) continue;
     seen.add(id);
     out.push(id);
   }
-
   if (!seen.has('core_default')) out.unshift('core_default');
   return out;
 }
@@ -162,29 +85,29 @@ function normalizeRedeemedCodes(value) {
   const input = Array.isArray(value) ? value : [];
   const out = [];
   const seen = new Set();
-
   for (const raw of input) {
     const code = String(raw || '').trim().toUpperCase().slice(0, 32);
     if (!code || !REDEEM_CODES[code] || seen.has(code)) continue;
     seen.add(code);
     out.push(code);
   }
-
   return out;
 }
 
 function publicCatalog() {
-  return Object.values(SKINS)
-    .filter((skin) => !skin.hidden)
-    .map((skin) => ({
-      id: skin.id,
-      name: skin.name,
-      rarity: skin.rarity,
-      type: skin.type,
-      priceGold: skin.priceGold,
-      priceDiamonds: skin.priceDiamonds,
-      style: skin.style
-    }));
+  return Object.values(SKINS).map((skin) => ({
+    id: skin.id,
+    name: skin.name,
+    rarity: skin.rarity,
+    type: skin.type,
+    priceGold: skin.priceGold,
+    priceDiamonds: skin.priceDiamonds,
+    priceUsd: skin.priceUsd,
+    style: skin.style,
+    defenseBonus: skin.defenseBonus,
+    realMoney: !!skin.realMoney,
+    redeemable: skin.rarity === 'Código'
+  }));
 }
 
 function publicRealMoneyOffers() {
