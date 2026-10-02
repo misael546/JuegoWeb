@@ -2,26 +2,26 @@
 
 const SKINS = Object.freeze({
   core_default: { id:'core_default', name:'NÚCLEO ORIGINAL', rarity:'Común', type:'skin', priceGold:0, priceDiamonds:0, priceUsd:0, style:'core', defenseBonus:0 },
-  pixel_cyan: { id:'pixel_cyan', name:'PIXEL CYAN', rarity:'Código', type:'skin', priceGold:0, priceDiamonds:0, priceUsd:0, style:'pixel', defenseBonus:2 },
-  rust_core: { id:'rust_core', name:'NÚCLEO OXIDADO', rarity:'Raro', type:'skin', priceGold:1500, priceDiamonds:0, priceUsd:0, style:'rust', defenseBonus:6 },
-  toxic_orb: { id:'toxic_orb', name:'ORBE TÓXICO', rarity:'Épico', type:'skin', priceGold:12000, priceDiamonds:0, priceUsd:0, style:'toxic', defenseBonus:12 },
-  plasma_violet: { id:'plasma_violet', name:'PLASMA VIOLETA', rarity:'Mítico', type:'skin', priceGold:60000, priceDiamonds:0, priceUsd:0, style:'plasma', defenseBonus:20 },
-  aurora: { id:'aurora', name:'AURORA', rarity:'Épico', type:'skin', priceGold:0, priceDiamonds:250, priceUsd:0, style:'aurora', defenseBonus:28 },
-  nebula_prism: { id:'nebula_prism', name:'NEBULOSA PRISMA', rarity:'Mítico', type:'skin', priceGold:0, priceDiamonds:4500, priceUsd:0, style:'nebula', defenseBonus:36 },
-  eclipse_gold: { id:'eclipse_gold', name:'ECLIPSE DORADO', rarity:'Legendario', type:'skin', priceGold:0, priceDiamonds:2000, priceUsd:0, style:'eclipse', defenseBonus:45 },
-  celestial: { id:'celestial', name:'CIELO CELESTE', rarity:'Legendario', type:'skin', priceGold:0, priceDiamonds:7500, priceUsd:0, style:'celestial', defenseBonus:58 },
-  angel_seraph: { id:'angel_seraph', name:'ÁNGEL SERAFÍN', rarity:'Legendario', type:'skin', priceGold:0, priceDiamonds:12000, priceUsd:0, style:'angel', defenseBonus:72 },
-  demon_infernal: { id:'demon_infernal', name:'DEMONIO INFERNAL', rarity:'Supremo', type:'skin', priceGold:0, priceDiamonds:25000, priceUsd:0, style:'demon', defenseBonus:88 },
-  eternal_void: { id:'eternal_void', name:'VACÍO ETERNO', rarity:'Supremo', type:'skin', priceGold:0, priceDiamonds:30000, priceUsd:0, style:'void', defenseBonus:105 },
-  gm_core: { id:'gm_core', name:'SOBERANO DEL NÚCLEO', rarity:'Supremo', type:'skin', priceGold:0, priceDiamonds:0, priceUsd:1, style:'gm', defenseBonus:125, realMoney:true }
+  pixel_cyan: { id:'pixel_cyan', name:'PIXEL CYAN', rarity:'Código', type:'skin', priceGold:0, priceDiamonds:0, priceUsd:0, style:'pixel', defenseBonus:0 },
+  rust_core: { id:'rust_core', name:'NÚCLEO OXIDADO', rarity:'Raro', type:'skin', priceGold:1500, priceDiamonds:0, priceUsd:0, style:'rust', defenseBonus:0 },
+  toxic_orb: { id:'toxic_orb', name:'ORBE TÓXICO', rarity:'Épico', type:'skin', priceGold:12000, priceDiamonds:0, priceUsd:0, style:'toxic', defenseBonus:0 },
+  plasma_violet: { id:'plasma_violet', name:'PLASMA VIOLETA', rarity:'Mítico', type:'skin', priceGold:60000, priceDiamonds:0, priceUsd:0, style:'plasma', defenseBonus:0 },
+  aurora: { id:'aurora', name:'AURORA', rarity:'Épico', type:'skin', priceGold:0, priceDiamonds:250, priceUsd:0, style:'aurora', defenseBonus:0 },
+  nebula_prism: { id:'nebula_prism', name:'NEBULOSA PRISMA', rarity:'Mítico', type:'skin', priceGold:0, priceDiamonds:4500, priceUsd:0, style:'nebula', defenseBonus:0 },
+  eclipse_gold: { id:'eclipse_gold', name:'ECLIPSE DORADO', rarity:'Legendario', type:'skin', priceGold:0, priceDiamonds:2000, priceUsd:0, style:'eclipse', defenseBonus:0 },
+  celestial: { id:'celestial', name:'CIELO CELESTE', rarity:'Legendario', type:'skin', priceGold:0, priceDiamonds:7500, priceUsd:0, style:'celestial', defenseBonus:0 },
+  angel_seraph: { id:'angel_seraph', name:'ÁNGEL SERAFÍN', rarity:'Legendario', type:'skin', priceGold:0, priceDiamonds:12000, priceUsd:0, style:'angel', defenseBonus:0 },
+  demon_infernal: { id:'demon_infernal', name:'DEMONIO INFERNAL', rarity:'Supremo', type:'skin', priceGold:0, priceDiamonds:25000, priceUsd:0, style:'demon', defenseBonus:0 },
+  eternal_void: { id:'eternal_void', name:'VACÍO ETERNO', rarity:'Supremo', type:'skin', priceGold:0, priceDiamonds:30000, priceUsd:0, style:'void', defenseBonus:0 },
+  gm_core: { id:'gm_core', name:'SOBERANO DEL NÚCLEO', rarity:'Supremo', type:'skin', priceGold:0, priceDiamonds:0, priceUsd:1, style:'gm', defenseBonus:0, realMoney:true }
 });
 
 const WEAPON_SKINS = Object.freeze({
-  blaster_neonstorm: { id:'blaster_neonstorm', name:'BLASTER · NEONSTORM', weaponId:'blaster', rarity:'Raro', priceGold:2500, priceDiamonds:0, attackBonus:8, defenseBonus:2, style:'neonstorm' },
-  pulse_prism: { id:'pulse_prism', name:'PULSE · PRISMA', weaponId:'pulse', rarity:'Épico', priceGold:10000, priceDiamonds:0, attackBonus:15, defenseBonus:4, style:'prism' },
-  cannon_solaris: { id:'cannon_solaris', name:'CANNON · SOLARIS', weaponId:'cannon', rarity:'Legendario', priceGold:0, priceDiamonds:1200, attackBonus:25, defenseBonus:6, style:'solaris' },
-  railgun_eclipse: { id:'railgun_eclipse', name:'RAILGUN · ECLIPSE', weaponId:'railgun', rarity:'Supremo', priceGold:0, priceDiamonds:7000, attackBonus:40, defenseBonus:8, style:'eclipse' },
-  nova_supernova: { id:'nova_supernova', name:'NOVA · SUPERNOVA', weaponId:'nova', rarity:'Supremo', priceGold:0, priceDiamonds:18000, attackBonus:65, defenseBonus:12, style:'supernova' }
+  blaster_neonstorm: { id:'blaster_neonstorm', name:'BLASTER · NEONSTORM', weaponId:'blaster', rarity:'Raro', priceGold:2500, priceDiamonds:0, attackBonus:8, defenseBonus:0, style:'neonstorm' },
+  pulse_prism: { id:'pulse_prism', name:'PULSE · PRISMA', weaponId:'pulse', rarity:'Épico', priceGold:10000, priceDiamonds:0, attackBonus:15, defenseBonus:0, style:'prism' },
+  cannon_solaris: { id:'cannon_solaris', name:'CANNON · SOLARIS', weaponId:'cannon', rarity:'Legendario', priceGold:0, priceDiamonds:1200, attackBonus:25, defenseBonus:0, style:'solaris' },
+  railgun_eclipse: { id:'railgun_eclipse', name:'RAILGUN · ECLIPSE', weaponId:'railgun', rarity:'Supremo', priceGold:0, priceDiamonds:7000, attackBonus:40, defenseBonus:0, style:'eclipse' },
+  nova_supernova: { id:'nova_supernova', name:'NOVA · SUPERNOVA', weaponId:'nova', rarity:'Supremo', priceGold:0, priceDiamonds:18000, attackBonus:65, defenseBonus:0, style:'supernova' }
 });
 
 const REAL_MONEY_OFFERS = Object.freeze([
