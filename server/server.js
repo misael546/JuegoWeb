@@ -19,7 +19,7 @@ const MAX_AMMO = 120;
 
 const SHOP_NPC = { x: 3600, y: 2200, r: 30 };
 const SHOP_INTERACTION_RADIUS = 80;
-const COSMETIC_SHOP_NPC = { x: 3300, y: 2500, r: 32 };
+const COSMETIC_SHOP_NPC = { x: 3300, y: 2200, r: 32 };
 const COSMETIC_SHOP_INTERACTION_RADIUS = 95;
 const BANK_NPC = { x: 3000, y: 1800, r: 24 };
 const BANK_INTERACTION_RADIUS = 95;
