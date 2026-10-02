@@ -212,14 +212,15 @@ test('tienda de skins: NPC, pestañas y código de regalo', async ({ page }) => 
 
   await waitForLiveGame(page, '12345', {errors,wsEvents:[]});
 
-  await page.keyboard.down('d');
-  await page.waitForTimeout(1600);
-  await page.keyboard.up('d');
+  await page.keyboard.down('a');
+  await page.waitForTimeout(700);
+  await page.keyboard.up('a');
 
   await expect(page.locator('#cosmeticShop')).toHaveCSS('display', 'flex', {timeout:10000});
   await expect(page.locator('.shopTab[data-shop-tab="gold"]')).toBeVisible();
   await expect(page.locator('.shopTab[data-shop-tab="diamonds"]')).toBeVisible();
   await expect(page.locator('.shopTab[data-shop-tab="real"]')).toBeVisible();
+  await expect(page.locator('#cosmeticShopClose')).toHaveCount(0);
   await expect(page.locator('#skinShopGrid')).toContainText('NÚCLEO OXIDADO');
 
   await page.locator('.shopTab[data-shop-tab="diamonds"]').click();
@@ -234,6 +235,11 @@ test('tienda de skins: NPC, pestañas y código de regalo', async ({ page }) => 
 
   const pixelCard = page.locator('.cosmeticCard[data-skin-id="pixel_cyan"]');
   await expect(pixelCard).toContainText('DESBLOQUEADO');
+
+  await page.locator('#redeemCode').fill('GMNEONCORE');
+  await page.locator('#redeemCodeBtn').click();
+  await expect(page.locator('#cosmeticShopMsg')).toContainText('SOBERANO DEL NÚCLEO', {timeout:10000});
+  await expect(page.locator('.cosmeticCard[data-skin-id="gm_core"]')).toHaveCount(0);
 
   if (errors.length) {
     throw new Error('Errores tienda: ' + errors.join(' | '));
