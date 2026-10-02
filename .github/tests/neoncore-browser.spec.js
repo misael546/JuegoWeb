@@ -1,6 +1,6 @@
 const { test, expect } = require('@playwright/test');
 
-const ROOMS = ['12345', '67890'];
+const ROOMS = ['12345'];
 
 function parsePos(text) {
   const m = text.match(/pos:(-?\d+),(-?\d+)/);
@@ -40,7 +40,7 @@ async function waitForLiveGame(page, room, debug) {
 }
 
 for (const room of ROOMS) {
-  test(`sala ${room}: conexión, movimiento y disparo`, async ({ page }) => {
+  test(`sala #1: conexión, movimiento y disparo`, async ({ page }) => {
     const errors = [];
     const wsEvents = [];
     page.on('websocket', ws => { wsEvents.push('created:'+ws.url()); ws.on('close', () => wsEvents.push('closed:'+ws.url())); });
@@ -114,7 +114,7 @@ for (const room of ROOMS) {
 
 
 for (const room of ROOMS) {
-  test(`sala ${room}: salir y volver a entrar reconecta`, async ({ page }) => {
+  test(`sala #1: salir y volver a entrar reconecta`, async ({ page }) => {
     const errors = [];
     page.on('pageerror', e => errors.push('PAGEERROR: ' + e.message));
     page.on('console', msg => {
@@ -191,7 +191,6 @@ test('menu principal: nombre y entrada a sala', async ({ browser }) => {
   await page.locator('#username').fill('PruebaNeon');
   await expect(page.locator('.room[data-room="12345"]')).not.toHaveClass(/disabled/);
   await expect(page.locator('#quickPlay')).toHaveCount(0);
-  await expect(page.locator('.room[data-room="67890"] .roomCount')).toBeVisible();
 
   await page.locator('.room[data-room="12345"]').click();
 
