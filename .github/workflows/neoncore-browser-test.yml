@@ -25,25 +25,25 @@ jobs:
       - name: Wait for GitHub Pages current build
         run: |
           for i in $(seq 1 30); do
-            if curl -fsSL "https://misael546.github.io/JuegoWeb/neoncore/12345/?ci=$i" | grep -q '20261002-139'; then
-              echo "Pages build 139 is public"
+            if curl -fsSL "https://misael546.github.io/JuegoWeb/neoncore/12345/?ci=$i" | grep -q '20261002-140'; then
+              echo "Pages build 140 is public"
               exit 0
             fi
             sleep 5
           done
-          echo "Pages build 136 was not detected"
+          echo "Pages build 140 was not detected"
           exit 1
 
       - name: Wait for Render server current build
         run: |
           for i in $(seq 1 36); do
-            if curl -fsSL "https://neon-core-multiplayer.onrender.com/health?ci=$i" | grep -q '"version":"20261002-139"'; then
-              echo "Render build 139 is live"
+            if curl -fsSL "https://neon-core-multiplayer.onrender.com/health?ci=$i" | grep -q '"version":"20261002-140"'; then
+              echo "Render build 140 is live"
               exit 0
             fi
             sleep 5
           done
-          echo "Render build 136 was not detected"
+          echo "Render build 140 was not detected"
           exit 1
 
       - name: Run live browser tests
