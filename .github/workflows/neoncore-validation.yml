@@ -63,6 +63,6 @@ jobs:
           const root = fs.readFileSync('index.html','utf8');
           if (!root.includes('location.replace("neoncore/")')) throw new Error('Root launcher is not synchronized');
           const roomsPage = fs.readFileSync('neoncore/index.html','utf8');
-          if (!roomsPage.includes('20261001-125')) throw new Error('Rooms page build marker missing');
+          if (!roomsPage.includes('20261001-126')) throw new Error('Rooms page build marker missing');
           console.log('Build synchronization: OK');
           NODE
