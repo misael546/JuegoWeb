@@ -11,7 +11,7 @@ const WORLD = { w: 6000, h: 4400 };
 const MAX_PLAYERS = 16;
 const SAFE_ZONE = { x: 3000, y: 2200, r: 300 };
 
-const SERVER_VERSION = '20261002-151';
+const SERVER_VERSION = '20261002-152';
 
 const AMMO_PACK_SIZE = 100;
 const AMMO_PACK_COST = 75;
@@ -53,7 +53,7 @@ const BOSS_PROJECTILE_DAMAGE = 260;
 const BOSS_PROJECTILE_SPEED = 440;
 const BOSS_PROJECTILE_COOLDOWN_MS = 3000;
 const BOSS_AOE_DAMAGE = 240;
-const BOSS_AOE_RADIUS = 72;
+const BOSS_AOE_RADIUS = 42;
 const BOSS_AOE_WARNING_MS = 1600;
 const BOSS_AOE_COOLDOWN_MS = 6200;
 const BOSS_AOE_RANGE = 780;
@@ -2435,7 +2435,7 @@ setInterval(() => {
           if (inSafeZone(pl.x, pl.y, 24)) continue;
           const d = Math.hypot(pl.x - warning.x, pl.y - warning.y);
 
-          if (d <= warning.r + pl.r) {
+          if (d <= Math.max(0, warning.r - pl.r * 0.35)) {
             const actualDamage = Math.max(
               20,
               Math.round((Number(warning.damage) || BOSS_AOE_DAMAGE) - Math.max(0, Number(pl.defense) || 0) * 0.5)
@@ -2521,7 +2521,7 @@ setInterval(() => {
           type: 'boss_explosion',
           x: projectile.x,
           y: projectile.y,
-          r: Math.max(80, Number(projectile.warning?.r) || BOSS_AOE_RADIUS),
+          r: BOSS_AOE_RADIUS,
           blocked: true
         });
         bossProjectiles.splice(i, 1);
@@ -2547,7 +2547,7 @@ setInterval(() => {
       const impactY = Number(projectile.impactY) || projectile.y;
       projectile.x = impactX;
       projectile.y = impactY;
-      const impactRadius = Math.max(80, Number(projectile.warning?.r) || BOSS_AOE_RADIUS);
+      const impactRadius = BOSS_AOE_RADIUS;
 
       broadcastRoom(code, {
         type: 'boss_explosion',
@@ -2560,7 +2560,7 @@ setInterval(() => {
       for (const pl of players) {
         if (inSafeZone(pl.x, pl.y, 24)) continue;
         const d = Math.hypot(pl.x - impactX, pl.y - impactY);
-        if (d > impactRadius + pl.r) continue;
+        if (d > impactRadius) continue;
 
         const actualDamage = Math.max(
           25,
