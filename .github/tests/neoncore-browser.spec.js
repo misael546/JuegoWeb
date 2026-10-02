@@ -157,6 +157,8 @@ test('menu público táctil: abrir sala desde el selector', async ({ browser }) 
   });
 
   await expect(page.locator('.room[data-room="12345"]')).toBeVisible({timeout:15000});
+  await expect(page.locator('#quickPlay')).toHaveCount(0);
+  await expect.poll(async () => page.locator('.room[data-room="12345"] .roomCount').innerText(), {timeout:20000, intervals:[500,1000]}).toMatch(/^\d+\/16 JUGADORES$/);
   await page.locator('.room[data-room="12345"]').dispatchEvent('pointerup', {
     pointerType: 'touch'
   });
@@ -188,8 +190,10 @@ test('menu principal: nombre y entrada a sala', async ({ browser }) => {
 
   await page.locator('#username').fill('PruebaNeon');
   await expect(page.locator('.room[data-room="12345"]')).not.toHaveClass(/disabled/);
+  await expect(page.locator('#quickPlay')).toHaveCount(0);
+  await expect(page.locator('.room[data-room="67890"] .roomCount')).toBeVisible();
 
-  await page.locator('#quickPlay').click();
+  await page.locator('.room[data-room="12345"]').click();
 
   await expect.poll(async () => page.url(), {
     timeout: 15000,
