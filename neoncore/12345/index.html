@@ -9,7 +9,7 @@
 <script>
 (function(){
   try{
-    var v="20261002-138";
+    var v="20261002-139";
     var k="neon_core_build";
     window.NEON_CORE_BUILD=v;
     var old=localStorage.getItem(k);
@@ -63,7 +63,7 @@
 </script>
 </head>
 <body>
-<canvas id="game"></canvas><div id="buildDisplay">NEON CORE · Build 138</div>
+<canvas id="game"></canvas><div id="buildDisplay">NEON CORE · Build 139</div>
 
 <div id="hud">
   <div class="panel" id="bars">
@@ -1032,6 +1032,17 @@ document.querySelectorAll(".shopTab").forEach(btn=>btn.addEventListener("click",
   cosmeticShopTab=["gold","diamonds","real"].includes(tab)?tab:"gold";
   renderCosmeticShop();
 }));
+const redeemCodeInput=document.getElementById("redeemCode");
+const redeemCodeBtn=document.getElementById("redeemCodeBtn");
+function redeemGiftCode(){
+  const code=String(redeemCodeInput?.value||"").trim();
+  if(!code){showCosmeticMsg("Escribe un código.");redeemCodeInput?.focus();return;}
+  sendCosmeticCommand("redeem_code","",code);
+  if(redeemCodeInput)redeemCodeInput.value="";
+}
+if(redeemCodeBtn)redeemCodeBtn.addEventListener("click",e=>{e.preventDefault();e.stopPropagation();redeemGiftCode();});
+if(redeemCodeInput)redeemCodeInput.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();redeemGiftCode();}});
+
 
 function drawMinimap(){
   const mm=document.getElementById("minimap");
