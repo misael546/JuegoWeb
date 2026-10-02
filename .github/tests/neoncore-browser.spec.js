@@ -199,6 +199,46 @@ test('menu principal: nombre y entrada a sala', async ({ browser }) => {
   await context.close();
 });
 
+
+test('tienda de skins: NPC, pestañas y código de regalo', async ({ page }) => {
+  const errors = [];
+  page.on('pageerror', e => errors.push('PAGEERROR: ' + e.message));
+  page.on('console', msg => {
+    if (msg.type() === 'error') errors.push('CONSOLE: ' + msg.text());
+  });
+
+  await waitForLiveGame(page, '12345', {errors,wsEvents:[]});
+
+  await page.keyboard.down('d');
+  await page.keyboard.down('s');
+  await page.waitForTimeout(2300);
+  await page.keyboard.up('d');
+  await page.keyboard.up('s');
+
+  await expect(page.locator('#cosmeticShop')).toHaveCSS('display', 'flex', {timeout:10000});
+  await expect(page.locator('.shopTab[data-shop-tab="gold"]')).toBeVisible();
+  await expect(page.locator('.shopTab[data-shop-tab="diamonds"]')).toBeVisible();
+  await expect(page.locator('.shopTab[data-shop-tab="real"]')).toBeVisible();
+  await expect(page.locator('#skinShopGrid')).toContainText('NÚCLEO OXIDADO');
+
+  await page.locator('.shopTab[data-shop-tab="diamonds"]').click();
+  await expect(page.locator('#skinShopGrid')).toContainText('AURORA');
+
+  await page.locator('.shopTab[data-shop-tab="real"]').click();
+  await expect(page.locator('#premiumGrid')).toContainText('PRÓXIMAMENTE');
+
+  await page.locator('#redeemCode').fill('NEONSTART');
+  await page.locator('#redeemCodeBtn').click();
+  await expect(page.locator('#cosmeticShopMsg')).toContainText('PIXEL CYAN', {timeout:10000});
+
+  const pixelCard = page.locator('.cosmeticCard[data-skin-id="pixel_cyan"]');
+  await expect(pixelCard).toContainText('DESBLOQUEADO');
+
+  if (errors.length) {
+    throw new Error('Errores tienda: ' + errors.join(' | '));
+  }
+});
+
 test('mobile emulation: interfaz táctil y controles visibles', async ({ browser }) => {
   const context = await browser.newContext({
     viewport: { width: 390, height: 844 },
