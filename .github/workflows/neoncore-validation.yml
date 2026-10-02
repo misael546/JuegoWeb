@@ -61,6 +61,8 @@ jobs:
           }
           if (new Set(versions).size !== 1) throw new Error('Build mismatch: ' + versions.join(', '));
           if (!/^20261001-\d+$/.test(versions[0])) throw new Error('Invalid build marker: ' + versions[0]);
+          const serverText = fs.readFileSync('server/server.js','utf8');
+          if (!serverText.includes("const PUBLIC_ROOMS = ['12345'];")) throw new Error('Public room list is not Sala #1 only');
           const root = fs.readFileSync('index.html','utf8');
           if (!root.includes('id="username"') || root.includes('id="quickPlay"') || !root.includes('data-room-count="12345"') || root.includes('data-room="67890"')) throw new Error('Main menu room flow is not synchronized');
           const roomsPage = fs.readFileSync('neoncore/index.html','utf8');
