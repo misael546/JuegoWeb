@@ -1078,7 +1078,7 @@ function shopBuy(ws, requestedWeapon) {
 }
 
 function cosmeticShopNearby(p) {
-  return !!p && Math.hypot(p.x - COSMETIC_SHOP_NPC.x, p.y - COSMETIC_SHOP_NPC.y) <= COSMETIC_SHOP_INTERACTION_RADIUS;
+  return !!p && Math.hypot(p.x - SHOP_NPC.x, p.y - SHOP_NPC.y) <= SHOP_INTERACTION_RADIUS;
 }
 
 function sendCosmeticState(p, message = 'Tienda de cosméticos lista.', unlockedSkin = '') {
@@ -1089,7 +1089,7 @@ function sendCosmeticState(p, message = 'Tienda de cosméticos lista.', unlocked
     unlockedSkin: cosmetics.getSkin(unlockedSkin) ? unlockedSkin : '',
     ownedSkins: cosmetics.normalizeOwnedSkins(p.ownedSkins),
     equippedSkin: cosmetics.getSkin(p.equippedSkin) ? p.equippedSkin : 'core_default',
-    cosmeticShopNpc: COSMETIC_SHOP_NPC,
+    shopNpc: SHOP_NPC,
     catalog: cosmetics.publicCatalog(),
     realMoneyOffers: cosmetics.publicRealMoneyOffers(),
     realMoneyEnabled: false
