@@ -10,7 +10,7 @@ const WORLD = { w: 6000, h: 4400 };
 const MAX_PLAYERS = 16;
 const SAFE_ZONE = { x: 3000, y: 2200, r: 300 };
 
-const SERVER_VERSION = '20261001-123';
+const SERVER_VERSION = '20261001-124';
 
 const AMMO_PACK_SIZE = 50;
 const AMMO_PACK_COST = 50;
@@ -1353,20 +1353,31 @@ wss.on('connection', (ws) => {
           .slice(0, 80);
 
         if (p.saveKey) {
+          // Una reconexión válida puede llegar antes de que el cierre de la
+          // conexión anterior termine de procesarse. Reemplazamos esa sesión
+          // vieja en vez de rechazar la nueva indefinidamente.
           for (const [oldWs, oldP] of clients) {
-            if (oldWs !== ws && oldP?.saveKey && oldP.saveKey === p.saveKey) {
-              send(ws, {
-                type: 'duplicate_session',
-                message: 'Ya tienes una sesión activa de Neon Core en este dispositivo.'
-              });
+            if (oldWs === ws || !oldP?.saveKey || oldP.saveKey !== p.saveKey) continue;
 
-              try {
-                ws.close(4001, 'duplicate_session');
-              } catch {}
+            try {
+              oldP.frozen = true;
+            } catch {}
 
-              clients.delete(ws);
-              return;
+            try {
+              if (oldP.room) {
+                await leaveRoom(oldWs);
+              } else if (oldP.saveKey) {
+                await persistPlayer(oldP);
+              }
+            } catch (error) {
+              console.error('[WS SESSION REPLACE]', error?.message || error);
             }
+
+            clients.delete(oldWs);
+
+            try {
+              oldWs.close(4001, 'replaced_session');
+            } catch {}
           }
         }
 
