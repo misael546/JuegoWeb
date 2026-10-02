@@ -612,7 +612,7 @@ function burst(x,y,color,n=10){
 }
 function enemyExplosion(e){
   if(!e || e.dead)return;
-  burst(e.x,e.y,e.kind==="elite"?"#ff9f43":"#ff3b81",26);
+  burst(e.x,e.y,e.kind==="boss"?"#ffd76a":e.kind==="elite"?"#ff9f43":"#ff3b81",e.kind==="boss"?46:26);
   e.dead=true;
 }
 
@@ -1052,9 +1052,10 @@ function drawMinimap(){
   mctx.fillStyle="rgba(57,231,255,.12)";mctx.beginPath();mctx.arc(zx,zy,zr,0,Math.PI*2);mctx.fill();
   mctx.strokeStyle="#39e7ff";mctx.lineWidth=2;mctx.setLineDash([7,5]);mctx.beginPath();mctx.arc(zx,zy,zr,0,Math.PI*2);mctx.stroke();mctx.setLineDash([]);
   for(const e of enemies){
+    if(e.dead)continue;
     const ex=ox+e.x*scale,ey=oy+e.y*scale;
-    mctx.fillStyle=e.kind==="elite"?"#ff9f43":"#ff5474";
-    mctx.beginPath();mctx.arc(ex,ey,e.kind==="elite"?3:2,0,Math.PI*2);mctx.fill();
+    mctx.fillStyle=e.kind==="boss"?"#ffd76a":e.kind==="elite"?"#ff9f43":"#ff5474";
+    mctx.beginPath();mctx.arc(ex,ey,e.kind==="boss"?5:e.kind==="elite"?3:2,0,Math.PI*2);mctx.fill();
   }
   for(const other of remotePlayers.values()){
     if(other.alive===false)continue;
@@ -1111,10 +1112,12 @@ function draw(){
     ctx.fillStyle=other.color||"#7cff72";ctx.fillRect(ox-24,oy,48*clamp((other.hp||100)/(other.maxHp||100),0,1),4);
   }
   for(const e of enemies){
-    const enemyAngle=Math.atan2(p.y-e.y,p.x-e.x);
+    if(e.dead)continue;
     drawEnemy(e);
-    drawNameTag(e.kind==="elite"?"ÉLITE":"ENEMIGO",e.x,e.y,e.r,e.kind==="elite"?"#ff9f43":"#ff5474");
-    const x=sx(e.x),y=sy(e.y)-e.r-10;ctx.fillStyle="#161c2a";ctx.fillRect(x-25,y,50,5);ctx.fillStyle=e.kind==="elite"?"#ff9f43":"#ff5474";ctx.fillRect(x-25,y,50*(e.hp/e.maxHp),5);
+    const enemyColor=e.kind==="boss"?"#ffd76a":e.kind==="elite"?"#ff9f43":"#ff5474";
+    drawNameTag(e.kind==="boss"?"👑 PRIMER BOSS":e.kind==="elite"?"ÉLITE":"ENEMIGO",e.x,e.y,e.r,enemyColor);
+    const x=sx(e.x),y=sy(e.y)-e.r-12,w=e.kind==="boss"?84:50;
+    ctx.fillStyle="#161c2a";ctx.fillRect(x-w/2,y,w,6);ctx.fillStyle=enemyColor;ctx.fillRect(x-w/2,y,w*clamp(e.hp/e.maxHp,0,1),6);
   }
   for(const q of particles){
     const alpha=Math.max(0,q.life/(q.maxLife||.6));
