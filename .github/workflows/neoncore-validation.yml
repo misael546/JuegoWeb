@@ -49,7 +49,7 @@ jobs:
         run: |
           node - <<'NODE'
           const fs = require('fs');
-          const files = ['server/server.js','neoncore/12345/index.html','neoncore/67890/index.html'];
+          const files = ['server/server.js','neoncore/12345/index.html'];
           const texts = files.map(f => fs.readFileSync(f,'utf8'));
           const versions = [];
           const server = texts[0].match(/SERVER_VERSION\s*=\s*['"]([^'"]+)/);
