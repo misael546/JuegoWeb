@@ -59,13 +59,13 @@ const PUBLIC_ROOMS = ['12345', '67890'];
 
 rooms.set('OPEN', new Set());
 roomEnemies.set('OPEN', []);
-roomWalls.set('OPEN', []);
+roomWalls.set('OPEN', null);
 roomWallRespawns.set('OPEN', []);
 
 for (const code of PUBLIC_ROOMS) {
   rooms.set(code, new Set());
   roomEnemies.set(code, []);
-  roomWalls.set(code, []);
+  roomWalls.set(code, null);
   roomWallRespawns.set(code, []);
 }
 
@@ -518,7 +518,7 @@ function restoreDueWalls(code, broadcast = false) {
 
 function ensureRoomWalls(code) {
   restoreDueWalls(code, false);
-  if (!roomWalls.has(code) || !roomWalls.get(code)?.length) {
+  if (!roomWalls.has(code) || !Array.isArray(roomWalls.get(code))) {
     roomWalls.set(
       code,
       WORLD_WALLS.map((wall) => ({ ...wall }))
