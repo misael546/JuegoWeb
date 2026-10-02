@@ -1467,7 +1467,27 @@ function createPlayer(ws) {
 }
 
 const httpServer = http.createServer(async (req, res) => {
-  if (req.url === '/health' || req.url === '/') {
+  const pathname = String(req.url || '').split('?')[0];
+
+  if (pathname === '/rooms') {
+    res.writeHead(200, {
+      'Content-Type': 'application/json; charset=utf-8',
+      'Access-Control-Allow-Origin': '*',
+      'Cache-Control': 'no-store, no-cache, must-revalidate'
+    });
+    return res.end(JSON.stringify({
+      ok: true,
+      version: SERVER_VERSION,
+      maxPlayers: MAX_PLAYERS,
+      rooms: PUBLIC_ROOMS.map((code) => ({
+        code,
+        players: roomPlayers(rooms.get(code)).length,
+        maxPlayers: MAX_PLAYERS
+      }))
+    }));
+  }
+
+  if (pathname === '/health' || pathname === '/') {
     res.writeHead(200, {
       'Content-Type': 'application/json',
       'Access-Control-Allow-Origin': '*',
