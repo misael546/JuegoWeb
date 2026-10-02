@@ -1753,7 +1753,6 @@ function handleShot(ws) {
       amount: damage,
       x: targetEnemy.x,
       y: targetEnemy.y,
-      attackLevel: WEAPONS[shooter.weapon]?.tier || 1,
       attackPower: shooter.damage
     });
 
