@@ -25,8 +25,8 @@ h2{font-size:15px;margin:18px 0 10px}
 .room:active:not(.disabled){transform:scale(.985)}
 .room.disabled{opacity:.42;filter:saturate(.55);cursor:not-allowed}
 .room strong{display:block;font-size:20px;letter-spacing:2px;color:#39e7ff}
-.room span{display:block;color:#9ca9bd;font-size:12px;margin-top:5px}
-.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.room span{display:block;color:#9ca9bd;font-size:12px;margin-top:5px}.room .roomCount{color:#6ff3b0;font-weight:900}
+.actions{display:grid;grid-template-columns:1fr;gap:8px;margin-top:12px}
 .action{min-height:44px;border:0;border-radius:10px;background:#183d58;color:#fff;font-weight:bold;touch-action:manipulation}
 .action.secondary{background:#26344e}
 .build{margin-top:18px;color:#53627b;font-size:10px;text-align:center}
@@ -46,16 +46,15 @@ h2{font-size:15px;margin:18px 0 10px}
   <div class="rooms">
     <a class="room disabled" data-room="12345" href="neoncore/12345/" aria-disabled="true" tabindex="-1">
       <strong>SALA 12345</strong>
-      <span>Entrar a la arena pública</span>
+      <span>Entrar a la arena pública · <b class="roomCount" data-room-count="12345">0/16 JUGADORES</b></span>
     </a>
     <a class="room disabled" data-room="67890" href="neoncore/67890/" aria-disabled="true" tabindex="-1">
       <strong>SALA 67890</strong>
-      <span>Entrar a la arena pública</span>
+      <span>Entrar a la arena pública · <b class="roomCount" data-room-count="67890">0/16 JUGADORES</b></span>
     </a>
   </div>
 
   <div class="actions">
-    <button class="action" id="quickPlay" type="button">ENTRAR RÁPIDO</button>
     <button class="action secondary" id="clearName" type="button">CAMBIAR NOMBRE</button>
   </div>
 
@@ -69,6 +68,26 @@ h2{font-size:15px;margin:18px 0 10px}
   const status=document.getElementById("status");
   const msg=document.getElementById("msg");
   const cards=[...document.querySelectorAll(".room[data-room]")];
+
+  const ROOM_STATUS_URL="https://neon-core-multiplayer.onrender.com/rooms";
+  async function refreshRoomCounts(){
+    try{
+      const res=await fetch(ROOM_STATUS_URL+"?t="+Date.now(),{cache:"no-store"});
+      if(!res.ok)throw new Error("rooms");
+      const data=await res.json();
+      const byCode=new Map((Array.isArray(data.rooms)?data.rooms:[]).map(r=>[String(r.code),r]));
+      cards.forEach(card=>{
+        const code=card.getAttribute("data-room");
+        const el=card.querySelector("[data-room-count]");
+        const room=byCode.get(String(code));
+        if(el)el.textContent=room?String(Number(room.players)||0)+"/"+String(Number(room.maxPlayers)||16)+" JUGADORES":"—/16 JUGADORES";
+      });
+    }catch(e){
+      cards.forEach(card=>{const el=card.querySelector("[data-room-count]");if(el)el.textContent="—/16 JUGADORES";});
+    }
+  }
+  refreshRoomCounts();
+  setInterval(refreshRoomCounts,5000);
 
   function getName(){return String(input.value||"").trim().slice(0,20)}
   function loadName(){try{return localStorage.getItem("neon_core_name")||""}catch(e){return""}}
@@ -111,13 +130,6 @@ h2{font-size:15px;margin:18px 0 10px}
     });
   });
 
-  document.getElementById("quickPlay").addEventListener("click",()=>{
-    const name=getName();
-    if(!name){msg.textContent="Escribe tu nombre primero.";input.focus();return}
-    saveName(name);
-    openRoom("12345");
-  });
-
   document.getElementById("clearName").addEventListener("click",()=>{
     input.value="";
     try{localStorage.removeItem("neon_core_name")}catch(e){}
@@ -131,7 +143,8 @@ h2{font-size:15px;margin:18px 0 10px}
       const name=getName();
       if(!name){msg.textContent="Escribe tu nombre primero.";return}
       saveName(name);
-      openRoom("12345");
+      const first=cards.find(card=>!card.classList.contains("disabled"));
+      if(first)first.focus();
     }
   });
 
