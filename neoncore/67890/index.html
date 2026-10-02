@@ -9,7 +9,7 @@
 <script>
 (function(){
   try{
-    var v="20261001-119";
+    var v="20261001-120";
     var k="neon_core_build";
     window.NEON_CORE_BUILD=v;
     var old=localStorage.getItem(k);
@@ -26,7 +26,7 @@
   }catch(e){}
 })();
 </script>
-<title>Neon Core · Build 118</title>
+<title>Neon Core · Build 120</title>
 <style>
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#050811;color:#fff;font-family:Arial,sans-serif;touch-action:none}
 #game{display:block;width:100vw;height:100vh}
@@ -57,7 +57,7 @@
 </script>
 </head>
 <body>
-<canvas id="game"></canvas><div id="buildDisplay">NEON CORE · BUILD 119</div>
+<canvas id="game"></canvas><div id="buildDisplay">NEON CORE · BUILD 120</div>
 
 <div id="hud">
   <div class="panel" id="bars">
@@ -960,6 +960,37 @@ function setupJoystick(id){
   return reset;
 }
 const resetMoveJoystick=setupJoystick("moveJoy");
+function setupTouchDragFallback(){
+  let activeId=null,startX=0,startY=0;
+  const validTarget=(target)=>{
+    if(!target)return false;
+    if(target.closest && (target.closest("#moveJoy")||target.closest("#fire")||target.closest("button")||target.closest("input")||target.closest("form")||target.closest("#controlEditor"))) return false;
+    return target===canvas || target===document.body || target===document.documentElement;
+  };
+  document.addEventListener("touchstart",e=>{
+    if(activeId!==null || !gameActive || !validTarget(e.target))return;
+    const t=e.changedTouches&&e.changedTouches[0]; if(!t || t.clientX>innerWidth*.58)return;
+    activeId=t.identifier;startX=t.clientX;startY=t.clientY;
+    e.preventDefault();
+  },{passive:false});
+  document.addEventListener("touchmove",e=>{
+    if(activeId===null)return;
+    const t=[...e.changedTouches].find(x=>x.identifier===activeId); if(!t)return;
+    const dx=t.clientX-startX,dy=t.clientY-startY,max=Math.max(36,Math.min(innerWidth,innerHeight)*.16);
+    const len=Math.hypot(dx,dy),scale=len>max?max/len:1;
+    moveX=clamp(dx*scale/max,-1,1);moveY=clamp(dy*scale/max,-1,1);
+    e.preventDefault();
+  },{passive:false});
+  const end=e=>{
+    if(activeId===null)return;
+    if([...e.changedTouches].some(x=>x.identifier===activeId)){
+      activeId=null;moveX=0;moveY=0;
+    }
+  };
+  document.addEventListener("touchend",end,{passive:false});
+  document.addEventListener("touchcancel",end,{passive:false});
+}
+setupTouchDragFallback();
 const controlDefaults={joySize:112,fireSize:86,joyX:8,joyY:8,fireX:8,fireY:8};
 let controlConfig={...controlDefaults};
 try{const saved=JSON.parse(localStorage.getItem("neon_core_controls")||"null");if(saved)controlConfig={...controlDefaults,...saved};}catch{}
