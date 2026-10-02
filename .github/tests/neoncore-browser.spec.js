@@ -158,6 +158,36 @@ test('menu público táctil: abrir sala desde el selector', async ({ browser }) 
   await context.close();
 });
 
+
+test('menu principal: nombre y entrada a sala', async ({ browser }) => {
+  const context = await browser.newContext({
+    viewport: { width: 390, height: 844 },
+    isMobile: true,
+    hasTouch: true
+  });
+  const page = await context.newPage();
+
+  await page.goto('https://misael546.github.io/JuegoWeb/?mainCI=' + Date.now(), {
+    waitUntil: 'domcontentloaded',
+    timeout: 45000
+  });
+
+  await expect(page.locator('#username')).toBeVisible({timeout:15000});
+  await expect(page.locator('.room[data-room="12345"]')).toHaveClass(/disabled/);
+
+  await page.locator('#username').fill('PruebaNeon');
+  await expect(page.locator('.room[data-room="12345"]')).not.toHaveClass(/disabled/);
+
+  await page.locator('#quickPlay').click();
+
+  await expect.poll(async () => page.url(), {
+    timeout: 15000,
+    intervals: [250, 500]
+  }).toContain('/neoncore/12345/');
+
+  await context.close();
+});
+
 test('mobile emulation: interfaz táctil y controles visibles', async ({ browser }) => {
   const context = await browser.newContext({
     viewport: { width: 390, height: 844 },
