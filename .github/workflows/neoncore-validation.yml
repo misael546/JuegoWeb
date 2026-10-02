@@ -33,8 +33,7 @@ jobs:
           node - <<'NODE'
           const fs = require('fs');
           const files = [
-            'neoncore/12345/index.html',
-            'neoncore/67890/index.html'
+            'neoncore/12345/index.html'
           ];
           for (const file of files) {
             const html = fs.readFileSync(file, 'utf8');
@@ -63,8 +62,8 @@ jobs:
           if (new Set(versions).size !== 1) throw new Error('Build mismatch: ' + versions.join(', '));
           if (!/^20261001-\d+$/.test(versions[0])) throw new Error('Invalid build marker: ' + versions[0]);
           const root = fs.readFileSync('index.html','utf8');
-          if (!root.includes('id="username"') || root.includes('id="quickPlay"') || !root.includes('data-room-count="12345"')) throw new Error('Main menu room flow is not synchronized');
+          if (!root.includes('id="username"') || root.includes('id="quickPlay"') || !root.includes('data-room-count="12345"') || root.includes('data-room="67890"')) throw new Error('Main menu room flow is not synchronized');
           const roomsPage = fs.readFileSync('neoncore/index.html','utf8');
-          if (roomsPage.includes('id="quickPlay"') || !roomsPage.includes('data-room-count="12345"') || !roomsPage.includes('ROOM_STATUS_URL')) throw new Error('Rooms page player-count flow is not synchronized');
+          if (roomsPage.includes('id="quickPlay"') || !roomsPage.includes('data-room-count="12345"') || roomsPage.includes('data-room="67890"') || !roomsPage.includes('ROOM_STATUS_URL')) throw new Error('Rooms page player-count flow is not synchronized');
           console.log('Build synchronization: OK');
           NODE
