@@ -1248,49 +1248,41 @@ function buyAmmo(ws) {
     send(ws, { type: 'shop_result', ok: false, message: 'No estás dentro de una sala.' });
     return;
   }
-
   if (!p.alive) {
     send(ws, { type: 'shop_result', ok: false, message: 'No puedes comprar estando destruido.' });
     return;
   }
-
   if (Math.hypot(p.x - SHOP_NPC.x, p.y - SHOP_NPC.y) > SHOP_INTERACTION_RADIUS) {
-    send(ws, {
-      type: 'shop_result',
-      ok: false,
-      message: 'Acércate al vendedor de munición.'
-    });
+    send(ws, { type: 'shop_result', ok: false, message: 'Párate sobre el SHOP.' });
     return;
   }
 
-  const ammo = clamp(Number(p.ammo) || 0, 0, MAX_AMMO);
+  const maxAmmo = maxAmmoForWeapon(p.weapon);
+  const ammo = clamp(Number(p.ammo) || 0, 0, maxAmmo);
   const gold = Math.max(0, Number(p.gold) || 0);
 
-  if (ammo >= MAX_AMMO) {
-    send(ws, { type: 'shop_result', ok: false, message: 'Munición al máximo.' });
+  if (ammo >= maxAmmo) {
+    send(ws, { type: 'shop_result', ok: false, message: 'Munición al máximo para este arsenal.' });
     return;
   }
-
   if (gold < AMMO_PACK_COST) {
-    send(ws, { type: 'shop_result', ok: false, message: 'Necesitas 50 de oro.' });
+    send(ws, { type: 'shop_result', ok: false, message: 'Necesitas ' + AMMO_PACK_COST + ' de oro.' });
     return;
   }
 
-  const purchased = Math.min(AMMO_PACK_SIZE, MAX_AMMO - ammo);
+  const purchased = Math.min(AMMO_PACK_SIZE, maxAmmo - ammo);
   p.gold = gold - AMMO_PACK_COST;
   p.ammo = ammo + purchased;
 
   void persistPlayer(p);
-
   send(ws, {
     type: 'shop_result',
     ok: true,
     message: 'Compraste ' + purchased + ' balas.',
     gold: p.gold,
     ammo: p.ammo,
-    maxAmmo: MAX_AMMO
+    maxAmmo
   });
-
   sendStats(p);
 }
 
@@ -1322,7 +1314,7 @@ function handleShot(ws) {
   const room = rooms.get(shooter.room);
   if (!room) return;
 
-  const damage = clamp(Number(shooter.damage) || 25, 10, 150);
+  const damage = clamp(Number(shooter.damage) || 35, 10, 1000);
   const maxRange = 1000;
 
   let targetPlayer = null;
@@ -1553,7 +1545,7 @@ function handleShot(ws) {
   }
 
   if (targetEnemy) {
-    const incomingDamage = targetEnemy.kind === 'boss' ? Math.max(1, Math.round(damage * 0.62)) : damage;
+    const incomingDamage = targetEnemy.kind === 'boss' ? Math.max(1, Math.round(damage * 0.55)) : damage;
     targetEnemy.hp = clamp(targetEnemy.hp - incomingDamage, 0, targetEnemy.maxHp);
 
     broadcastRoom(shooter.room, {
