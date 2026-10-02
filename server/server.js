@@ -11,7 +11,7 @@ const WORLD = { w: 6000, h: 4400 };
 const MAX_PLAYERS = 16;
 const SAFE_ZONE = { x: 3000, y: 2200, r: 300 };
 
-const SERVER_VERSION = '20261002-152';
+const SERVER_VERSION = '20261002-153';
 
 const AMMO_PACK_SIZE = 100;
 const AMMO_PACK_COST = 75;
@@ -1286,20 +1286,23 @@ function equipCosmeticSkin(ws, skinId) {
   const id = String(skinId || '');
   p.ownedSkins = cosmetics.normalizeOwnedSkins(p.ownedSkins);
   if (id === '') {
+    return cosmeticShopError(ws, 'Selecciona una skin para alternar su equipamiento.');
+  }
+
+  if (!cosmetics.getSkin(id) || !p.ownedSkins.includes(id)) return cosmeticShopError(ws, 'Skin bloqueado.');
+
+  if (p.equippedSkin === id) {
     p.equippedSkin = '';
     applyCombatStats(p);
     void persistPlayer(p);
     sendCosmeticState(p, 'Skin de tanque desequipado · DEFENSA del skin retirada.');
-    sendStats(p);
-    sendPlayerList(p.room);
-    return;
+  } else {
+    p.equippedSkin = id;
+    applyCombatStats(p);
+    void persistPlayer(p);
+    sendCosmeticState(p, 'Skin equipado: ' + cosmetics.getSkin(id).name + '.');
   }
 
-  if (!cosmetics.getSkin(id) || !p.ownedSkins.includes(id)) return cosmeticShopError(ws, 'Skin bloqueado.');
-  p.equippedSkin = id;
-  applyCombatStats(p);
-  void persistPlayer(p);
-  sendCosmeticState(p, 'Skin equipado: ' + cosmetics.getSkin(id).name + '.');
   sendStats(p);
   sendPlayerList(p.room);
 }
