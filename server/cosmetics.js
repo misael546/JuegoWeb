@@ -17,11 +17,11 @@ const SKINS = Object.freeze({
 });
 
 const WEAPON_SKINS = Object.freeze({
-  blaster_neonstorm: { id:'blaster_neonstorm', name:'BLASTER · NEONSTORM', weaponId:'blaster', rarity:'Raro', priceGold:2500, priceDiamonds:0, attackBonus:8, defenseBonus:0, style:'neonstorm' },
-  pulse_prism: { id:'pulse_prism', name:'PULSE · PRISMA', weaponId:'pulse', rarity:'Épico', priceGold:10000, priceDiamonds:0, attackBonus:15, defenseBonus:0, style:'prism' },
-  cannon_solaris: { id:'cannon_solaris', name:'CANNON · SOLARIS', weaponId:'cannon', rarity:'Legendario', priceGold:0, priceDiamonds:1200, attackBonus:25, defenseBonus:0, style:'solaris' },
-  railgun_eclipse: { id:'railgun_eclipse', name:'RAILGUN · ECLIPSE', weaponId:'railgun', rarity:'Supremo', priceGold:0, priceDiamonds:7000, attackBonus:40, defenseBonus:0, style:'eclipse' },
-  nova_supernova: { id:'nova_supernova', name:'NOVA · SUPERNOVA', weaponId:'nova', rarity:'Supremo', priceGold:0, priceDiamonds:18000, attackBonus:65, defenseBonus:0, style:'supernova' }
+  blaster_neonstorm: { id:'blaster_neonstorm', name:'BLASTER · NEONSTORM', weaponId:'blaster', rarity:'Raro', priceGold:2500, priceDiamonds:0, attackBonus:8, style:'neonstorm' },
+  pulse_prism: { id:'pulse_prism', name:'PULSE · PRISMA', weaponId:'pulse', rarity:'Épico', priceGold:10000, priceDiamonds:0, attackBonus:15, style:'prism' },
+  cannon_solaris: { id:'cannon_solaris', name:'CANNON · SOLARIS', weaponId:'cannon', rarity:'Legendario', priceGold:0, priceDiamonds:1200, attackBonus:25, style:'solaris' },
+  railgun_eclipse: { id:'railgun_eclipse', name:'RAILGUN · ECLIPSE', weaponId:'railgun', rarity:'Supremo', priceGold:0, priceDiamonds:7000, attackBonus:40, style:'eclipse' },
+  nova_supernova: { id:'nova_supernova', name:'NOVA · SUPERNOVA', weaponId:'nova', rarity:'Supremo', priceGold:0, priceDiamonds:18000, attackBonus:65, style:'supernova' }
 });
 
 const REAL_MONEY_OFFERS = Object.freeze([
@@ -91,7 +91,7 @@ function publicWeaponCatalog() {
   return Object.values(WEAPON_SKINS).map(skin => ({
     id:skin.id, name:skin.name, weaponId:skin.weaponId, rarity:skin.rarity,
     priceGold:skin.priceGold, priceDiamonds:skin.priceDiamonds,
-    attackBonus:skin.attackBonus, defenseBonus:skin.defenseBonus, style:skin.style,
+    attackBonus:skin.attackBonus, style:skin.style,
     redeemable:Object.values(REDEEM_CODES).some(x=>x.weaponSkinId===skin.id)
   }));
 }
