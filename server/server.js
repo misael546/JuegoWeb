@@ -11,7 +11,7 @@ const WORLD = { w: 6000, h: 4400 };
 const MAX_PLAYERS = 16;
 const SAFE_ZONE = { x: 3000, y: 2200, r: 300 };
 
-const SERVER_VERSION = '20261001-129';
+const SERVER_VERSION = '20261001-130';
 
 const AMMO_PACK_SIZE = 50;
 const AMMO_PACK_COST = 50;
@@ -20,7 +20,7 @@ const MAX_AMMO = 120;
 const SHOP_NPC = { x: 3600, y: 2200, r: 30 };
 const SHOP_INTERACTION_RADIUS = 80;
 const COSMETIC_SHOP_NPC = { x: 3300, y: 2200, r: 32 };
-const COSMETIC_SHOP_INTERACTION_RADIUS = 95;
+const COSMETIC_SHOP_INTERACTION_RADIUS = 120;
 const BANK_NPC = { x: 3000, y: 1800, r: 24 };
 const BANK_INTERACTION_RADIUS = 95;
 
