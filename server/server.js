@@ -11,13 +11,13 @@ const WORLD = { w: 6000, h: 4400 };
 const MAX_PLAYERS = 16;
 const SAFE_ZONE = { x: 3000, y: 2200, r: 300 };
 
-const SERVER_VERSION = '1';
+const SERVER_VERSION = '2';
 
 const AMMO_PACK_SIZE = 100;
 const AMMO_PACK_COST = 75;
 const MAX_AMMO = 700;
 
-const SHOP_NPC = { x: 3000, y: 2200, r: 24 };
+const SHOP_NPC = { x: 3250, y: 2200, r: 24 };
 const SHOP_INTERACTION_RADIUS = 48;
 const BANK_ENABLED = false;
 
@@ -1068,7 +1068,7 @@ function spawnPosition(code) {
     [3100, 2200],
     [3000, 2100],
     [2750, 2200],
-    [3250, 2200],
+    [3000, 2300],
     [3000, 1900],
     [3000, 2500],
     [2700, 1900],
