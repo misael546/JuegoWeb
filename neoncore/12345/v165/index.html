@@ -9,7 +9,7 @@
 <script>
 (function(){
   try{
-    var v="20261003-165-audio3";
+    var v="20261003-165-audio4";
     var k="neon_core_build";
     window.NEON_CORE_BUILD=v;
     var old=localStorage.getItem(k);
@@ -2011,9 +2011,22 @@ addEventListener("pointerup",e=>{if(e.pointerType==="mouse")pointer.down=false;}
 function sendShopCommand(type,weapon){if(!multiplayerSocket||multiplayerSocket.readyState!==1)return;const msg={type};if(weapon)msg.weapon=weapon;multiplayerSocket.send(JSON.stringify(msg));}const buyAmmoBtn=document.getElementById("buyAmmoBtn");buyAmmoBtn.addEventListener("click",e=>{e.preventDefault();e.stopPropagation();sendShopCommand("buy_ammo");});document.querySelectorAll(".shopItem").forEach(btn=>btn.addEventListener("click",e=>{e.preventDefault();e.stopPropagation();sendShopCommand("buy_weapon",btn.dataset.weapon);}));
 
 const fireButton=document.getElementById("fire");
-fireButton.addEventListener("pointerdown",e=>{e.preventDefault();fire();},{passive:false});
-fireButton.addEventListener("pointerup",e=>{e.preventDefault();pointer.down=false;},{passive:false});
-fireButton.addEventListener("pointercancel",()=>{pointer.down=false;});
+fireButton.addEventListener("pointerdown",e=>{
+  e.preventDefault();
+  e.stopPropagation();
+  pointer.down=true;
+  fire();
+  try{fireButton.setPointerCapture(e.pointerId);}catch{}
+},{passive:false});
+fireButton.addEventListener("pointerup",e=>{
+  e.preventDefault();
+  pointer.down=false;
+  try{if(fireButton.hasPointerCapture(e.pointerId))fireButton.releasePointerCapture(e.pointerId);}catch{}
+},{passive:false});
+fireButton.addEventListener("pointercancel",e=>{
+  e.preventDefault();
+  pointer.down=false;
+},{passive:false});
 fireButton.addEventListener("lostpointercapture",()=>{pointer.down=false;});
 
 loadStats();
