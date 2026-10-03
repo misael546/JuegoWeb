@@ -55,7 +55,7 @@ h2{font-size:15px;margin:18px 0 10px}
   </div>
 
   <div id="msg" class="msg"></div>
-  <div class="build">NEON CORE · BUILD 20261001-132</div>
+  <div class="build">NEON CORE · BUILD 20261003-160</div>
 </main>
 
 <script>
@@ -83,7 +83,7 @@ h2{font-size:15px;margin:18px 0 10px}
     }
   }
   refreshRoomCounts();
-  setInterval(refreshRoomCounts,5000);
+  setInterval(refreshRoomCounts,2000);
 
   function getName(){return String(input.value||"").trim().slice(0,20)}
   function loadName(){try{return localStorage.getItem("neon_core_name")||""}catch(e){return""}}
