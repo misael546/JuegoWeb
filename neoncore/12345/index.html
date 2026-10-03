@@ -290,24 +290,6 @@ const remotePlayers=new Map();
 let multiplayerSocket=null,multiplayerReady=false,multiplayerId="",lastNetSend=0,currentRoom="",multiplayerConnectTimer=null;
 let movementTelemetry={inputSince:0,lastX:p.x,lastY:p.y,lastReport:0};
 const neonDiag={inputEvents:0,lastInput:0,lastSync:"none",frames:0,started:performance.now()};
-(function installNeonDiag(){
-  const box=document.createElement("div");
-  box.id="neonDiag";
-  box.style.cssText="position:fixed;right:8px;top:8px;z-index:99999;padding:7px 9px;border:1px solid rgba(57,231,255,.45);border-radius:8px;background:rgba(3,8,18,.88);color:#dffbff;font:11px/1.35 monospace;pointer-events:none;white-space:pre;max-width:210px";
-  document.body.appendChild(box);
-  window.neonDiag=neonDiag;
-  window.updateNeonDiag=()=>{
-    const ws=multiplayerSocket?multiplayerSocket.readyState:-1;
-    box.textContent="B149 DIAG\\n"+
-      "game:"+!!gameActive+" alive:"+!!p.alive+"\\n"+
-      "input:"+moveX.toFixed(2)+","+moveY.toFixed(2)+" ev:"+neonDiag.inputEvents+"\\n"+
-      "pos:"+Math.round(p.x)+","+Math.round(p.y)+" sp:"+Math.round(p.speed)+"\\n"+
-      "ws:"+ws+" room:"+String(currentRoom||"-")+"\\n"+
-      "mobs:"+enemies.length+" walls:"+walls.length+"\\n"+
-      "sync:"+neonDiag.lastSync;
-  };
-})();
-
 const MULTIPLAYER_SERVER="wss://neon-core-multiplayer.onrender.com/ws";
 const RENDER_HEALTH_URL=MULTIPLAYER_SERVER.replace(/^wss:/,"https:").replace(/^ws:/,"http:").replace(/\/ws$/,"/health");
 let renderStatusTimer=null,renderServerVersion="",renderServerStartedAt=0;
@@ -636,7 +618,7 @@ function connectMultiplayer(roomMode="quick",roomCode=""){ const publicRoomAuto=
           if(m.unlockedWeapon&&!ownedWeapons.includes(m.unlockedWeapon))ownedWeapons=[...ownedWeapons,m.unlockedWeapon];
           if(m.shopNpc){shopNpc.x=Number(m.shopNpc.x)||shopNpc.x;shopNpc.y=Number(m.shopNpc.y)||shopNpc.y;shopNpc.r=Number(m.shopNpc.r)||shopNpc.r;cosmeticShopNpc={...shopNpc};}
           renderCosmeticShop();showCosmeticMsg(m.message||"SHOP actualizado.");updateResourceHud();
-        }else if(m.type==="cosmetic_result"){        }else if(m.type==="cosmetic_result"){
+        }else if(m.type==="cosmetic_result"){
           if(Array.isArray(m.ownedSkins))ownedSkins=m.ownedSkins;
           if(Array.isArray(m.ownedWeapons))ownedWeapons=m.ownedWeapons;
           if(Array.isArray(m.ownedWeaponSkins))ownedWeaponSkins=m.ownedWeaponSkins;
@@ -703,20 +685,24 @@ function connectMultiplayer(roomMode="quick",roomCode=""){ const publicRoomAuto=
       if(!publicRoomAuto){ nameBox.style.display="flex"; username.value=playerName||username.value; }
     });
     socket.addEventListener("close",()=>{
-       if(multiplayerSocket!==socket)return;
-      if(multiplayerConnectTimer){clearTimeout(multiplayerConnectTimer);multiplayerConnectTimer=null;}
-      multiplayerSocket=null;
-      if(!gameActive && currentRoom){
-        setConnectionStatus("RENDER ACTUALIZANDO","La conexión se perdió. Reintentando automáticamente…",true);
-        if(!publicRoomAuto){ nameBox.style.display="flex"; username.value=playerName||username.value; }
-        else multiplayerConnectTimer=setTimeout(()=>connectMultiplayer("join",PUBLIC_ROOM_CODE),1800);
-      }else if(currentRoom){
-        setConnectionStatus("RENDER ACTUALIZANDO","La conexión se perdió. Render puede estar reiniciando o desplegando una actualización.",false);
-      }
-    });
-  }catch{}
-}
-function sendMultiplayerState(dt){
+        if(multiplayerSocket!==socket)return;
+       if(multiplayerConnectTimer){clearTimeout(multiplayerConnectTimer);multiplayerConnectTimer=null;}
+       multiplayerSocket=null;
+       if(currentRoom){
+         const reconnectMode=currentRoom==="OPEN"?"quick":"join";
+         const reconnectCode=currentRoom==="OPEN"?"":currentRoom;
+         setConnectionStatus("RECONEXIÓN","La conexión se perdió. Intentando volver a entrar…",true);
+         if(!publicRoomAuto) nameBox.style.display="none";
+         multiplayerConnectTimer=setTimeout(()=>{
+           if(multiplayerSocket===null && currentRoom){
+             connectMultiplayer(reconnectMode,reconnectCode);
+           }
+         },1800);
+       }
+     });
+   }catch{}
+ }
+ function sendMultiplayerState(dt){
   if(!multiplayerSocket || multiplayerSocket.readyState!==1)return;
   lastNetSend+=dt;
   if(lastNetSend<.05)return;
