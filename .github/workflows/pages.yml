@@ -38,7 +38,7 @@ jobs:
           ]
           for path in targets:
               html = path.read_text(encoding="utf-8")
-              scripts = re.findall(r"<script(?:[^>]*)>([\\s\\S]*?)</script>", html, flags=re.I)
+              scripts = re.findall(r"<script(?:[^>]*)>([\s\S]*?)</script>", html, flags=re.I)
               checked = 0
               for i, code in enumerate(scripts):
                   if not code.strip():
