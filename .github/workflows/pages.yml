@@ -63,7 +63,7 @@ jobs:
           legacy = Path("neoncore/index.html").read_text(encoding="utf-8")
 
           assert '20261003-006-pages-live-main-menu' in root
-          assert 'const PUBLIC_ROOM_CODE=""' in root
+          assert re.search(r'const\s+PUBLIC_ROOM_CODE\s*=\s*""', root)
           assert 'MENÚ PRINCIPAL · SALAS PÚBLICAS' not in root
           assert 'Sala #1' not in root
           assert '20261003-167-darkscifi' not in root
@@ -93,7 +93,10 @@ jobs:
           echo "[PAGES] Checking live URL: $url"
           for i in $(seq 1 12); do
             html="$(curl -fsSL --retry 2 --retry-delay 2 "$url" || true)"
-            if printf '%s' "$html" | grep -Fq '20261003-006-pages-live-main-menu'               && printf '%s' "$html" | grep -Fq 'const PUBLIC_ROOM_CODE=""'               && ! printf '%s' "$html" | grep -Fq 'MENÚ PRINCIPAL · SALAS PÚBLICAS'               && ! printf '%s' "$html" | grep -Fq '20261003-167-darkscifi'; then
+            if grep -Fq '20261003-006-pages-live-main-menu' <<<"$html" \
+               && grep -Eq 'const[[:space:]]+PUBLIC_ROOM_CODE[[:space:]]*=[[:space:]]*""' <<<"$html" \
+               && ! grep -Fq 'MENÚ PRINCIPAL · SALAS PÚBLICAS' <<<"$html" \
+               && ! grep -Fq '20261003-167-darkscifi' <<<"$html"; then
               echo "[PAGES] LIVE ROOT VERIFIED: current main menu is being served."
               exit 0
             fi
@@ -101,5 +104,5 @@ jobs:
             sleep 5
           done
           echo "[PAGES] LIVE ROOT CHECK FAILED."
-          printf '%s' "$html" | head -c 1200
+          printf '%s' "${html:0:1200}"
           exit 1
