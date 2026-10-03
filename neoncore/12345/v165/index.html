@@ -9,7 +9,7 @@
 <script>
 (function(){
   try{
-    var v="20261003-165-audio6";
+    var v="20261003-165-audio7";
     var k="neon_core_build";
     window.NEON_CORE_BUILD=v;
     var old=localStorage.getItem(k);
@@ -1751,7 +1751,6 @@ function setupJoystick(id){
     stick.style.transform="translate("+x+"px,"+y+"px)";
   }
   el.addEventListener("pointerdown",e=>{
-    if(e.isPrimary===false)return;
     if(e.pointerType==="mouse" && e.button!==0)return;
     e.preventDefault();
     active=true;pointerId=e.pointerId;
