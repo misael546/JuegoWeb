@@ -9,7 +9,7 @@
 <script>
 (function(){
   try{
-    var v="20261003-165-audio5";
+    var v="20261003-165-audio6";
     var k="neon_core_build";
     window.NEON_CORE_BUILD=v;
     var old=localStorage.getItem(k);
@@ -1137,8 +1137,8 @@ function update(dt){
   if(controlMode==="mouse"){
     const aimX=pointer.x-W/2,aimY=pointer.y-H/2;
     if(Math.hypot(aimX,aimY)>2)p.angle=Math.atan2(aimY,aimX);
-    if(pointer.down)fire();
   }
+  if(pointer.down)fire();
 
 
   for(const b of bullets){
