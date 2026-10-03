@@ -9,7 +9,7 @@
 <script>
 (function(){
   try{
-    var v="20261002-157";
+    var v="20261002-158";
     var k="neon_core_build";
     window.NEON_CORE_BUILD=v;
     var old=localStorage.getItem(k);
@@ -26,7 +26,7 @@
   }catch(e){}
 })();
 </script>
-<title>Neon Core · Build 157</title>
+<title>Neon Core · Build 158</title>
 <style>
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#050811;color:#fff;font-family:Arial,sans-serif;touch-action:none}
 #game{display:block;width:100vw;height:100vh}
@@ -97,7 +97,7 @@
 </script>
 </head>
 <body>
-<canvas id="game"></canvas><div id="buildDisplay">NEON CORE · Build 157</div>
+<canvas id="game"></canvas><div id="buildDisplay">NEON CORE · Build 158</div>
 
 <div id="hud">
   <div class="panel" id="bars">
@@ -199,7 +199,6 @@ function resize(){
   canvas.style.width=W+"px";
   canvas.style.height=H+"px";
   ctx.setTransform(DPR,0,0,DPR,0,0);
-  if(typeof applyControlConfig==="function")applyControlConfig();
 }
 addEventListener("resize",resize);
 if(window.visualViewport)window.visualViewport.addEventListener("resize",resize);
