@@ -308,17 +308,29 @@ function persistPlayer(p) {
   return p.persistChain;
 }
 
-async function loadSavedPlayer(saveKey) {
+async function loadSavedPlayer(saveKey, playerName = '') {
   if (!saveKey) return null;
+
   const cached = savedPlayers.get(saveKey);
-  if (cached) return { ...cached };
+  if (cached) return { data: { ...cached }, migrated: false };
 
   try {
     await storage.ready;
+
     const data = await storage.loadPlayerData(saveKey);
     if (data) {
       savedPlayers.set(saveKey, data);
-      return { ...data };
+      return { data: { ...data }, migrated: false };
+    }
+
+    // Migración entre orígenes (por ejemplo github.io -> dominio corto):
+    // si el navegador genera un saveKey nuevo, recuperamos el único perfil
+    // existente que tenga exactamente el mismo nombre.
+    const legacy = await storage.loadPlayerDataByName(playerName);
+    if (legacy) {
+      savedPlayers.set(saveKey, { ...legacy });
+      console.log('[STORAGE MIGRATION] Perfil recuperado por nombre:', String(playerName || '').trim());
+      return { data: { ...legacy }, migrated: true };
     }
   } catch (error) {
     console.error('[STORAGE LOAD]', error?.message || error);
@@ -2015,7 +2027,9 @@ wss.on('connection', (ws) => {
           }
         }
 
-        const saved = await loadSavedPlayer(p.saveKey);
+        const loadedProfile = await loadSavedPlayer(p.saveKey, p.name);
+        const saved = loadedProfile?.data || null;
+        p.migratedProfile = Boolean(loadedProfile?.migrated);
         p.hasSaved = !!saved;
 
         if (saved) {
@@ -2060,6 +2074,11 @@ wss.on('connection', (ws) => {
           await joinRoom(ws, '', true);
         } else {
           await joinRoom(ws, 'OPEN', false);
+        }
+
+        if (p.migratedProfile) {
+          await persistPlayer(p);
+          p.migratedProfile = false;
         }
 
         if (p.room) {
