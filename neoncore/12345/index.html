@@ -9,7 +9,7 @@
 <script>
 (function(){
   try{
-    var v="20261002-158";
+    var v="20261003-159";
     var k="neon_core_build";
     window.NEON_CORE_BUILD=v;
     var old=localStorage.getItem(k);
@@ -26,11 +26,11 @@
   }catch(e){}
 })();
 </script>
-<title>Neon Core · Build 158</title>
+<title>Neon Core · Build 159</title>
 <style>
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#050811;color:#fff;font-family:Arial,sans-serif;touch-action:none}
 #game{display:block;width:100vw;height:100vh}
-#hud{position:fixed;top:10px;left:10px;right:10px;display:flex;justify-content:space-between;align-items:flex-start;gap:8px;pointer-events:none;z-index:3}
+#hud{position:fixed;top:10px;left:10px;right:10px;display:flex;justify-content:space-between;align-items:flex-start;gap:8px;pointer-events:none;z-index:3}.combatStats{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:7px}.coreStat{position:relative;overflow:hidden;min-width:88px;padding:6px 8px;border:1px solid #39e7ff44;border-radius:10px;background:linear-gradient(135deg,#091523,#0b1220);box-shadow:inset 0 0 16px #39e7ff0a,0 0 12px #000}.coreStat small{display:block;color:#8ea0b8;font-size:9px;letter-spacing:1.4px;font-weight:900}.coreStat b{display:block;font-size:18px;line-height:1.05;margin-top:2px;letter-spacing:.5px}.powerStat{border-color:#39e7ff66;box-shadow:inset 0 0 20px #39e7ff12,0 0 12px #39e7ff12}.powerStat b{color:#dfffff;text-shadow:0 0 10px #39e7ff99}.defenseStat{border-color:#b67cff66;box-shadow:inset 0 0 20px #a855f712,0 0 12px #a855f712}.defenseStat b{color:#f0e5ff;text-shadow:0 0 10px #a855f799}.statParticles{position:absolute;right:-4px;top:0;color:#fff;opacity:.8;font-size:12px;letter-spacing:4px;animation:statSpark 2.2s linear infinite;pointer-events:none}@keyframes statSpark{0%{transform:translate(-8px,7px) rotate(0deg);opacity:.1}45%{opacity:.9}100%{transform:translate(32px,-4px) rotate(16deg);opacity:0}}
 .panel{background:rgba(5,8,17,.82);border:1px solid #26344e;border-radius:12px;padding:8px 10px;font-size:13px;backdrop-filter:blur(5px)}
 #bars{min-width:190px}#score{opacity:.45;font-size:11px}.bar{height:16px;background:#182033;border-radius:9px;overflow:hidden;margin-top:5px;position:relative;border:1px solid #26344e}.bar i{display:block;height:100%;width:100%;background:#36e0ff}.xpbar i{background:#a855f7}.masterybar{height:18px;margin-top:6px}.masterybar i{background:linear-gradient(90deg,#a855f7,#39e7ff)}.masterybar .barLabel{font-size:11px;letter-spacing:.5px}.barLabel{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:bold;color:#fff;text-shadow:0 1px 2px #000;pointer-events:none}
 #buildDisplay{position:fixed;top:8px;left:50%;transform:translateX(-50%);z-index:40;background:rgba(5,8,17,.94);border:2px solid #39e7ff;border-radius:10px;padding:6px 12px;color:#39e7ff;font-size:14px;font-weight:900;letter-spacing:1.5px;box-shadow:0 0 18px #39e7ff55;pointer-events:none}#nameBox{position:fixed;inset:0;background:#000b;display:none;align-items:center;justify-content:center;padding:20px;z-index:20}
@@ -52,7 +52,7 @@
 @media(min-width:800px){#controls{display:none!important}}html.touch-controls #controls{display:flex!important;z-index:90!important;pointer-events:none}html.touch-controls #controls .joy,html.touch-controls #controls #fire{pointer-events:auto}html.touch-controls #cosmeticShop{pointer-events:none!important}html.touch-controls #cosmeticShop .cosmeticShopCard{pointer-events:none!important}html.touch-controls #cosmeticShop .cosmeticShopCard button,html.touch-controls #cosmeticShop .cosmeticShopCard input{pointer-events:auto!important}html.touch-controls #nameBox,html.touch-controls #connectionOverlay,html.touch-controls #death{z-index:200!important}html.touch-controls #controlConfigBtn{z-index:130!important}
 .pcHint{display:none;position:fixed;left:50%;bottom:12px;transform:translateX(-50%);z-index:7;padding:7px 11px;border:1px solid #26344e;border-radius:9px;background:rgba(5,8,17,.82);color:#9ca9bd;font:11px Arial,sans-serif;pointer-events:none}html.pc-controls #controls{display:none!important}html.pc-controls #controlConfigBtn{display:none!important}html.pc-controls .pcHint{display:block!important}html.touch-controls .pcHint{display:none!important}
 #roomActions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}#roomActions button{width:100%;min-height:44px;border:0;border-radius:10px;background:#183d58;color:#fff;font-weight:bold}#roomCodeInput{width:100%;padding:13px;border:1px solid #33415d;background:#111a2d;color:white;border-radius:10px;font-size:16px;outline:none;margin-top:8px;text-transform:uppercase}@media(max-width:799px){#playersPanel{top:8px;right:calc(min(42vw,150px) + 14px);width:min(160px,42vw)}#controlConfigBtn{display:block}#hud{top:8px;left:8px;right:8px}.panel{padding:7px 8px;font-size:12px}#bars{min-width:0;width:min(190px,58vw)}#hud>.panel:last-child{white-space:nowrap}#gameActions{top:74px;left:8px}#gameActions button{min-height:38px;padding:0 9px;font-size:11px}#minimapWrap{top:8px;right:8px;width:min(150px,42vw);height:min(112px,32vw);padding:5px}#playersPanel{top:126px;right:8px;width:min(180px,48vw);padding:7px 8px;font-size:11px}#playersList{max-height:130px;gap:3px}#controls{padding:12px}.joy{width:100px;height:100px}.stick{width:44px;height:44px;left:28px;top:28px}#fire{width:78px;height:78px}}@media(max-width:430px){#hud>.panel:last-child{max-width:105px;overflow:hidden;text-overflow:ellipsis}#playersPanel{max-width:45vw}.onlinePlayer{font-size:10px}} .shopGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:8px 0}.shopItem{min-height:58px;border:1px solid #263b55;border-radius:9px;background:#0d1827;color:#fff;padding:6px}.shopItem strong{display:block;color:#39e7ff;font-size:11px}.shopItem small{display:block;color:#9ca9bd;font-size:9px;margin-top:3px}.shopItem:active{transform:scale(.97)}#weaponHud{margin-top:5px;color:#9ca9bd;font-size:11px;letter-spacing:1px}#weaponName{color:#39e7ff}#resourceHud{display:flex;gap:10px;margin-top:5px;color:#dffbff;font-size:12px}#resourceHud span{background:#0b1424;border:1px solid #26344e;border-radius:7px;padding:3px 6px}#ammoShop,.shopItem,#buyAmmoBtn{touch-action:manipulation;pointer-events:auto}#ammoShop{position:fixed;left:50%;bottom:112px;transform:translateX(-50%);z-index:8;display:none;min-width:min(310px,88vw);background:rgba(5,8,17,.94);border:1px solid #39e7ff;border-radius:14px;padding:12px;text-align:center;backdrop-filter:blur(6px);box-shadow:0 8px 30px #000}#ammoShop b{display:block;color:#39e7ff;font-size:13px}#ammoShop span{display:block;color:#c8d3e5;font-size:12px;margin:4px 0 8px}#buyAmmoBtn{width:100%;min-height:42px;border:0;border-radius:9px;background:#183d58;color:#fff;font-weight:bold}#shopMsg{display:block;color:#9ca9bd;margin-top:7px;font-size:11px}#fire:disabled{filter:grayscale(1);opacity:.45}html.public-room #nameBox{display:none!important}
-#cosmeticShop{position:fixed;inset:0;display:none;align-items:center;justify-content:center;padding:14px;z-index:80;background:rgba(1,4,10,.66);backdrop-filter:blur(6px);pointer-events:auto;touch-action:auto}.cosmeticShopCard{position:relative;width:min(760px,96vw);max-height:min(86vh,760px);overflow:auto;background:linear-gradient(180deg,#0b1425,#070d18);border:1px solid #39e7ff66;border-radius:20px;padding:18px;box-shadow:0 20px 80px #000}.cosmeticShopHead{display:flex;align-items:center;gap:12px}.cosmeticShopTitle{flex:1}.cosmeticShopTitle strong{display:block;color:#39e7ff;letter-spacing:2px;font-size:20px;text-shadow:0 0 18px #39e7ff66}.cosmeticShopTitle small{display:block;color:#8ea0b8;margin-top:3px}.cosmeticBalance{display:flex;flex-wrap:wrap;gap:7px;margin:12px 0}.cosmeticBalance span{background:#0a1220;border:1px solid #26344e;border-radius:9px;padding:7px 10px;color:#dffbff;font-size:12px}.shopTabs{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;margin:10px 0}.shopTab{min-height:42px;border:1px solid #26344e;border-radius:10px;background:#111a2d;color:#9ca9bd;font-weight:900}.shopTab.active{background:#183d58;border-color:#39e7ff;color:#fff}.cosmeticGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;align-items:stretch}.cosmeticCard{border:1px solid #26344e;border-radius:13px;background:linear-gradient(180deg,#0d192b,#09111d);color:#fff;padding:9px;text-align:left;min-height:160px;display:flex;flex-direction:column;gap:6px;box-shadow:0 8px 22px #0008;transition:transform .16s ease,box-shadow .16s ease,border-color .16s ease}.cosmeticCard:hover{border-color:#39e7ff;transform:translateY(-2px);box-shadow:0 10px 28px #000,0 0 22px #39e7ff16}.cosmeticCard.owned{border-color:#5bcb93aa}.cosmeticCard.locked{opacity:.76}.cosmeticCard:disabled{cursor:not-allowed}.skinPreview{width:66px;height:66px;border-radius:50%;margin:1px auto 2px;border:2px solid #fff4;box-shadow:0 0 15px #000,inset 0 0 14px #fff2;position:relative}.skinPreview:after{content:"";position:absolute;inset:12px;border-radius:50%;border:2px solid #fff7;opacity:.7}.skin-core-default{background:radial-gradient(circle at 35% 28%,#dfffff,#39e7ff 42%,#12627b 78%,#09111f)}.skin-pixel-cyan{background:radial-gradient(circle at 34% 28%,#fff,#70f5ff 35%,#39e7ff 65%,#07506d)}.skin-rust-core{background:radial-gradient(circle at 33% 28%,#ffe2b1,#d97835 36%,#703112 70%,#27110a)}.skin-toxic-orb{background:radial-gradient(circle at 34% 25%,#eaffc3,#8cff66 34%,#2c972a 67%,#082a12);box-shadow:0 0 22px #72ff5d55,inset 0 0 16px #fff3}.skin-plasma-violet{background:radial-gradient(circle at 35% 25%,#fff,#e3b3ff 24%,#a855f7 54%,#3d176b 82%,#10061e);box-shadow:0 0 25px #a855f766,inset 0 0 18px #fff4}.skin-aurora{background:linear-gradient(145deg,#39e7ff,#82ffd7 42%,#a855f7 72%,#261343);box-shadow:0 0 25px #39e7ff55,inset 0 0 18px #fff4}.skin-eclipse-gold{background:radial-gradient(circle at 50% 45%,#2a2d39 0 45%,#0a0b10 64%);border-color:#ffd76a;box-shadow:0 0 20px #ffd76a66,inset 0 0 14px #ffd76a44}.skin-celestial{background:radial-gradient(circle at 35% 30%,#d6efff,#4d90ff 37%,#202a8e 68%,#090a29);box-shadow:0 0 25px #5d8dff77,inset 0 0 16px #fff4}.skin-eternal-void{background:radial-gradient(circle at 45% 45%,#25122f,#08050d 52%,#020207 74%);border-color:#e879ff;box-shadow:0 0 30px #e879ff66,0 0 50px #39e7ff2e,inset 0 0 18px #e879ff44}
+#cosmeticShop{position:fixed;inset:0;display:none;align-items:center;justify-content:center;padding:14px;z-index:80;background:rgba(1,4,10,.66);backdrop-filter:blur(6px);pointer-events:auto;touch-action:auto}.cosmeticShopCard{position:relative;width:min(760px,96vw);max-height:min(86vh,760px);overflow:auto;background:linear-gradient(180deg,#0b1425,#070d18);border:1px solid #39e7ff66;border-radius:20px;padding:18px;box-shadow:0 20px 80px #000}.cosmeticShopHead{display:flex;align-items:center;gap:12px}.cosmeticShopTitle{flex:1}.cosmeticShopTitle strong{display:block;color:#39e7ff;letter-spacing:2px;font-size:20px;text-shadow:0 0 18px #39e7ff66}.cosmeticShopTitle small{display:block;color:#8ea0b8;margin-top:3px}.cosmeticBalance{display:flex;flex-wrap:wrap;gap:7px;margin:12px 0}.cosmeticBalance span{background:#0a1220;border:1px solid #26344e;border-radius:9px;padding:7px 10px;color:#dffbff;font-size:12px}.shopTabs{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;margin:10px 0}.shopTab{min-height:42px;border:1px solid #26344e;border-radius:10px;background:#111a2d;color:#9ca9bd;font-weight:900}.shopTab.active{background:#183d58;border-color:#39e7ff;color:#fff}.cosmeticGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;align-items:stretch}.cosmeticCard{border:1px solid #26344e;border-radius:13px;background:linear-gradient(180deg,#0d192b,#09111d);color:#fff;padding:9px;text-align:left;min-height:160px;display:flex;flex-direction:column;gap:6px;box-shadow:0 8px 22px #0008;transition:transform .16s ease,box-shadow .16s ease,border-color .16s ease}.cosmeticCard:hover{border-color:#39e7ff;transform:translateY(-2px);box-shadow:0 10px 28px #000,0 0 22px #39e7ff16}.cosmeticCard.owned{border-color:#5bcb93aa}.cosmeticCard.locked{opacity:.76}.cosmeticCard:disabled{cursor:not-allowed}.skinPreview{width:66px;height:66px;border-radius:15px 15px 22px 22px;clip-path:polygon(12% 0,88% 0,100% 22%,92% 84%,50% 100%,8% 84%,0 22%);margin:1px auto 2px;border:2px solid #fff4;box-shadow:0 0 15px #000,inset 0 0 14px #fff2;position:relative}.skinPreview:after{content:"";position:absolute;inset:12px;border-radius:50%;border:2px solid #fff7;opacity:.7}.skin-core-default{background:radial-gradient(circle at 35% 28%,#dfffff,#39e7ff 42%,#12627b 78%,#09111f)}.skin-pixel-cyan{background:radial-gradient(circle at 34% 28%,#fff,#70f5ff 35%,#39e7ff 65%,#07506d)}.skin-rust-core{background:radial-gradient(circle at 33% 28%,#ffe2b1,#d97835 36%,#703112 70%,#27110a)}.skin-toxic-orb{background:radial-gradient(circle at 34% 25%,#eaffc3,#8cff66 34%,#2c972a 67%,#082a12);box-shadow:0 0 22px #72ff5d55,inset 0 0 16px #fff3}.skin-plasma-violet{background:radial-gradient(circle at 35% 25%,#fff,#e3b3ff 24%,#a855f7 54%,#3d176b 82%,#10061e);box-shadow:0 0 25px #a855f766,inset 0 0 18px #fff4}.skin-aurora{background:linear-gradient(145deg,#39e7ff,#82ffd7 42%,#a855f7 72%,#261343);box-shadow:0 0 25px #39e7ff55,inset 0 0 18px #fff4}.skin-eclipse-gold{background:radial-gradient(circle at 50% 45%,#2a2d39 0 45%,#0a0b10 64%);border-color:#ffd76a;box-shadow:0 0 20px #ffd76a66,inset 0 0 14px #ffd76a44}.skin-celestial{background:radial-gradient(circle at 35% 30%,#d6efff,#4d90ff 37%,#202a8e 68%,#090a29);box-shadow:0 0 25px #5d8dff77,inset 0 0 16px #fff4}.skin-eternal-void{background:radial-gradient(circle at 45% 45%,#25122f,#08050d 52%,#020207 74%);border-color:#e879ff;box-shadow:0 0 30px #e879ff66,0 0 50px #39e7ff2e,inset 0 0 18px #e879ff44}
 .skin-nebula-prism{background:conic-gradient(from 20deg,#ff4fd8,#6f7bff,#39e7ff,#7dff9b,#ffdb5d,#ff4fd8);box-shadow:0 0 28px #7d7bff77,inset 0 0 18px #fff5;animation:skinSpin 5s linear infinite}
 .skin-angel-seraph{background:radial-gradient(circle at 50% 38%,#fff,#fff5c2 34%,#ffe08a 55%,#b9964b 78%);border-color:#fff5bd;box-shadow:0 0 30px #fff2ad99,0 0 52px #ffffff33,inset 0 0 20px #fff8}
 .skin-demon-infernal{background:radial-gradient(circle at 50% 45%,#ffcf9e,#ff553f 28%,#8c1820 58%,#18050a 82%);border-color:#ff6d4c;box-shadow:0 0 28px #ff452f99,0 0 55px #7b0e2b55,inset 0 0 18px #ffd2a044}.skin-gm-core{background:radial-gradient(circle at 50% 35%,#fff,#ffd76a 28%,#a56e11 62%,#1a0e05 85%);border-color:#ffe27a;box-shadow:0 0 32px #ffe27a99,0 0 58px #fff5,inset 0 0 20px #fff8}.cosmeticCard.selected{border-color:#ffd76a;box-shadow:0 0 24px #ffd76a33,0 8px 22px #0008}.cosmeticCard.selected .cosmeticAction{background:#6b5420;color:#fff}
@@ -97,13 +97,13 @@
 </script>
 </head>
 <body>
-<canvas id="game"></canvas><div id="buildDisplay">NEON CORE · Build 158</div>
+<canvas id="game"></canvas><div id="buildDisplay">NEON CORE · Build 159</div>
 
 <div id="hud">
   <div class="panel" id="bars">
     <b>NEON CORE</b>· <span id="level">Nv. 1</span> · ☠ <span id="pvpKills">0</span>
     <div class="bar"><i id="hpFill"></i><span class="barLabel">❤️ <span id="hp">100</span>/<span id="maxHp">100</span></span></div>
-    <div class="bar xpbar"><i id="xpFill"></i><span class="barLabel">XP <span id="xp">0</span>/<span id="xpNeed">100</span></span></div><div class="bar masterybar"><i id="attackFill"></i><span class="barLabel">⚔ ATAQUE · <span id="attackPower">35</span></span></div><div class="bar masterybar"><i id="defenseFill"></i><span class="barLabel">🛡 DEFENSA <span id="defenseValue">0</span></span></div>
+    <div class="bar xpbar"><i id="xpFill"></i><span class="barLabel">XP <span id="xp">0</span>/<span id="xpNeed">100</span></span></div><div class="combatStats"><div class="coreStat powerStat"><span class="statParticles">✦ · ˚ ✧</span><small>PODER</small><b id="powerValue">100</b></div><div class="coreStat defenseStat"><span class="statParticles">✦ ˚ · ✧</span><small>DEFENSA</small><b id="defenseValue">0</b></div></div>
     <small>🎯 <span id="kills">0</span></small><div id="resourceHud"><span>🪙 <b id="gold">0</b></span><span>💎 <b id="diamonds">0</b></span><span>🔸 <b id="ammo">60</b>/<b id="maxAmmo">220</b></span></div>
   <div id="weaponHud">ARMA: <b id="weaponName">BLASTER</b></div>
 </div>
@@ -116,25 +116,25 @@
       <span>🪙 <b id="cosmeticGold">0</b></span>
       <span>💎 <b id="cosmeticDiamonds">0</b></span>
       <span>⚔ <b id="cosmeticOwned">10</b> armas</span>
-      <span>🛡 <b id="shopDefense">0</b> DEF · TANQUE</span>
+      <span>🛡 DEFENSA · <b id="shopDefense">0</b></span>
     </div>
     <div class="shopTabs">
       <button class="shopTab active" data-shop-section="arsenal" type="button">⚔ ARSENAL</button>
-      <button class="shopTab" data-shop-section="skins" type="button">🎨 SKINS</button>
+      <button class="shopTab" data-shop-section="skins" type="button">🛡 ARMADURAS</button>
       <button class="shopTab" data-shop-section="redeem" type="button">🎁 CENTRO DE CÓDIGOS</button>
     </div>
 
     <section id="shopArsenalSection" class="shopSection">
-      <div class="shopSubTitle arsenalCompleteTitle">⚔ ARSENAL COMPLETO · 10 ARMAS CON DISEÑO INTEGRADO</div>
+      <div class="shopSubTitle arsenalCompleteTitle">⚔ ARSENAL · 10 ARMAS · PODER ASCENDENTE</div>
       <div class="arsenalAmmoBar">
         <div><strong>🔸 MUNICIÓN</strong><span><b id="arsenalAmmo">60</b>/<b id="arsenalMaxAmmo">220</b></span></div>
         <button id="buyAmmoBtn" type="button">COMPRAR 100 · 🪙 75</button>
       </div>
       <div id="arsenalGrid" class="shopGrid shopUnifiedGrid"></div>
-      <small id="shopMsg" class="shopUnifiedMsg">Toca un arma para equiparla; vuelve a tocarla para desequiparla. La DEFENSA es exclusiva del tanque.</small>
+      <small id="shopMsg" class="shopUnifiedMsg">Las armas otorgan PODER. Cuanto más PODER tengas, más daño haces. Las ARMADURAS otorgan DEFENSA.</small>
     </section>
 
-    <section id="shopSkinsSection" class="shopSection" style="display:none">
+    <section id="shopSkinsSection" class="shopSection" style="display:none"><div class="shopSubTitle arsenalCompleteTitle">🛡 ARMADURAS · DEFENSA Y DISEÑOS DEL TANQUE</div>
       <div id="skinShopGrid" class="cosmeticGrid"></div>
     </section>
 
@@ -205,7 +205,7 @@ if(window.visualViewport)window.visualViewport.addEventListener("resize",resize)
 resize();
 
 const world={w:6000,h:4400};
-const p={x:3000,y:2200,r:16,angle:0,hp:100,maxHp:100,xp:0,level:1,score:0,kills:0,pvpKills:0,damage:35,defense:0,speed:205,fireRate:320,lastShot:0,alive:true,gold:0,diamonds:0,ammo:60,maxAmmo:220,weapon:"blaster",equippedSkin:"core_default"};
+const p={x:3000,y:2200,r:16,angle:0,hp:100,maxHp:100,xp:0,level:1,score:0,kills:0,pvpKills:0,power:100,damage:35,defense:0,speed:205,fireRate:320,lastShot:0,alive:true,gold:0,diamonds:0,ammo:60,maxAmmo:220,weapon:"blaster",equippedSkin:"core_default"};
 const shopNpc={x:3000,y:2200,r:24};
 const weaponNames={
   blaster:"BLASTER · NEONSTORM",
@@ -220,32 +220,32 @@ const weaponNames={
   omega:"OMEGA · ASCENSION"
 };
 const weaponStats={
-  blaster:{name:"BLASTER · NEONSTORM",damage:35,fireRate:320,maxAmmo:220,cost:0,range:760},
-  pulse:{name:"PULSE · PRISMA",damage:70,fireRate:230,maxAmmo:260,cost:500,range:820},
-  cannon:{name:"CANNON · SOLARIS",damage:140,fireRate:620,maxAmmo:320,cost:1500,range:880},
-  railgun:{name:"RAILGUN · ECLIPSE",damage:260,fireRate:900,maxAmmo:380,cost:6500,range:960},
-  nova:{name:"NOVA · SUPERNOVA",damage:520,fireRate:1350,maxAmmo:450,cost:22000,range:1040},
-  plasma:{name:"PLASMA · INFERNO",damage:800,fireRate:1050,maxAmmo:500,cost:60000,range:1120},
-  vortex:{name:"VORTEX · SHARD",damage:1150,fireRate:1450,maxAmmo:550,cost:150000,range:1200},
-  quasar:{name:"QUASAR · RAY",damage:1550,fireRate:1750,maxAmmo:600,cost:400000,range:1280},
-  singularity:{name:"SINGULARITY · CORE",damage:2100,fireRate:2150,maxAmmo:650,cost:900000,range:1360},
-  omega:{name:"OMEGA · ASCENSION",damage:2800,fireRate:2600,maxAmmo:700,cost:2000000,range:1440}
+  blaster:{name:"BLASTER · NEONSTORM",power:100,fireRate:320,maxAmmo:220,cost:0,range:760},
+  pulse:{name:"PULSE · PRISMA",power:200,fireRate:230,maxAmmo:260,cost:500,range:820},
+  cannon:{name:"CANNON · SOLARIS",power:400,fireRate:620,maxAmmo:320,cost:1500,range:880},
+  railgun:{name:"RAILGUN · ECLIPSE",power:743,fireRate:900,maxAmmo:380,cost:6500,range:960},
+  nova:{name:"NOVA · SUPERNOVA",power:1486,fireRate:1350,maxAmmo:450,cost:22000,range:1040},
+  plasma:{name:"PLASMA · INFERNO",power:2286,fireRate:1050,maxAmmo:500,cost:60000,range:1120},
+  vortex:{name:"VORTEX · SHARD",power:3286,fireRate:1450,maxAmmo:550,cost:150000,range:1200},
+  quasar:{name:"QUASAR · RAY",power:4429,fireRate:1750,maxAmmo:600,cost:400000,range:1280},
+  singularity:{name:"SINGULARITY · CORE",power:6000,fireRate:2150,maxAmmo:650,cost:900000,range:1360},
+  omega:{name:"OMEGA · ASCENSION",power:8000,fireRate:2600,maxAmmo:700,cost:2000000,range:1440}
 };let shopOpen=false,shopSection="arsenal";
 const SHOP_INTERACTION_RADIUS_CLIENT=48;
 const COSMETIC_SKINS=[
 {id:"core_default",name:"NÚCLEO ORIGINAL",rarity:"Común",currency:"free",price:0,priceUsd:0,defenseBonus:0,desc:"El núcleo base de Neon Core."},
-{id:"pixel_cyan",name:"PIXEL CYAN",rarity:"Raro",currency:"gold",price:5000,priceUsd:0,defenseBonus:0,desc:"Núcleo pixelado para el tanque."},
-{id:"rust_core",name:"NÚCLEO OXIDADO",rarity:"Raro",currency:"gold",price:1500,priceUsd:0,defenseBonus:0,desc:"Metal viejo con chispas de energía."},
-{id:"toxic_orb",name:"ORBE TÓXICO",rarity:"Épico",currency:"gold",price:12000,priceUsd:0,defenseBonus:0,desc:"Aura verde con residuos radiactivos."},
-{id:"plasma_violet",name:"PLASMA VIOLETA",rarity:"Mítico",currency:"gold",price:60000,priceUsd:0,defenseBonus:0,desc:"Plasma inestable alrededor del núcleo."},
-{id:"aurora",name:"AURORA",rarity:"Épico",currency:"diamonds",price:250,priceUsd:0,defenseBonus:0,desc:"Flujo polar de energía."},
-{id:"nebula_prism",name:"NEBULOSA PRISMA",rarity:"Mítico",currency:"diamonds",price:4500,priceUsd:0,defenseBonus:0,desc:"Partículas como una galaxia."},
-{id:"eclipse_gold",name:"ECLIPSE DORADO",rarity:"Legendario",currency:"diamonds",price:2000,priceUsd:0,defenseBonus:0,desc:"Anillo solar y núcleo oscuro."},
-{id:"celestial",name:"CIELO CELESTE",rarity:"Legendario",currency:"diamonds",price:7500,priceUsd:0,defenseBonus:0,desc:"Estrellas y energía celeste."},
-{id:"angel_seraph",name:"ÁNGEL SERAFÍN",rarity:"Legendario",currency:"diamonds",price:12000,priceUsd:0,defenseBonus:0,desc:"Halo, alas de luz y plumas."},
-{id:"demon_infernal",name:"DEMONIO INFERNAL",rarity:"Supremo",currency:"diamonds",price:25000,priceUsd:0,defenseBonus:0,desc:"Cuernos, alas y brasas demoníacas."},
-{id:"eternal_void",name:"VACÍO ETERNO",rarity:"Supremo",currency:"diamonds",price:30000,priceUsd:0,defenseBonus:0,desc:"Vórtice oscuro de energía."},
-{id:"gm_core",name:"SOBERANO DEL NÚCLEO",rarity:"Supremo",currency:"diamonds",price:50000,priceUsd:0,defenseBonus:0,desc:"Núcleo soberano para el tanque."}
+{id:"pixel_cyan",name:"PIXEL CYAN",rarity:"Raro",currency:"gold",price:5000,priceUsd:0,defenseBonus:10,desc:"Núcleo pixelado para el tanque."},
+{id:"rust_core",name:"NÚCLEO OXIDADO",rarity:"Raro",currency:"gold",price:1500,priceUsd:0,defenseBonus:20,desc:"Metal viejo con chispas de energía."},
+{id:"toxic_orb",name:"ORBE TÓXICO",rarity:"Épico",currency:"gold",price:12000,priceUsd:0,defenseBonus:35,desc:"Aura verde con residuos radiactivos."},
+{id:"plasma_violet",name:"PLASMA VIOLETA",rarity:"Mítico",currency:"gold",price:60000,priceUsd:0,defenseBonus:60,desc:"Plasma inestable alrededor del núcleo."},
+{id:"aurora",name:"AURORA",rarity:"Épico",currency:"diamonds",price:250,priceUsd:0,defenseBonus:90,desc:"Flujo polar de energía."},
+{id:"nebula_prism",name:"NEBULOSA PRISMA",rarity:"Mítico",currency:"diamonds",price:4500,priceUsd:0,defenseBonus:140,desc:"Partículas como una galaxia."},
+{id:"eclipse_gold",name:"ECLIPSE DORADO",rarity:"Legendario",currency:"diamonds",price:2000,priceUsd:0,defenseBonus:220,desc:"Anillo solar y núcleo oscuro."},
+{id:"celestial",name:"CIELO CELESTE",rarity:"Legendario",currency:"diamonds",price:7500,priceUsd:0,defenseBonus:320,desc:"Estrellas y energía celeste."},
+{id:"angel_seraph",name:"ÁNGEL SERAFÍN",rarity:"Legendario",currency:"diamonds",price:12000,priceUsd:0,defenseBonus:500,desc:"Halo, alas de luz y plumas."},
+{id:"demon_infernal",name:"DEMONIO INFERNAL",rarity:"Supremo",currency:"diamonds",price:25000,priceUsd:0,defenseBonus:700,desc:"Cuernos, alas y brasas demoníacas."},
+{id:"eternal_void",name:"VACÍO ETERNO",rarity:"Supremo",currency:"diamonds",price:30000,priceUsd:0,defenseBonus:950,desc:"Vórtice oscuro de energía."},
+{id:"gm_core",name:"SOBERANO DEL NÚCLEO",rarity:"Supremo",currency:"diamonds",price:50000,priceUsd:0,defenseBonus:1250,desc:"Núcleo soberano para el tanque."}
 ];
 let cosmeticShopNpc={...shopNpc};
 let ownedSkins=["core_default"],equippedSkin="core_default";
@@ -253,7 +253,7 @@ let ownedWeapons=["blaster"],equippedWeaponSkin="",ownedWeaponSkins=[];
 let weaponSkinCatalog=[];
 let cosmeticShopWasNear=false,cosmeticShopDismissedUntil=0;
 let bullets=[],enemies=[],drops=[],particles=[],walls=[],hitTexts=[],bossProjectiles=[],bossWarnings=[];
-let serverXpNeed=100,serverKillsToLevel=5,serverAttackPower=35,serverAttackFill=6,serverDefense=0,serverDefenseMax=125;
+let serverXpNeed=100,serverKillsToLevel=5,serverPower=100,serverDefense=0;
 let gameActive=false;
 let camera={x:p.x,y:p.y},last=performance.now(),playerName="";
 let safeZone={x:3000,y:2200,r:300};
@@ -547,7 +547,7 @@ function connectMultiplayer(roomMode="quick",roomCode=""){ const publicRoomAuto=
             if(Number(m.hp)<=0)enemyExplosion(e);
           }
         }else if(m.type==="hit_confirm"){
-          if(Number.isFinite(m.attackPower))serverAttackPower=m.attackPower;
+          if(Number.isFinite(m.power))serverPower=Math.max(0,Number(m.power));
           showFloatingHit(Number(m.x)||p.x,Number(m.y)||p.y,Number(m.amount)||0,m.kind==="player"?"#ff6f8f":"#ffe27a");
           burst(Number(m.x)||p.x,Number(m.y)||p.y,m.kind==="player"?"#ff5474":"#ffcf5a",6);
         }else if(m.type==="enemy_respawn"){
@@ -615,10 +615,9 @@ function connectMultiplayer(roomMode="quick",roomCode=""){ const publicRoomAuto=
            if(Array.isArray(m.ownedSkins))ownedSkins=m.ownedSkins;
            if(Array.isArray(m.ownedWeapons))ownedWeapons=m.ownedWeapons;
           if(Number.isFinite(m.xpNeed))serverXpNeed=m.xpNeed;
-          if(Number.isFinite(m.attackPower))serverAttackPower=m.attackPower;
-          if(Number.isFinite(m.attackFill))serverAttackFill=m.attackFill;
+          if(Number.isFinite(m.power))serverPower=Math.max(0,Number(m.power));
           if(Number.isFinite(m.defense))serverDefense=m.defense;
-          if(Number.isFinite(m.defenseMax))serverDefenseMax=m.defenseMax;
+          
           if(Number.isFinite(m.killsToLevel))serverKillsToLevel=m.killsToLevel;
           if(Number.isFinite(m.gold))p.gold=m.gold;
           if(Number.isFinite(m.diamonds))p.diamonds=m.diamonds;
@@ -1196,6 +1195,7 @@ function skinCostText(item){
 }
 
 function skinClass(id){return "skin-"+String(id||"core_default").replace(/_/g,"-");}
+function skinDefenseValue(id){const item=COSMETIC_SKINS.find(x=>x.id===id);return Math.max(0,Number(item?.defenseBonus)||0);}
 
 function weaponCostText(item){
   if(Number(item.priceGold)>0)return "🪙 "+Number(item.priceGold).toLocaleString("es-MX");
@@ -1212,7 +1212,7 @@ function renderArsenal(){
     return '<button type="button" class="shopWeaponCard '+(selected?"equipped":"")+'" data-weapon-buy="'+id+'">'+
       '<div class="weaponCardVisual weapon-base-'+id+'"></div>'+
       '<div class="weaponCardHead"><strong>'+item.name+'</strong><span>ARMA</span></div>'+
-      '<div class="weaponStats">⚔ ATAQUE · '+item.damage+' <b>· '+rarity+'</b></div>'+
+      '<div class="weaponStats">✦ PODER · '+item.power+' <b>· '+rarity+'</b></div>'+
       '<small>⏱ '+item.fireRate+'ms · 🔸 '+item.maxAmmo+' · 🎯 '+item.range+' rango</small>'+
       '<small>'+((item.cost||0)===0?"Gratis":"🪙 "+item.cost.toLocaleString("es-MX"))+'</small>'+
       '<div class="cosmeticAction">'+action+'</div>'+
@@ -1227,8 +1227,8 @@ function renderArsenal(){
   if(max)max.textContent=Math.max(0,Number(p.maxAmmo)||220);
   const msg=document.getElementById("shopMsg");
   if(msg)msg.textContent=p.weapon
-    ? "Toca un arma para equiparla; vuelve a tocarla para desequiparla. La DEFENSA no pertenece a las armas."
-    : "Arsenal desequipado · ATAQUE base 10 y sin munición.";
+    ? "Toca un arma para equiparla; vuelve a tocarla para desequiparla. Su PODER determina el daño."
+    : "Arsenal desequipado · PODER 0 y sin munición.";
 }
 function renderSkinShop(){
   const grid=document.getElementById("skinShopGrid");if(!grid)return;
@@ -1236,14 +1236,14 @@ function renderSkinShop(){
     const owned=ownedSkins.includes(item.id),selected=equippedSkin===item.id;
     const action=selected?"✓ EQUIPADA · TOCA PARA DESEQUIPAR":owned?"TOCA PARA EQUIPAR":item.currency==="code"?"🎁 CANJEAR":"COMPRAR";
     const cost=item.currency==="code"?"🎁 Código de regalo":skinCostText(item);
-    return '<button type="button" class="cosmeticCard '+(owned?"owned ":"")+(selected?"selected ":"")+'" data-skin-id="'+item.id+'"><div class="skinPreview '+skinClass(item.id)+'"></div><strong>'+item.name+'</strong><small>'+item.rarity+'<br>'+item.desc+'</small><span class="cosmeticCost">'+cost+'</span><span class="cosmeticAction">'+action+'</span></button>';
+    return '<button type="button" class="cosmeticCard '+(owned?"owned ":"")+(selected?"selected ":"")+'" data-skin-id="'+item.id+'"><div class="skinPreview '+skinClass(item.id)+'"></div><strong>'+item.name+'</strong><small>ARMADURA · '+item.rarity+'<br>'+item.desc+'</small><span class="armorDefense">🛡 DEFENSA +'+Number(item.defenseBonus||0)+'</span><span class="cosmeticCost">'+cost+'</span><span class="cosmeticAction">'+action+'</span></button>';
   }).join("");
   grid.querySelectorAll(".cosmeticCard").forEach(btn=>btn.addEventListener("click",e=>{
     e.preventDefault();e.stopPropagation();
     const id=btn.dataset.skinId,item=COSMETIC_SKINS.find(x=>x.id===id);if(!id)return;
     if(ownedSkins.includes(id))sendCosmeticCommand("equip_skin",id);
     else if(item?.currency==="gold"||item?.currency==="diamonds")sendCosmeticCommand("buy_skin",id);
-    else if(item?.currency==="code"){setShopSection("redeem");showCosmeticMsg("Usa CENTRO DE CÓDIGOS para desbloquear este skin.");}
+    else if(item?.currency==="code"){setShopSection("redeem");showCosmeticMsg("Usa CENTRO DE CÓDIGOS para desbloquear esta armadura.");}
   }));
 }
 function setShopSection(section){
@@ -1469,12 +1469,11 @@ function draw(){
   const need=Math.max(1,serverXpNeed);
   document.getElementById("xp").textContent=p.xp;
   document.getElementById("xpNeed").textContent=need;
-  document.getElementById("attackPower").textContent=Math.round(serverAttackPower);
+  document.getElementById("powerValue").textContent=Math.round(serverPower);
   document.getElementById("defenseValue").textContent=Math.round(serverDefense);
   document.getElementById("hpFill").style.width=clamp(p.hp/p.maxHp*100,0,100)+"%";
   document.getElementById("xpFill").style.width=clamp(p.xp/need*100,0,100)+"%";
-  document.getElementById("attackFill").style.width=clamp(serverAttackFill,0,100)+"%";
-  document.getElementById("defenseFill").style.width=clamp(serverDefense/serverDefenseMax*100,0,100)+"%";
+  
 }
 
 function setupJoystick(id){
