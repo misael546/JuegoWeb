@@ -9,7 +9,7 @@
 <script>
 (function(){
   try{
-    var v="20261003-003-root-main-menu";
+    var v="20261003-004-shop-movement-fix";
     var k="neon_core_build";
     window.NEON_CORE_BUILD=v;
     var old=localStorage.getItem(k);
@@ -26,7 +26,7 @@
   }catch(e){}
 })();
 </script>
-<title>Neon Core · Build 2 · MAIN MENU</title>
+<title>Neon Core · Build 2 · SHOP MOVEMENT FIX</title>
 <style>
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#050811;color:#fff;font-family:Arial,sans-serif;touch-action:none}
 #game{display:block;width:100vw;height:100vh}
@@ -1678,13 +1678,16 @@ function closeCosmeticShop(){
 function updateCosmeticShop(){
   const near=Math.hypot(p.x-shopNpc.x,p.y-shopNpc.y)<=SHOP_INTERACTION_RADIUS_CLIENT;
   const box=document.getElementById("cosmeticShop");
+  // La tienda NO se abre automáticamente al aparecer junto al NPC.
+  // El spawn inicial está junto al NPC, así que abrirla aquí bloqueaba
+  // la pantalla y daba la impresión de que el movimiento estaba roto.
+  // Se mantiene cerrada hasta que exista una interacción explícita.
   if(!near){
     cosmeticShopWasNear=false;
     if(box)box.style.display="none";
-    return;
+  }else{
+    cosmeticShopWasNear=true;
   }
-  if(near&&!cosmeticShopWasNear&&p.alive&&performance.now()>cosmeticShopDismissedUntil)openCosmeticShop();
-  cosmeticShopWasNear=near;
   const def=document.getElementById("shopDefense");
   if(def)def.textContent=Math.round(serverDefense);
 }
