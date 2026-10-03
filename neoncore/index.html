@@ -25,7 +25,7 @@ h2{font-size:15px;margin:18px 0 10px}
 .room:active:not(.disabled){transform:scale(.985)}
 .room.disabled{opacity:.42;filter:saturate(.55);cursor:not-allowed}
 .room strong{display:block;font-size:20px;letter-spacing:2px;color:#39e7ff}
-.room span{display:block;color:#9ca9bd;font-size:12px;margin-top:5px}.room .roomCount{color:#6ff3b0;font-weight:900}
+.room span{display:block;color:#9ca9bd;font-size:12px;margin-top:5px}.room .roomCount{color:#6ff3b0;font-weight:900}.room .roomLive{display:block;margin-top:5px;color:#53627b;font-size:9px;letter-spacing:.6px}.room.roomOnline{border-color:#39e7ff55}.room.roomOnline .roomLive{color:#6ff3b0}
 .actions{display:grid;grid-template-columns:1fr;gap:8px;margin-top:12px}
 .action{min-height:44px;border:0;border-radius:10px;background:#183d58;color:#fff;font-weight:bold;touch-action:manipulation}
 .action.secondary{background:#26344e}
@@ -40,13 +40,13 @@ h2{font-size:15px;margin:18px 0 10px}
 
   <label for="username">NOMBRE DEL TANQUE</label>
   <input id="username" maxlength="20" autocomplete="nickname" autocapitalize="words" placeholder="Escribe tu nombre">
-  <div id="status" class="status">Escribe tu nombre para desbloquear las salas.</div>
+  <div id="status" class="status">Escribe tu nombre para desbloquear las salas. Las cifras de jugadores se leen directamente del servidor.</div>
 
   <h2>ELIGE UNA SALA</h2>
   <div class="rooms">
     <a class="room disabled" data-room="12345" href="12345/" aria-disabled="true" tabindex="-1">
       <strong>SALA #1</strong>
-      <span>Entrar a la arena pública · <b class="roomCount" data-room-count="12345">0/16 JUGADORES</b></span>
+      <span>Entrar a la arena pública · <b class="roomCount" data-room-count="12345">CONSULTANDO…</b></span><small class="roomLive" data-room-live="12345">● ESPERANDO DATOS DEL SERVIDOR</small>
     </a>
   </div>
 
@@ -55,7 +55,7 @@ h2{font-size:15px;margin:18px 0 10px}
   </div>
 
   <div id="msg" class="msg"></div>
-  <div class="build">NEON CORE · BUILD 20261001-132</div>
+  <div class="build">NEON CORE · BUILD 20261003-159</div>
 </main>
 
 <script>
@@ -66,24 +66,53 @@ h2{font-size:15px;margin:18px 0 10px}
   const cards=[...document.querySelectorAll(".room[data-room]")];
 
   const ROOM_STATUS_URL="https://neon-core-multiplayer.onrender.com/rooms";
+  let roomFetchBusy=false;
+  function setRoomState(card,text,liveText,live){
+    const count=card.querySelector("[data-room-count]");
+    const liveEl=card.querySelector("[data-room-live]");
+    if(count)count.textContent=text;
+    if(liveEl)liveEl.textContent=liveText;
+    card.classList.toggle("roomOnline",!!live);
+  }
   async function refreshRoomCounts(){
+    if(roomFetchBusy)return;
+    roomFetchBusy=true;
+    const controllers=[];
     try{
-      const res=await fetch(ROOM_STATUS_URL+"?t="+Date.now(),{cache:"no-store"});
-      if(!res.ok)throw new Error("rooms");
+      cards.forEach(card=>setRoomState(card,"CONSULTANDO…","● ACTUALIZANDO SERVIDOR",false));
+      const controller=new AbortController();
+      controllers.push(controller);
+      const timer=setTimeout(()=>controller.abort(),8000);
+      const res=await fetch(ROOM_STATUS_URL+"?t="+Date.now(),{
+        cache:"no-store",
+        mode:"cors",
+        credentials:"omit",
+        signal:controller.signal,
+        headers:{"Cache-Control":"no-cache","Pragma":"no-cache"}
+      });
+      clearTimeout(timer);
+      if(!res.ok)throw new Error("rooms_"+res.status);
       const data=await res.json();
-      const byCode=new Map((Array.isArray(data.rooms)?data.rooms:[]).map(r=>[String(r.code),r]));
+      const byCode=new Map((Array.isArray(data.rooms)?data.rooms:[]).map(room=>[String(room.code),room]));
       cards.forEach(card=>{
-        const code=card.getAttribute("data-room");
-        const el=card.querySelector("[data-room-count]");
-        const room=byCode.get(String(code));
-        if(el)el.textContent=room?String(Number(room.players)||0)+"/"+String(Number(room.maxPlayers)||16)+" JUGADORES":"—/16 JUGADORES";
+        const code=String(card.getAttribute("data-room")||"");
+        const room=byCode.get(code);
+        if(room){
+          const players=Math.max(0,Number(room.players)||0),maxPlayers=Math.max(1,Number(room.maxPlayers)||16);
+          setRoomState(card,players+"/"+maxPlayers+" JUGADORES","● EN VIVO · "+new Date().toLocaleTimeString("es-MX"),true);
+        }else{
+          setRoomState(card,"SIN DATOS","● SALA NO PUBLICADA",false);
+        }
       });
     }catch(e){
-      cards.forEach(card=>{const el=card.querySelector("[data-room-count]");if(el)el.textContent="—/16 JUGADORES";});
+      cards.forEach(card=>setRoomState(card,"SIN DATOS","● SERVIDOR NO RESPONDE · REINTENTANDO",false));
+    }finally{
+      controllers.forEach(c=>{try{c.abort()}catch{}});
+      roomFetchBusy=false;
     }
   }
   refreshRoomCounts();
-  setInterval(refreshRoomCounts,5000);
+  setInterval(refreshRoomCounts,2000);
 
   function getName(){return String(input.value||"").trim().slice(0,20)}
   function loadName(){try{return localStorage.getItem("neon_core_name")||""}catch(e){return""}}
