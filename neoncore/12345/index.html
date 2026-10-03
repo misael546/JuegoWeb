@@ -2,14 +2,14 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="#050811">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="#050811"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <script>
 (function(){
   try{
-    var v="20261003-166";
+    var v="20261003-167";
     var k="neon_core_build";
     window.NEON_CORE_BUILD=v;
     var old=localStorage.getItem(k);
@@ -26,10 +26,10 @@
   }catch(e){}
 })();
 </script>
-<title>Neon Core · Build 166</title>
+<title>Neon Core · Build 167</title>
 <style>
-*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#050811;color:#fff;font-family:Arial,sans-serif;touch-action:none}
-#game{display:block;width:100vw;height:100vh}
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;min-height:100dvh;overflow:hidden;background:#050811;color:#fff;font-family:Arial,sans-serif;touch-action:none}
+#game{display:block;width:100vw;height:100vh;height:100dvh}
 #hud{position:fixed;top:10px;left:10px;right:10px;display:flex;justify-content:space-between;align-items:flex-start;gap:8px;pointer-events:none;z-index:3}.combatStats{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:7px}.coreStat{position:relative;overflow:hidden;min-width:88px;padding:6px 8px;border:1px solid #39e7ff44;border-radius:10px;background:linear-gradient(135deg,#091523,#0b1220);box-shadow:inset 0 0 16px #39e7ff0a,0 0 12px #000}.coreStat small{display:block;color:#8ea0b8;font-size:9px;letter-spacing:1.4px;font-weight:900}.coreStat b{display:block;font-size:18px;line-height:1.05;margin-top:2px;letter-spacing:.5px}.powerStat{border-color:#39e7ff66;box-shadow:inset 0 0 20px #39e7ff12,0 0 12px #39e7ff12}.powerStat b{color:#dfffff;text-shadow:0 0 10px #39e7ff99}.defenseStat{border-color:#b67cff66;box-shadow:inset 0 0 20px #a855f712,0 0 12px #a855f712}.defenseStat b{color:#f0e5ff;text-shadow:0 0 10px #a855f799}.statParticles{position:absolute;right:-4px;top:0;color:#fff;opacity:.8;font-size:12px;letter-spacing:4px;animation:statSpark 2.2s linear infinite;pointer-events:none}@keyframes statSpark{0%{transform:translate(-8px,7px) rotate(0deg);opacity:.1}45%{opacity:.9}100%{transform:translate(32px,-4px) rotate(16deg);opacity:0}}
 .panel{background:rgba(5,8,17,.82);border:1px solid #26344e;border-radius:12px;padding:8px 10px;font-size:13px;backdrop-filter:blur(5px)}
 #bars{min-width:190px}#score{opacity:.45;font-size:11px}.bar{height:16px;background:#182033;border-radius:9px;overflow:hidden;margin-top:5px;position:relative;border:1px solid #26344e}.bar i{display:block;height:100%;width:100%;background:#36e0ff}.xpbar i{background:#a855f7}.masterybar{height:18px;margin-top:6px}.masterybar i{background:linear-gradient(90deg,#a855f7,#39e7ff)}.masterybar .barLabel{font-size:11px;letter-spacing:.5px}.barLabel{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:bold;color:#fff;text-shadow:0 1px 2px #000;pointer-events:none}
@@ -97,7 +97,7 @@
 </script>
 </head>
 <body>
-<canvas id="game"></canvas><button id="fullscreenBtn" type="button" aria-label="Pantalla completa" title="Pantalla completa"><span>⛶</span></button><div id="buildDisplay">NEON CORE · Build 161</div>
+<canvas id="game"></canvas><div id="fullscreenGate"><div class="fullscreenGateCard"><div class="fullscreenGateLogo">NEON CORE</div><div class="fullscreenGateTitle">PANTALLA COMPLETA</div><div class="fullscreenGateText">Toca el botón para entrar al modo de juego a pantalla completa.</div><button id="fullscreenGateButton" class="fullscreenGateButton" type="button"><span>⛶ ENTRAR A LA ARENA</span></button><div id="fullscreenGateStatus" class="fullscreenGateStatus"></div><div class="fullscreenGateHint">Android exige una acción del jugador para activar fullscreen.</div></div></div><button id="fullscreenBtn" type="button" aria-label="Pantalla completa" title="Pantalla completa"><span>⛶</span></button><div id="buildDisplay">NEON CORE · Build 167</div>
 
 <div id="hud">
   <div class="panel" id="bars">
@@ -177,7 +177,7 @@
   </div>
 </div>
 
-#fullscreenBtn{position:fixed;right:10px;bottom:62px;z-index:130;width:48px;height:48px;border:1px solid #39e7ff;background:linear-gradient(135deg,#06101c,#0b2030);color:#dffbff;border-radius:12px;font-size:22px;font-weight:900;display:none;pointer-events:auto;box-shadow:0 0 14px #39e7ff22,0 5px 20px #000,inset 0 0 16px #39e7ff0b;text-shadow:0 0 10px #39e7ff99;overflow:hidden}#fullscreenBtn:before{content:"";position:absolute;inset:-55%;background:conic-gradient(from 0deg,transparent,#39e7ff55,transparent 25%,#a855f755,transparent 50%);animation:fullscreenSpin 4s linear infinite;opacity:.7}#fullscreenBtn span{position:relative;z-index:2}@keyframes fullscreenSpin{to{transform:rotate(360deg)}}html.touch-controls #fullscreenBtn{display:block}html.pc-controls #fullscreenBtn{display:none}@media(max-width:430px){#fullscreenBtn{right:8px;bottom:58px;width:44px;height:44px;font-size:20px}}<button id="controlConfigBtn" type="button" aria-label="Configurar controles">⚙</button>
+#fullscreenGate{position:fixed;inset:0;z-index:10050;display:none;align-items:center;justify-content:center;padding:24px;background:radial-gradient(circle at 50% 35%,#0c2133f2,#050811f8 64%);touch-action:manipulation;text-align:center}html.touch-controls #fullscreenGate{display:flex}#fullscreenGate.hidden{display:none!important}.fullscreenGateCard{width:min(390px,92vw);padding:24px 20px;border:1px solid #39e7ff99;border-radius:22px;background:linear-gradient(180deg,#0b1727f5,#050b14f5);box-shadow:0 0 45px #39e7ff18,0 20px 70px #000}.fullscreenGateLogo{font-size:28px;font-weight:1000;letter-spacing:4px;color:#39e7ff;text-shadow:0 0 18px #39e7ff99}.fullscreenGateTitle{margin-top:10px;font-size:17px;font-weight:900;color:#fff;letter-spacing:1px}.fullscreenGateText{margin:8px 0 16px;color:#9ca9bd;font-size:12px;line-height:1.45}.fullscreenGateButton{position:relative;width:100%;min-height:52px;border:1px solid #39e7ff;border-radius:13px;background:linear-gradient(135deg,#12415a,#183d58);color:#fff;font-weight:1000;letter-spacing:1.5px;box-shadow:0 0 18px #39e7ff22;overflow:hidden}.fullscreenGateButton:before{content:"";position:absolute;inset:-60%;background:conic-gradient(from 0deg,transparent,#39e7ff77,transparent 25%,#a855f777,transparent 50%);animation:fullscreenSpin 4s linear infinite}.fullscreenGateButton span{position:relative;z-index:2}.fullscreenGateStatus{min-height:16px;margin-top:9px;color:#6ff3b0;font-size:10px;font-weight:900}.fullscreenGateHint{margin-top:8px;color:#53627b;font-size:9px}#fullscreenBtn{position:fixed;right:10px;bottom:62px;z-index:130;width:48px;height:48px;border:1px solid #39e7ff;background:linear-gradient(135deg,#06101c,#0b2030);color:#dffbff;border-radius:12px;font-size:22px;font-weight:900;display:none;pointer-events:auto;box-shadow:0 0 14px #39e7ff22,0 5px 20px #000,inset 0 0 16px #39e7ff0b;text-shadow:0 0 10px #39e7ff99;overflow:hidden}#fullscreenBtn:before{content:"";position:absolute;inset:-55%;background:conic-gradient(from 0deg,transparent,#39e7ff55,transparent 25%,#a855f755,transparent 50%);animation:fullscreenSpin 4s linear infinite;opacity:.7}#fullscreenBtn span{position:relative;z-index:2}@keyframes fullscreenSpin{to{transform:rotate(360deg)}}html.touch-controls #fullscreenBtn{display:block}html.pc-controls #fullscreenBtn{display:none}@media(max-width:430px){#fullscreenBtn{right:8px;bottom:58px;width:44px;height:44px;font-size:20px}}<button id="controlConfigBtn" type="button" aria-label="Configurar controles">⚙</button>
 <div id="controlEditor"><div id="controlCard"><button id="controlClose" type="button" aria-label="Cerrar configuración">×</button><h2>CONTROLES</h2><p>En móvil ajusta el joystick. En PC puedes cambiar las teclas de movimiento y disparo de teclado. Los cambios quedan guardados en este dispositivo.</p><div class="controlRow"><label>Arriba</label><button class="bindKey" data-bind="up" type="button">W</button></div><div class="controlRow"><label>Izquierda</label><button class="bindKey" data-bind="left" type="button">A</button></div><div class="controlRow"><label>Abajo</label><button class="bindKey" data-bind="down" type="button">S</button></div><div class="controlRow"><label>Derecha</label><button class="bindKey" data-bind="right" type="button">D</button></div><div class="controlRow"><label>Disparo teclado</label><button class="bindKey" data-bind="fire" type="button">ESPACIO</button></div><div id="bindMsg" style="min-height:18px;margin:-2px 0 8px;color:#39e7ff;font-size:11px;text-align:center"></div><div class="controlRow"><label for="joySize">Joystick</label><input id="joySize" type="range" min="80" max="170" value="112"></div><div class="controlRow"><label for="fireSize">Disparo</label><input id="fireSize" type="range" min="60" max="130" value="86"></div><div class="controlRow"><label for="joyX">Joystick X</label><input id="joyX" type="range" min="0" max="100" value="8"></div><div class="controlRow"><label for="joyY">Joystick Y</label><input id="joyY" type="range" min="0" max="100" value="8"></div><div class="controlRow"><label for="fireX">Disparo X</label><input id="fireX" type="range" min="0" max="100" value="8"></div><div class="controlRow"><label for="fireY">Disparo Y</label><input id="fireY" type="range" min="0" max="100" value="8"></div><div class="controlActions"><button id="controlReset" type="button">Restablecer</button><button id="controlDone" type="button">Listo</button></div></div></div>
 <div id="controls">
   <div class="joy" id="moveJoy"><div class="stick"></div></div>
@@ -187,36 +187,51 @@
 <script>
 "use strict";
 const fullscreenBtn=document.getElementById("fullscreenBtn");
+const fullscreenGate=document.getElementById("fullscreenGate");
+const fullscreenGateButton=document.getElementById("fullscreenGateButton");
+const fullscreenGateStatus=document.getElementById("fullscreenGateStatus");
 let fullscreenAttempted=false;
-function updateFullscreenButton(){
-  const active=!!document.fullscreenElement || !!document.webkitFullscreenElement;
-  if(fullscreenBtn){
-    const touch=document.documentElement.classList.contains("touch-controls");
-    fullscreenBtn.style.display=(touch && !active)?"block":"none";
-  }
+function isFullscreenActive(){return !!document.fullscreenElement || !!document.webkitFullscreenElement;}
+function updateFullscreenUi(){
+  const active=isFullscreenActive(),touch=document.documentElement.classList.contains("touch-controls");
+  if(fullscreenBtn)fullscreenBtn.style.display=(touch&&!active)?"block":"none";
+  if(fullscreenGate)fullscreenGate.classList.toggle("hidden",!touch||active);
 }
-async function enterNeonFullscreen(){
-  if(document.fullscreenElement || document.webkitFullscreenElement)return true;
+function afterFullscreen(){
+  updateFullscreenUi();
+  try{if(screen.orientation&&screen.orientation.lock)screen.orientation.lock("landscape").catch(function(){});}catch{}
+  setTimeout(updateFullscreenUi,250);
+}
+function requestNeonFullscreen(){
+  if(isFullscreenActive())return;
   fullscreenAttempted=true;
+  if(fullscreenGateStatus)fullscreenGateStatus.textContent="ACTIVANDO MODO INMERSIVO…";
+  const root=document.documentElement;
   try{
-    if(document.documentElement.requestFullscreen){
-      try{await document.documentElement.requestFullscreen({navigationUI:"hide"});}
-      catch{await document.documentElement.requestFullscreen();}
-    }else if(document.documentElement.webkitRequestFullscreen){
-      document.documentElement.webkitRequestFullscreen();
-    }else{throw new Error("fullscreen_unsupported");}
-    setTimeout(updateFullscreenButton,100);
-    return true;
+    if(root.requestFullscreen){
+      const promise=root.requestFullscreen();
+      if(promise&&typeof promise.then==="function"){
+        promise.then(function(){afterFullscreen();}).catch(function(){
+          fullscreenAttempted=false;
+          if(fullscreenGateStatus)fullscreenGateStatus.textContent="FULLSCREEN BLOQUEADO · TOCA OTRA VEZ";
+          updateFullscreenUi();
+        });
+      }else{afterFullscreen();}
+      return;
+    }
+    if(root.webkitRequestFullscreen){root.webkitRequestFullscreen();afterFullscreen();return;}
+    throw new Error("fullscreen_unsupported");
   }catch(e){
     fullscreenAttempted=false;
-    updateFullscreenButton();
-    return false;
+    if(fullscreenGateStatus)fullscreenGateStatus.textContent="FULLSCREEN NO DISPONIBLE EN ESTE NAVEGADOR";
+    updateFullscreenUi();
   }
 }
-document.addEventListener("fullscreenchange",updateFullscreenButton);
-document.addEventListener("webkitfullscreenchange",updateFullscreenButton);
-if(fullscreenBtn)fullscreenBtn.addEventListener("click",()=>{void enterNeonFullscreen();});
-
+function enterNeonFullscreen(){requestNeonFullscreen();}
+document.addEventListener("fullscreenchange",afterFullscreen);
+document.addEventListener("webkitfullscreenchange",afterFullscreen);
+if(fullscreenBtn)fullscreenBtn.addEventListener("click",function(e){e.preventDefault();e.stopPropagation();requestNeonFullscreen();});
+if(fullscreenGateButton)fullscreenGateButton.addEventListener("click",function(e){e.preventDefault();e.stopPropagation();requestNeonFullscreen();});
 let W=innerWidth,H=innerHeight,DPR=Math.min(devicePixelRatio||1,2);
 function resize(){
   W=Math.max(1,innerWidth);
@@ -314,10 +329,7 @@ function updateControlMode(){
   document.documentElement.classList.toggle("touch-controls",controlMode==="touch");
 }
 updateControlMode();
-updateFullscreenButton();
-document.addEventListener("pointerdown",()=>{
-  if(controlMode==="touch" && !fullscreenAttempted && !document.fullscreenElement)void enterNeonFullscreen();
-},{passive:true});
+updateFullscreenUi();
 const remotePlayers=new Map();
 let multiplayerSocket=null,multiplayerReady=false,multiplayerId="",lastNetSend=0,currentRoom="",multiplayerConnectTimer=null;
 let movementTelemetry={inputSince:0,lastX:p.x,lastY:p.y,lastReport:0};
