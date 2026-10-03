@@ -60,6 +60,34 @@ async function loadPlayerData(saveKey) {
   }
 }
 
+async function loadPlayerDataByName(name) {
+  if (!storageReady || !pool) return null;
+
+  const cleanName = String(name || '').trim().slice(0, 20);
+  if (!cleanName) return null;
+
+  try {
+    const result = await pool.query(
+      'SELECT data FROM neoncore_players ' +
+        'WHERE lower(trim(data->>\'name\')) = lower(trim($1)) ' +
+        'ORDER BY updated_at DESC LIMIT 2',
+      [cleanName]
+    );
+
+    if (result.rows.length !== 1) {
+      if (result.rows.length > 1) {
+        console.warn('[STORAGE MIGRATION] Nombre ambiguo; no se migrará:', cleanName);
+      }
+      return null;
+    }
+
+    return result.rows[0]?.data || null;
+  } catch (error) {
+    console.error('[STORAGE NAME LOAD QUERY]', error?.message || error);
+    return null;
+  }
+}
+
 async function savePlayerData(saveKey, data) {
   if (!storageReady || !pool || !saveKey) return false;
 
@@ -90,6 +118,7 @@ async function closeStorage() {
 module.exports = {
   initStorage,
   loadPlayerData,
+  loadPlayerDataByName,
   savePlayerData,
   closeStorage,
   get enabled() {
