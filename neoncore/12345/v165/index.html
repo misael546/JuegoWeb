@@ -9,7 +9,7 @@
 <script>
 (function(){
   try{
-    var v="20261003-165-audio7";
+    var v="20261003-165-audio8";
     var k="neon_core_build";
     window.NEON_CORE_BUILD=v;
     var old=localStorage.getItem(k);
@@ -1750,19 +1750,23 @@ function setupJoystick(id){
     moveY=clamp(y/max,-1,1);
     stick.style.transform="translate("+x+"px,"+y+"px)";
   }
+  // PC: Pointer Events. Móvil: Touch Events independientes por dedo.
   el.addEventListener("pointerdown",e=>{
-    if(e.pointerType==="mouse" && e.button!==0)return;
+    if(e.pointerType==="touch")return;
+    if(e.button!==0)return;
     e.preventDefault();
     active=true;pointerId=e.pointerId;
     try{el.setPointerCapture(e.pointerId)}catch{}
     apply(e.clientX,e.clientY);
   },{passive:false});
   el.addEventListener("pointermove",e=>{
+    if(e.pointerType==="touch")return;
     if(!active || e.pointerId!==pointerId)return;
     e.preventDefault();
     apply(e.clientX,e.clientY);
   },{passive:false});
   const end=e=>{
+    if(e.pointerType==="touch")return;
     if(e.pointerId!==pointerId)return;
     e.preventDefault();
     try{if(el.hasPointerCapture(e.pointerId))el.releasePointerCapture(e.pointerId)}catch{}
@@ -1771,8 +1775,46 @@ function setupJoystick(id){
   el.addEventListener("pointerup",end,{passive:false});
   el.addEventListener("pointercancel",end,{passive:false});
   el.addEventListener("lostpointercapture",e=>{
+    if(e.pointerType==="touch")return;
     if(pointerId===e.pointerId){active=false;pointerId=null;stick.style.transform="translate(0,0)";moveX=0;moveY=0;}
   });
+
+  let touchId=null;
+  function findTouch(list,id){
+    for(const t of Array.from(list||[])){if(t.identifier===id)return t;}
+    return null;
+  }
+  function touchInside(t){
+    const r=el.getBoundingClientRect();
+    return t.clientX>=r.left&&t.clientX<=r.right&&t.clientY>=r.top&&t.clientY<=r.bottom;
+  }
+  document.addEventListener("touchstart",e=>{
+    if(controlMode!=="touch"||touchId!==null)return;
+    const t=Array.from(e.changedTouches||[]).find(touchInside);
+    if(!t)return;
+    e.preventDefault();
+    touchId=t.identifier;
+    active=true;
+    apply(t.clientX,t.clientY);
+  },{passive:false});
+  document.addEventListener("touchmove",e=>{
+    if(controlMode!=="touch"||touchId===null)return;
+    const t=findTouch(e.touches,touchId);
+    if(!t)return;
+    e.preventDefault();
+    apply(t.clientX,t.clientY);
+  },{passive:false});
+  const touchEnd=e=>{
+    if(controlMode!=="touch"||touchId===null)return;
+    const t=findTouch(e.changedTouches,touchId);
+    if(!t)return;
+    e.preventDefault();
+    touchId=null;active=false;
+    stick.style.transform="translate(0,0)";moveX=0;moveY=0;
+  };
+  document.addEventListener("touchend",touchEnd,{passive:false});
+  document.addEventListener("touchcancel",touchEnd,{passive:false});
+
   return reset;
 }
 const resetMoveJoystick=setupJoystick("moveJoy");
@@ -2010,23 +2052,62 @@ addEventListener("pointerup",e=>{if(e.pointerType==="mouse")pointer.down=false;}
 function sendShopCommand(type,weapon){if(!multiplayerSocket||multiplayerSocket.readyState!==1)return;const msg={type};if(weapon)msg.weapon=weapon;multiplayerSocket.send(JSON.stringify(msg));}const buyAmmoBtn=document.getElementById("buyAmmoBtn");buyAmmoBtn.addEventListener("click",e=>{e.preventDefault();e.stopPropagation();sendShopCommand("buy_ammo");});document.querySelectorAll(".shopItem").forEach(btn=>btn.addEventListener("click",e=>{e.preventDefault();e.stopPropagation();sendShopCommand("buy_weapon",btn.dataset.weapon);}));
 
 const fireButton=document.getElementById("fire");
+const mobileFireTouches=new Set();
 fireButton.addEventListener("pointerdown",e=>{
+  if(e.pointerType==="touch")return;
   e.preventDefault();
-  e.stopPropagation();
   pointer.down=true;
   fire();
-  try{fireButton.setPointerCapture(e.pointerId);}catch{}
 },{passive:false});
 fireButton.addEventListener("pointerup",e=>{
+  if(e.pointerType==="touch")return;
   e.preventDefault();
   pointer.down=false;
-  try{if(fireButton.hasPointerCapture(e.pointerId))fireButton.releasePointerCapture(e.pointerId);}catch{}
 },{passive:false});
 fireButton.addEventListener("pointercancel",e=>{
+  if(e.pointerType==="touch")return;
   e.preventDefault();
   pointer.down=false;
 },{passive:false});
-fireButton.addEventListener("lostpointercapture",()=>{pointer.down=false;});
+
+document.addEventListener("touchstart",e=>{
+  if(controlMode!=="touch")return;
+  const r=fireButton.getBoundingClientRect();
+  let added=false;
+  for(const t of Array.from(e.changedTouches||[])){
+    if(t.clientX>=r.left&&t.clientX<=r.right&&t.clientY>=r.top&&t.clientY<=r.bottom){
+      mobileFireTouches.add(t.identifier);
+      added=true;
+    }
+  }
+  if(added){
+    e.preventDefault();
+    pointer.down=mobileFireTouches.size>0;
+    fire();
+  }
+},{passive:false});
+document.addEventListener("touchend",e=>{
+  if(controlMode!=="touch"||mobileFireTouches.size===0)return;
+  let removed=false;
+  for(const t of Array.from(e.changedTouches||[])){
+    if(mobileFireTouches.delete(t.identifier))removed=true;
+  }
+  if(removed){
+    e.preventDefault();
+    pointer.down=mobileFireTouches.size>0;
+  }
+},{passive:false});
+document.addEventListener("touchcancel",e=>{
+  if(controlMode!=="touch"||mobileFireTouches.size===0)return;
+  let removed=false;
+  for(const t of Array.from(e.changedTouches||[])){
+    if(mobileFireTouches.delete(t.identifier))removed=true;
+  }
+  if(removed){
+    e.preventDefault();
+    pointer.down=mobileFireTouches.size>0;
+  }
+},{passive:false});
 
 loadStats();
 function frame(now){
