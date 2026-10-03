@@ -9,7 +9,7 @@
 <script>
 (function(){
   try{
-    var v="20261003-165-audio8";
+    var v="20261003-165-audio9";
     var k="neon_core_build";
     window.NEON_CORE_BUILD=v;
     var old=localStorage.getItem(k);
@@ -1737,7 +1737,6 @@ function setupJoystick(id){
     active=false;pointerId=null;
     stick.style.transform="translate(0,0)";
     moveX=0;moveY=0;
-    
   }
   function apply(clientX,clientY){
     const r=el.getBoundingClientRect();
@@ -1750,74 +1749,35 @@ function setupJoystick(id){
     moveY=clamp(y/max,-1,1);
     stick.style.transform="translate("+x+"px,"+y+"px)";
   }
-  // PC: Pointer Events. Móvil: Touch Events independientes por dedo.
+  // PC y móvil usan Pointer Events. Cada dedo conserva su propio pointerId.
   el.addEventListener("pointerdown",e=>{
-    if(e.pointerType==="touch")return;
-    if(e.button!==0)return;
+    if(e.pointerType==="mouse" && e.button!==0)return;
+    if(e.pointerType!=="touch" && e.button!==0)return;
+    if(active)return;
     e.preventDefault();
     active=true;pointerId=e.pointerId;
-    try{el.setPointerCapture(e.pointerId)}catch{}
     apply(e.clientX,e.clientY);
   },{passive:false});
   el.addEventListener("pointermove",e=>{
-    if(e.pointerType==="touch")return;
     if(!active || e.pointerId!==pointerId)return;
     e.preventDefault();
     apply(e.clientX,e.clientY);
   },{passive:false});
   const end=e=>{
-    if(e.pointerType==="touch")return;
     if(e.pointerId!==pointerId)return;
     e.preventDefault();
-    try{if(el.hasPointerCapture(e.pointerId))el.releasePointerCapture(e.pointerId)}catch{}
-    active=false;pointerId=null;stick.style.transform="translate(0,0)";moveX=0;moveY=0;
+    active=false;pointerId=null;
+    stick.style.transform="translate(0,0)";moveX=0;moveY=0;
   };
   el.addEventListener("pointerup",end,{passive:false});
   el.addEventListener("pointercancel",end,{passive:false});
-  el.addEventListener("lostpointercapture",e=>{
-    if(e.pointerType==="touch")return;
-    if(pointerId===e.pointerId){active=false;pointerId=null;stick.style.transform="translate(0,0)";moveX=0;moveY=0;}
-  });
-
-  let touchId=null;
-  function findTouch(list,id){
-    for(const t of Array.from(list||[])){if(t.identifier===id)return t;}
-    return null;
-  }
-  function touchInside(t){
-    const r=el.getBoundingClientRect();
-    return t.clientX>=r.left&&t.clientX<=r.right&&t.clientY>=r.top&&t.clientY<=r.bottom;
-  }
-  document.addEventListener("touchstart",e=>{
-    if(controlMode!=="touch"||touchId!==null)return;
-    const t=Array.from(e.changedTouches||[]).find(touchInside);
-    if(!t)return;
-    e.preventDefault();
-    touchId=t.identifier;
-    active=true;
-    apply(t.clientX,t.clientY);
-  },{passive:false});
-  document.addEventListener("touchmove",e=>{
-    if(controlMode!=="touch"||touchId===null)return;
-    const t=findTouch(e.touches,touchId);
-    if(!t)return;
-    e.preventDefault();
-    apply(t.clientX,t.clientY);
-  },{passive:false});
-  const touchEnd=e=>{
-    if(controlMode!=="touch"||touchId===null)return;
-    const t=findTouch(e.changedTouches,touchId);
-    if(!t)return;
-    e.preventDefault();
-    touchId=null;active=false;
-    stick.style.transform="translate(0,0)";moveX=0;moveY=0;
-  };
-  document.addEventListener("touchend",touchEnd,{passive:false});
-  document.addEventListener("touchcancel",touchEnd,{passive:false});
-
+  el.addEventListener("lostpointercapture",end,{passive:false});
+  window.__neonJoystickApply=apply;
+  window.__neonJoystickElement=el;
   return reset;
 }
 const resetMoveJoystick=setupJoystick("moveJoy");
+window.__neonJoystickPointerId=null;
 const controlDefaults={joySize:112,fireSize:86,joyX:8,joyY:8,fireX:8,fireY:8};
 let controlConfig={...controlDefaults};
 try{const saved=JSON.parse(localStorage.getItem("neon_core_controls")||"null");if(saved)controlConfig={...controlDefaults,...saved};}catch{}
@@ -1850,6 +1810,8 @@ document.getElementById("controlReset").addEventListener("click",()=>{controlCon
 
 function resetAllControls(){
   resetMoveJoystick();
+  window.__neonJoystickPointerId=null;
+  if(typeof mobileFirePointers!=="undefined")mobileFirePointers.clear();
   pointer.down=false;
   keys.w=keys.a=keys.s=keys.d=false;
   controlCapture=null;
@@ -2052,7 +2014,8 @@ addEventListener("pointerup",e=>{if(e.pointerType==="mouse")pointer.down=false;}
 function sendShopCommand(type,weapon){if(!multiplayerSocket||multiplayerSocket.readyState!==1)return;const msg={type};if(weapon)msg.weapon=weapon;multiplayerSocket.send(JSON.stringify(msg));}const buyAmmoBtn=document.getElementById("buyAmmoBtn");buyAmmoBtn.addEventListener("click",e=>{e.preventDefault();e.stopPropagation();sendShopCommand("buy_ammo");});document.querySelectorAll(".shopItem").forEach(btn=>btn.addEventListener("click",e=>{e.preventDefault();e.stopPropagation();sendShopCommand("buy_weapon",btn.dataset.weapon);}));
 
 const fireButton=document.getElementById("fire");
-const mobileFireTouches=new Set();
+const mobileFirePointers=new Set();
+
 fireButton.addEventListener("pointerdown",e=>{
   if(e.pointerType==="touch")return;
   e.preventDefault();
@@ -2070,46 +2033,57 @@ fireButton.addEventListener("pointercancel",e=>{
   pointer.down=false;
 },{passive:false});
 
-document.addEventListener("touchstart",e=>{
-  if(controlMode!=="touch")return;
-  const r=fireButton.getBoundingClientRect();
-  let added=false;
-  for(const t of Array.from(e.changedTouches||[])){
-    if(t.clientX>=r.left&&t.clientX<=r.right&&t.clientY>=r.top&&t.clientY<=r.bottom){
-      mobileFireTouches.add(t.identifier);
-      added=true;
-    }
-  }
-  if(added){
+// Multitouch móvil centralizado: el joystick y ATACAR tienen pointerId independientes.
+document.addEventListener("pointerdown",e=>{
+  if(controlMode!=="touch"||e.pointerType!=="touch")return;
+  const t={clientX:e.clientX,clientY:e.clientY};
+  const fireRect=fireButton.getBoundingClientRect();
+  if(t.clientX>=fireRect.left&&t.clientX<=fireRect.right&&t.clientY>=fireRect.top&&t.clientY<=fireRect.bottom){
     e.preventDefault();
-    pointer.down=mobileFireTouches.size>0;
+    mobileFirePointers.add(e.pointerId);
+    pointer.down=true;
     fire();
   }
 },{passive:false});
-document.addEventListener("touchend",e=>{
-  if(controlMode!=="touch"||mobileFireTouches.size===0)return;
-  let removed=false;
-  for(const t of Array.from(e.changedTouches||[])){
-    if(mobileFireTouches.delete(t.identifier))removed=true;
-  }
-  if(removed){
-    e.preventDefault();
-    pointer.down=mobileFireTouches.size>0;
-  }
-},{passive:false});
-document.addEventListener("touchcancel",e=>{
-  if(controlMode!=="touch"||mobileFireTouches.size===0)return;
-  let removed=false;
-  for(const t of Array.from(e.changedTouches||[])){
-    if(mobileFireTouches.delete(t.identifier))removed=true;
-  }
-  if(removed){
-    e.preventDefault();
-    pointer.down=mobileFireTouches.size>0;
-  }
+
+document.addEventListener("pointermove",e=>{
+  if(controlMode!=="touch"||e.pointerType!=="touch")return;
+  const joyEl=window.__neonJoystickElement;
+  const joyId=window.__neonJoystickPointerId;
+  if(joyId!==e.pointerId)return;
+  e.preventDefault();
+  if(window.__neonJoystickApply)window.__neonJoystickApply(e.clientX,e.clientY);
 },{passive:false});
 
-loadStats();
+document.addEventListener("pointerdown",e=>{
+  if(controlMode!=="touch"||e.pointerType!=="touch")return;
+  const joyEl=window.__neonJoystickElement;
+  if(!joyEl||window.__neonJoystickPointerId!=null)return;
+  const r=joyEl.getBoundingClientRect();
+  if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)return;
+  e.preventDefault();
+  window.__neonJoystickPointerId=e.pointerId;
+  if(window.__neonJoystickApply)window.__neonJoystickApply(e.clientX,e.clientY);
+},{passive:false});
+
+function neonMobilePointerEnd(e){
+  if(controlMode!=="touch"||e.pointerType!=="touch")return;
+  let changed=false;
+  if(window.__neonJoystickPointerId===e.pointerId){
+    window.__neonJoystickPointerId=null;
+    resetMoveJoystick();
+    changed=true;
+  }
+  if(mobileFirePointers.delete(e.pointerId)){
+    pointer.down=mobileFirePointers.size>0;
+    changed=true;
+  }
+  if(changed)e.preventDefault();
+}
+document.addEventListener("pointerup",neonMobilePointerEnd,{passive:false});
+document.addEventListener("pointercancel",neonMobilePointerEnd,{passive:false});
+
+loadStats();loadStats();
 function frame(now){
   const dt=Math.min(.05,(now-last)/1000);
   last=now;
