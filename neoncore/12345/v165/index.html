@@ -9,7 +9,7 @@
 <script>
 (function(){
   try{
-    var v="20261003-165-chat3";
+    var v="20261003-165-chat4";
     var k="neon_core_build";
     window.NEON_CORE_BUILD=v;
     var old=localStorage.getItem(k);
@@ -177,11 +177,13 @@
   .cosmeticCard{min-height:104px}
 }
 </style><style id="chatHudStyle">
+.hudTopLine{position:relative;display:flex;align-items:center;min-height:27px;padding-right:62px;white-space:nowrap}
+#bars{position:relative}
 #chatToggle{
- position:fixed!important;
- left:204px!important;
- top:43px!important;
- z-index:125!important;
+ position:absolute!important;
+ right:6px!important;
+ top:5px!important;
+ z-index:126!important;
  display:flex!important;
  align-items:center;
  justify-content:center;
@@ -210,12 +212,14 @@
 .chatLine.expiring{animation:chatFade .65s ease-out forwards}
 @keyframes chatFade{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(16px)}}
 @media(max-width:799px){
- #chatToggle{left:min(204px,62vw)!important;top:41px!important;min-width:54px;height:28px}
+ #hud{z-index:4}
+ #chatToggle{right:6px!important;top:5px!important;min-width:54px;height:28px}
  #chatFeed{left:8px;top:90px;width:min(300px,68vw);max-height:155px}
  #chatBox{left:8px;top:80px;width:min(310px,calc(100vw - 16px))}
 }
 @media(max-width:430px){
- #chatToggle{left:min(200px,61vw)!important;top:40px!important;min-width:50px;height:27px;font-size:8px;padding:0 6px}
+ .hudTopLine{padding-right:57px;font-size:12px}
+ #chatToggle{right:5px!important;top:5px!important;min-width:50px;height:27px;font-size:8px;padding:0 6px}
  #chatFeed{top:88px;width:min(270px,70vw);max-height:150px}
  #chatBox{top:76px;width:min(300px,calc(100vw - 16px))}
 }
@@ -226,14 +230,14 @@ html.pc-controls #chatFeed{width:min(420px,38vw)}
 
 <div id="hud">
   <div class="panel" id="bars">
-    <b>NEON CORE</b>· <span id="level">Nv. 1</span> · ☠ <span id="pvpKills">0</span>
+    <div class="hudTopLine"><span><b>NEON CORE</b>· <span id="level">Nv. 1</span> · ☠ <span id="pvpKills">0</span></span><button id="chatToggle" type="button" aria-expanded="false" aria-controls="chatBox"><span class="chatIcon">◉</span><span class="chatLabel">CHAT</span></button></div>
     <div class="bar hpBar"><i id="hpFill"></i><span class="barLabel">❤️ <span id="hp">100</span>/<span id="maxHp">100</span></span></div>
     <div class="bar xpbar"><i id="xpFill"></i><span class="barLabel">XP <span id="xp">0</span>/<span id="xpNeed">100</span></span></div><div class="combatStats"><div class="coreStat powerStat"><span class="statParticles">✦ · ˚ ✧</span><small>PODER</small><b id="powerValue">100</b></div><div class="coreStat defenseStat"><span class="statParticles">✦ ˚ · ✧</span><small>DEFENSA</small><b id="defenseValue">0</b></div></div>
     <small>🎯 <span id="kills">0</span></small><div id="resourceHud"><span>🪙 <b id="gold">0</b></span><span>💎 <b id="diamonds">0</b></span><span>🔸 <b id="ammo">60</b>/<b id="maxAmmo">220</b></span></div>
   <div id="weaponHud">ARMA: <b id="weaponName">BLASTER</b></div>
 </div>
 
-<button id="chatToggle" type="button" aria-expanded="false" aria-controls="chatBox"><span class="chatIcon">◉</span><span class="chatLabel">CHAT</span></button><div id="minimapWrap"><canvas id="minimap" width="360" height="270"></canvas><span id="minimapTitle">MINIMAPA</span></div>
+<div id="minimapWrap"><canvas id="minimap" width="360" height="270"></canvas><span id="minimapTitle">MINIMAPA</span></div>
 <div id="cosmeticShop" aria-hidden="true">
   <div class="cosmeticShopCard shopUnifiedCard">
     <div class="cosmeticShopHead"><div class="cosmeticShopTitle"><strong>⚡ SHOP</strong><small>Arsenal, armaduras y códigos en un solo lugar. Párate sobre el SHOP para interactuar.</small></div></div>
