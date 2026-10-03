@@ -52,80 +52,25 @@ jobs:
               print(f"{path}: {checked} scripts OK")
           PY
 
-      - name: Download Neon Core music pack
+      - name: Verify official entry
         shell: bash
         run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq ffmpeg
           python3 - <<'PY'
-          import html
-          import os
-          import re
-          import subprocess
-          import sys
           from pathlib import Path
-          from urllib.parse import urljoin
+          import re
 
-          import requests
+          root = Path("index.html").read_text(encoding="utf-8")
+          legacy = Path("neoncore/index.html").read_text(encoding="utf-8")
 
-          PAGE = "https://tinytunatunes.itch.io/free-dark-sci-fi-indie-game-music-pack-5-tracks"
-          OUT = Path("neoncore/assets/music")
-          OUT.mkdir(parents=True, exist_ok=True)
+          assert '20261003-006-pages-live-main-menu' in root
+          assert 'const PUBLIC_ROOM_CODE=""' in root
+          assert 'MENÚ PRINCIPAL' not in root
+          assert 'SALAS PÚBLICAS' not in root
+          assert '20261003-167-darkscifi' not in root
+          assert 'location.replace(target+q)' in legacy
 
-          session = requests.Session()
-          session.headers.update({
-              "User-Agent": "Mozilla/5.0 (GitHub Pages build) AppleWebKit/537.36 Chrome/140 Safari/537.36"
-          })
-          response = session.get(PAGE, timeout=60)
-          response.raise_for_status()
-          page = response.text
-
-          hrefs = []
-          for m in re.finditer(r'href=[\"\']([^\"\']*/download/[^\"\']*)[\"\']', page, flags=re.I):
-              href = html.unescape(m.group(1))
-              href = urljoin(PAGE, href)
-              if href not in hrefs:
-                  hrefs.append(href)
-
-          if len(hrefs) < 5:
-              raise SystemExit(
-                  f"No se encontraron las 5 descargas de itch.io. Detectadas: {len(hrefs)}. "
-                  "La estructura de la pagina puede haber cambiado."
-              )
-
-          names = ["exploration","tension","combat","main_menu","bonus"]
-          for name, href in zip(names, hrefs[:5]):
-              tmp = OUT / f".{name}.wav"
-              mp3 = OUT / f"{name}.mp3"
-              print(f"[MUSIC] {name}: {href}")
-              with session.get(href, stream=True, timeout=180, allow_redirects=True) as r:
-                  r.raise_for_status()
-                  with tmp.open("wb") as f:
-                      for chunk in r.iter_content(chunk_size=1024*1024):
-                          if chunk:
-                              f.write(chunk)
-              if tmp.stat().st_size < 100_000:
-                  raise SystemExit(f"Archivo demasiado pequeno para {name}: {tmp.stat().st_size} bytes")
-              with tmp.open("rb") as f:
-                  magic=f.read(12)
-              if not (magic.startswith(b"RIFF") or magic.startswith(b"RIFX")):
-                  raise SystemExit(f"La descarga de {name} no parece WAV valido: {magic!r}")
-              subprocess.run([
-                  "ffmpeg","-y","-loglevel","error",
-                  "-i",str(tmp),
-                  "-codec:a","libmp3lame","-b:a","96k",
-                  str(mp3)
-              ], check=True)
-              tmp.unlink(missing_ok=True)
-              print(f"[MUSIC] listo {mp3} ({mp3.stat().st_size} bytes)")
-
-          (OUT / "CREDIT.txt").write_text(
-              "Neon Core usa musica del pack Free Dark Sci-Fi Indie Game Music Pack (5 Tracks)\n"
-              "Music by tinytunatunes | https://tinytunatunes.itch.io/\n"
-              "Uso permitido en proyectos personales y comerciales; se permite editar, hacer loop, remix y adaptar.\n"
-              "No redistribuir ni sublicenciar los archivos de audio como archivos independientes o como otro asset pack.\n",
-              encoding="utf-8"
-          )
+          print("[PAGES] Official root verified: current main menu.")
+          print("[PAGES] Legacy neoncore route redirects to official root.")
           PY
 
       - name: Setup Pages
