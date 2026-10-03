@@ -9,7 +9,7 @@
 <script>
 (function(){
   try{
-    var v="20261003-166";
+    var v="20261003-166-touchfix";
     var k="neon_core_build";
     window.NEON_CORE_BUILD=v;
     var old=localStorage.getItem(k);
@@ -26,14 +26,14 @@
   }catch(e){}
 })();
 </script>
-<title>Neon Core · Build 166</title>
+<title>Neon Core · Build 165</title>
 <style>
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#050811;color:#fff;font-family:Arial,sans-serif;touch-action:none}
 #game{display:block;width:100vw;height:100vh}
 #hud{position:fixed;top:10px;left:10px;right:10px;display:flex;justify-content:space-between;align-items:flex-start;gap:8px;pointer-events:none;z-index:3}.combatStats{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:7px}.coreStat{position:relative;overflow:hidden;min-width:88px;padding:6px 8px;border:1px solid #39e7ff44;border-radius:10px;background:linear-gradient(135deg,#091523,#0b1220);box-shadow:inset 0 0 16px #39e7ff0a,0 0 12px #000}.coreStat small{display:block;color:#8ea0b8;font-size:9px;letter-spacing:1.4px;font-weight:900}.coreStat b{display:block;font-size:18px;line-height:1.05;margin-top:2px;letter-spacing:.5px}.powerStat{border-color:#39e7ff66;box-shadow:inset 0 0 20px #39e7ff12,0 0 12px #39e7ff12}.powerStat b{color:#dfffff;text-shadow:0 0 10px #39e7ff99}.defenseStat{border-color:#b67cff66;box-shadow:inset 0 0 20px #a855f712,0 0 12px #a855f712}.defenseStat b{color:#f0e5ff;text-shadow:0 0 10px #a855f799}.statParticles{position:absolute;right:-4px;top:0;color:#fff;opacity:.8;font-size:12px;letter-spacing:4px;animation:statSpark 2.2s linear infinite;pointer-events:none}@keyframes statSpark{0%{transform:translate(-8px,7px) rotate(0deg);opacity:.1}45%{opacity:.9}100%{transform:translate(32px,-4px) rotate(16deg);opacity:0}}
 .panel{background:rgba(5,8,17,.82);border:1px solid #26344e;border-radius:12px;padding:8px 10px;font-size:13px;backdrop-filter:blur(5px)}
 #bars{min-width:190px}#score{opacity:.45;font-size:11px}.bar{height:16px;background:#182033;border-radius:9px;overflow:hidden;margin-top:5px;position:relative;border:1px solid #26344e}.bar i{display:block;height:100%;width:100%;background:#36e0ff}.xpbar i{background:#a855f7}.masterybar{height:18px;margin-top:6px}.masterybar i{background:linear-gradient(90deg,#a855f7,#39e7ff)}.masterybar .barLabel{font-size:11px;letter-spacing:.5px}.barLabel{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:bold;color:#fff;text-shadow:0 1px 2px #000;pointer-events:none}
-#buildDisplay{position:fixed;top:8px;left:50%;transform:translateX(-50%);z-index:40;background:rgba(5,8,17,.94);border:2px solid #39e7ff;border-radius:10px;padding:6px 12px;color:#39e7ff;font-size:14px;font-weight:900;letter-spacing:1.5px;box-shadow:0 0 18px #39e7ff55;pointer-events:none}#nameBox{position:fixed;inset:0;background:#000b;display:none;align-items:center;justify-content:center;padding:20px;z-index:20}
+#buildDisplay{position:fixed;right:4px;bottom:4px;top:auto;left:auto;transform:none;z-index:2;background:transparent;border:0;border-radius:0;padding:0;color:#ffffff;font-size:7px;font-weight:700;letter-spacing:.5px;opacity:.22;text-shadow:none;box-shadow:none;pointer-events:none;white-space:nowrap}#nameBox{position:fixed;inset:0;background:#000b;display:none;align-items:center;justify-content:center;padding:20px;z-index:20}
 #nameCard{width:min(380px,100%);background:#0b1020;border:1px solid #26344e;border-radius:18px;padding:22px;box-shadow:0 15px 60px #000}
 #nameCard h1{margin:0 0 5px;font-size:30px;letter-spacing:2px;color:#39e7ff}
 #nameCard p{color:#9ca9bd;margin:0 0 16px}
@@ -95,19 +95,156 @@
 <script>
 (function(){try{if(/\/(?:12345|67890)(?:\/|\/index\.html)?(?:$|[?#])/.test(location.pathname+location.search)){document.documentElement.classList.add("public-room");}}catch(e){}})();
 </script>
-</head>
+<style id="neonFullscreenStyle">#neonFullscreenButton{position:fixed;top:48px;left:50%;transform:translateX(-50%);z-index:125;display:none;align-items:center;justify-content:center;gap:7px;min-width:168px;height:40px;padding:0 13px;border:1px solid #39e7ff;border-radius:11px;background:linear-gradient(135deg,#06101c,#0b2030ee);color:#dffbff;font:900 11px Arial,sans-serif;letter-spacing:1px;box-shadow:0 0 16px #39e7ff22,0 6px 22px #000,inset 0 0 16px #39e7ff0d;text-shadow:0 0 8px #39e7ff88;overflow:hidden;pointer-events:auto;-webkit-tap-highlight-color:transparent}#neonFullscreenButton:before{content:"";position:absolute;inset:-70%;background:conic-gradient(from 0deg,transparent,#39e7ff66,transparent 24%,#a855f766,transparent 48%);animation:neonFullscreenSpin 4s linear infinite;opacity:.75}#neonFullscreenButton:after{content:"✦ · ✧ · • · ✦";position:absolute;left:-20%;right:-20%;top:2px;color:#9ff7ff55;font-size:7px;letter-spacing:4px;animation:neonFullscreenParticles 2.5s linear infinite;pointer-events:none}#neonFullscreenButton span,#neonFullscreenButton b{position:relative;z-index:2}#neonFullscreenButton span{font-size:16px}#neonFullscreenButton:active{transform:translateX(-50%) scale(.96)}@keyframes neonFullscreenSpin{to{transform:rotate(360deg)}}@keyframes neonFullscreenParticles{from{transform:translateX(-8%);opacity:.1}25%{opacity:.8}75%{opacity:.8}to{transform:translateX(8%);opacity:.1}}html.neon-touch #neonFullscreenButton{display:flex}@media(max-width:430px){#neonFullscreenButton{top:46px;min-width:154px;height:38px;font-size:10px}}/* Neon Core compact mobile shop + HUD chat */
+#cosmeticShop{padding:8px}
+.cosmeticShopCard.shopUnifiedCard{
+  width:min(680px,92vw);
+  max-height:min(76vh,620px);
+  padding:12px;
+  border-radius:16px;
+}
+.cosmeticShopTitle strong{font-size:17px}
+.cosmeticShopTitle small{font-size:10px}
+.cosmeticBalance{gap:5px;margin:8px 0}
+.cosmeticBalance span{padding:5px 7px;font-size:10px}
+.shopTabs{gap:5px;margin:7px 0}
+.shopTab{min-height:36px;font-size:11px}
+.shopSubTitle{margin:7px 0 4px;font-size:10px}
+.arsenalAmmoBar{margin:5px 0 7px;padding:7px 8px}
+.arsenalAmmoBar strong{font-size:10px}
+.arsenalAmmoBar span{font-size:11px}
+.arsenalAmmoBar button{min-height:32px;min-width:110px;font-size:10px}
+.shopUnifiedGrid{gap:6px}
+.shopWeaponCard{min-height:138px!important;padding:7px!important;border-radius:10px;gap:4px}
+.shopWeaponCard strong{font-size:10px;letter-spacing:.7px}
+.shopWeaponCard small{font-size:9px}
+.shopWeaponCard .weaponStats{font-size:10px}
+.shopWeaponCard button{min-height:28px;font-size:9px}
+.cosmeticGrid{gap:6px}
+.cosmeticCard{min-height:125px;padding:7px;gap:4px;border-radius:10px}
+.skinPreview{width:50px;height:50px}
+.cosmeticCard strong{font-size:10px}
+.cosmeticCard small{font-size:9px}
+.armorDefense{font-size:9px}
+.cosmeticAction{min-height:27px;font-size:9px}
+.codeBox{margin-top:8px;padding:8px}
+.codeBox b{font-size:10px}
+.codeBox small{font-size:9px}
+.codeRow{gap:5px;margin-top:5px}
+.codeRow input{padding:8px;font-size:12px}
+.codeRow button{min-width:90px}
+@media(max-width:700px){
+  #cosmeticShop{padding:6px}
+  .cosmeticShopCard.shopUnifiedCard{
+    width:min(430px,94vw);
+    max-height:72vh;
+    padding:9px;
+    border-radius:13px;
+  }
+  .cosmeticShopHead{gap:7px}
+  .cosmeticShopTitle strong{font-size:14px}
+  .cosmeticShopTitle small{font-size:8px}
+  .cosmeticBalance{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin:6px 0}
+  .cosmeticBalance span{padding:4px 5px;font-size:9px}
+  .shopTabs{grid-template-columns:1fr 1fr 1fr;gap:4px;margin:5px 0}
+  .shopTab{min-height:31px;font-size:9px}
+  .arsenalAmmoBar{padding:6px;gap:6px}
+  .arsenalAmmoBar>div{gap:5px}
+  .arsenalAmmoBar button{min-height:29px;min-width:92px;font-size:9px}
+  .shopUnifiedGrid{grid-template-columns:1fr 1fr!important;gap:5px!important}
+  .shopWeaponCard{min-height:122px!important;padding:6px!important}
+  .shopWeaponCard strong{font-size:9px}
+  .shopWeaponCard small{font-size:8px}
+  .shopWeaponCard .weaponStats{font-size:9px}
+  .shopWeaponCard button{min-height:25px;font-size:8px}
+  .cosmeticGrid{grid-template-columns:1fr 1fr;gap:5px}
+  .cosmeticCard{min-height:112px;padding:6px}
+  .skinPreview{width:44px;height:44px}
+  .cosmeticCard strong{font-size:9px}
+  .cosmeticCard small,.armorDefense{font-size:8px}
+  .cosmeticAction{min-height:24px;font-size:8px}
+}
+@media(max-width:430px){
+  .cosmeticShopCard.shopUnifiedCard{
+    width:92vw;
+    max-height:68vh;
+    padding:8px;
+  }
+  .cosmeticShopTitle strong{font-size:13px}
+  .cosmeticBalance span{font-size:8px}
+  .shopTab{min-height:29px;font-size:8px}
+  .shopWeaponCard{min-height:108px!important}
+  .cosmeticCard{min-height:104px}
+}
+</style><style id="neonAudioStyle">
+#audioToggle{position:fixed;left:10px;bottom:10px;z-index:16;width:38px;height:30px;border:1px solid #39e7ff55;border-radius:9px;background:rgba(5,8,17,.55);color:#bfefff;font:16px Arial,sans-serif;display:flex;align-items:center;justify-content:center;opacity:.62;pointer-events:auto;box-shadow:0 4px 12px #0008;backdrop-filter:blur(4px);-webkit-tap-highlight-color:transparent}
+#audioToggle:hover{opacity:.95;border-color:#39e7ff}
+#audioToggle.audioOff{opacity:.38;filter:grayscale(.65)}
+#audioToggle.audioOn{box-shadow:0 0 12px #39e7ff22,0 4px 12px #0008}
+@media(max-width:799px){#audioToggle{left:10px;bottom:126px;width:36px;height:28px;font-size:14px;z-index:95}}
+@media(max-width:430px){#audioToggle{bottom:120px;width:34px;height:27px;font-size:13px}}
+</style><style id="chatHudStyle">
+.hudTopLine{position:relative;display:flex;align-items:center;min-height:27px;white-space:nowrap}
+#chatToggle{
+ position:fixed!important;
+ left:calc(10px + min(245px,64vw))!important;
+ top:10px!important;
+ z-index:126!important;
+ display:flex!important;
+ align-items:center;
+ justify-content:center;
+ gap:4px;
+ min-width:58px;
+ height:29px;
+ padding:0 7px;
+ border:1px solid #39e7ff;
+ border-radius:9px;
+ background:linear-gradient(135deg,#06101c,#0b2030);
+ color:#dffbff;
+ font:900 9px Arial,sans-serif;
+ letter-spacing:1px;
+ pointer-events:auto!important;
+ box-shadow:0 0 10px #39e7ff22,0 4px 12px #000,inset 0 0 12px #39e7ff0d;
+ text-shadow:0 0 7px #39e7ff99;
+ overflow:hidden;
+}
+#chatToggle:before{content:"";position:absolute;inset:-45%;background:conic-gradient(from 0deg,transparent,#39e7ff55,transparent 22%,#a855f755,transparent 44%);animation:chatSpin 3.8s linear infinite;opacity:.7}
+#chatToggle .chatLabel,#chatToggle .chatIcon{position:relative;z-index:2;text-shadow:0 0 7px #39e7ff99}
+#chatToggle .chatIcon{font-size:11px;margin-right:2px}
+#chatBox{position:fixed;left:calc(10px + min(245px,64vw))!important;top:46px;bottom:auto;width:min(350px,42vw);z-index:140;background:linear-gradient(180deg,#081423f5,#050b15f5);border:1px solid #39e7ff88;border-radius:12px;padding:8px;backdrop-filter:blur(8px);pointer-events:auto;box-shadow:0 0 18px #39e7ff22,0 10px 28px #000}
+#chatFeed{position:fixed;left:calc(10px + min(245px,64vw))!important;top:46px;bottom:auto;width:min(360px,42vw);max-height:165px;display:flex;flex-direction:column;align-items:flex-start;gap:4px;z-index:120;pointer-events:none;overflow:hidden;mask-image:linear-gradient(to bottom,#000 0,#000 82%,transparent 100%);-webkit-mask-image:linear-gradient(to bottom,#000 0,#000 82%,transparent 100%)}
+.chatLine{align-self:flex-start;max-width:100%;padding:5px 8px;border:1px solid #39e7ff44;border-radius:8px;background:linear-gradient(90deg,#061421ef,#0b1220d9);box-shadow:0 0 12px #39e7ff12,0 4px 12px #0008;backdrop-filter:blur(4px);font-size:11px;line-height:1.25;word-break:break-word;text-shadow:0 1px 3px #000;animation:chatDrop .28s ease-out}
+@keyframes chatDrop{from{opacity:0;transform:translateY(-15px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+.chatLine.expiring{animation:chatFade .65s ease-out forwards}
+@keyframes chatFade{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(16px)}}
+@media(max-width:799px){
+ #hud{z-index:4}
+ #chatToggle{left:calc(8px + min(220px,64vw))!important;top:8px!important;min-width:54px;height:28px}
+ #chatFeed{left:calc(8px + min(220px,64vw))!important;top:44px;width:min(300px,calc(100vw - 8px));max-height:155px}
+ #chatBox{left:calc(8px + min(220px,64vw))!important;top:44px;width:min(300px,calc(100vw - 8px))}
+}
+@media(max-width:430px){
+ #hud{left:8px}
+ .hudTopLine{font-size:12px}
+ #chatToggle{left:calc(8px + min(205px,61vw))!important;top:8px!important;min-width:50px;height:27px;font-size:8px;padding:0 6px}
+ #chatFeed{left:calc(8px + min(205px,61vw))!important;top:41px;width:min(275px,calc(100vw - 8px));max-height:150px}
+ #chatBox{left:calc(8px + min(205px,61vw))!important;top:41px;width:min(290px,calc(100vw - 8px))}
+}
+html.pc-controls #chatFeed{width:min(420px,38vw)}
+</style></head>
 <body>
-<canvas id="game"></canvas><div id="buildDisplay">NEON CORE · Build 166</div>
+<canvas id="game"></canvas><div id="buildDisplay">NEON CORE · Build 165</div><button id="audioToggle" type="button" aria-label="Activar o silenciar audio">🔊</button>
 
 <div id="hud">
   <div class="panel" id="bars">
-    <b>NEON CORE</b>· <span id="level">Nv. 1</span> · ☠ <span id="pvpKills">0</span>
-    <div class="bar"><i id="hpFill"></i><span class="barLabel">❤️ <span id="hp">100</span>/<span id="maxHp">100</span></span></div>
+    <div class="hudTopLine"><span><b>NEON CORE</b>· <span id="level">Nv. 1</span> · ☠ <span id="pvpKills">0</span></span></div>
+    <div class="bar hpBar"><i id="hpFill"></i><span class="barLabel">❤️ <span id="hp">100</span>/<span id="maxHp">100</span></span></div>
     <div class="bar xpbar"><i id="xpFill"></i><span class="barLabel">XP <span id="xp">0</span>/<span id="xpNeed">100</span></span></div><div class="combatStats"><div class="coreStat powerStat"><span class="statParticles">✦ · ˚ ✧</span><small>PODER</small><b id="powerValue">100</b></div><div class="coreStat defenseStat"><span class="statParticles">✦ ˚ · ✧</span><small>DEFENSA</small><b id="defenseValue">0</b></div></div>
     <small>🎯 <span id="kills">0</span></small><div id="resourceHud"><span>🪙 <b id="gold">0</b></span><span>💎 <b id="diamonds">0</b></span><span>🔸 <b id="ammo">60</b>/<b id="maxAmmo">220</b></span></div>
   <div id="weaponHud">ARMA: <b id="weaponName">BLASTER</b></div>
 </div>
 
+<button id="chatToggle" type="button" aria-expanded="false" aria-controls="chatBox"><span class="chatIcon">◉</span><span class="chatLabel">CHAT</span></button>
 <div id="minimapWrap"><canvas id="minimap" width="360" height="270"></canvas><span id="minimapTitle">MINIMAPA</span></div>
 <div id="cosmeticShop" aria-hidden="true">
   <div class="cosmeticShopCard shopUnifiedCard">
@@ -148,7 +285,7 @@
     </section>
   </div>
 </div>
-<div id="toastFeed" aria-live="polite"></div><div class="pcHint">PC: WASD / flechas para moverte · mouse para apuntar · clic izquierdo para disparar · ESPACIO también dispara</div><div id="chatFeed" aria-live="polite" aria-label="Mensajes del chat"></div><button id="chatToggle" type="button" aria-expanded="false" aria-controls="chatBox"><span class="chatIcon">◉</span><span class="chatLabel">NEON CHAT</span></button><div id="chatBox" aria-label="Escribir en el chat" style="display:none"><div class="chatInputHead"><span>✦ MENSAJE NEON</span><button class="chatClose" id="chatCloseStatic" type="button" aria-label="Cerrar chat">×</button></div><form id="chatForm"><input id="chatInput" maxlength="120" autocomplete="off" placeholder="Escribe un mensaje…"><button id="chatSend" type="submit">ENVIAR</button></form><div id="chatHint">Enter para enviar · máximo 120 caracteres</div></div><div id="connectionOverlay" aria-live="polite"><div id="connectionCard"><div id="connectionSpinner"></div><b id="connectionTitle">CONECTANDO AL SERVIDOR</b><span id="connectionText">Despertando el servidor multiplayer…</span></div></div>
+<div id="toastFeed" aria-live="polite"></div><div class="pcHint">PC: WASD / flechas para moverte · mouse para apuntar · clic izquierdo para disparar · ESPACIO también dispara</div><div id="chatFeed" aria-live="polite" aria-label="Mensajes del chat"></div><div id="chatBox" aria-label="Escribir en el chat" style="display:none"><div class="chatInputHead"><span>✦ MENSAJE NEON</span><button class="chatClose" id="chatCloseStatic" type="button" aria-label="Cerrar chat">×</button></div><form id="chatForm"><input id="chatInput" maxlength="120" autocomplete="off" placeholder="Escribe un mensaje…"><button id="chatSend" type="submit">ENVIAR</button></form><div id="chatHint">Enter para enviar · máximo 120 caracteres</div></div><div id="connectionOverlay" aria-live="polite"><div id="connectionCard"><div id="connectionSpinner"></div><b id="connectionTitle">CONECTANDO AL SERVIDOR</b><span id="connectionText">Despertando el servidor multiplayer…</span></div></div>
 
 
 <div id="playersPanel"><b>JUGADORES CONECTADOS · <span id="playersCount">0</span></b><div id="playersList"></div></div>
@@ -202,6 +339,113 @@ addEventListener("resize",resize);
 if(window.visualViewport)window.visualViewport.addEventListener("resize",resize);
 resize();
 
+let neonAudio={
+  ctx:null,master:null,compressor:null,musicGain:null,musicTimer:null,musicStep:0,
+  enabled:true,ready:false
+};
+try{neonAudio.enabled=localStorage.getItem("neon_core_audio")!=="off";}catch{}
+function audioButtonRefresh(){
+  const b=document.getElementById("audioToggle");
+  if(!b)return;
+  b.textContent=neonAudio.enabled?"🔊":"🔇";
+  b.classList.toggle("audioOn",neonAudio.enabled);
+  b.classList.toggle("audioOff",!neonAudio.enabled);
+  b.setAttribute("aria-label",neonAudio.enabled?"Silenciar audio":"Activar audio");
+}
+function audioContextCtor(){return window.AudioContext||window.webkitAudioContext||null;}
+function ensureAudio(){
+  if(!neonAudio.enabled)return false;
+  try{
+    const AC=audioContextCtor();
+    if(!AC)return false;
+    if(!neonAudio.ctx){
+      neonAudio.ctx=new AC();
+      neonAudio.master=neonAudio.ctx.createGain();
+      neonAudio.master.gain.value=.72;
+      neonAudio.compressor=neonAudio.ctx.createDynamicsCompressor();
+      neonAudio.compressor.threshold.value=-20;
+      neonAudio.compressor.knee.value=18;
+      neonAudio.compressor.ratio.value=4;
+      neonAudio.compressor.attack.value=.004;
+      neonAudio.compressor.release.value=.18;
+      neonAudio.master.connect(neonAudio.compressor);
+      neonAudio.compressor.connect(neonAudio.ctx.destination);
+      neonAudio.musicGain=neonAudio.ctx.createGain();
+      neonAudio.musicGain.gain.value=.42;
+      neonAudio.musicGain.connect(neonAudio.master);
+      neonAudio.ready=true;
+      startNeonMusic();
+    }
+    if(neonAudio.ctx.state==="suspended")neonAudio.ctx.resume().catch(()=>{});
+    return true;
+  }catch(e){return false;}
+}
+function stopNeonMusic(){
+  if(neonAudio.musicTimer){clearInterval(neonAudio.musicTimer);neonAudio.musicTimer=null;}
+  neonAudio.musicStep=0;
+}
+function audioTone(freq,duration=.12,type="sine",volume=.12,slide=0,delay=0,dest=null){
+  if(!ensureAudio()||!neonAudio.ctx)return;
+  const ctx=neonAudio.ctx,now=ctx.currentTime+Math.max(0,delay);
+  const o=ctx.createOscillator(),g=ctx.createGain();
+  o.type=type;o.frequency.setValueAtTime(Math.max(20,freq),now);
+  if(slide)o.frequency.exponentialRampToValueAtTime(Math.max(20,freq+slide),now+duration);
+  g.gain.setValueAtTime(.0001,now);
+  g.gain.exponentialRampToValueAtTime(Math.max(.0001,volume),now+.008);
+  g.gain.exponentialRampToValueAtTime(.0001,now+duration);
+  o.connect(g);g.connect(dest||neonAudio.master);
+  o.start(now);o.stop(now+duration+.02);
+}
+function audioNoise(duration=.12,volume=.08,delay=0,highpass=900){
+  if(!ensureAudio()||!neonAudio.ctx)return;
+  const ctx=neonAudio.ctx,now=ctx.currentTime+Math.max(0,delay);
+  const len=Math.max(1,Math.floor(ctx.sampleRate*duration)),buf=ctx.createBuffer(1,len,ctx.sampleRate),d=buf.getChannelData(0);
+  for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*(1-i/len);
+  const src=ctx.createBufferSource(),filter=ctx.createBiquadFilter(),g=ctx.createGain();
+  filter.type="highpass";filter.frequency.value=highpass;
+  g.gain.setValueAtTime(Math.max(.0001,volume),now);
+  g.gain.exponentialRampToValueAtTime(.0001,now+duration);
+  src.buffer=buf;src.connect(filter);filter.connect(g);g.connect(neonAudio.master);
+  src.start(now);src.stop(now+duration+.02);
+}
+function startNeonMusic(){
+  if(!neonAudio.enabled||!neonAudio.ready||neonAudio.musicTimer)return;
+  const bass=[110,98,87.31,98,123.47,110,98,82.41];
+  const lead=[220,246.94,261.63,246.94,196,220,246.94,164.81];
+  const tick=0;
+  const playStep=()=>{
+    if(!neonAudio.enabled||!neonAudio.ctx)return;
+    const i=neonAudio.musicStep++%bass.length;
+    audioTone(bass[i],.52,"triangle",.028,-3,tick,neonAudio.musicGain);
+    if(i%2===0)audioTone(lead[i],.32,"sine",.018,4,.04,neonAudio.musicGain);
+    if(i===0||i===4)audioTone(bass[i]*2,.75,"sine",.009,0,.02,neonAudio.musicGain);
+  };
+  playStep();
+  neonAudio.musicTimer=setInterval(playStep,520);
+}
+function unlockNeonAudio(){
+  if(!neonAudio.enabled)return;
+  ensureAudio();
+}
+function setNeonAudioEnabled(on){
+  neonAudio.enabled=!!on;
+  try{localStorage.setItem("neon_core_audio",neonAudio.enabled?"on":"off");}catch{}
+  if(!neonAudio.enabled){
+    stopNeonMusic();
+    if(neonAudio.master&&neonAudio.ctx)neonAudio.master.gain.setTargetAtTime(0,neonAudio.ctx.currentTime,.04);
+  }else{
+    ensureAudio();
+    if(neonAudio.master&&neonAudio.ctx)neonAudio.master.gain.setTargetAtTime(.72,neonAudio.ctx.currentTime,.04);
+    startNeonMusic();
+  }
+  audioButtonRefresh();
+}
+const audioToggle=document.getElementById("audioToggle");
+if(audioToggle)audioToggle.addEventListener("click",e=>{e.preventDefault();e.stopPropagation();setNeonAudioEnabled(!neonAudio.enabled);});
+audioButtonRefresh();
+document.addEventListener("pointerdown",unlockNeonAudio,{passive:true});
+document.addEventListener("keydown",unlockNeonAudio,{passive:true});
+
 const world={w:6000,h:4400};
 const p={x:3000,y:2200,r:16,angle:0,hp:100,maxHp:100,xp:0,level:1,score:0,kills:0,pvpKills:0,power:100,damage:35,defense:0,speed:205,fireRate:320,lastShot:0,alive:true,gold:0,diamonds:0,ammo:60,maxAmmo:220,weapon:"blaster",equippedSkin:"core_default"};
 const shopNpc={x:3000,y:2200,r:24};
@@ -218,16 +462,16 @@ const weaponNames={
   omega:"OMEGA · ASCENSION"
 };
 const weaponStats={
-  blaster:{name:"BLASTER · NEONSTORM",power:100,fireRate:320,maxAmmo:220,cost:0,range:760},
-  pulse:{name:"PULSE · PRISMA",power:200,fireRate:230,maxAmmo:260,cost:500,range:820},
-  cannon:{name:"CANNON · SOLARIS",power:400,fireRate:620,maxAmmo:320,cost:1500,range:880},
-  railgun:{name:"RAILGUN · ECLIPSE",power:743,fireRate:900,maxAmmo:380,cost:6500,range:960},
-  nova:{name:"NOVA · SUPERNOVA",power:1486,fireRate:1350,maxAmmo:450,cost:22000,range:1040},
-  plasma:{name:"PLASMA · INFERNO",power:2286,fireRate:1050,maxAmmo:500,cost:60000,range:1120},
-  vortex:{name:"VORTEX · SHARD",power:3286,fireRate:1450,maxAmmo:550,cost:150000,range:1200},
-  quasar:{name:"QUASAR · RAY",power:4429,fireRate:1750,maxAmmo:600,cost:400000,range:1280},
-  singularity:{name:"SINGULARITY · CORE",power:6000,fireRate:2150,maxAmmo:650,cost:900000,range:1360},
-  omega:{name:"OMEGA · ASCENSION",power:8000,fireRate:2600,maxAmmo:700,cost:2000000,range:1440}
+  blaster:{name:"BLASTER · NEONSTORM",power:100,fireRate:280,maxAmmo:220,cost:0,range:760},
+  pulse:{name:"PULSE · PRISMA",power:200,fireRate:190,maxAmmo:260,cost:500,range:820},
+  cannon:{name:"CANNON · SOLARIS",power:400,fireRate:520,maxAmmo:320,cost:1500,range:880},
+  railgun:{name:"RAILGUN · ECLIPSE",power:743,fireRate:700,maxAmmo:380,cost:6500,range:960},
+  nova:{name:"NOVA · SUPERNOVA",power:1486,fireRate:1000,maxAmmo:450,cost:22000,range:1040},
+  plasma:{name:"PLASMA · INFERNO",power:2286,fireRate:550,maxAmmo:500,cost:60000,range:1120},
+  vortex:{name:"VORTEX · SHARD",power:3286,fireRate:950,maxAmmo:550,cost:150000,range:1200},
+  quasar:{name:"QUASAR · RAY",power:4429,fireRate:1050,maxAmmo:600,cost:400000,range:1280},
+  singularity:{name:"SINGULARITY · CORE",power:6000,fireRate:1400,maxAmmo:650,cost:900000,range:1360},
+  omega:{name:"OMEGA · ASCENSION",power:8000,fireRate:900,maxAmmo:700,cost:2000000,range:1440}
 };let shopOpen=false,shopSection="arsenal";
 const SHOP_INTERACTION_RADIUS_CLIENT=48;
 const COSMETIC_SKINS=[
@@ -414,6 +658,7 @@ function connectMultiplayer(roomMode="quick",roomCode=""){ const publicRoomAuto=
           nameBox.style.display="none";
           updatePlayersFromList(m.players||[]);
         }else if(m.type==="chat"){
+          audioTone(740,.06,"sine",.022,90);
           const box=document.getElementById("chatFeed");
           if(box){
             const row=document.createElement("div");
@@ -421,9 +666,11 @@ function connectMultiplayer(roomMode="quick",roomCode=""){ const publicRoomAuto=
             const name=document.createElement("span");name.className="chatName";name.textContent=m.name||"Jugador";
             const sep=document.createElement("span");sep.className="chatSeparator";sep.textContent="›";
             const msgText=document.createElement("span");msgText.className="chatText";msgText.textContent=m.text||"";
-            row.appendChild(name);row.appendChild(sep);row.appendChild(msgText);box.appendChild(row);
-            while(box.children.length>12)box.removeChild(box.firstChild);
+            row.appendChild(name);row.appendChild(sep);row.appendChild(msgText);
+            box.appendChild(row);
+            while(box.children.length>10)box.removeChild(box.firstChild);
             setTimeout(()=>row.classList.remove("new"),1200);
+            setTimeout(()=>{if(!row.isConnected)return;row.classList.add("expiring");setTimeout(()=>{if(row.isConnected)row.remove();},700);},30000);
           }
         }else if(m.type==="room_error"){
           const msg=document.getElementById("nameMsg"); if(msg)msg.textContent=m.message||"No se pudo entrar a la sala.";
@@ -476,6 +723,20 @@ function connectMultiplayer(roomMode="quick",roomCode=""){ const publicRoomAuto=
               remotePlayers.set(m.player.id,m.player);
             }
           }
+        }else if(m.type==="player_shot"){
+          if(m.id!==multiplayerId && Number.isFinite(Number(m.x)) && Number.isFinite(Number(m.y)) && Number.isFinite(Number(m.angle))){
+            const sx0=Number(m.x),sy0=Number(m.y),angle=Number(m.angle);
+            const travelDistance=Math.max(1,Number(m.travelDistance)||Number(m.range)||weaponStats[m.weapon]?.range||760);
+            const ix=Number.isFinite(Number(m.impactX))?Number(m.impactX):sx0+Math.cos(angle)*travelDistance;
+            const iy=Number.isFinite(Number(m.impactY))?Number(m.impactY):sy0+Math.sin(angle)*travelDistance;
+            bullets.push({
+              x:sx0,y:sy0,startX:sx0,startY:sy0,
+              vx:Math.cos(angle)*1200,vy:Math.sin(angle)*1200,
+              life:travelDistance/1200+0.08,damage:Number(m.damage)||0,
+              range:0,maxRange:travelDistance,impactX:ix,impactY:iy,remoteShot:true
+            });
+            audioTone(520,.065,"sawtooth",.03,240);
+          }
         }else if(m.type==="enemy_state"){
           const incoming=m.enemies||[];
           const byId=new Map(enemies.map(e=>[e.id,e]));
@@ -499,7 +760,9 @@ function connectMultiplayer(roomMode="quick",roomCode=""){ const publicRoomAuto=
           for(const e of next) enemies.push(e);
 
           bossProjectiles=Array.isArray(m.bossProjectiles)?m.bossProjectiles.map(q=>({...q})):bossProjectiles;
-          bossWarnings=Array.isArray(m.bossWarnings)?m.bossWarnings.map(q=>({...q})):bossWarnings;
+          const incomingWarnings=Array.isArray(m.bossWarnings)?m.bossWarnings.map(q=>({...q})):bossWarnings;
+          if(incomingWarnings.length>(bossWarnings?.length||0)){audioTone(190,.1,"square",.04,80);audioTone(380,.16,"sawtooth",.03,120,.1);}
+          bossWarnings=incomingWarnings;
         }else if(m.type==="wall_state"){
           walls.length=0;for(const w of (m.walls||[]))walls.push({...w});
         }else if(m.type==="wall_hit"){
@@ -530,6 +793,7 @@ function connectMultiplayer(roomMode="quick",roomCode=""){ const publicRoomAuto=
         }else if(m.type==="hit_confirm"){
           if(Number.isFinite(m.power))serverPower=Math.max(0,Number(m.power));
           showFloatingHit(Number(m.x)||p.x,Number(m.y)||p.y,Number(m.amount)||0,m.kind==="player"?"#ff6f8f":"#ffe27a");
+          audioTone(m.kind==="player"?180:280,.09,"square",.045,m.kind==="player"?-80:-120);
           burst(Number(m.x)||p.x,Number(m.y)||p.y,m.kind==="player"?"#ff5474":"#ffcf5a",6);
         }else if(m.type==="enemy_respawn"){
           if(m.enemy){
@@ -549,13 +813,15 @@ function connectMultiplayer(roomMode="quick",roomCode=""){ const publicRoomAuto=
           updateResourceHud();
         }else if(m.type==="enemy_dead"){
           const e=enemies.find(x=>x.id===m.id);
-          if(e)enemyExplosion(e);
+          if(e){audioTone(e.kind==="boss"?90:140,.18,"sawtooth",.055,-65);audioNoise(e.kind==="boss"?.22:.12,.035,0,500);enemyExplosion(e);}
         }else if(m.type==="pve_damage"){
           p.hp=Number.isFinite(m.hp)?m.hp:Math.max(0,p.hp-(Number(m.amount)||0));
           if(Number.isFinite(m.maxHp))p.maxHp=m.maxHp;
           if(Number.isFinite(m.defense))serverDefense=m.defense;
+          audioTone(m.boss?95:160,.16,"square",.05,-45);
           burst(p.x,p.y,m.boss?"#ffd76a":"#ff5474",m.boss?8:4);
         }else if(m.type==="pve_dead"){
+          audioTone(180,.18,"sawtooth",.06,-90);audioTone(90,.35,"triangle",.045,-35,.12);audioNoise(.22,.05,.12,250);
           const r=m.respawn||{};
           applyServerRespawn(r);
           enemies.length=0;
@@ -563,20 +829,21 @@ function connectMultiplayer(roomMode="quick",roomCode=""){ const publicRoomAuto=
           const ex=Number(m.x)||p.x,ey=Number(m.y)||p.y,er=Math.max(1,Number(m.r)||42);
           burst(ex,ey,m.blocked?"#ff8b4a":"#ff3b32",m.blocked?22:42);
           particles.push({x:ex,y:ey,vx:0,vy:0,life:.55,maxLife:.55,color:"#ffd76a",size:er,ring:true});
-          if(Math.hypot(p.x-ex,p.y-ey)<=er)showToast("⚠ IMPACTO DEL DESTRUCTOR ESTELAR");
+          if(Math.hypot(p.x-ex,p.y-ey)<=er){audioNoise(.28,.09,0,220);audioTone(72,.3,"sawtooth",.055,-25);showToast("⚠ IMPACTO DEL DESTRUCTOR ESTELAR");}
         }else if(m.type==="boss_projectile_hit"){
           p.hp=Number.isFinite(m.hp)?m.hp:Math.max(0,p.hp-(Number(m.amount)||0));if(Number.isFinite(m.maxHp))p.maxHp=m.maxHp;
           const hx=Number(m.x)||p.x,hy=Number(m.y)||p.y;
-          burst(hx,hy,"#ff6a45",16);showFloatingHit(hx,hy,Number(m.amount)||0,"#ff5b3e");updateHud();
+          burst(hx,hy,"#ff6a45",16);audioNoise(.13,.07,0,800);audioTone(120,.12,"square",.035,-55);showFloatingHit(hx,hy,Number(m.amount)||0,"#ff5b3e");updateHud();
         }else if(m.type==="boss_aoe_hit"){
           p.hp=Number.isFinite(m.hp)?m.hp:Math.max(0,p.hp-(Number(m.amount)||0));if(Number.isFinite(m.maxHp))p.maxHp=m.maxHp;
-          burst(Number(m.x)||p.x,Number(m.y)||p.y,"#ff3b32",18);showFloatingHit(Number(m.x)||p.x,Number(m.y)||p.y,Number(m.amount)||0,"#ff3b3e");updateHud();
+          burst(Number(m.x)||p.x,Number(m.y)||p.y,"#ff3b32",18);audioNoise(.18,.08,0,500);audioTone(82,.16,"sawtooth",.045,-35);showFloatingHit(Number(m.x)||p.x,Number(m.y)||p.y,Number(m.amount)||0,"#ff3b3e");updateHud();
         }else if(m.type==="pvp_damage"){
           p.hp=Number.isFinite(m.hp)?m.hp:Math.max(0,p.hp-(Number(m.amount)||0));
           if(Number.isFinite(m.maxHp))p.maxHp=m.maxHp;
           if(Number.isFinite(m.defense))serverDefense=m.defense;
-          burst(p.x,p.y,"#ff5474",8);
+          burst(p.x,p.y,"#ff5474",8);audioTone(130,.13,"square",.045,-65);
         }else if(m.type==="pvp_dead"){
+          audioTone(210,.15,"sawtooth",.055,-100);audioTone(105,.3,"triangle",.04,-35,.1);
           const r=m.respawn||{};
           applyServerRespawn(r);
           enemies.length=0;
@@ -623,13 +890,13 @@ function connectMultiplayer(roomMode="quick",roomCode=""){ const publicRoomAuto=
           if(Array.isArray(m.ownedWeaponSkins))ownedWeaponSkins=m.ownedWeaponSkins;
           if(Object.prototype.hasOwnProperty.call(m,"equippedSkin")){equippedSkin=m.equippedSkin||"";p.equippedSkin=equippedSkin;}
           if(Object.prototype.hasOwnProperty.call(m,"equippedWeaponSkin"))equippedWeaponSkin=m.equippedWeaponSkin||"";
-          renderCosmeticShop();showCosmeticMsg(m.message||"");updateResourceHud();
+          renderCosmeticShop();audioTone(720,.08,"triangle",.035,160);audioTone(960,.11,"triangle",.025,120,.07);showCosmeticMsg(m.message||"");updateResourceHud();
         }else if(m.type==="wall_respawn"){
           if(m.wall){m.wall.dead=false;walls.push({...m.wall});burst(Number(m.wall.x)||0,Number(m.wall.y)||0,"#39e7ff",8);}
         }else if(m.type==="premium_purchase_result"){
           showCosmeticMsg(m.message||"Compras reales aún no activadas.");
         }else if(m.type==="hp_regen"){p.hp=Math.min(Number(m.maxHp)||p.maxHp,Number(m.hp)||p.hp);updateHud();
-        }else if(m.type==="ammo_empty"){p.ammo=0;updateResourceHud();showShopMsg("Sin munición. Ve con el vendedor.");
+        }else if(m.type==="ammo_empty"){audioTone(220,.1,"square",.05,-120);audioTone(110,.16,"square",.04,0,.06);p.ammo=0;updateResourceHud();showShopMsg("Sin munición. Ve con el vendedor.");
         }else if(m.type==="shot_result"){
           if(Number.isFinite(Number(m.ammo)))p.ammo=Math.max(0,Number(m.ammo));
           if(m.ok){
@@ -656,19 +923,19 @@ function connectMultiplayer(roomMode="quick",roomCode=""){ const publicRoomAuto=
           if(Object.prototype.hasOwnProperty.call(m,"weapon"))p.weapon=m.weapon;
           if(Array.isArray(m.ownedWeapons))ownedWeapons=m.ownedWeapons;
           if(Object.prototype.hasOwnProperty.call(m,"equippedWeaponSkin"))equippedWeaponSkin=m.equippedWeaponSkin||"";
-          showShopMsg(m.message||"");renderCosmeticShop();updateResourceHud();
+          showShopMsg(m.message||"");audioTone(660,.08,"triangle",.035,180);audioTone(880,.12,"triangle",.028,120,.08);renderCosmeticShop();updateResourceHud();
         }else if(m.type==="respawn_ok"){
           if(m.safeZone){safeZone=m.safeZone;}
           spawnProtectionUntil=performance.now()+(Number(m.spawnProtectionMs)||5000);
-          p.x=m.x;p.y=m.y;p.hp=Number.isFinite(m.hp)?m.hp:p.maxHp;p.alive=true;
+          p.x=m.x;p.y=m.y;p.hp=Number.isFinite(m.hp)?m.hp:p.maxHp;p.alive=true;audioTone(330,.12,"triangle",.03,140);audioTone(660,.2,"sine",.022,260,.08);
           if(Number.isFinite(m.maxHp))p.maxHp=m.maxHp;
           if(Number.isFinite(m.speed))p.speed=m.speed;
           if(m.weapon&&weaponStats[m.weapon])p.weapon=m.weapon;
-          document.getElementById("death").style.display="none";
+          document.getElementById("death").style.display="none";audioTone(300,.12,"triangle",.035,120);audioTone(600,.2,"sine",.028,220,.08);
         }else if(m.type==="pvp_kill"){
           const killer=remotePlayers.get(m.killer);
           const target=remotePlayers.get(m.target);
-          showToast((killer?.name||"Jugador")+" destruyó a "+(target?.name||"otro tanque"));
+          audioTone(260,.09,"square",.04,160);audioTone(520,.16,"triangle",.03,260,.08);showToast((killer?.name||"Jugador")+" destruyó a "+(target?.name||"otro tanque"));
         }else if(m.type==="enemy_dead"){
           if(m.killer===multiplayerId)showToast("Enemigo destruido · recompensa añadida");
         }else if(m.type==="player_leave"){
@@ -769,11 +1036,13 @@ function enemyExplosion(e){
 
 function fire(){
   if(!p.alive)return;
-  if((p.ammo||0)<=0){showShopMsg("Sin munición. Ve con el vendedor.");return;}
+  if((p.ammo||0)<=0){audioTone(220,.08,"square",.045,-100);showShopMsg("Sin munición. Ve con el vendedor.");return;}
   const now=performance.now();
   if(now-p.lastShot<p.fireRate)return;
   if(!multiplayerSocket || multiplayerSocket.readyState!==1)return;
   p.lastShot=now;
+  audioTone(520,.075,"sawtooth",.055,260);
+  audioTone(1040,.055,"triangle",.025,-180,.018);
   multiplayerSocket.send(JSON.stringify({type:"fire"}));
 }
 function returnToMenu(){
@@ -868,8 +1137,8 @@ function update(dt){
   if(controlMode==="mouse"){
     const aimX=pointer.x-W/2,aimY=pointer.y-H/2;
     if(Math.hypot(aimX,aimY)>2)p.angle=Math.atan2(aimY,aimX);
-    if(pointer.down)fire();
   }
+  if(pointer.down)fire();
 
 
   for(const b of bullets){
@@ -1468,7 +1737,6 @@ function setupJoystick(id){
     active=false;pointerId=null;
     stick.style.transform="translate(0,0)";
     moveX=0;moveY=0;
-    
   }
   function apply(clientX,clientY){
     const r=el.getBoundingClientRect();
@@ -1481,12 +1749,13 @@ function setupJoystick(id){
     moveY=clamp(y/max,-1,1);
     stick.style.transform="translate("+x+"px,"+y+"px)";
   }
+  // PC y móvil usan Pointer Events. Cada dedo conserva su propio pointerId.
   el.addEventListener("pointerdown",e=>{
-    if(e.isPrimary===false)return;
     if(e.pointerType==="mouse" && e.button!==0)return;
+    if(e.pointerType!=="touch" && e.button!==0)return;
+    if(active)return;
     e.preventDefault();
     active=true;pointerId=e.pointerId;
-    try{el.setPointerCapture(e.pointerId)}catch{}
     apply(e.clientX,e.clientY);
   },{passive:false});
   el.addEventListener("pointermove",e=>{
@@ -1497,17 +1766,18 @@ function setupJoystick(id){
   const end=e=>{
     if(e.pointerId!==pointerId)return;
     e.preventDefault();
-    try{if(el.hasPointerCapture(e.pointerId))el.releasePointerCapture(e.pointerId)}catch{}
-    active=false;pointerId=null;stick.style.transform="translate(0,0)";moveX=0;moveY=0;
+    active=false;pointerId=null;
+    stick.style.transform="translate(0,0)";moveX=0;moveY=0;
   };
   el.addEventListener("pointerup",end,{passive:false});
   el.addEventListener("pointercancel",end,{passive:false});
-  el.addEventListener("lostpointercapture",e=>{
-    if(pointerId===e.pointerId){active=false;pointerId=null;stick.style.transform="translate(0,0)";moveX=0;moveY=0;}
-  });
+  el.addEventListener("lostpointercapture",end,{passive:false});
+  window.__neonJoystickApply=apply;
+  window.__neonJoystickElement=el;
   return reset;
 }
 const resetMoveJoystick=setupJoystick("moveJoy");
+window.__neonJoystickPointerId=null;
 const controlDefaults={joySize:112,fireSize:86,joyX:8,joyY:8,fireX:8,fireY:8};
 let controlConfig={...controlDefaults};
 try{const saved=JSON.parse(localStorage.getItem("neon_core_controls")||"null");if(saved)controlConfig={...controlDefaults,...saved};}catch{}
@@ -1540,6 +1810,8 @@ document.getElementById("controlReset").addEventListener("click",()=>{controlCon
 
 function resetAllControls(){
   resetMoveJoystick();
+  window.__neonJoystickPointerId=null;
+  if(typeof mobileFirePointers!=="undefined")mobileFirePointers.clear();
   pointer.down=false;
   keys.w=keys.a=keys.s=keys.d=false;
   controlCapture=null;
@@ -1563,11 +1835,11 @@ let chatOpen=false;
 function setChatOpen(open){
   chatOpen=!!open;
   chatBox.style.display=chatOpen?"block":"none";
-  chatToggle.style.display=chatOpen?"none":"block";
+  chatToggle.style.display="flex";
   chatToggle.setAttribute("aria-expanded",String(chatOpen));
   if(chatOpen)setTimeout(()=>chatInput.focus(),30);
 }
-chatToggle.addEventListener("click",()=>setChatOpen(true));
+chatToggle.addEventListener("click",()=>setChatOpen(!chatOpen));
 if(chatCloseStatic)chatCloseStatic.addEventListener("click",()=>setChatOpen(false));
 chatForm.addEventListener("submit",e=>{
   e.preventDefault();
@@ -1655,6 +1927,8 @@ restartBtn.addEventListener("click",()=>returnToMenu());
 
 // Cierra la conexión al salir de esta página para que al volver no quede el tanque anterior conectado.
 function requestServerSaveAndClose(){
+  try{if(neonAudio?.ctx&&neonAudio.master)neonAudio.master.gain.setTargetAtTime(0,neonAudio.ctx.currentTime,.03);}catch{}
+  try{stopNeonMusic();}catch{}
   try{
     if(multiplayerSocket && multiplayerSocket.readyState===WebSocket.OPEN && currentRoom && gameActive){
       multiplayerSocket.send(JSON.stringify({type:"save_on_exit"}));
@@ -1740,12 +2014,76 @@ addEventListener("pointerup",e=>{if(e.pointerType==="mouse")pointer.down=false;}
 function sendShopCommand(type,weapon){if(!multiplayerSocket||multiplayerSocket.readyState!==1)return;const msg={type};if(weapon)msg.weapon=weapon;multiplayerSocket.send(JSON.stringify(msg));}const buyAmmoBtn=document.getElementById("buyAmmoBtn");buyAmmoBtn.addEventListener("click",e=>{e.preventDefault();e.stopPropagation();sendShopCommand("buy_ammo");});document.querySelectorAll(".shopItem").forEach(btn=>btn.addEventListener("click",e=>{e.preventDefault();e.stopPropagation();sendShopCommand("buy_weapon",btn.dataset.weapon);}));
 
 const fireButton=document.getElementById("fire");
-fireButton.addEventListener("pointerdown",e=>{e.preventDefault();fire();},{passive:false});
-fireButton.addEventListener("pointerup",e=>{e.preventDefault();pointer.down=false;},{passive:false});
-fireButton.addEventListener("pointercancel",()=>{pointer.down=false;});
-fireButton.addEventListener("lostpointercapture",()=>{pointer.down=false;});
+const mobileFirePointers=new Set();
 
-loadStats();
+fireButton.addEventListener("pointerdown",e=>{
+  if(e.pointerType==="touch")return;
+  e.preventDefault();
+  pointer.down=true;
+  fire();
+},{passive:false});
+fireButton.addEventListener("pointerup",e=>{
+  if(e.pointerType==="touch")return;
+  e.preventDefault();
+  pointer.down=false;
+},{passive:false});
+fireButton.addEventListener("pointercancel",e=>{
+  if(e.pointerType==="touch")return;
+  e.preventDefault();
+  pointer.down=false;
+},{passive:false});
+
+// Multitouch móvil centralizado: el joystick y ATACAR tienen pointerId independientes.
+document.addEventListener("pointerdown",e=>{
+  if(controlMode!=="touch"||e.pointerType!=="touch")return;
+  const t={clientX:e.clientX,clientY:e.clientY};
+  const fireRect=fireButton.getBoundingClientRect();
+  if(t.clientX>=fireRect.left&&t.clientX<=fireRect.right&&t.clientY>=fireRect.top&&t.clientY<=fireRect.bottom){
+    e.preventDefault();
+    mobileFirePointers.add(e.pointerId);
+    pointer.down=true;
+    fire();
+  }
+},{passive:false});
+
+document.addEventListener("pointermove",e=>{
+  if(controlMode!=="touch"||e.pointerType!=="touch")return;
+  const joyEl=window.__neonJoystickElement;
+  const joyId=window.__neonJoystickPointerId;
+  if(joyId!==e.pointerId)return;
+  e.preventDefault();
+  if(window.__neonJoystickApply)window.__neonJoystickApply(e.clientX,e.clientY);
+},{passive:false});
+
+document.addEventListener("pointerdown",e=>{
+  if(controlMode!=="touch"||e.pointerType!=="touch")return;
+  const joyEl=window.__neonJoystickElement;
+  if(!joyEl||window.__neonJoystickPointerId!=null)return;
+  const r=joyEl.getBoundingClientRect();
+  if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)return;
+  e.preventDefault();
+  window.__neonJoystickPointerId=e.pointerId;
+  if(window.__neonJoystickApply)window.__neonJoystickApply(e.clientX,e.clientY);
+},{passive:false});
+
+function neonMobilePointerEnd(e){
+  if(controlMode!=="touch"||e.pointerType!=="touch")return;
+  let changed=false;
+  if(window.__neonJoystickPointerId===e.pointerId){
+    window.__neonJoystickPointerId=null;
+    resetMoveJoystick();
+    changed=true;
+  }
+  if(mobileFirePointers.delete(e.pointerId)){
+    pointer.down=mobileFirePointers.size>0;
+    changed=true;
+  }
+  if(changed)e.preventDefault();
+}
+document.addEventListener("pointerup",neonMobilePointerEnd,{passive:false});
+document.addEventListener("pointercancel",neonMobilePointerEnd,{passive:false});
+
+loadStats();loadStats();
 function frame(now){
   const dt=Math.min(.05,(now-last)/1000);
   last=now;
@@ -1757,5 +2095,5 @@ function frame(now){
 }
 requestAnimationFrame(frame);
 </script>
-</body>
+<script>(function(){var ua=String(navigator.userAgent||"");var touch=Number(navigator.maxTouchPoints||0)>0||"ontouchstart"in window;var android=/Android/i.test(ua);if(!touch||!android)return;document.documentElement.classList.add("neon-touch");var btn=document.createElement("button");btn.id="neonFullscreenButton";btn.type="button";btn.setAttribute("aria-label","Activar pantalla completa");btn.innerHTML="<span>⛶</span><b>PANTALLA COMPLETA</b>";document.body.appendChild(btn);function active(){return !!document.fullscreenElement||!!document.webkitFullscreenElement;}function refresh(){btn.style.display=active()?"none":"flex";}function enter(){if(active())return;try{var root=document.documentElement;if(root.requestFullscreen){var p=root.requestFullscreen();if(p&&typeof p.then==="function"){p.then(refresh).catch(function(){var b=btn.querySelector("b");if(b)b.textContent="TOCA DE NUEVO";setTimeout(function(){var x=btn.querySelector("b");if(x)x.textContent="PANTALLA COMPLETA";},1800);});}else refresh();return;}if(root.webkitRequestFullscreen){root.webkitRequestFullscreen();refresh();return;}var b2=btn.querySelector("b");if(b2)b2.textContent="NO COMPATIBLE";}catch(e){var b3=btn.querySelector("b");if(b3)b3.textContent="NO DISPONIBLE";}}btn.addEventListener("click",function(e){e.preventDefault();e.stopPropagation();enter();});document.addEventListener("fullscreenchange",refresh);document.addEventListener("webkitfullscreenchange",refresh);refresh();})();</script></body>
 </html>
