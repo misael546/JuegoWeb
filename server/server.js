@@ -1645,7 +1645,14 @@ function handleShot(ws) {
     id: shooter.id,
     x: shooter.x,
     y: shooter.y,
-    angle: shooter.angle
+    angle: shooter.angle,
+    weapon: shooter.weapon,
+    range: maxRange,
+    travelDistance: impactDistance,
+    impactX,
+    impactY,
+    hitKind,
+    hitTarget
   });
 
   if (nearestWall && nearestWallDistance <= best) {
