@@ -9,7 +9,7 @@
 <script>
 (function(){
   try{
-    var v="20261003-165-audio1";
+    var v="20261003-165-audio2";
     var k="neon_core_build";
     window.NEON_CORE_BUILD=v;
     var old=localStorage.getItem(k);
@@ -340,7 +340,7 @@ if(window.visualViewport)window.visualViewport.addEventListener("resize",resize)
 resize();
 
 let neonAudio={
-  ctx:null,master:null,musicGain:null,musicTimer:null,musicStep:0,
+  ctx:null,master:null,compressor:null,musicGain:null,musicTimer:null,musicStep:0,
   enabled:true,ready:false
 };
 try{neonAudio.enabled=localStorage.getItem("neon_core_audio")!=="off";}catch{}
@@ -361,10 +361,17 @@ function ensureAudio(){
     if(!neonAudio.ctx){
       neonAudio.ctx=new AC();
       neonAudio.master=neonAudio.ctx.createGain();
-      neonAudio.master.gain.value=.18;
-      neonAudio.master.connect(neonAudio.ctx.destination);
+      neonAudio.master.gain.value=.72;
+      neonAudio.compressor=neonAudio.ctx.createDynamicsCompressor();
+      neonAudio.compressor.threshold.value=-20;
+      neonAudio.compressor.knee.value=18;
+      neonAudio.compressor.ratio.value=4;
+      neonAudio.compressor.attack.value=.004;
+      neonAudio.compressor.release.value=.18;
+      neonAudio.master.connect(neonAudio.compressor);
+      neonAudio.compressor.connect(neonAudio.ctx.destination);
       neonAudio.musicGain=neonAudio.ctx.createGain();
-      neonAudio.musicGain.gain.value=.28;
+      neonAudio.musicGain.gain.value=.42;
       neonAudio.musicGain.connect(neonAudio.master);
       neonAudio.ready=true;
       startNeonMusic();
@@ -428,7 +435,7 @@ function setNeonAudioEnabled(on){
     if(neonAudio.master&&neonAudio.ctx)neonAudio.master.gain.setTargetAtTime(0,neonAudio.ctx.currentTime,.04);
   }else{
     ensureAudio();
-    if(neonAudio.master&&neonAudio.ctx)neonAudio.master.gain.setTargetAtTime(.18,neonAudio.ctx.currentTime,.04);
+    if(neonAudio.master&&neonAudio.ctx)neonAudio.master.gain.setTargetAtTime(.72,neonAudio.ctx.currentTime,.04);
     startNeonMusic();
   }
   audioButtonRefresh();
