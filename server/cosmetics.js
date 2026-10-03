@@ -19,7 +19,7 @@ const SKINS = Object.freeze({
 const WEAPON_SKINS = Object.freeze({});
 
 const REAL_MONEY_OFFERS = Object.freeze([
-  { sku:'gm_core_usd', name:'SOBERANO DEL NÚCLEO', description:'Skin premium individual.', priceUsd:1, skinId:'gm_core', enabled:false }
+  { sku:'gm_core_usd', name:'SOBERANO DEL NÚCLEO', description:'Armadura premium individual.', priceUsd:1, skinId:'gm_core', enabled:false }
 ]);
 
 const REDEEM_CODES = Object.freeze({
@@ -31,7 +31,7 @@ const REDEEM_CODES = Object.freeze({
     repeatable:true,
     allSkins:true,
     allWeapons:true,
-    message:'TEST ALL: desbloqueaste todas las armas y todas las skins.'
+    message:'TEST ALL: desbloqueaste todas las armas y todas las armaduras.'
   },
 
   WEAPON_BLASTER: { enabled:true, weaponId:'blaster', message:'Código válido: desbloqueaste BLASTER · NEONSTORM.' },
