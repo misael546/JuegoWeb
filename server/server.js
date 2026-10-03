@@ -22,16 +22,16 @@ const SHOP_INTERACTION_RADIUS = 48;
 const BANK_ENABLED = false;
 
 const WEAPONS = {
-  blaster: { name: 'BLASTER · NEONSTORM', cost: 0, power: 100, fireRate: 320, maxAmmo: 220, range: 760 },
-  pulse: { name: 'PULSE · PRISMA', cost: 500, power: 200, fireRate: 230, maxAmmo: 260, range: 820 },
-  cannon: { name: 'CANNON · SOLARIS', cost: 1500, power: 400, fireRate: 620, maxAmmo: 320, range: 880 },
-  railgun: { name: 'RAILGUN · ECLIPSE', cost: 6500, power: 743, fireRate: 900, maxAmmo: 380, range: 960 },
-  nova: { name: 'NOVA · SUPERNOVA', cost: 22000, power: 1486, fireRate: 1350, maxAmmo: 450, range: 1040 },
-  plasma: { name: 'PLASMA · INFERNO', cost: 60000, power: 2286, fireRate: 1050, maxAmmo: 500, range: 1120 },
-  vortex: { name: 'VORTEX · SHARD', cost: 150000, power: 3286, fireRate: 1450, maxAmmo: 550, range: 1200 },
-  quasar: { name: 'QUASAR · RAY', cost: 400000, power: 4429, fireRate: 1750, maxAmmo: 600, range: 1280 },
-  singularity: { name: 'SINGULARITY · CORE', cost: 900000, power: 6000, fireRate: 2150, maxAmmo: 650, range: 1360 },
-  omega: { name: 'OMEGA · ASCENSION', cost: 2000000, power: 8000, fireRate: 2600, maxAmmo: 700, range: 1440 }
+  blaster: { name: 'BLASTER · NEONSTORM', cost: 0, power: 100, fireRate: 280, maxAmmo: 220, range: 760 },
+  pulse: { name: 'PULSE · PRISMA', cost: 500, power: 200, fireRate: 190, maxAmmo: 260, range: 820 },
+  cannon: { name: 'CANNON · SOLARIS', cost: 1500, power: 400, fireRate: 520, maxAmmo: 320, range: 880 },
+  railgun: { name: 'RAILGUN · ECLIPSE', cost: 6500, power: 743, fireRate: 700, maxAmmo: 380, range: 960 },
+  nova: { name: 'NOVA · SUPERNOVA', cost: 22000, power: 1486, fireRate: 1000, maxAmmo: 450, range: 1040 },
+  plasma: { name: 'PLASMA · INFERNO', cost: 60000, power: 2286, fireRate: 550, maxAmmo: 500, range: 1120 },
+  vortex: { name: 'VORTEX · SHARD', cost: 150000, power: 3286, fireRate: 950, maxAmmo: 550, range: 1200 },
+  quasar: { name: 'QUASAR · RAY', cost: 400000, power: 4429, fireRate: 1050, maxAmmo: 600, range: 1280 },
+  singularity: { name: 'SINGULARITY · CORE', cost: 900000, power: 6000, fireRate: 1400, maxAmmo: 650, range: 1360 },
+  omega: { name: 'OMEGA · ASCENSION', cost: 2000000, power: 8000, fireRate: 900, maxAmmo: 700, range: 1440 }
 };
 
 function damageForPower(power) {
