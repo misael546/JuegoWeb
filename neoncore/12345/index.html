@@ -289,7 +289,6 @@ updateControlMode();
 const remotePlayers=new Map();
 let multiplayerSocket=null,multiplayerReady=false,multiplayerId="",lastNetSend=0,currentRoom="",multiplayerConnectTimer=null;
 let movementTelemetry={inputSince:0,lastX:p.x,lastY:p.y,lastReport:0};
-const neonDiag={inputEvents:0,lastInput:0,lastSync:"none",frames:0,started:performance.now()};
 const MULTIPLAYER_SERVER="wss://neon-core-multiplayer.onrender.com/ws";
 const RENDER_HEALTH_URL=MULTIPLAYER_SERVER.replace(/^wss:/,"https:").replace(/^ws:/,"http:").replace(/\/ws$/,"/health");
 let renderStatusTimer=null,renderServerVersion="",renderServerStartedAt=0;
@@ -1481,7 +1480,6 @@ function setupJoystick(id){
     moveX=clamp(x/max,-1,1);
     moveY=clamp(y/max,-1,1);
     stick.style.transform="translate("+x+"px,"+y+"px)";
-    if(window.neonDiag){neonDiag.inputEvents++;neonDiag.lastInput=performance.now();}
   }
   el.addEventListener("pointerdown",e=>{
     if(e.isPrimary===false)return;
@@ -1741,8 +1739,6 @@ fireButton.addEventListener("lostpointercapture",()=>{pointer.down=false;});
 
 loadStats();
 function frame(now){
-  neonDiag.frames++;
-  if(neonDiag.frames%6===0 && window.updateNeonDiag)window.updateNeonDiag();
   const dt=Math.min(.05,(now-last)/1000);
   last=now;
   update(dt);
