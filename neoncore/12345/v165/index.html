@@ -9,7 +9,7 @@
 <script>
 (function(){
   try{
-    var v="20261003-165-chat7";
+    var v="20261003-165-audio1";
     var k="neon_core_build";
     window.NEON_CORE_BUILD=v;
     var old=localStorage.getItem(k);
@@ -176,6 +176,13 @@
   .shopWeaponCard{min-height:108px!important}
   .cosmeticCard{min-height:104px}
 }
+</style><style id="neonAudioStyle">
+#audioToggle{position:fixed;left:10px;bottom:10px;z-index:16;width:38px;height:30px;border:1px solid #39e7ff55;border-radius:9px;background:rgba(5,8,17,.55);color:#bfefff;font:16px Arial,sans-serif;display:flex;align-items:center;justify-content:center;opacity:.62;pointer-events:auto;box-shadow:0 4px 12px #0008;backdrop-filter:blur(4px);-webkit-tap-highlight-color:transparent}
+#audioToggle:hover{opacity:.95;border-color:#39e7ff}
+#audioToggle.audioOff{opacity:.38;filter:grayscale(.65)}
+#audioToggle.audioOn{box-shadow:0 0 12px #39e7ff22,0 4px 12px #0008}
+@media(max-width:799px){#audioToggle{left:10px;bottom:126px;width:36px;height:28px;font-size:14px;z-index:95}}
+@media(max-width:430px){#audioToggle{bottom:120px;width:34px;height:27px;font-size:13px}}
 </style><style id="chatHudStyle">
 .hudTopLine{position:relative;display:flex;align-items:center;min-height:27px;white-space:nowrap}
 #chatToggle{
@@ -226,7 +233,7 @@
 html.pc-controls #chatFeed{width:min(420px,38vw)}
 </style></head>
 <body>
-<canvas id="game"></canvas><div id="buildDisplay">NEON CORE · Build 165</div>
+<canvas id="game"></canvas><div id="buildDisplay">NEON CORE · Build 165</div><button id="audioToggle" type="button" aria-label="Activar o silenciar audio">🔊</button>
 
 <div id="hud">
   <div class="panel" id="bars">
@@ -331,6 +338,106 @@ function resize(){
 addEventListener("resize",resize);
 if(window.visualViewport)window.visualViewport.addEventListener("resize",resize);
 resize();
+
+let neonAudio={
+  ctx:null,master:null,musicGain:null,musicTimer:null,musicStep:0,
+  enabled:true,ready:false
+};
+try{neonAudio.enabled=localStorage.getItem("neon_core_audio")!=="off";}catch{}
+function audioButtonRefresh(){
+  const b=document.getElementById("audioToggle");
+  if(!b)return;
+  b.textContent=neonAudio.enabled?"🔊":"🔇";
+  b.classList.toggle("audioOn",neonAudio.enabled);
+  b.classList.toggle("audioOff",!neonAudio.enabled);
+  b.setAttribute("aria-label",neonAudio.enabled?"Silenciar audio":"Activar audio");
+}
+function audioContextCtor(){return window.AudioContext||window.webkitAudioContext||null;}
+function ensureAudio(){
+  if(!neonAudio.enabled)return false;
+  try{
+    const AC=audioContextCtor();
+    if(!AC)return false;
+    if(!neonAudio.ctx){
+      neonAudio.ctx=new AC();
+      neonAudio.master=neonAudio.ctx.createGain();
+      neonAudio.master.gain.value=.18;
+      neonAudio.master.connect(neonAudio.ctx.destination);
+      neonAudio.musicGain=neonAudio.ctx.createGain();
+      neonAudio.musicGain.gain.value=.28;
+      neonAudio.musicGain.connect(neonAudio.master);
+      neonAudio.ready=true;
+      startNeonMusic();
+    }
+    if(neonAudio.ctx.state==="suspended")neonAudio.ctx.resume().catch(()=>{});
+    return true;
+  }catch(e){return false;}
+}
+function stopNeonMusic(){
+  if(neonAudio.musicTimer){clearInterval(neonAudio.musicTimer);neonAudio.musicTimer=null;}
+  neonAudio.musicStep=0;
+}
+function audioTone(freq,duration=.12,type="sine",volume=.12,slide=0,delay=0,dest=null){
+  if(!ensureAudio()||!neonAudio.ctx)return;
+  const ctx=neonAudio.ctx,now=ctx.currentTime+Math.max(0,delay);
+  const o=ctx.createOscillator(),g=ctx.createGain();
+  o.type=type;o.frequency.setValueAtTime(Math.max(20,freq),now);
+  if(slide)o.frequency.exponentialRampToValueAtTime(Math.max(20,freq+slide),now+duration);
+  g.gain.setValueAtTime(.0001,now);
+  g.gain.exponentialRampToValueAtTime(Math.max(.0001,volume),now+.008);
+  g.gain.exponentialRampToValueAtTime(.0001,now+duration);
+  o.connect(g);g.connect(dest||neonAudio.master);
+  o.start(now);o.stop(now+duration+.02);
+}
+function audioNoise(duration=.12,volume=.08,delay=0,highpass=900){
+  if(!ensureAudio()||!neonAudio.ctx)return;
+  const ctx=neonAudio.ctx,now=ctx.currentTime+Math.max(0,delay);
+  const len=Math.max(1,Math.floor(ctx.sampleRate*duration)),buf=ctx.createBuffer(1,len,ctx.sampleRate),d=buf.getChannelData(0);
+  for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*(1-i/len);
+  const src=ctx.createBufferSource(),filter=ctx.createBiquadFilter(),g=ctx.createGain();
+  filter.type="highpass";filter.frequency.value=highpass;
+  g.gain.setValueAtTime(Math.max(.0001,volume),now);
+  g.gain.exponentialRampToValueAtTime(.0001,now+duration);
+  src.buffer=buf;src.connect(filter);filter.connect(g);g.connect(neonAudio.master);
+  src.start(now);src.stop(now+duration+.02);
+}
+function startNeonMusic(){
+  if(!neonAudio.enabled||!neonAudio.ready||neonAudio.musicTimer)return;
+  const bass=[110,98,87.31,98,123.47,110,98,82.41];
+  const lead=[220,246.94,261.63,246.94,196,220,246.94,164.81];
+  const tick=0;
+  const playStep=()=>{
+    if(!neonAudio.enabled||!neonAudio.ctx)return;
+    const i=neonAudio.musicStep++%bass.length;
+    audioTone(bass[i],.52,"triangle",.028,-3,tick,neonAudio.musicGain);
+    if(i%2===0)audioTone(lead[i],.32,"sine",.018,4,.04,neonAudio.musicGain);
+    if(i===0||i===4)audioTone(bass[i]*2,.75,"sine",.009,0,.02,neonAudio.musicGain);
+  };
+  playStep();
+  neonAudio.musicTimer=setInterval(playStep,520);
+}
+function unlockNeonAudio(){
+  if(!neonAudio.enabled)return;
+  ensureAudio();
+}
+function setNeonAudioEnabled(on){
+  neonAudio.enabled=!!on;
+  try{localStorage.setItem("neon_core_audio",neonAudio.enabled?"on":"off");}catch{}
+  if(!neonAudio.enabled){
+    stopNeonMusic();
+    if(neonAudio.master&&neonAudio.ctx)neonAudio.master.gain.setTargetAtTime(0,neonAudio.ctx.currentTime,.04);
+  }else{
+    ensureAudio();
+    if(neonAudio.master&&neonAudio.ctx)neonAudio.master.gain.setTargetAtTime(.18,neonAudio.ctx.currentTime,.04);
+    startNeonMusic();
+  }
+  audioButtonRefresh();
+}
+const audioToggle=document.getElementById("audioToggle");
+if(audioToggle)audioToggle.addEventListener("click",e=>{e.preventDefault();e.stopPropagation();setNeonAudioEnabled(!neonAudio.enabled);});
+audioButtonRefresh();
+document.addEventListener("pointerdown",unlockNeonAudio,{passive:true});
+document.addEventListener("keydown",unlockNeonAudio,{passive:true});
 
 const world={w:6000,h:4400};
 const p={x:3000,y:2200,r:16,angle:0,hp:100,maxHp:100,xp:0,level:1,score:0,kills:0,pvpKills:0,power:100,damage:35,defense:0,speed:205,fireRate:320,lastShot:0,alive:true,gold:0,diamonds:0,ammo:60,maxAmmo:220,weapon:"blaster",equippedSkin:"core_default"};
@@ -544,6 +651,7 @@ function connectMultiplayer(roomMode="quick",roomCode=""){ const publicRoomAuto=
           nameBox.style.display="none";
           updatePlayersFromList(m.players||[]);
         }else if(m.type==="chat"){
+          audioTone(740,.06,"sine",.022,90);
           const box=document.getElementById("chatFeed");
           if(box){
             const row=document.createElement("div");
@@ -631,7 +739,9 @@ function connectMultiplayer(roomMode="quick",roomCode=""){ const publicRoomAuto=
           for(const e of next) enemies.push(e);
 
           bossProjectiles=Array.isArray(m.bossProjectiles)?m.bossProjectiles.map(q=>({...q})):bossProjectiles;
-          bossWarnings=Array.isArray(m.bossWarnings)?m.bossWarnings.map(q=>({...q})):bossWarnings;
+          const incomingWarnings=Array.isArray(m.bossWarnings)?m.bossWarnings.map(q=>({...q})):bossWarnings;
+          if(incomingWarnings.length>(bossWarnings?.length||0)){audioTone(190,.1,"square",.04,80);audioTone(380,.16,"sawtooth",.03,120,.1);}
+          bossWarnings=incomingWarnings;
         }else if(m.type==="wall_state"){
           walls.length=0;for(const w of (m.walls||[]))walls.push({...w});
         }else if(m.type==="wall_hit"){
@@ -662,6 +772,7 @@ function connectMultiplayer(roomMode="quick",roomCode=""){ const publicRoomAuto=
         }else if(m.type==="hit_confirm"){
           if(Number.isFinite(m.power))serverPower=Math.max(0,Number(m.power));
           showFloatingHit(Number(m.x)||p.x,Number(m.y)||p.y,Number(m.amount)||0,m.kind==="player"?"#ff6f8f":"#ffe27a");
+          audioTone(m.kind==="player"?180:280,.09,"square",.045,m.kind==="player"?-80:-120);
           burst(Number(m.x)||p.x,Number(m.y)||p.y,m.kind==="player"?"#ff5474":"#ffcf5a",6);
         }else if(m.type==="enemy_respawn"){
           if(m.enemy){
@@ -681,13 +792,15 @@ function connectMultiplayer(roomMode="quick",roomCode=""){ const publicRoomAuto=
           updateResourceHud();
         }else if(m.type==="enemy_dead"){
           const e=enemies.find(x=>x.id===m.id);
-          if(e)enemyExplosion(e);
+          if(e){audioTone(e.kind==="boss"?90:140,.18,"sawtooth",.055,-65);audioNoise(e.kind==="boss"?.22:.12,.035,0,500);enemyExplosion(e);}
         }else if(m.type==="pve_damage"){
           p.hp=Number.isFinite(m.hp)?m.hp:Math.max(0,p.hp-(Number(m.amount)||0));
           if(Number.isFinite(m.maxHp))p.maxHp=m.maxHp;
           if(Number.isFinite(m.defense))serverDefense=m.defense;
+          audioTone(m.boss?95:160,.16,"square",.05,-45);
           burst(p.x,p.y,m.boss?"#ffd76a":"#ff5474",m.boss?8:4);
         }else if(m.type==="pve_dead"){
+          audioTone(180,.18,"sawtooth",.06,-90);audioTone(90,.35,"triangle",.045,-35,.12);audioNoise(.22,.05,.12,250);
           const r=m.respawn||{};
           applyServerRespawn(r);
           enemies.length=0;
@@ -695,20 +808,21 @@ function connectMultiplayer(roomMode="quick",roomCode=""){ const publicRoomAuto=
           const ex=Number(m.x)||p.x,ey=Number(m.y)||p.y,er=Math.max(1,Number(m.r)||42);
           burst(ex,ey,m.blocked?"#ff8b4a":"#ff3b32",m.blocked?22:42);
           particles.push({x:ex,y:ey,vx:0,vy:0,life:.55,maxLife:.55,color:"#ffd76a",size:er,ring:true});
-          if(Math.hypot(p.x-ex,p.y-ey)<=er)showToast("⚠ IMPACTO DEL DESTRUCTOR ESTELAR");
+          if(Math.hypot(p.x-ex,p.y-ey)<=er){audioNoise(.28,.09,0,220);audioTone(72,.3,"sawtooth",.055,-25);showToast("⚠ IMPACTO DEL DESTRUCTOR ESTELAR");}
         }else if(m.type==="boss_projectile_hit"){
           p.hp=Number.isFinite(m.hp)?m.hp:Math.max(0,p.hp-(Number(m.amount)||0));if(Number.isFinite(m.maxHp))p.maxHp=m.maxHp;
           const hx=Number(m.x)||p.x,hy=Number(m.y)||p.y;
-          burst(hx,hy,"#ff6a45",16);showFloatingHit(hx,hy,Number(m.amount)||0,"#ff5b3e");updateHud();
+          burst(hx,hy,"#ff6a45",16);audioNoise(.13,.07,0,800);audioTone(120,.12,"square",.035,-55);showFloatingHit(hx,hy,Number(m.amount)||0,"#ff5b3e");updateHud();
         }else if(m.type==="boss_aoe_hit"){
           p.hp=Number.isFinite(m.hp)?m.hp:Math.max(0,p.hp-(Number(m.amount)||0));if(Number.isFinite(m.maxHp))p.maxHp=m.maxHp;
-          burst(Number(m.x)||p.x,Number(m.y)||p.y,"#ff3b32",18);showFloatingHit(Number(m.x)||p.x,Number(m.y)||p.y,Number(m.amount)||0,"#ff3b3e");updateHud();
+          burst(Number(m.x)||p.x,Number(m.y)||p.y,"#ff3b32",18);audioNoise(.18,.08,0,500);audioTone(82,.16,"sawtooth",.045,-35);showFloatingHit(Number(m.x)||p.x,Number(m.y)||p.y,Number(m.amount)||0,"#ff3b3e");updateHud();
         }else if(m.type==="pvp_damage"){
           p.hp=Number.isFinite(m.hp)?m.hp:Math.max(0,p.hp-(Number(m.amount)||0));
           if(Number.isFinite(m.maxHp))p.maxHp=m.maxHp;
           if(Number.isFinite(m.defense))serverDefense=m.defense;
-          burst(p.x,p.y,"#ff5474",8);
+          burst(p.x,p.y,"#ff5474",8);audioTone(130,.13,"square",.045,-65);
         }else if(m.type==="pvp_dead"){
+          audioTone(210,.15,"sawtooth",.055,-100);audioTone(105,.3,"triangle",.04,-35,.1);
           const r=m.respawn||{};
           applyServerRespawn(r);
           enemies.length=0;
@@ -755,13 +869,13 @@ function connectMultiplayer(roomMode="quick",roomCode=""){ const publicRoomAuto=
           if(Array.isArray(m.ownedWeaponSkins))ownedWeaponSkins=m.ownedWeaponSkins;
           if(Object.prototype.hasOwnProperty.call(m,"equippedSkin")){equippedSkin=m.equippedSkin||"";p.equippedSkin=equippedSkin;}
           if(Object.prototype.hasOwnProperty.call(m,"equippedWeaponSkin"))equippedWeaponSkin=m.equippedWeaponSkin||"";
-          renderCosmeticShop();showCosmeticMsg(m.message||"");updateResourceHud();
+          renderCosmeticShop();audioTone(720,.08,"triangle",.035,160);audioTone(960,.11,"triangle",.025,120,.07);showCosmeticMsg(m.message||"");updateResourceHud();
         }else if(m.type==="wall_respawn"){
           if(m.wall){m.wall.dead=false;walls.push({...m.wall});burst(Number(m.wall.x)||0,Number(m.wall.y)||0,"#39e7ff",8);}
         }else if(m.type==="premium_purchase_result"){
           showCosmeticMsg(m.message||"Compras reales aún no activadas.");
         }else if(m.type==="hp_regen"){p.hp=Math.min(Number(m.maxHp)||p.maxHp,Number(m.hp)||p.hp);updateHud();
-        }else if(m.type==="ammo_empty"){p.ammo=0;updateResourceHud();showShopMsg("Sin munición. Ve con el vendedor.");
+        }else if(m.type==="ammo_empty"){audioTone(220,.1,"square",.05,-120);audioTone(110,.16,"square",.04,0,.06);p.ammo=0;updateResourceHud();showShopMsg("Sin munición. Ve con el vendedor.");
         }else if(m.type==="shot_result"){
           if(Number.isFinite(Number(m.ammo)))p.ammo=Math.max(0,Number(m.ammo));
           if(m.ok){
@@ -788,19 +902,19 @@ function connectMultiplayer(roomMode="quick",roomCode=""){ const publicRoomAuto=
           if(Object.prototype.hasOwnProperty.call(m,"weapon"))p.weapon=m.weapon;
           if(Array.isArray(m.ownedWeapons))ownedWeapons=m.ownedWeapons;
           if(Object.prototype.hasOwnProperty.call(m,"equippedWeaponSkin"))equippedWeaponSkin=m.equippedWeaponSkin||"";
-          showShopMsg(m.message||"");renderCosmeticShop();updateResourceHud();
+          showShopMsg(m.message||"");audioTone(660,.08,"triangle",.035,180);audioTone(880,.12,"triangle",.028,120,.08);renderCosmeticShop();updateResourceHud();
         }else if(m.type==="respawn_ok"){
           if(m.safeZone){safeZone=m.safeZone;}
           spawnProtectionUntil=performance.now()+(Number(m.spawnProtectionMs)||5000);
-          p.x=m.x;p.y=m.y;p.hp=Number.isFinite(m.hp)?m.hp:p.maxHp;p.alive=true;
+          p.x=m.x;p.y=m.y;p.hp=Number.isFinite(m.hp)?m.hp:p.maxHp;p.alive=true;audioTone(330,.12,"triangle",.03,140);audioTone(660,.2,"sine",.022,260,.08);
           if(Number.isFinite(m.maxHp))p.maxHp=m.maxHp;
           if(Number.isFinite(m.speed))p.speed=m.speed;
           if(m.weapon&&weaponStats[m.weapon])p.weapon=m.weapon;
-          document.getElementById("death").style.display="none";
+          document.getElementById("death").style.display="none";audioTone(300,.12,"triangle",.035,120);audioTone(600,.2,"sine",.028,220,.08);
         }else if(m.type==="pvp_kill"){
           const killer=remotePlayers.get(m.killer);
           const target=remotePlayers.get(m.target);
-          showToast((killer?.name||"Jugador")+" destruyó a "+(target?.name||"otro tanque"));
+          audioTone(260,.09,"square",.04,160);audioTone(520,.16,"triangle",.03,260,.08);showToast((killer?.name||"Jugador")+" destruyó a "+(target?.name||"otro tanque"));
         }else if(m.type==="enemy_dead"){
           if(m.killer===multiplayerId)showToast("Enemigo destruido · recompensa añadida");
         }else if(m.type==="player_leave"){
@@ -901,11 +1015,13 @@ function enemyExplosion(e){
 
 function fire(){
   if(!p.alive)return;
-  if((p.ammo||0)<=0){showShopMsg("Sin munición. Ve con el vendedor.");return;}
+  if((p.ammo||0)<=0){audioTone(220,.08,"square",.045,-100);showShopMsg("Sin munición. Ve con el vendedor.");return;}
   const now=performance.now();
   if(now-p.lastShot<p.fireRate)return;
   if(!multiplayerSocket || multiplayerSocket.readyState!==1)return;
   p.lastShot=now;
+  audioTone(520,.075,"sawtooth",.055,260);
+  audioTone(1040,.055,"triangle",.025,-180,.018);
   multiplayerSocket.send(JSON.stringify({type:"fire"}));
 }
 function returnToMenu(){
@@ -1787,6 +1903,8 @@ restartBtn.addEventListener("click",()=>returnToMenu());
 
 // Cierra la conexión al salir de esta página para que al volver no quede el tanque anterior conectado.
 function requestServerSaveAndClose(){
+  try{if(neonAudio?.ctx&&neonAudio.master)neonAudio.master.gain.setTargetAtTime(0,neonAudio.ctx.currentTime,.03);}catch{}
+  try{stopNeonMusic();}catch{}
   try{
     if(multiplayerSocket && multiplayerSocket.readyState===WebSocket.OPEN && currentRoom && gameActive){
       multiplayerSocket.send(JSON.stringify({type:"save_on_exit"}));
