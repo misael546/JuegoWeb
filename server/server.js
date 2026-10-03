@@ -11,7 +11,7 @@ const WORLD = { w: 6000, h: 4400 };
 const MAX_PLAYERS = 16;
 const SAFE_ZONE = { x: 3000, y: 2200, r: 300 };
 
-const SERVER_VERSION = '20261002-154';
+const SERVER_VERSION = '20261003-159';
 
 const AMMO_PACK_SIZE = 100;
 const AMMO_PACK_COST = 75;
@@ -22,17 +22,21 @@ const SHOP_INTERACTION_RADIUS = 48;
 const BANK_ENABLED = false;
 
 const WEAPONS = {
-  blaster: { name: 'BLASTER · NEONSTORM', cost: 0, damage: 35, fireRate: 320, maxAmmo: 220, range: 760 },
-  pulse: { name: 'PULSE · PRISMA', cost: 500, damage: 70, fireRate: 230, maxAmmo: 260, range: 820 },
-  cannon: { name: 'CANNON · SOLARIS', cost: 1500, damage: 140, fireRate: 620, maxAmmo: 320, range: 880 },
-  railgun: { name: 'RAILGUN · ECLIPSE', cost: 6500, damage: 260, fireRate: 900, maxAmmo: 380, range: 960 },
-  nova: { name: 'NOVA · SUPERNOVA', cost: 22000, damage: 520, fireRate: 1350, maxAmmo: 450, range: 1040 },
-  plasma: { name: 'PLASMA · INFERNO', cost: 60000, damage: 800, fireRate: 1050, maxAmmo: 500, range: 1120 },
-  vortex: { name: 'VORTEX · SHARD', cost: 150000, damage: 1150, fireRate: 1450, maxAmmo: 550, range: 1200 },
-  quasar: { name: 'QUASAR · RAY', cost: 400000, damage: 1550, fireRate: 1750, maxAmmo: 600, range: 1280 },
-  singularity: { name: 'SINGULARITY · CORE', cost: 900000, damage: 2100, fireRate: 2150, maxAmmo: 650, range: 1360 },
-  omega: { name: 'OMEGA · ASCENSION', cost: 2000000, damage: 2800, fireRate: 2600, maxAmmo: 700, range: 1440 }
+  blaster: { name: 'BLASTER · NEONSTORM', cost: 0, power: 100, fireRate: 320, maxAmmo: 220, range: 760 },
+  pulse: { name: 'PULSE · PRISMA', cost: 500, power: 200, fireRate: 230, maxAmmo: 260, range: 820 },
+  cannon: { name: 'CANNON · SOLARIS', cost: 1500, power: 400, fireRate: 620, maxAmmo: 320, range: 880 },
+  railgun: { name: 'RAILGUN · ECLIPSE', cost: 6500, power: 743, fireRate: 900, maxAmmo: 380, range: 960 },
+  nova: { name: 'NOVA · SUPERNOVA', cost: 22000, power: 1486, fireRate: 1350, maxAmmo: 450, range: 1040 },
+  plasma: { name: 'PLASMA · INFERNO', cost: 60000, power: 2286, fireRate: 1050, maxAmmo: 500, range: 1120 },
+  vortex: { name: 'VORTEX · SHARD', cost: 150000, power: 3286, fireRate: 1450, maxAmmo: 550, range: 1200 },
+  quasar: { name: 'QUASAR · RAY', cost: 400000, power: 4429, fireRate: 1750, maxAmmo: 600, range: 1280 },
+  singularity: { name: 'SINGULARITY · CORE', cost: 900000, power: 6000, fireRate: 2150, maxAmmo: 650, range: 1360 },
+  omega: { name: 'OMEGA · ASCENSION', cost: 2000000, power: 8000, fireRate: 2600, maxAmmo: 700, range: 1440 }
 };
+
+function damageForPower(power) {
+  return Math.max(1, Math.round((Number(power) || 0) * 0.35));
+}
 
 const HP_REGEN_PER_SEC = 3;
 const WORLD_WALL_COUNT = 24;
@@ -197,6 +201,7 @@ function publicPlayer(p) {
     speed: p.speed,
     color: p.color,
     weapon: p.weapon,
+    power: Number(p.power) || 0,
     equippedSkin: cosmetics.getSkin(p.equippedSkin) ? p.equippedSkin : ''
   };
 }
@@ -226,16 +231,16 @@ function sendStats(p) {
     score: p.score,
     xp: p.xp,
     level: p.level,
+    power: p.power,
     damage: p.damage,
     defense: p.defense,
     fireRate: p.fireRate,
     speed: p.speed,
     maxHp: maxHpForLevel(p.level),
     xpNeed: xpToNextLevel(p.level),
-    attackPower: Number(p.damage) || 10,
-    attackFill: Math.round(clamp(((Number(p.damage) || 10) / 650) * 100, 0, 100)),
-    defense: p.defense,
-    defenseMax: 125,
+    power: Number(p.power) || 0,
+    defense: Number(p.defense) || 0,
+    skinDefense: skinDefenseBonus(p),
     killsToLevel: nextKills,
     gold: p.gold || 0,
     diamonds: p.diamonds || 0,
@@ -357,18 +362,21 @@ function skinDefenseBonus(p) {
 function applyCombatStats(p) {
   const item = WEAPONS[p.weapon] || null;
   if (item) {
-    const levelDamage = Math.max(0, Number(p.level || 1) - 1) * 2;
-    p.damage = Math.max(5, Math.round(item.damage + levelDamage + weaponSkinAttackBonus(p) - (Number(p.damagePenalty) || 0)));
+    p.power = Math.max(0, Number(item.power) || 0);
+    p.damage = Math.max(1, damageForPower(p.power));
     p.fireRate = Math.max(100, item.fireRate - Math.max(0, p.level - 1) * 3);
   } else {
     p.weapon = null;
-    p.damage = 10;
+    p.power = 0;
+    p.damage = 1;
     p.fireRate = 999999;
   }
+
   p.defense = Math.max(0, Math.round(
     skinDefenseBonus(p) - (Number(p.defensePenalty) || 0)
   ));
   p.speed = speedForLevel(p.level);
+
   const maxAmmo = maxAmmoForWeapon(p.weapon);
   p.ammo = maxAmmo > 0 ? clamp(Number(p.ammo) || 0, 0, maxAmmo) : 0;
   if (maxAmmo > 0 && p.ammo <= 0) p.ammo = Math.min(60, maxAmmo);
@@ -1093,7 +1101,7 @@ function shopBuy(ws, requestedWeapon) {
     send(ws, {
       type: 'shop_result',
       ok: true,
-      message: 'Arsenal desequipado · buff de ATAQUE del arma retirado.',
+      message: 'Arsenal desequipado · PODER del arma retirado.',
       weapon: null,
       ownedWeapons: p.ownedWeapons,
       equippedWeaponSkin: '',
@@ -1124,7 +1132,7 @@ function shopBuy(ws, requestedWeapon) {
   send(ws, {
     type: 'shop_result',
     ok: true,
-    message: (owned ? 'Equipada ' : 'Comprada y equipada ') + item.name + '.',
+    message: (owned ? 'Equipada ' : 'Comprada y equipada ') + item.name + ' · PODER ' + item.power + '.',
     weapon: p.weapon,
     ownedWeapons: p.ownedWeapons,
     equippedWeaponSkin: '',
@@ -1782,7 +1790,7 @@ function handleShot(ws) {
       amount: damage,
       x: targetEnemy.x,
       y: targetEnemy.y,
-      attackPower: shooter.damage
+      power: shooter.power
     });
 
     if (targetEnemy.hp <= 0) {
@@ -1838,7 +1846,8 @@ function createPlayer(ws) {
     angle: 0,
     hp: 100,
     level: 1,
-    damage: 25,
+    damage: 35,
+    power: 100,
     defense: 0,
     damagePenalty: 0,
     defensePenalty: 0,
