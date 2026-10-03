@@ -2,179 +2,24 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Neon Core · Menú principal · Build 165</title>
-<style>
-*{box-sizing:border-box}
-html,body{margin:0;min-height:100%;background:#050811;color:#fff;font-family:Arial,sans-serif}
-body{display:grid;place-items:center;padding:18px;touch-action:manipulation}
-.card{width:min(560px,100%);background:#0b1020;border:1px solid #26344e;border-radius:22px;padding:24px;box-shadow:0 18px 70px #000}
-h1{margin:0;color:#39e7ff;letter-spacing:3px;font-size:34px;text-align:center}
-.sub{color:#9ca9bd;text-align:center;margin:6px 0 22px}
-label{display:block;color:#9ca9bd;font-size:12px;margin-bottom:7px}
-#username{width:100%;padding:14px;border:1px solid #33415d;background:#111a2d;color:#fff;border-radius:11px;font-size:17px;outline:none}
-#username:focus{border-color:#39e7ff;box-shadow:0 0 0 2px #39e7ff22}
-.status{min-height:18px;margin:8px 0 14px;color:#9ca9bd;font-size:12px;text-align:center}
-h2{font-size:15px;margin:18px 0 10px}
-.rooms{display:grid;gap:10px}
-.room{display:block;width:100%;text-align:left;text-decoration:none;color:#fff;background:#101a2c;border:1px solid #2a3a56;border-radius:14px;padding:16px;transition:.15s;touch-action:manipulation;user-select:none;-webkit-user-select:none;cursor:pointer;-webkit-tap-highlight-color:transparent}
-.room:hover:not(.disabled){border-color:#39e7ff;background:#122238}
-.room:active:not(.disabled){transform:scale(.985)}
-.room.disabled{opacity:.42;filter:saturate(.55);cursor:not-allowed}
-.room strong{display:block;font-size:20px;letter-spacing:2px;color:#39e7ff}
-.room span{display:block;color:#9ca9bd;font-size:12px;margin-top:5px}.room .roomCount{color:#6ff3b0;font-weight:900}.room .roomLive{display:block;margin-top:5px;color:#53627b;font-size:9px;letter-spacing:.6px}.room.roomOnline{border-color:#39e7ff55}.room.roomOnline .roomLive{color:#6ff3b0}
-.actions{display:grid;grid-template-columns:1fr;gap:8px;margin-top:12px}
-.action{min-height:44px;border:0;border-radius:10px;background:#183d58;color:#fff;font-weight:bold;touch-action:manipulation}
-.action.secondary{background:#26344e}
-.build{margin-top:18px;color:#53627b;font-size:10px;text-align:center}
-.msg{min-height:18px;color:#ff8b8b;font-size:12px;text-align:center;margin-top:8px}
-</style>
-</head>
-<body>
-<main class="card">
-  <h1>NEON CORE</h1>
-  <div class="sub">MENÚ PRINCIPAL · SALAS PÚBLICAS</div>
-
-  <label for="username">NOMBRE DEL TANQUE</label>
-  <input id="username" maxlength="20" autocomplete="nickname" autocapitalize="words" placeholder="Escribe tu nombre">
-  <div id="status" class="status">Escribe tu nombre para desbloquear las salas. Las cifras de jugadores se leen directamente del servidor.</div>
-
-  <h2>ELIGE UNA SALA</h2>
-  <div class="rooms">
-    <a class="room disabled" data-room="12345" href="12345/" aria-disabled="true" tabindex="-1">
-      <strong>SALA #1</strong>
-      <span>Entrar a la arena pública · <b class="roomCount" data-room-count="12345">CONSULTANDO…</b></span><small class="roomLive" data-room-live="12345">● ESPERANDO DATOS DEL SERVIDOR</small>
-    </a>
-  </div>
-
-  <div class="actions">
-    <button class="action secondary" id="clearName" type="button">CAMBIAR NOMBRE</button>
-  </div>
-
-  <div id="msg" class="msg"></div>
-  <div class="build">NEON CORE · BUILD 20261003-167-darkscifi</div>
-</main>
-
+<title>Neon Core · Entrada oficial</title>
 <script>
 (function(){
-  const input=document.getElementById("username");
-  const status=document.getElementById("status");
-  const msg=document.getElementById("msg");
-  const cards=[...document.querySelectorAll(".room[data-room]")];
-
-  const ROOM_STATUS_URL="https://neon-core-multiplayer.onrender.com/rooms";
-  let roomFetchBusy=false;
-  function setRoomState(card,text,liveText,live){
-    const count=card.querySelector("[data-room-count]");
-    const liveEl=card.querySelector("[data-room-live]");
-    if(count)count.textContent=text;
-    if(liveEl)liveEl.textContent=liveText;
-    card.classList.toggle("roomOnline",!!live);
+  var target="../../";
+  try{
+    var q=location.search||"";
+    location.replace(target+q);
+  }catch(e){
+    location.href=target;
   }
-  async function refreshRoomCounts(){
-    if(roomFetchBusy)return;
-    roomFetchBusy=true;
-    const controllers=[];
-    try{
-      cards.forEach(card=>setRoomState(card,"CONSULTANDO…","● ACTUALIZANDO SERVIDOR",false));
-      const controller=new AbortController();
-      controllers.push(controller);
-      const timer=setTimeout(()=>controller.abort(),30000);
-      const res=await fetch(ROOM_STATUS_URL+"?t="+Date.now(),{
-        cache:"no-store",
-        mode:"cors",
-        credentials:"omit",
-        signal:controller.signal,
-        headers:{"Cache-Control":"no-cache","Pragma":"no-cache"}
-      });
-      clearTimeout(timer);
-      if(!res.ok)throw new Error("rooms_"+res.status);
-      const data=await res.json();
-      const byCode=new Map((Array.isArray(data.rooms)?data.rooms:[]).map(room=>[String(room.code),room]));
-      cards.forEach(card=>{
-        const code=String(card.getAttribute("data-room")||"");
-        const room=byCode.get(code);
-        if(room){
-          const players=Math.max(0,Number(room.players)||0),maxPlayers=Math.max(1,Number(room.maxPlayers)||16);
-          setRoomState(card,players+"/"+maxPlayers+" JUGADORES","● EN VIVO · "+new Date().toLocaleTimeString("es-MX"),true);
-        }else{
-          setRoomState(card,"SIN DATOS","● SALA NO PUBLICADA",false);
-        }
-      });
-    }catch(e){
-      cards.forEach(card=>setRoomState(card,"SIN DATOS","● DESPERTANDO SERVIDOR · REINTENTANDO",false));
-    }finally{
-      controllers.forEach(c=>{try{c.abort()}catch{}});
-      roomFetchBusy=false;
-    }
-  }
-  refreshRoomCounts();
-  setInterval(refreshRoomCounts,2000);
-
-  function getName(){return String(input.value||"").trim().slice(0,20)}
-  function loadName(){try{return localStorage.getItem("neon_core_name")||""}catch(e){return""}}
-  function saveName(name){try{localStorage.setItem("neon_core_name",name)}catch(e){}}
-
-  function refresh(){
-    const name=getName();
-    const ok=!!name;
-    cards.forEach(card=>{
-      card.classList.toggle("disabled",!ok);
-      card.setAttribute("aria-disabled",ok?"false":"true");
-      card.tabIndex=ok?0:-1;
-    });
-    status.textContent=ok?"Nombre listo. Elige una sala.":"Escribe tu nombre para desbloquear las salas.";
-    msg.textContent="";
-  }
-
-  function openRoom(room){
-    const name=getName();
-    const code=String(room||"").replace(/[^0-9]/g,"");
-    if(!name){msg.textContent="Escribe tu nombre primero.";input.focus();return}
-    if(!code)return;
-    saveName(name);
-    status.textContent="Entrando a la sala "+code+"…";
-    window.location.assign("12345/v167/?menu="+Date.now());
-  }
-
-  input.value=loadName();
-  input.addEventListener("input",refresh);
-
-  cards.forEach(card=>{
-    const code=card.getAttribute("data-room");
-    card.addEventListener("pointerup",e=>{
-      if(e.pointerType==="touch"||e.pointerType==="pen"){
-        e.preventDefault();e.stopPropagation();openRoom(code);
-      }
-    });
-    card.addEventListener("click",e=>{
-      e.preventDefault();e.stopPropagation();openRoom(code);
-    });
-  });
-
-  document.getElementById("clearName").addEventListener("click",()=>{
-    input.value="";
-    try{localStorage.removeItem("neon_core_name")}catch(e){}
-    refresh();
-    input.focus();
-  });
-
-  input.addEventListener("keydown",e=>{
-    if(e.key==="Enter"){
-      e.preventDefault();
-      const name=getName();
-      if(!name){msg.textContent="Escribe tu nombre primero.";return}
-      saveName(name);
-      const first=cards.find(card=>!card.classList.contains("disabled"));
-      if(first)first.focus();
-    }
-  });
-
-  refresh();
 })();
 </script>
+</head>
+<body style="margin:0;background:#050811;color:#fff;font-family:Arial,sans-serif;display:grid;place-items:center;min-height:100vh">
+<div>Abriendo la entrada oficial de Neon Core…</div>
 </body>
 </html>
