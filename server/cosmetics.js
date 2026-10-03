@@ -1,19 +1,19 @@
 'use strict';
 
 const SKINS = Object.freeze({
-  core_default: { id:'core_default', name:'NÚCLEO ORIGINAL', rarity:'Común', type:'skin', priceGold:0, priceDiamonds:0, priceUsd:0, style:'core', defenseBonus:0 },
-  pixel_cyan: { id:'pixel_cyan', name:'PIXEL CYAN', rarity:'Raro', type:'skin', priceGold:5000, priceDiamonds:0, priceUsd:0, style:'pixel', defenseBonus:0 },
-  rust_core: { id:'rust_core', name:'NÚCLEO OXIDADO', rarity:'Raro', type:'skin', priceGold:1500, priceDiamonds:0, priceUsd:0, style:'rust', defenseBonus:0 },
-  toxic_orb: { id:'toxic_orb', name:'ORBE TÓXICO', rarity:'Épico', type:'skin', priceGold:12000, priceDiamonds:0, priceUsd:0, style:'toxic', defenseBonus:0 },
-  plasma_violet: { id:'plasma_violet', name:'PLASMA VIOLETA', rarity:'Mítico', type:'skin', priceGold:60000, priceDiamonds:0, priceUsd:0, style:'plasma', defenseBonus:0 },
-  aurora: { id:'aurora', name:'AURORA', rarity:'Épico', type:'skin', priceGold:0, priceDiamonds:250, priceUsd:0, style:'aurora', defenseBonus:0 },
-  nebula_prism: { id:'nebula_prism', name:'NEBULOSA PRISMA', rarity:'Mítico', type:'skin', priceGold:0, priceDiamonds:4500, priceUsd:0, style:'nebula', defenseBonus:0 },
-  eclipse_gold: { id:'eclipse_gold', name:'ECLIPSE DORADO', rarity:'Legendario', type:'skin', priceGold:0, priceDiamonds:2000, priceUsd:0, style:'eclipse', defenseBonus:0 },
-  celestial: { id:'celestial', name:'CIELO CELESTE', rarity:'Legendario', type:'skin', priceGold:0, priceDiamonds:7500, priceUsd:0, style:'celestial', defenseBonus:0 },
-  angel_seraph: { id:'angel_seraph', name:'ÁNGEL SERAFÍN', rarity:'Legendario', type:'skin', priceGold:0, priceDiamonds:12000, priceUsd:0, style:'angel', defenseBonus:0 },
-  demon_infernal: { id:'demon_infernal', name:'DEMONIO INFERNAL', rarity:'Supremo', type:'skin', priceGold:0, priceDiamonds:25000, priceUsd:0, style:'demon', defenseBonus:0 },
-  eternal_void: { id:'eternal_void', name:'VACÍO ETERNO', rarity:'Supremo', type:'skin', priceGold:0, priceDiamonds:30000, priceUsd:0, style:'void', defenseBonus:0 },
-  gm_core: { id:'gm_core', name:'SOBERANO DEL NÚCLEO', rarity:'Supremo', type:'skin', priceGold:0, priceDiamonds:50000, priceUsd:0, style:'gm', defenseBonus:0 }
+  core_default: { id:'core_default', name:'NÚCLEO ORIGINAL', rarity:'Común', type:'armor', priceGold:0, priceDiamonds:0, priceUsd:0, style:'core', defenseBonus:0 },
+  pixel_cyan: { id:'pixel_cyan', name:'PIXEL CYAN', rarity:'Raro', type:'armor', priceGold:5000, priceDiamonds:0, priceUsd:0, style:'pixel', defenseBonus:10 },
+  rust_core: { id:'rust_core', name:'NÚCLEO OXIDADO', rarity:'Raro', type:'armor', priceGold:1500, priceDiamonds:0, priceUsd:0, style:'rust', defenseBonus:20 },
+  toxic_orb: { id:'toxic_orb', name:'ORBE TÓXICO', rarity:'Épico', type:'armor', priceGold:12000, priceDiamonds:0, priceUsd:0, style:'toxic', defenseBonus:35 },
+  plasma_violet: { id:'plasma_violet', name:'PLASMA VIOLETA', rarity:'Mítico', type:'armor', priceGold:60000, priceDiamonds:0, priceUsd:0, style:'plasma', defenseBonus:60 },
+  aurora: { id:'aurora', name:'AURORA', rarity:'Épico', type:'armor', priceGold:0, priceDiamonds:250, priceUsd:0, style:'aurora', defenseBonus:90 },
+  nebula_prism: { id:'nebula_prism', name:'NEBULOSA PRISMA', rarity:'Mítico', type:'armor', priceGold:0, priceDiamonds:4500, priceUsd:0, style:'nebula', defenseBonus:140 },
+  eclipse_gold: { id:'eclipse_gold', name:'ECLIPSE DORADO', rarity:'Legendario', type:'armor', priceGold:0, priceDiamonds:2000, priceUsd:0, style:'eclipse', defenseBonus:220 },
+  celestial: { id:'celestial', name:'CIELO CELESTE', rarity:'Legendario', type:'armor', priceGold:0, priceDiamonds:7500, priceUsd:0, style:'celestial', defenseBonus:320 },
+  angel_seraph: { id:'angel_seraph', name:'ÁNGEL SERAFÍN', rarity:'Legendario', type:'armor', priceGold:0, priceDiamonds:12000, priceUsd:0, style:'angel', defenseBonus:500 },
+  demon_infernal: { id:'demon_infernal', name:'DEMONIO INFERNAL', rarity:'Supremo', type:'armor', priceGold:0, priceDiamonds:25000, priceUsd:0, style:'demon', defenseBonus:700 },
+  eternal_void: { id:'eternal_void', name:'VACÍO ETERNO', rarity:'Supremo', type:'armor', priceGold:0, priceDiamonds:30000, priceUsd:0, style:'void', defenseBonus:950 },
+  gm_core: { id:'gm_core', name:'SOBERANO DEL NÚCLEO', rarity:'Supremo', type:'armor', priceGold:0, priceDiamonds:50000, priceUsd:0, style:'gm', defenseBonus:1250 }
 });
 
 const WEAPON_SKINS = Object.freeze({});
