@@ -9,7 +9,7 @@
 <script>
 (function(){
   try{
-    var v="20261003-165";
+    var v="20261003-165-fs1";
     var k="neon_core_build";
     window.NEON_CORE_BUILD=v;
     var old=localStorage.getItem(k);
@@ -95,7 +95,7 @@
 <script>
 (function(){try{if(/\/(?:12345|67890)(?:\/|\/index\.html)?(?:$|[?#])/.test(location.pathname+location.search)){document.documentElement.classList.add("public-room");}}catch(e){}})();
 </script>
-</head>
+<style id="neonFullscreenStyle">#neonFullscreenButton{position:fixed;top:48px;left:50%;transform:translateX(-50%);z-index:125;display:none;align-items:center;justify-content:center;gap:7px;min-width:168px;height:40px;padding:0 13px;border:1px solid #39e7ff;border-radius:11px;background:linear-gradient(135deg,#06101c,#0b2030ee);color:#dffbff;font:900 11px Arial,sans-serif;letter-spacing:1px;box-shadow:0 0 16px #39e7ff22,0 6px 22px #000,inset 0 0 16px #39e7ff0d;text-shadow:0 0 8px #39e7ff88;overflow:hidden;pointer-events:auto;-webkit-tap-highlight-color:transparent}#neonFullscreenButton:before{content:"";position:absolute;inset:-70%;background:conic-gradient(from 0deg,transparent,#39e7ff66,transparent 24%,#a855f766,transparent 48%);animation:neonFullscreenSpin 4s linear infinite;opacity:.75}#neonFullscreenButton:after{content:"✦ · ✧ · • · ✦";position:absolute;left:-20%;right:-20%;top:2px;color:#9ff7ff55;font-size:7px;letter-spacing:4px;animation:neonFullscreenParticles 2.5s linear infinite;pointer-events:none}#neonFullscreenButton span,#neonFullscreenButton b{position:relative;z-index:2}#neonFullscreenButton span{font-size:16px}#neonFullscreenButton:active{transform:translateX(-50%) scale(.96)}@keyframes neonFullscreenSpin{to{transform:rotate(360deg)}}@keyframes neonFullscreenParticles{from{transform:translateX(-8%);opacity:.1}25%{opacity:.8}75%{opacity:.8}to{transform:translateX(8%);opacity:.1}}html.neon-touch #neonFullscreenButton{display:flex}@media(max-width:430px){#neonFullscreenButton{top:46px;min-width:154px;height:38px;font-size:10px}}</style></head>
 <body>
 <canvas id="game"></canvas><div id="buildDisplay">NEON CORE · Build 165</div>
 
@@ -1757,5 +1757,5 @@ function frame(now){
 }
 requestAnimationFrame(frame);
 </script>
-</body>
+<script>(function(){var ua=String(navigator.userAgent||"");var touch=Number(navigator.maxTouchPoints||0)>0||"ontouchstart"in window;var android=/Android/i.test(ua);if(!touch||!android)return;document.documentElement.classList.add("neon-touch");var btn=document.createElement("button");btn.id="neonFullscreenButton";btn.type="button";btn.setAttribute("aria-label","Activar pantalla completa");btn.innerHTML="<span>⛶</span><b>PANTALLA COMPLETA</b>";document.body.appendChild(btn);function active(){return !!document.fullscreenElement||!!document.webkitFullscreenElement;}function refresh(){btn.style.display=active()?"none":"flex";}function enter(){if(active())return;try{var root=document.documentElement;if(root.requestFullscreen){var p=root.requestFullscreen();if(p&&typeof p.then==="function"){p.then(refresh).catch(function(){var b=btn.querySelector("b");if(b)b.textContent="TOCA DE NUEVO";setTimeout(function(){var x=btn.querySelector("b");if(x)x.textContent="PANTALLA COMPLETA";},1800);});}else refresh();return;}if(root.webkitRequestFullscreen){root.webkitRequestFullscreen();refresh();return;}var b2=btn.querySelector("b");if(b2)b2.textContent="NO COMPATIBLE";}catch(e){var b3=btn.querySelector("b");if(b3)b3.textContent="NO DISPONIBLE";}}btn.addEventListener("click",function(e){e.preventDefault();e.stopPropagation();enter();});document.addEventListener("fullscreenchange",refresh);document.addEventListener("webkitfullscreenchange",refresh);refresh();})();</script></body>
 </html>
