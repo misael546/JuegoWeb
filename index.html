@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -33,7 +33,7 @@ h2{font-size:15px;margin:18px 0 10px}
 .msg{min-height:18px;color:#ff8b8b;font-size:12px;text-align:center;margin-top:8px}
 </style>
 </head>
-<body>
+<body><noscript><div style="position:fixed;inset:0;display:grid;place-items:center;padding:24px;background:#050811;color:#fff;font:16px Arial;text-align:center">Neon Core necesita JavaScript activado en este navegador.</div></noscript>
 <main class="card">
   <h1>NEON CORE</h1>
   <div class="sub">MENÚ PRINCIPAL · SALAS PÚBLICAS</div>
@@ -55,7 +55,7 @@ h2{font-size:15px;margin:18px 0 10px}
   </div>
 
   <div id="msg" class="msg"></div>
-  <div class="build">NEON CORE · BUILD 20261003-162</div>
+  <div class="build">NEON CORE · BUILD 20261003-163</div>
 </main>
 
 <script>
@@ -64,8 +64,12 @@ h2{font-size:15px;margin:18px 0 10px}
   const status=document.getElementById("status");
   const msg=document.getElementById("msg");
   const cards=[...document.querySelectorAll(".room[data-room]")];
-
   const ROOM_STATUS_URL="https://neon-core-multiplayer.onrender.com/rooms";
+
+  function getName(){return String(input.value||"").trim().slice(0,20)}
+  function loadName(){try{return localStorage.getItem("neon_core_name")||""}catch(e){return""}}
+  function saveName(name){try{localStorage.setItem("neon_core_name",name)}catch(e){}}
+
   async function refreshRoomCounts(){
     try{
       const res=await fetch(ROOM_STATUS_URL+"?t="+Date.now(),{cache:"no-store"});
@@ -79,19 +83,15 @@ h2{font-size:15px;margin:18px 0 10px}
         if(el)el.textContent=room?String(Number(room.players)||0)+"/"+String(Number(room.maxPlayers)||16)+" JUGADORES":"—/16 JUGADORES";
       });
     }catch(e){
-      cards.forEach(card=>{const el=card.querySelector("[data-room-count]");if(el)el.textContent="—/16 JUGADORES";});
+      cards.forEach(card=>{
+        const el=card.querySelector("[data-room-count]");
+        if(el)el.textContent="—/16 JUGADORES";
+      });
     }
   }
-  refreshRoomCounts();
-  setInterval(refreshRoomCounts,2000);
-
-  function getName(){return String(input.value||"").trim().slice(0,20)}
-  function loadName(){try{return localStorage.getItem("neon_core_name")||""}catch(e){return""}}
-  function saveName(name){try{localStorage.setItem("neon_core_name",name)}catch(e){}}
 
   function refresh(){
-    const name=getName();
-    const ok=!!name;
+    const ok=!!getName();
     cards.forEach(card=>{
       card.classList.toggle("disabled",!ok);
       card.setAttribute("aria-disabled",ok?"false":"true");
@@ -101,45 +101,34 @@ h2{font-size:15px;margin:18px 0 10px}
     msg.textContent="";
   }
 
-  function gameRootUrl(){
-    const host=String(location.hostname||"").toLowerCase();
-    if(host.endsWith(".foo.ng") || host==="foo.ng"){
-      return new URL("/",location.origin);
-    }
-    const path=String(location.pathname||"");
-    const marker="/JuegoWeb/";
-    const index=path.indexOf(marker);
-    if(index>=0){
-      return new URL(path.slice(0,index)+marker,location.origin);
-    }
-    return new URL("/",location.origin);
-  }
-
-  function openRoom(room){
-    const name=getName();
-    const code=String(room||"").replace(/[^0-9]/g,"");
-    if(!name){msg.textContent="Escribe tu nombre primero.";input.focus();return}
-    if(!code)return;
-    saveName(name);
-    status.textContent="Entrando a la sala "+code+"…";
-    const target=new URL("neoncore/"+code+"/",gameRootUrl());
-    target.searchParams.set("menu",Date.now());
-    window.location.assign(target.href);
-  }
-
   input.value=loadName();
-  input.addEventListener("input",refresh);
 
   cards.forEach(card=>{
-    const code=card.getAttribute("data-room");
-    card.addEventListener("pointerup",e=>{
-      if(e.pointerType==="touch"||e.pointerType==="pen"){
-        e.preventDefault();e.stopPropagation();openRoom(code);
+    card.addEventListener("click",function(e){
+      const name=getName();
+      if(!name){
+        e.preventDefault();
+        msg.textContent="Escribe tu nombre primero.";
+        input.focus();
+        return;
       }
-    });
-    card.addEventListener("click",e=>{
-      e.preventDefault();e.stopPropagation();openRoom(code);
-    });
+      saveName(name);
+      status.textContent="Entrando a la sala "+String(card.getAttribute("data-room")||"")+"…";
+      // No hacemos preventDefault aquí: el navegador móvil usa el enlace
+      // nativo, que es más estable que forzar window.location.
+    },{passive:false});
+  });
+
+  input.addEventListener("input",refresh);
+  input.addEventListener("keydown",e=>{
+    if(e.key==="Enter"){
+      e.preventDefault();
+      const name=getName();
+      if(!name){msg.textContent="Escribe tu nombre primero.";return}
+      saveName(name);
+      const first=cards.find(card=>!card.classList.contains("disabled"));
+      if(first)first.click();
+    }
   });
 
   document.getElementById("clearName").addEventListener("click",()=>{
@@ -149,18 +138,9 @@ h2{font-size:15px;margin:18px 0 10px}
     input.focus();
   });
 
-  input.addEventListener("keydown",e=>{
-    if(e.key==="Enter"){
-      e.preventDefault();
-      const name=getName();
-      if(!name){msg.textContent="Escribe tu nombre primero.";return}
-      saveName(name);
-      const first=cards.find(card=>!card.classList.contains("disabled"));
-      if(first)first.focus();
-    }
-  });
-
   refresh();
+  refreshRoomCounts();
+  setInterval(refreshRoomCounts,3000);
 })();
 </script>
 </body>
