@@ -221,6 +221,7 @@ function sendPlayerList(code) {
 
 function sendStats(p) {
   if (!p?.ws) return;
+
   const nextKills = p.kills % 5 === 0 ? 5 : 5 - (p.kills % 5);
   const maxAmmo = maxAmmoForWeapon(p.weapon);
 
@@ -231,16 +232,13 @@ function sendStats(p) {
     score: p.score,
     xp: p.xp,
     level: p.level,
-    power: p.power,
-    damage: p.damage,
-    defense: p.defense,
+    power: Number(p.power) || 0,
+    damage: Number(p.damage) || 1,
+    defense: Number(p.defense) || 0,
     fireRate: p.fireRate,
     speed: p.speed,
     maxHp: maxHpForLevel(p.level),
     xpNeed: xpToNextLevel(p.level),
-    power: Number(p.power) || 0,
-    defense: Number(p.defense) || 0,
-    skinDefense: skinDefenseBonus(p),
     killsToLevel: nextKills,
     gold: p.gold || 0,
     diamonds: p.diamonds || 0,
@@ -251,12 +249,13 @@ function sendStats(p) {
     shopNpc: SHOP_NPC,
     bankEnabled: BANK_ENABLED,
     equippedSkin: cosmetics.getSkin(p.equippedSkin) ? p.equippedSkin : '',
+    equippedArmor: cosmetics.getSkin(p.equippedSkin) ? p.equippedSkin : '',
     ownedSkins: cosmetics.normalizeOwnedSkins(p.ownedSkins),
+    ownedArmors: cosmetics.normalizeOwnedSkins(p.ownedSkins),
     redeemedCodes: cosmetics.normalizeRedeemedCodes(p.redeemedCodes),
-    skinDefense: skinDefenseBonus(p),
+    skinDefense: skinDefenseBonus(p)
   });
 }
-
 function capturePlayerData(p) {
   return {
     name: p.name,
