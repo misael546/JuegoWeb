@@ -1,5 +1,5 @@
 name: Deploy Neon Core to GitHub Pages
-# Force Pages refresh from current main branch — 20261003-006
+# Force Pages refresh from current main branch — 20261003-007
 
 on:
   push:
@@ -64,8 +64,8 @@ jobs:
 
           assert '20261003-006-pages-live-main-menu' in root
           assert 'const PUBLIC_ROOM_CODE=""' in root
-          assert 'MENÚ PRINCIPAL' not in root
-          assert 'SALAS PÚBLICAS' not in root
+          assert 'MENÚ PRINCIPAL · SALAS PÚBLICAS' not in root
+          assert 'Sala #1' not in root
           assert '20261003-167-darkscifi' not in root
           assert 'location.replace(target+q)' in legacy
 
