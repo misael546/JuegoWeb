@@ -95,14 +95,122 @@
 <script>
 (function(){try{if(/\/(?:12345|67890)(?:\/|\/index\.html)?(?:$|[?#])/.test(location.pathname+location.search)){document.documentElement.classList.add("public-room");}}catch(e){}})();
 </script>
-<style id="neonFullscreenStyle">#neonFullscreenButton{position:fixed;top:48px;left:50%;transform:translateX(-50%);z-index:125;display:none;align-items:center;justify-content:center;gap:7px;min-width:168px;height:40px;padding:0 13px;border:1px solid #39e7ff;border-radius:11px;background:linear-gradient(135deg,#06101c,#0b2030ee);color:#dffbff;font:900 11px Arial,sans-serif;letter-spacing:1px;box-shadow:0 0 16px #39e7ff22,0 6px 22px #000,inset 0 0 16px #39e7ff0d;text-shadow:0 0 8px #39e7ff88;overflow:hidden;pointer-events:auto;-webkit-tap-highlight-color:transparent}#neonFullscreenButton:before{content:"";position:absolute;inset:-70%;background:conic-gradient(from 0deg,transparent,#39e7ff66,transparent 24%,#a855f766,transparent 48%);animation:neonFullscreenSpin 4s linear infinite;opacity:.75}#neonFullscreenButton:after{content:"✦ · ✧ · • · ✦";position:absolute;left:-20%;right:-20%;top:2px;color:#9ff7ff55;font-size:7px;letter-spacing:4px;animation:neonFullscreenParticles 2.5s linear infinite;pointer-events:none}#neonFullscreenButton span,#neonFullscreenButton b{position:relative;z-index:2}#neonFullscreenButton span{font-size:16px}#neonFullscreenButton:active{transform:translateX(-50%) scale(.96)}@keyframes neonFullscreenSpin{to{transform:rotate(360deg)}}@keyframes neonFullscreenParticles{from{transform:translateX(-8%);opacity:.1}25%{opacity:.8}75%{opacity:.8}to{transform:translateX(8%);opacity:.1}}html.neon-touch #neonFullscreenButton{display:flex}@media(max-width:430px){#neonFullscreenButton{top:46px;min-width:154px;height:38px;font-size:10px}}</style></head>
+<style id="neonFullscreenStyle">#neonFullscreenButton{position:fixed;top:48px;left:50%;transform:translateX(-50%);z-index:125;display:none;align-items:center;justify-content:center;gap:7px;min-width:168px;height:40px;padding:0 13px;border:1px solid #39e7ff;border-radius:11px;background:linear-gradient(135deg,#06101c,#0b2030ee);color:#dffbff;font:900 11px Arial,sans-serif;letter-spacing:1px;box-shadow:0 0 16px #39e7ff22,0 6px 22px #000,inset 0 0 16px #39e7ff0d;text-shadow:0 0 8px #39e7ff88;overflow:hidden;pointer-events:auto;-webkit-tap-highlight-color:transparent}#neonFullscreenButton:before{content:"";position:absolute;inset:-70%;background:conic-gradient(from 0deg,transparent,#39e7ff66,transparent 24%,#a855f766,transparent 48%);animation:neonFullscreenSpin 4s linear infinite;opacity:.75}#neonFullscreenButton:after{content:"✦ · ✧ · • · ✦";position:absolute;left:-20%;right:-20%;top:2px;color:#9ff7ff55;font-size:7px;letter-spacing:4px;animation:neonFullscreenParticles 2.5s linear infinite;pointer-events:none}#neonFullscreenButton span,#neonFullscreenButton b{position:relative;z-index:2}#neonFullscreenButton span{font-size:16px}#neonFullscreenButton:active{transform:translateX(-50%) scale(.96)}@keyframes neonFullscreenSpin{to{transform:rotate(360deg)}}@keyframes neonFullscreenParticles{from{transform:translateX(-8%);opacity:.1}25%{opacity:.8}75%{opacity:.8}to{transform:translateX(8%);opacity:.1}}html.neon-touch #neonFullscreenButton{display:flex}@media(max-width:430px){#neonFullscreenButton{top:46px;min-width:154px;height:38px;font-size:10px}}/* Neon Core compact mobile shop + HUD chat */
+#cosmeticShop{padding:8px}
+.cosmeticShopCard.shopUnifiedCard{
+  width:min(680px,92vw);
+  max-height:min(76vh,620px);
+  padding:12px;
+  border-radius:16px;
+}
+.cosmeticShopTitle strong{font-size:17px}
+.cosmeticShopTitle small{font-size:10px}
+.cosmeticBalance{gap:5px;margin:8px 0}
+.cosmeticBalance span{padding:5px 7px;font-size:10px}
+.shopTabs{gap:5px;margin:7px 0}
+.shopTab{min-height:36px;font-size:11px}
+.shopSubTitle{margin:7px 0 4px;font-size:10px}
+.arsenalAmmoBar{margin:5px 0 7px;padding:7px 8px}
+.arsenalAmmoBar strong{font-size:10px}
+.arsenalAmmoBar span{font-size:11px}
+.arsenalAmmoBar button{min-height:32px;min-width:110px;font-size:10px}
+.shopUnifiedGrid{gap:6px}
+.shopWeaponCard{min-height:138px!important;padding:7px!important;border-radius:10px;gap:4px}
+.shopWeaponCard strong{font-size:10px;letter-spacing:.7px}
+.shopWeaponCard small{font-size:9px}
+.shopWeaponCard .weaponStats{font-size:10px}
+.shopWeaponCard button{min-height:28px;font-size:9px}
+.cosmeticGrid{gap:6px}
+.cosmeticCard{min-height:125px;padding:7px;gap:4px;border-radius:10px}
+.skinPreview{width:50px;height:50px}
+.cosmeticCard strong{font-size:10px}
+.cosmeticCard small{font-size:9px}
+.armorDefense{font-size:9px}
+.cosmeticAction{min-height:27px;font-size:9px}
+.codeBox{margin-top:8px;padding:8px}
+.codeBox b{font-size:10px}
+.codeBox small{font-size:9px}
+.codeRow{gap:5px;margin-top:5px}
+.codeRow input{padding:8px;font-size:12px}
+.codeRow button{min-width:90px}
+@media(max-width:700px){
+  #cosmeticShop{padding:6px}
+  .cosmeticShopCard.shopUnifiedCard{
+    width:min(430px,94vw);
+    max-height:72vh;
+    padding:9px;
+    border-radius:13px;
+  }
+  .cosmeticShopHead{gap:7px}
+  .cosmeticShopTitle strong{font-size:14px}
+  .cosmeticShopTitle small{font-size:8px}
+  .cosmeticBalance{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin:6px 0}
+  .cosmeticBalance span{padding:4px 5px;font-size:9px}
+  .shopTabs{grid-template-columns:1fr 1fr 1fr;gap:4px;margin:5px 0}
+  .shopTab{min-height:31px;font-size:9px}
+  .arsenalAmmoBar{padding:6px;gap:6px}
+  .arsenalAmmoBar>div{gap:5px}
+  .arsenalAmmoBar button{min-height:29px;min-width:92px;font-size:9px}
+  .shopUnifiedGrid{grid-template-columns:1fr 1fr!important;gap:5px!important}
+  .shopWeaponCard{min-height:122px!important;padding:6px!important}
+  .shopWeaponCard strong{font-size:9px}
+  .shopWeaponCard small{font-size:8px}
+  .shopWeaponCard .weaponStats{font-size:9px}
+  .shopWeaponCard button{min-height:25px;font-size:8px}
+  .cosmeticGrid{grid-template-columns:1fr 1fr;gap:5px}
+  .cosmeticCard{min-height:112px;padding:6px}
+  .skinPreview{width:44px;height:44px}
+  .cosmeticCard strong{font-size:9px}
+  .cosmeticCard small,.armorDefense{font-size:8px}
+  .cosmeticAction{min-height:24px;font-size:8px}
+}
+@media(max-width:430px){
+  .cosmeticShopCard.shopUnifiedCard{
+    width:92vw;
+    max-height:68vh;
+    padding:8px;
+  }
+  .cosmeticShopTitle strong{font-size:13px}
+  .cosmeticBalance span{font-size:8px}
+  .shopTab{min-height:29px;font-size:8px}
+  .shopWeaponCard{min-height:108px!important}
+  .cosmeticCard{min-height:104px}
+}
+</style><style id="chatHudStyle">
+.hpChatRow{display:flex;align-items:center;gap:6px;margin-top:5px}
+.hpChatRow .hpBar{flex:1;min-width:0;margin-top:0}
+#chatToggle{position:relative;flex:0 0 auto;min-width:62px;height:30px;border:1px solid #39e7ff;background:linear-gradient(135deg,#06101c,#0b2030);color:#dffbff;border-radius:9px;font:900 9px Arial,sans-serif;letter-spacing:1px;pointer-events:auto;box-shadow:0 0 10px #39e7ff22,0 4px 12px #000,inset 0 0 12px #39e7ff0d;overflow:hidden}
+#chatToggle:before{content:"";position:absolute;inset:-45%;background:conic-gradient(from 0deg,transparent,#39e7ff55,transparent 22%,#a855f755,transparent 44%);animation:chatSpin 3.8s linear infinite;opacity:.7}
+#chatToggle .chatLabel,#chatToggle .chatIcon{position:relative;z-index:2;text-shadow:0 0 7px #39e7ff99}
+#chatToggle .chatIcon{font-size:12px;margin-right:3px}
+#chatBox{position:fixed;left:10px;top:86px;bottom:auto;width:min(350px,calc(100vw - 20px));z-index:14;background:linear-gradient(180deg,#081423f5,#050b15f5);border:1px solid #39e7ff88;border-radius:12px;padding:8px;backdrop-filter:blur(8px);pointer-events:auto;box-shadow:0 0 18px #39e7ff22,0 10px 28px #000}
+#chatFeed{position:fixed;left:10px;top:96px;bottom:auto;width:min(350px,52vw);max-height:220px;display:flex;flex-direction:column;align-items:flex-start;gap:4px;z-index:11;pointer-events:none;overflow:hidden;mask-image:linear-gradient(to bottom,#000 0,#000 82%,transparent 100%);-webkit-mask-image:linear-gradient(to bottom,#000 0,#000 82%,transparent 100%)}
+.chatLine{align-self:flex-start;max-width:100%;padding:5px 8px;border:1px solid #39e7ff44;border-radius:8px;background:linear-gradient(90deg,#061421ef,#0b1220d9);box-shadow:0 0 12px #39e7ff12,0 4px 12px #0008;backdrop-filter:blur(4px);font-size:11px;line-height:1.25;word-break:break-word;text-shadow:0 1px 3px #000;animation:chatDrop .28s ease-out}
+@keyframes chatDrop{from{opacity:0;transform:translateY(-15px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+.chatLine.expiring{animation:chatFade .65s ease-out forwards}
+@keyframes chatFade{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(16px)}}
+@media(max-width:799px){
+  .hpChatRow{gap:5px}
+  #chatToggle{min-width:54px;height:28px;font-size:8px}
+  #chatToggle .chatIcon{font-size:11px}
+  #chatFeed{left:8px;top:92px;width:min(300px,58vw);max-height:180px}
+  #chatBox{left:8px;top:88px;width:min(310px,calc(100vw - 16px))}
+}
+@media(max-width:430px){
+  .hpChatRow{gap:4px}
+  #chatToggle{min-width:50px;height:27px;padding:0 6px}
+  #chatFeed{top:90px;width:min(260px,68vw);max-height:155px}
+  #chatBox{top:86px;width:min(300px,calc(100vw - 16px))}
+}
+html.pc-controls #chatFeed{width:min(420px,38vw)}
+</style></head>
 <body>
 <canvas id="game"></canvas><div id="buildDisplay">NEON CORE · Build 165</div>
 
 <div id="hud">
   <div class="panel" id="bars">
     <b>NEON CORE</b>· <span id="level">Nv. 1</span> · ☠ <span id="pvpKills">0</span>
-    <div class="bar"><i id="hpFill"></i><span class="barLabel">❤️ <span id="hp">100</span>/<span id="maxHp">100</span></span></div>
+    <div class="hpChatRow"><div class="bar hpBar"><i id="hpFill"></i><span class="barLabel">❤️ <span id="hp">100</span>/<span id="maxHp">100</span></span></div><button id="chatToggle" type="button" aria-expanded="false" aria-controls="chatBox"><span class="chatIcon">◉</span><span class="chatLabel">CHAT</span></button></div>
     <div class="bar xpbar"><i id="xpFill"></i><span class="barLabel">XP <span id="xp">0</span>/<span id="xpNeed">100</span></span></div><div class="combatStats"><div class="coreStat powerStat"><span class="statParticles">✦ · ˚ ✧</span><small>PODER</small><b id="powerValue">100</b></div><div class="coreStat defenseStat"><span class="statParticles">✦ ˚ · ✧</span><small>DEFENSA</small><b id="defenseValue">0</b></div></div>
     <small>🎯 <span id="kills">0</span></small><div id="resourceHud"><span>🪙 <b id="gold">0</b></span><span>💎 <b id="diamonds">0</b></span><span>🔸 <b id="ammo">60</b>/<b id="maxAmmo">220</b></span></div>
   <div id="weaponHud">ARMA: <b id="weaponName">BLASTER</b></div>
@@ -148,7 +256,7 @@
     </section>
   </div>
 </div>
-<div id="toastFeed" aria-live="polite"></div><div class="pcHint">PC: WASD / flechas para moverte · mouse para apuntar · clic izquierdo para disparar · ESPACIO también dispara</div><div id="chatFeed" aria-live="polite" aria-label="Mensajes del chat"></div><button id="chatToggle" type="button" aria-expanded="false" aria-controls="chatBox"><span class="chatIcon">◉</span><span class="chatLabel">NEON CHAT</span></button><div id="chatBox" aria-label="Escribir en el chat" style="display:none"><div class="chatInputHead"><span>✦ MENSAJE NEON</span><button class="chatClose" id="chatCloseStatic" type="button" aria-label="Cerrar chat">×</button></div><form id="chatForm"><input id="chatInput" maxlength="120" autocomplete="off" placeholder="Escribe un mensaje…"><button id="chatSend" type="submit">ENVIAR</button></form><div id="chatHint">Enter para enviar · máximo 120 caracteres</div></div><div id="connectionOverlay" aria-live="polite"><div id="connectionCard"><div id="connectionSpinner"></div><b id="connectionTitle">CONECTANDO AL SERVIDOR</b><span id="connectionText">Despertando el servidor multiplayer…</span></div></div>
+<div id="toastFeed" aria-live="polite"></div><div class="pcHint">PC: WASD / flechas para moverte · mouse para apuntar · clic izquierdo para disparar · ESPACIO también dispara</div><div id="chatFeed" aria-live="polite" aria-label="Mensajes del chat"></div><div id="chatBox" aria-label="Escribir en el chat" style="display:none"><div class="chatInputHead"><span>✦ MENSAJE NEON</span><button class="chatClose" id="chatCloseStatic" type="button" aria-label="Cerrar chat">×</button></div><form id="chatForm"><input id="chatInput" maxlength="120" autocomplete="off" placeholder="Escribe un mensaje…"><button id="chatSend" type="submit">ENVIAR</button></form><div id="chatHint">Enter para enviar · máximo 120 caracteres</div></div><div id="connectionOverlay" aria-live="polite"><div id="connectionCard"><div id="connectionSpinner"></div><b id="connectionTitle">CONECTANDO AL SERVIDOR</b><span id="connectionText">Despertando el servidor multiplayer…</span></div></div>
 
 
 <div id="playersPanel"><b>JUGADORES CONECTADOS · <span id="playersCount">0</span></b><div id="playersList"></div></div>
@@ -421,9 +529,11 @@ function connectMultiplayer(roomMode="quick",roomCode=""){ const publicRoomAuto=
             const name=document.createElement("span");name.className="chatName";name.textContent=m.name||"Jugador";
             const sep=document.createElement("span");sep.className="chatSeparator";sep.textContent="›";
             const msgText=document.createElement("span");msgText.className="chatText";msgText.textContent=m.text||"";
-            row.appendChild(name);row.appendChild(sep);row.appendChild(msgText);box.appendChild(row);
-            while(box.children.length>12)box.removeChild(box.firstChild);
+            row.appendChild(name);row.appendChild(sep);row.appendChild(msgText);
+            box.appendChild(row);
+            while(box.children.length>10)box.removeChild(box.firstChild);
             setTimeout(()=>row.classList.remove("new"),1200);
+            setTimeout(()=>{if(!row.isConnected)return;row.classList.add("expiring");setTimeout(()=>{if(row.isConnected)row.remove();},700);},30000);
           }
         }else if(m.type==="room_error"){
           const msg=document.getElementById("nameMsg"); if(msg)msg.textContent=m.message||"No se pudo entrar a la sala.";
@@ -1563,11 +1673,11 @@ let chatOpen=false;
 function setChatOpen(open){
   chatOpen=!!open;
   chatBox.style.display=chatOpen?"block":"none";
-  chatToggle.style.display=chatOpen?"none":"block";
+  chatToggle.style.display="flex";
   chatToggle.setAttribute("aria-expanded",String(chatOpen));
   if(chatOpen)setTimeout(()=>chatInput.focus(),30);
 }
-chatToggle.addEventListener("click",()=>setChatOpen(true));
+chatToggle.addEventListener("click",()=>setChatOpen(!chatOpen));
 if(chatCloseStatic)chatCloseStatic.addEventListener("click",()=>setChatOpen(false));
 chatForm.addEventListener("submit",e=>{
   e.preventDefault();
