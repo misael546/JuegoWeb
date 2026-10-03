@@ -26,7 +26,7 @@
   }catch(e){}
 })();
 </script>
-<title>Neon Core · Build 161</title>
+<title>Neon Core · Build 164</title>
 <style>
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#050811;color:#fff;font-family:Arial,sans-serif;touch-action:none}
 #game{display:block;width:100vw;height:100vh}
@@ -46,7 +46,7 @@
 .joy{touch-action:none;user-select:none;-webkit-user-select:none;width:112px;height:112px;border:1px solid #41516d;background:#07101dcc;border-radius:50%;position:relative;pointer-events:auto}
 .stick{position:absolute;width:48px;height:48px;border-radius:50%;left:32px;top:32px;background:#39e7ff99;border:1px solid #8ff5ff}
 #fire{width:86px;height:86px;border-radius:50%;border:2px solid #ff8aa0;background:radial-gradient(circle at 35% 30%,#ff607f,#8e1737 62%,#3b0b1a);color:white;font-size:28px;font-weight:bold;pointer-events:auto;box-shadow:0 0 18px #ff365966,inset 0 0 12px #fff2;display:grid;place-items:center;position:relative;overflow:hidden}#fire:active{transform:scale(.94)}#fire .fireIcon{width:36px;height:36px;border:3px solid #fff;border-radius:50%;position:relative;display:block;box-shadow:0 0 8px #fff8}#fire .fireIcon:after{content:"";position:absolute;width:12px;height:12px;right:-7px;top:-7px;border-radius:50%;background:#fff}
-#toastFeed{position:fixed;left:50%;top:74px;transform:translateX(-50%);z-index:15;display:grid;gap:5px;width:min(360px,86vw);pointer-events:none}.toast{background:rgba(5,8,17,.9);border:1px solid #26344e;border-radius:9px;padding:7px 10px;text-align:center;color:#dffbff;font-size:11px;font-weight:bold;box-shadow:0 6px 20px #000;animation:toastIn .2s ease-out}@keyframes toastIn{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:translateY(0)}}#chatToggle{position:fixed;left:10px;bottom:145px;z-index:13;min-width:96px;height:42px;border:1px solid #39e7ff;background:rgba(5,8,17,.94);color:#fff;border-radius:11px;font-weight:bold;pointer-events:auto;box-shadow:0 5px 20px #000}#chatBox{position:fixed;left:10px;bottom:145px;width:min(330px,calc(100vw - 20px));z-index:12;background:rgba(5,8,17,.9);border:1px solid #26344e;border-radius:12px;padding:8px;backdrop-filter:blur(6px);pointer-events:auto}#chatMessages{height:120px;overflow-y:auto;display:flex;flex-direction:column;gap:4px;font-size:12px;margin-bottom:7px;scrollbar-width:thin}#chatMessages div{word-break:break-word}#chatMessages .chatName{color:#39e7ff;font-weight:bold}#chatForm{display:flex;gap:6px}#chatInput{min-width:0;flex:1;padding:9px 10px;border:1px solid #33415d;background:#111a2d;color:#fff;border-radius:9px;outline:none;font-size:14px}#chatSend{min-width:58px;border:0;border-radius:9px;background:#183d58;color:#fff;font-weight:bold}#chatHint{font-size:10px;color:#74839a;margin-top:4px}@media(max-width:600px){#chatToggle{bottom:138px;min-width:90px}#chatBox{bottom:138px;width:min(300px,calc(100vw - 20px))}#chatMessages{height:90px}}#connectionOverlay{position:fixed;inset:0;background:#050811e8;display:none;align-items:center;justify-content:center;z-index:30;text-align:center;padding:20px}#connectionCard{width:min(340px,100%);background:#0b1020;border:1px solid #26344e;border-radius:16px;padding:24px;display:grid;gap:9px;box-shadow:0 15px 60px #000}#connectionTitle{color:#39e7ff;letter-spacing:1px}#connectionText{color:#9ca9bd;font-size:13px;line-height:1.4}#connectionSpinner{width:28px;height:28px;border:3px solid #26344e;border-top-color:#39e7ff;border-radius:50%;margin:0 auto 5px;animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}#death{position:fixed;inset:0;background:#000b;display:none;align-items:center;justify-content:center;z-index:10;text-align:center}
+#toastFeed{position:fixed;left:50%;top:74px;transform:translateX(-50%);z-index:15;display:grid;gap:5px;width:min(360px,86vw);pointer-events:none}.toast{background:rgba(5,8,17,.9);border:1px solid #26344e;border-radius:9px;padding:7px 10px;text-align:center;color:#dffbff;font-size:11px;font-weight:bold;box-shadow:0 6px 20px #000;animation:toastIn .2s ease-out}@keyframes toastIn{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:translateY(0)}}#chatFeed{position:fixed;left:10px;bottom:190px;width:min(390px,55vw);max-height:150px;display:flex;flex-direction:column;justify-content:flex-end;gap:5px;z-index:11;pointer-events:none;overflow:hidden;mask-image:linear-gradient(to bottom,transparent 0,#000 14%,#000 100%);-webkit-mask-image:linear-gradient(to bottom,transparent 0,#000 14%,#000 100%)}.chatLine{align-self:flex-start;max-width:100%;padding:5px 9px;border:1px solid #39e7ff55;border-radius:9px;background:linear-gradient(90deg,#061421ef,#0b1220d9);box-shadow:0 0 14px #39e7ff12,0 5px 15px #0008;backdrop-filter:blur(4px);font-size:12px;line-height:1.25;word-break:break-word;text-shadow:0 1px 3px #000;animation:chatIn .22s ease-out}.chatLine .chatName{color:#39e7ff;font-weight:900;letter-spacing:.4px;text-shadow:0 0 9px #39e7ff88}.chatLine .chatSeparator{color:#7f91aa;margin:0 3px}.chatLine .chatText{color:#fff}.chatLine.new{box-shadow:0 0 18px #39e7ff33,0 5px 16px #0008}@keyframes chatIn{from{opacity:0;transform:translateX(-8px) scale(.98)}to{opacity:1;transform:translateX(0) scale(1)}}#chatToggle{position:fixed;left:10px;bottom:145px;z-index:13;min-width:108px;height:44px;border:1px solid #39e7ff;background:linear-gradient(135deg,#06101c,#0b2030);color:#dffbff;border-radius:12px;font-weight:900;letter-spacing:1.3px;font-size:12px;pointer-events:auto;overflow:hidden;box-shadow:0 0 12px #39e7ff22,0 6px 22px #000,inset 0 0 14px #39e7ff0d;transition:transform .15s ease,box-shadow .15s ease,border-color .15s ease}#chatToggle:before{content:"";position:absolute;inset:-45%;background:conic-gradient(from 0deg,transparent,#39e7ff66,transparent 22%,#a855f766,transparent 44%);animation:chatSpin 3.8s linear infinite;opacity:.7}#chatToggle:after{content:"✦ · ✧ · • · ✦";position:absolute;left:-25%;right:-25%;top:4px;color:#9ff7ff66;font-size:8px;letter-spacing:5px;animation:chatParticles 2.7s linear infinite;pointer-events:none}#chatToggle:hover{border-color:#8ff5ff;box-shadow:0 0 20px #39e7ff44,0 7px 24px #000,inset 0 0 18px #39e7ff16}#chatToggle:active{transform:scale(.95)}#chatToggle .chatLabel,#chatToggle .chatIcon{position:relative;z-index:2;text-shadow:0 0 8px #39e7ff99}#chatToggle .chatIcon{font-size:15px;margin-right:5px}@keyframes chatSpin{to{transform:rotate(360deg)}}@keyframes chatParticles{from{transform:translateX(-12%);opacity:0}25%{opacity:1}75%{opacity:1}to{transform:translateX(12%);opacity:0}}#chatBox{position:fixed;left:10px;bottom:145px;width:min(350px,calc(100vw - 20px));z-index:14;background:linear-gradient(180deg,#081423f5,#050b15f5);border:1px solid #39e7ff88;border-radius:14px;padding:9px;backdrop-filter:blur(8px);pointer-events:auto;box-shadow:0 0 22px #39e7ff22,0 12px 34px #000}.chatInputHead{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:7px;color:#dffbff;font-size:11px;font-weight:900;letter-spacing:1px}.chatInputHead span{color:#39e7ff;text-shadow:0 0 8px #39e7ff88}.chatClose{width:28px;height:28px;border:1px solid #33415d;border-radius:8px;background:#0b1424;color:#fff;font-weight:900}#chatForm{display:flex;gap:6px}#chatInput{min-width:0;flex:1;padding:10px;border:1px solid #39e7ff55;background:#091321;color:#fff;border-radius:9px;outline:none;font-size:14px;box-shadow:inset 0 0 10px #39e7ff08}#chatInput:focus{border-color:#39e7ff;box-shadow:0 0 0 2px #39e7ff18,inset 0 0 12px #39e7ff0c}#chatSend{min-width:64px;border:1px solid #39e7ff;border-radius:9px;background:linear-gradient(135deg,#183d58,#1a5b74);color:#fff;font-weight:900;letter-spacing:.5px;box-shadow:0 0 12px #39e7ff22}#chatHint{font-size:9px;color:#74839a;margin-top:5px}@media(max-width:600px){#chatFeed{left:8px;bottom:186px;width:min(330px,72vw);max-height:132px}.chatLine{font-size:11px;padding:5px 8px}#chatToggle{bottom:138px;min-width:94px;height:42px}#chatBox{bottom:138px;width:min(320px,calc(100vw - 16px))}}#connectionOverlay{position:fixed;inset:0;background:#050811e8;display:none;align-items:center;justify-content:center;z-index:30;text-align:center;padding:20px}#connectionCard{width:min(340px,100%);background:#0b1020;border:1px solid #26344e;border-radius:16px;padding:24px;display:grid;gap:9px;box-shadow:0 15px 60px #000}#connectionTitle{color:#39e7ff;letter-spacing:1px}#connectionText{color:#9ca9bd;font-size:13px;line-height:1.4}#connectionSpinner{width:28px;height:28px;border:3px solid #26344e;border-top-color:#39e7ff;border-radius:50%;margin:0 auto 5px;animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}#death{position:fixed;inset:0;background:#000b;display:none;align-items:center;justify-content:center;z-index:10;text-align:center}
 #deathCard{background:#0b1020;border:1px solid #26344e;border-radius:16px;padding:22px;width:min(330px,90%)}
 #deathCard h2{color:#ff5474;margin:0 0 8px}.buildBadge{display:inline-block;margin-left:6px;padding:2px 5px;border:1px solid #26344e;border-radius:5px;color:#74839a;font-size:9px;vertical-align:middle}.hitText{position:fixed;pointer-events:none;z-index:9;font-weight:900;font-size:14px;text-shadow:0 2px 4px #000;transform:translate(-50%,-50%);animation:hitFloat .65s ease-out forwards}@keyframes hitFloat{0%{opacity:1;transform:translate(-50%,-20% ) scale(1.05)}100%{opacity:0;transform:translate(-50%,-110%) scale(.9)}}
 @media(min-width:800px){#controls{display:none!important}}html.touch-controls #controls{display:flex!important;z-index:90!important;pointer-events:none}html.touch-controls #controls .joy,html.touch-controls #controls #fire{pointer-events:auto}html.touch-controls #cosmeticShop{pointer-events:none!important}html.touch-controls #cosmeticShop .cosmeticShopCard{pointer-events:none!important}html.touch-controls #cosmeticShop .cosmeticShopCard button,html.touch-controls #cosmeticShop .cosmeticShopCard input{pointer-events:auto!important}html.touch-controls #nameBox,html.touch-controls #connectionOverlay,html.touch-controls #death{z-index:200!important}html.touch-controls #controlConfigBtn{z-index:130!important}
@@ -148,9 +148,7 @@
     </section>
   </div>
 </div>
-<div id="toastFeed" aria-live="polite"></div><div class="pcHint">PC: WASD / flechas para moverte · mouse para apuntar · clic izquierdo para disparar · ESPACIO también dispara</div><button id="chatToggle" type="button" aria-expanded="false" aria-controls="chatBox">💬 CHAT</button><div id="chatBox" aria-label="Chat del servidor" style="display:none"><button id="chatCloseStatic" type="button" aria-label="Cerrar chat">×</button><div id="chatMessages" aria-live="polite"></div><form id="chatForm"><input id="chatInput" maxlength="120" autocomplete="off" placeholder="Escribe un mensaje…"><button id="chatSend" type="submit">ENVIAR</button></form><div id="chatHint">Enter para enviar · máximo 120 caracteres</div></div>
-
-<div id="connectionOverlay" aria-live="polite"><div id="connectionCard"><div id="connectionSpinner"></div><b id="connectionTitle">CONECTANDO AL SERVIDOR</b><span id="connectionText">Despertando el servidor multiplayer…</span></div></div>
+<div id="toastFeed" aria-live="polite"></div><div class="pcHint">PC: WASD / flechas para moverte · mouse para apuntar · clic izquierdo para disparar · ESPACIO también dispara</div><div id="chatFeed" aria-live="polite" aria-label="Mensajes del chat"></div><button id="chatToggle" type="button" aria-expanded="false" aria-controls="chatBox"><span class="chatIcon">◉</span><span class="chatLabel">NEON CHAT</span></button><div id="chatBox" aria-label="Escribir en el chat" style="display:none"><div class="chatInputHead"><span>✦ MENSAJE NEON</span><button class="chatClose" id="chatCloseStatic" type="button" aria-label="Cerrar chat">×</button></div><form id="chatForm"><input id="chatInput" maxlength="120" autocomplete="off" placeholder="Escribe un mensaje…"><button id="chatSend" type="submit">ENVIAR</button></form><div id="chatHint">Enter para enviar · máximo 120 caracteres</div></div><div id="connectionOverlay" aria-live="polite"><div id="connectionCard"><div id="connectionSpinner"></div><b id="connectionTitle">CONECTANDO AL SERVIDOR</b><span id="connectionText">Despertando el servidor multiplayer…</span></div></div>
 
 
 <div id="playersPanel"><b>JUGADORES CONECTADOS · <span id="playersCount">0</span></b><div id="playersList"></div></div>
@@ -416,14 +414,16 @@ function connectMultiplayer(roomMode="quick",roomCode=""){ const publicRoomAuto=
           nameBox.style.display="none";
           updatePlayersFromList(m.players||[]);
         }else if(m.type==="chat"){
-          const box=document.getElementById("chatMessages");
+          const box=document.getElementById("chatFeed");
           if(box){
             const row=document.createElement("div");
-            const name=document.createElement("span");name.className="chatName";name.textContent=(m.name||"Jugador")+" : ";
-            const text=document.createElement("span");text.textContent=m.text||"";
-            row.appendChild(name);row.appendChild(text);box.appendChild(row);
-            while(box.children.length>40)box.removeChild(box.firstChild);
-            box.scrollTop=box.scrollHeight;
+            row.className="chatLine new";
+            const name=document.createElement("span");name.className="chatName";name.textContent=m.name||"Jugador";
+            const sep=document.createElement("span");sep.className="chatSeparator";sep.textContent="›";
+            const msgText=document.createElement("span");msgText.className="chatText";msgText.textContent=m.text||"";
+            row.appendChild(name);row.appendChild(sep);row.appendChild(msgText);box.appendChild(row);
+            while(box.children.length>12)box.removeChild(box.firstChild);
+            setTimeout(()=>row.classList.remove("new"),1200);
           }
         }else if(m.type==="room_error"){
           const msg=document.getElementById("nameMsg"); if(msg)msg.textContent=m.message||"No se pudo entrar a la sala.";
@@ -1557,17 +1557,25 @@ document.addEventListener("visibilitychange",()=>{
 });
 
 const chatToggle=document.getElementById("chatToggle"),chatBox=document.getElementById("chatBox");
-let chatOpen=false;
-function setChatOpen(open){chatOpen=!!open;chatBox.style.display=chatOpen?"block":"none";chatToggle.style.display=chatOpen?"none":"block";chatToggle.setAttribute("aria-expanded",String(chatOpen));if(chatOpen)chatInput.focus();}
-chatToggle.addEventListener("click",()=>setChatOpen(true));
-const chatCloseBtn=document.createElement("button");chatCloseBtn.type="button";chatCloseBtn.textContent="×";chatCloseBtn.setAttribute("aria-label","Cerrar chat");chatCloseBtn.style.cssText="position:absolute;right:8px;top:6px;width:28px;height:28px;border:1px solid #33415d;border-radius:7px;background:#111a2d;color:#fff;font-weight:bold";chatBox.insertBefore(chatCloseBtn,chatBox.firstChild);const chatCloseStatic=document.getElementById("chatCloseStatic");if(chatCloseStatic)chatCloseStatic.addEventListener("click",()=>setChatOpen(false));chatCloseBtn.addEventListener("click",()=>setChatOpen(false));
+const chatCloseStatic=document.getElementById("chatCloseStatic");
 const chatForm=document.getElementById("chatForm"),chatInput=document.getElementById("chatInput");
+let chatOpen=false;
+function setChatOpen(open){
+  chatOpen=!!open;
+  chatBox.style.display=chatOpen?"block":"none";
+  chatToggle.style.display=chatOpen?"none":"block";
+  chatToggle.setAttribute("aria-expanded",String(chatOpen));
+  if(chatOpen)setTimeout(()=>chatInput.focus(),30);
+}
+chatToggle.addEventListener("click",()=>setChatOpen(true));
+if(chatCloseStatic)chatCloseStatic.addEventListener("click",()=>setChatOpen(false));
 chatForm.addEventListener("submit",e=>{
   e.preventDefault();
   const text=String(chatInput.value||"").trim().slice(0,120);
   if(!text||!multiplayerSocket||multiplayerSocket.readyState!==1)return;
   multiplayerSocket.send(JSON.stringify({type:"chat",text}));
   chatInput.value="";
+  setChatOpen(false);
 });
 chatInput.addEventListener("keydown",e=>{if(e.key==="Escape"){chatInput.blur();setChatOpen(false);}});
 setChatOpen(false);
