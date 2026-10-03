@@ -82,7 +82,7 @@ h2{font-size:15px;margin:18px 0 10px}
       cards.forEach(card=>setRoomState(card,"CONSULTANDO…","● ACTUALIZANDO SERVIDOR",false));
       const controller=new AbortController();
       controllers.push(controller);
-      const timer=setTimeout(()=>controller.abort(),8000);
+      const timer=setTimeout(()=>controller.abort(),30000);
       const res=await fetch(ROOM_STATUS_URL+"?t="+Date.now(),{
         cache:"no-store",
         mode:"cors",
@@ -105,7 +105,7 @@ h2{font-size:15px;margin:18px 0 10px}
         }
       });
     }catch(e){
-      cards.forEach(card=>setRoomState(card,"SIN DATOS","● SERVIDOR NO RESPONDE · REINTENTANDO",false));
+      cards.forEach(card=>setRoomState(card,"SIN DATOS","● DESPERTANDO SERVIDOR · REINTENTANDO",false));
     }finally{
       controllers.forEach(c=>{try{c.abort()}catch{}});
       roomFetchBusy=false;
