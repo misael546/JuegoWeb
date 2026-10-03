@@ -84,3 +84,22 @@ jobs:
       - name: Deploy to Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+      - name: Verify live Pages content
+        shell: bash
+        run: |
+          set -euo pipefail
+          url="https://misael546.github.io/NeonCore/?livecheck=$(date +%s%N)"
+          echo "[PAGES] Checking live URL: $url"
+          for i in $(seq 1 12); do
+            html="$(curl -fsSL --retry 2 --retry-delay 2 "$url" || true)"
+            if printf '%s' "$html" | grep -Fq '20261003-006-pages-live-main-menu'               && printf '%s' "$html" | grep -Fq 'const PUBLIC_ROOM_CODE=""'               && ! printf '%s' "$html" | grep -Fq 'MENÚ PRINCIPAL · SALAS PÚBLICAS'               && ! printf '%s' "$html" | grep -Fq '20261003-167-darkscifi'; then
+              echo "[PAGES] LIVE ROOT VERIFIED: current main menu is being served."
+              exit 0
+            fi
+            echo "[PAGES] Live root check $i/12 did not match current build; waiting..."
+            sleep 5
+          done
+          echo "[PAGES] LIVE ROOT CHECK FAILED."
+          printf '%s' "$html" | head -c 1200
+          exit 1
