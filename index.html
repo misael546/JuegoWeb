@@ -55,7 +55,7 @@ h2{font-size:15px;margin:18px 0 10px}
   </div>
 
   <div id="msg" class="msg"></div>
-  <div class="build">NEON CORE · BUILD 20261003-160</div>
+  <div class="build">NEON CORE · BUILD 20261003-162</div>
 </main>
 
 <script>
@@ -101,6 +101,20 @@ h2{font-size:15px;margin:18px 0 10px}
     msg.textContent="";
   }
 
+  function gameRootUrl(){
+    const host=String(location.hostname||"").toLowerCase();
+    if(host.endsWith(".foo.ng") || host==="foo.ng"){
+      return new URL("/",location.origin);
+    }
+    const path=String(location.pathname||"");
+    const marker="/JuegoWeb/";
+    const index=path.indexOf(marker);
+    if(index>=0){
+      return new URL(path.slice(0,index)+marker,location.origin);
+    }
+    return new URL("/",location.origin);
+  }
+
   function openRoom(room){
     const name=getName();
     const code=String(room||"").replace(/[^0-9]/g,"");
@@ -108,7 +122,9 @@ h2{font-size:15px;margin:18px 0 10px}
     if(!code)return;
     saveName(name);
     status.textContent="Entrando a la sala "+code+"…";
-    window.location.assign("neoncore/"+code+"/?menu="+Date.now());
+    const target=new URL("neoncore/"+code+"/",gameRootUrl());
+    target.searchParams.set("menu",Date.now());
+    window.location.assign(target.href);
   }
 
   input.value=loadName();
