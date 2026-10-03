@@ -11,7 +11,7 @@ const WORLD = { w: 6000, h: 4400 };
 const MAX_PLAYERS = 16;
 const SAFE_ZONE = { x: 3000, y: 2200, r: 300 };
 
-const SERVER_VERSION = '20261003-159';
+const SERVER_VERSION = '20261003-160';
 
 const AMMO_PACK_SIZE = 100;
 const AMMO_PACK_COST = 75;
@@ -2838,7 +2838,7 @@ function runServerDiagnostics() {
     ' rooms=' + rooms.size +
     ' walls=' + WORLD_WALLS.length +
     ' weapons=' + Object.keys(WEAPONS).length +
-    ' skins=' + Object.keys(cosmetics.SKINS).length +
+    ' armors=' + Object.keys(cosmetics.SKINS).length +
     ' storage=' + (storage.enabled ? 'postgres' : 'memory')
   );
   return true;
