@@ -9,7 +9,7 @@
 <script>
 (function(){
   try{
-    var v="20261003-165-audio2";
+    var v="20261003-165-audio3";
     var k="neon_core_build";
     window.NEON_CORE_BUILD=v;
     var old=localStorage.getItem(k);
@@ -722,6 +722,20 @@ function connectMultiplayer(roomMode="quick",roomCode=""){ const publicRoomAuto=
               m.player.weapon=m.player.weapon||"blaster";m.player.equippedSkin=m.player.equippedSkin||"core_default";m.player.maxHp=m.player.maxHp||100;m.player.speed=m.player.speed||205;
               remotePlayers.set(m.player.id,m.player);
             }
+          }
+        }else if(m.type==="player_shot"){
+          if(m.id!==multiplayerId && Number.isFinite(Number(m.x)) && Number.isFinite(Number(m.y)) && Number.isFinite(Number(m.angle))){
+            const sx0=Number(m.x),sy0=Number(m.y),angle=Number(m.angle);
+            const travelDistance=Math.max(1,Number(m.travelDistance)||Number(m.range)||weaponStats[m.weapon]?.range||760);
+            const ix=Number.isFinite(Number(m.impactX))?Number(m.impactX):sx0+Math.cos(angle)*travelDistance;
+            const iy=Number.isFinite(Number(m.impactY))?Number(m.impactY):sy0+Math.sin(angle)*travelDistance;
+            bullets.push({
+              x:sx0,y:sy0,startX:sx0,startY:sy0,
+              vx:Math.cos(angle)*1200,vy:Math.sin(angle)*1200,
+              life:travelDistance/1200+0.08,damage:Number(m.damage)||0,
+              range:0,maxRange:travelDistance,impactX:ix,impactY:iy,remoteShot:true
+            });
+            audioTone(520,.065,"sawtooth",.03,240);
           }
         }else if(m.type==="enemy_state"){
           const incoming=m.enemies||[];
