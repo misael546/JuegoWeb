@@ -1150,11 +1150,11 @@ function shopBuy(ws, requestedWeapon) {
 function buyWeaponSkin(ws, skinId) {
   const p = clients.get(ws);
   if (!p) return;
-  if (!p.room || !p.alive) return cosmeticShopError(ws, 'No puedes usar skins de arma ahora.');
+  if (!p.room || !p.alive) return cosmeticShopError(ws, 'No puedes usar armaduras de arma ahora.');
   if (!cosmeticShopNearby(p)) return cosmeticShopError(ws, 'Párate sobre el SHOP.');
 
   const skin = cosmetics.getWeaponSkin(skinId);
-  if (!skin) return cosmeticShopError(ws, 'Skin de arma no disponible.');
+  if (!skin) return cosmeticShopError(ws, 'Armadura de arma no disponible.');
   if (!p.weapon || skin.weaponId !== p.weapon) return cosmeticShopError(ws, 'Equipa primero el arma compatible.');
 
   p.ownedWeaponSkins = cosmetics.normalizeOwnedWeaponSkins(p.ownedWeaponSkins);
@@ -1170,7 +1170,7 @@ function buyWeaponSkin(ws, skinId) {
       if (gold < skin.priceGold) return cosmeticShopError(ws, 'Necesitas ' + skin.priceGold + ' de oro.');
       p.gold = gold - skin.priceGold;
     } else {
-      return cosmeticShopError(ws, 'Esta skin de arma no tiene un precio válido.');
+      return cosmeticShopError(ws, 'Esta armadura de arma no tiene un precio válido.');
     }
     p.ownedWeaponSkins.push(skin.id);
     p.equippedWeaponSkin = skin.id;
@@ -1178,7 +1178,7 @@ function buyWeaponSkin(ws, skinId) {
 
   applyCombatStats(p);
   void persistPlayer(p);
-  sendCosmeticState(p, p.equippedWeaponSkin ? 'Skin de arma equipada: ' + skin.name + '.' : 'Skin de arma desequipada · buff de ATAQUE/DEFENSA retirado.');
+  sendCosmeticState(p, p.equippedWeaponSkin ? 'Diseño de arma equipado: ' + skin.name + '.' : 'Diseño de arma desequipado · bonificación retirada.');
   sendStats(p);
   sendPlayerList(p.room);
 }
@@ -1186,7 +1186,7 @@ function buyWeaponSkin(ws, skinId) {
 function equipWeaponSkin(ws, skinId) {
   const p = clients.get(ws);
   if (!p) return;
-  if (!p.room || !p.alive) return cosmeticShopError(ws, 'No puedes cambiar la skin de arma ahora.');
+  if (!p.room || !p.alive) return cosmeticShopError(ws, 'No puedes cambiar el diseño del arma ahora.');
   if (!cosmeticShopNearby(p)) return cosmeticShopError(ws, 'Acércate al SHOP.');
 
   const id = String(skinId || '');
@@ -1194,7 +1194,7 @@ function equipWeaponSkin(ws, skinId) {
   if (id === '') {
     applyCombatStats(p);
     void persistPlayer(p);
-    sendCosmeticState(p, 'Skin de arma desequipada · buff de ATAQUE/DEFENSA retirado.');
+    sendCosmeticState(p, 'Diseño de arma desequipado · bonificación retirada.');
     sendStats(p);
     sendPlayerList(p.room);
     return;
@@ -1202,13 +1202,13 @@ function equipWeaponSkin(ws, skinId) {
 
   const skin = cosmetics.getWeaponSkin(id);
   if (!skin || !p.ownedWeaponSkins.includes(id) || skin.weaponId !== p.weapon) {
-    return cosmeticShopError(ws, 'Skin de arma no disponible para tu arsenal equipado.');
+    return cosmeticShopError(ws, 'Diseño de arma no disponible para tu arsenal equipado.');
   }
 
   p.equippedWeaponSkin = id;
   applyCombatStats(p);
   void persistPlayer(p);
-  sendCosmeticState(p, 'Skin de arma equipada: ' + skin.name + '.');
+  sendCosmeticState(p, 'Diseño de arma equipado: ' + skin.name + '.');
   sendStats(p);
   sendPlayerList(p.room);
 }
@@ -1246,13 +1246,13 @@ function buyCosmeticSkin(ws, skinId) {
   if (!p.room || !p.alive) return cosmeticShopError(ws, 'No puedes usar el SHOP ahora.');
   if (!cosmeticShopNearby(p)) return cosmeticShopError(ws, 'Párate sobre el SHOP.');
   const skin = cosmetics.getSkin(skinId);
-  if (!skin || skin.id === 'core_default' || skin.rarity === 'Código') return cosmeticShopError(ws, 'Ese skin no se puede comprar aquí.');
+  if (!skin || skin.id === 'core_default' || skin.rarity === 'Código') return cosmeticShopError(ws, 'Esa armadura no se puede comprar aquí.');
 
   p.ownedSkins = cosmetics.normalizeOwnedSkins(p.ownedSkins);
   if (p.ownedSkins.includes(skin.id)) {
     p.equippedSkin = skin.id;
     void persistPlayer(p);
-    sendCosmeticState(p, 'Skin equipado: ' + skin.name + '.');
+    sendCosmeticState(p, 'Armadura equipada: ' + skin.name + '.');
     sendStats(p);
     sendPlayerList(p.room);
     return;
@@ -1272,7 +1272,7 @@ function buyCosmeticSkin(ws, skinId) {
     if (gold < skin.priceGold) return cosmeticShopError(ws, 'Necesitas ' + skin.priceGold + ' de oro.');
     p.gold = gold - skin.priceGold;
   } else {
-    return cosmeticShopError(ws, 'Este skin no tiene precio válido.');
+    return cosmeticShopError(ws, 'Esta armadura no tiene precio válido.');
   }
 
   p.ownedSkins.push(skin.id);
@@ -1280,7 +1280,7 @@ function buyCosmeticSkin(ws, skinId) {
   p.equippedSkin = skin.id;
   applyCombatStats(p);
   void persistPlayer(p);
-  sendCosmeticState(p, '¡Compraste ' + skin.name + ' y quedó equipado!');
+  sendCosmeticState(p, '¡Compraste la armadura ' + skin.name + ' y quedó equipada!');
   sendStats(p);
   sendPlayerList(p.room);
 }
@@ -1288,27 +1288,27 @@ function buyCosmeticSkin(ws, skinId) {
 function equipCosmeticSkin(ws, skinId) {
   const p = clients.get(ws);
   if (!p) return;
-  if (!p.room || !p.alive) return cosmeticShopError(ws, 'No puedes cambiar de skin ahora.');
+  if (!p.room || !p.alive) return cosmeticShopError(ws, 'No puedes cambiar de armadura ahora.');
   if (!cosmeticShopNearby(p)) return cosmeticShopError(ws, 'Acércate al SHOP.');
 
   const id = String(skinId || '');
   p.ownedSkins = cosmetics.normalizeOwnedSkins(p.ownedSkins);
   if (id === '') {
-    return cosmeticShopError(ws, 'Selecciona una skin para alternar su equipamiento.');
+    return cosmeticShopError(ws, 'Selecciona una armadura para alternar su equipamiento.');
   }
 
-  if (!cosmetics.getSkin(id) || !p.ownedSkins.includes(id)) return cosmeticShopError(ws, 'Skin bloqueado.');
+  if (!cosmetics.getSkin(id) || !p.ownedSkins.includes(id)) return cosmeticShopError(ws, 'Armadura bloqueada.');
 
   if (p.equippedSkin === id) {
     p.equippedSkin = '';
     applyCombatStats(p);
     void persistPlayer(p);
-    sendCosmeticState(p, 'Skin de tanque desequipado · DEFENSA del skin retirada.');
+    sendCosmeticState(p, 'Armadura desequipada · DEFENSA retirada.');
   } else {
     p.equippedSkin = id;
     applyCombatStats(p);
     void persistPlayer(p);
-    sendCosmeticState(p, 'Skin equipado: ' + cosmetics.getSkin(id).name + '.');
+    sendCosmeticState(p, 'Armadura equipada: ' + cosmetics.getSkin(id).name + '.');
   }
 
   sendStats(p);
@@ -1365,7 +1365,7 @@ async function redeemCosmeticCode(ws, rawCode) {
 
   if (reward.skinId) {
     const skin = cosmetics.getSkin(reward.skinId);
-    if (!skin) return cosmeticShopError(ws, 'Código sin recompensa de skin válida.');
+    if (!skin) return cosmeticShopError(ws, 'Código sin recompensa de armadura válida.');
     unlockedSkin = skin.id;
     if (!p.ownedSkins.includes(skin.id)) p.ownedSkins.push(skin.id);
     p.equippedSkin = skin.id;
