@@ -9,7 +9,7 @@
 <script>
 (function(){
   try{
-    var v="20261002-001-neon-core";
+    var v="20261003-002-main-menu";
     var k="neon_core_build";
     window.NEON_CORE_BUILD=v;
     var old=localStorage.getItem(k);
@@ -26,7 +26,7 @@
   }catch(e){}
 })();
 </script>
-<title>Neon Core · Build 1</title>
+<title>Neon Core · Build 2</title>
 <style>
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#050811;color:#fff;font-family:Arial,sans-serif;touch-action:none}
 #game{display:block;width:100vw;height:100vh}
@@ -233,7 +233,7 @@
 html.pc-controls #chatFeed{width:min(420px,38vw)}
 </style></head>
 <body>
-<canvas id="game"></canvas><div id="buildDisplay">BUILD 1</div><button id="audioToggle" type="button" aria-label="Activar o silenciar audio">🔊</button>
+<canvas id="game"></canvas><div id="buildDisplay">BUILD 2</div><button id="audioToggle" type="button" aria-label="Activar o silenciar audio">🔊</button>
 
 <div id="hud">
   <div class="panel" id="bars">
@@ -2016,7 +2016,7 @@ function startGame(mode="quick",code=""){
   connectMultiplayer(mode,code);
 }
 
-const PUBLIC_ROOM_CODE="12345";
+const PUBLIC_ROOM_CODE="";
 const publicRoomsBtn=document.getElementById("publicRoomsBtn");
 function enterPublicRooms(){
   const n=String(username.value||"").trim().slice(0,20);
@@ -2086,6 +2086,10 @@ addEventListener("pageshow",e=>{
 
 username.value=loadName();
 startRenderMonitor();
+if(!PUBLIC_ROOM_CODE){
+  nameBox.style.display="flex";
+  username.focus();
+}
 if(PUBLIC_ROOM_CODE){
   const roomTitle=document.querySelector("#nameCard h1");
   const roomText=document.querySelector("#nameCard p");
@@ -2234,8 +2238,8 @@ requestAnimationFrame(frame);
    Capa visual única: no reemplaza la lógica de servidor ni crea sistemas duplicados.
    Solo añade feedback local sobre el combate ya existente. */
 (function(){
-  if(window.__NEON_COMBAT_POLISH_1)return;
-  window.__NEON_COMBAT_POLISH_1=true;
+  if(window.__NEON_COMBAT_POLISH_2)return;
+  window.__NEON_COMBAT_POLISH_2=true;
 
   const fx={
     muzzle:0,
