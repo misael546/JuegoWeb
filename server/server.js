@@ -1250,8 +1250,9 @@ function buyCosmeticSkin(ws, skinId) {
   p.ownedSkins = cosmetics.normalizeOwnedSkins(p.ownedSkins);
   if (p.ownedSkins.includes(skin.id)) {
     p.equippedSkin = skin.id;
+    applyCombatStats(p);
     void persistPlayer(p);
-    sendCosmeticState(p, 'Armadura equipada: ' + skin.name + '.');
+    sendCosmeticState(p, 'Armadura equipada: ' + skin.name + ' · DEFENSA +' + skin.defenseBonus + '.');
     sendStats(p);
     sendPlayerList(p.room);
     return;
