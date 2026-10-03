@@ -57,6 +57,6 @@ jobs:
 
       - name: Validate JSON and custom-domain files
         run: |
-          node -e "JSON.parse(require('fs').readFileSync('server/package.json','utf8')); JSON.parse(require('fs').readFileSync('server/cosmetics.js','utf8').match(/$/)?.[0] || '{}')" || true
+          node -e "JSON.parse(require('fs').readFileSync('server/package.json','utf8')); JSON.parse(require('fs').readFileSync('server/package.json','utf8'))"
           test -f CNAME
           grep -Fx "neoncore.foo.ng" CNAME
