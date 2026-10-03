@@ -1,4 +1,5 @@
 name: Deploy Neon Core to GitHub Pages
+# Force Pages refresh from current main branch — 20261003-006
 
 on:
   push:
