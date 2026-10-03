@@ -27,6 +27,7 @@ jobs:
       - name: Validate Neon Core JavaScript
         shell: bash
         run: |
+          python3 -m pip install --disable-pip-version-check requests
           python3 - <<'PY'
           from pathlib import Path
           import re, subprocess, tempfile
