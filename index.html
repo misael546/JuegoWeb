@@ -9,7 +9,7 @@
 <script>
 (function(){
   try{
-    var v="20261003-004-shop-movement-fix";
+    var v="20261003-005-comprehensive-shop-spawn-fix";
     var k="neon_core_build";
     window.NEON_CORE_BUILD=v;
     var old=localStorage.getItem(k);
@@ -26,7 +26,7 @@
   }catch(e){}
 })();
 </script>
-<title>Neon Core · Build 2 · SHOP MOVEMENT FIX</title>
+<title>Neon Core · Build 2 · COMPREHENSIVE FIX</title>
 <style>
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#050811;color:#fff;font-family:Arial,sans-serif;touch-action:none}
 #game{display:block;width:100vw;height:100vh}
@@ -581,7 +581,7 @@ function stopNeonMusic(){neonProcClear();neonMusic.current="";neonMusic.desired=
 
 const world={w:6000,h:4400};
 const p={x:3000,y:2200,r:16,angle:0,hp:100,maxHp:100,xp:0,level:1,score:0,kills:0,pvpKills:0,power:100,damage:35,defense:0,speed:205,fireRate:320,lastShot:0,alive:true,gold:0,diamonds:0,ammo:60,maxAmmo:220,weapon:"blaster",equippedSkin:"core_default"};
-const shopNpc={x:3000,y:2200,r:24};
+const shopNpc={x:3250,y:2200,r:24};
 const weaponNames={
   blaster:"BLASTER · NEONSTORM",
   pulse:"PULSE · PRISMA",
@@ -1678,20 +1678,16 @@ function closeCosmeticShop(){
 function updateCosmeticShop(){
   const near=Math.hypot(p.x-shopNpc.x,p.y-shopNpc.y)<=SHOP_INTERACTION_RADIUS_CLIENT;
   const box=document.getElementById("cosmeticShop");
-  // La tienda NO se abre automáticamente al aparecer junto al NPC.
-  // El spawn inicial está junto al NPC, así que abrirla aquí bloqueaba
-  // la pantalla y daba la impresión de que el movimiento estaba roto.
-  // Se mantiene cerrada hasta que exista una interacción explícita.
   if(!near){
     cosmeticShopWasNear=false;
     if(box)box.style.display="none";
-  }else{
-    cosmeticShopWasNear=true;
+    return;
   }
+  if(near&&!cosmeticShopWasNear&&p.alive&&performance.now()>cosmeticShopDismissedUntil)openCosmeticShop();
+  cosmeticShopWasNear=near;
   const def=document.getElementById("shopDefense");
   if(def)def.textContent=Math.round(serverDefense);
 }
-
 function sendCosmeticCommand(type,skinId,code){
   if(!multiplayerSocket||multiplayerSocket.readyState!==1){
     showCosmeticMsg("Servidor no conectado.");
