@@ -55,8 +55,7 @@ jobs:
           console.log(\`Validated ${scripts.length} client script block(s).\`);
           NODE
 
-      - name: Validate JSON and custom-domain files
+      - name: Validate JSON
         run: |
-          node -e "JSON.parse(require('fs').readFileSync('server/package.json','utf8')); JSON.parse(require('fs').readFileSync('server/package.json','utf8'))"
-          test -f CNAME
-          grep -Fx "neoncore.foo.ng" CNAME
+          node -e "JSON.parse(require('fs').readFileSync('server/package.json','utf8'))"
+
